@@ -25,6 +25,7 @@
 #include "duckdb/optimizer/unnest_rewriter.hpp"
 #include "duckdb/planner/binder.hpp"
 #include "duckdb/planner/planner.hpp"
+#include "duckdb/common/printer.hpp"
 
 namespace duckdb {
 
@@ -119,6 +120,10 @@ unique_ptr<LogicalOperator> Optimizer::Optimize(unique_ptr<LogicalOperator> plan
 		plan = deliminator.Optimize(std::move(plan));
 	});
 
+	// add QuerySplit algorithm here
+
+	Printer::Print("This is a dummy QuerySplit\n");
+
 	// then we perform the join ordering optimization
 	// this also rewrites cross products + filters into joins and performs filter pushdowns
 	RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {
@@ -192,6 +197,11 @@ unique_ptr<LogicalOperator> Optimizer::Optimize(unique_ptr<LogicalOperator> plan
 	RunOptimizer(OptimizerType::REORDER_FILTER, [&]() {
 		ExpressionHeuristics expression_heuristics(*this);
 		plan = expression_heuristics.Rewrite(std::move(plan));
+	});
+
+	// apply query split algorithm
+	RunOptimizer(OptimizerType::QUERY_SPLIT, [&]() {
+		Printer::Print("TODO: Implement Query Split\n");
 	});
 
 	for (auto &optimizer_extension : DBConfig::GetConfig(context).optimizer_extensions) {

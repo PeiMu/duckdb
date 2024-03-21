@@ -3900,6 +3900,8 @@ const char* EnumUtil::ToChars<OptimizerType>(OptimizerType value) {
 		return "DUPLICATE_GROUPS";
 	case OptimizerType::REORDER_FILTER:
 		return "REORDER_FILTER";
+	case OptimizerType::QUERY_SPLIT:
+		return "QUERY_SPLIT";
 	case OptimizerType::EXTENSION:
 		return "EXTENSION";
 	default:
@@ -3962,6 +3964,9 @@ OptimizerType EnumUtil::FromString<OptimizerType>(const char *value) {
 	}
 	if (StringUtil::Equals(value, "REORDER_FILTER")) {
 		return OptimizerType::REORDER_FILTER;
+	}
+	if (StringUtil::Equals(value, "QUERY_SPLIT")) {
+		return OptimizerType::QUERY_SPLIT;
 	}
 	if (StringUtil::Equals(value, "EXTENSION")) {
 		return OptimizerType::EXTENSION;
