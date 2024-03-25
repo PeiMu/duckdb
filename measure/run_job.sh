@@ -15,3 +15,18 @@ do
   echo -ne "${command}" | duckdb ./imdb.db
 done
 
+# execute queries
+dir="/home/pei/Project/benchmarks/imdb_job-postgres/skinner_explained"
+iteration=10
+
+rm -rf job_result/
+mkdir -p job_result/
+
+for i in $(eval echo {1.."${iteration}"}); do
+  for sql in "${dir}"/*; do
+    echo "execute ${sql}" 2>&1|tee -a skinner_explained_imdb_${i}.txt;
+    echo -ne ".read ${sql}" | duckdb ./imdb.db 2>&1|tee -a skinner_explained_imdb_${i}.txt;
+  done
+done
+
+mv skinner_explained_imdb_* job_result/.
