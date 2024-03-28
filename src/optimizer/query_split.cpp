@@ -5,8 +5,7 @@ namespace duckdb {
 unique_ptr<LogicalOperator> QuerySplit::Optimize(unique_ptr<LogicalOperator> plan) {
 	// remove redundant joins if the current query is not a CMD_UTILITY
 	// todo: check if the current query is a CMD_UTILITY
-	if (LogicalOperatorType::LOGICAL_PROJECTION != plan->type &&
-	    LogicalOperatorType::LOGICAL_ORDER_BY != plan->type &&
+	if (LogicalOperatorType::LOGICAL_PROJECTION != plan->type && LogicalOperatorType::LOGICAL_ORDER_BY != plan->type &&
 	    LogicalOperatorType::LOGICAL_EXPLAIN != plan->type) {
 		return plan;
 	}
@@ -45,92 +44,96 @@ uint64_t QuerySplit::CollectRangeTableLength(const unique_ptr<LogicalOperator> &
 unique_ptr<LogicalOperator> QuerySplit::Recon(unique_ptr<LogicalOperator> original_plan, uint64_t length) {
 	auto op = original_plan.get();
 
-	// <join_left_column_name, join_right_column_name>
-	std::vector<std::pair<std::string, std::string>> join_column_pairs;
-	// <column_name, is_foreign_key>
-	std::unordered_map<std::string, bool> foreign_key_represent;
-
-	std::vector<TableCatalogEntry*> used_table_entries;
-
+	// <join_left_column_binding, join_right_column_binding>
+	std::vector<std::pair<ColumnBinding, ColumnBinding>> join_column_pairs;
+	// <column_binding, is_foreign_key>
+	std::unordered_map<ColumnBinding, bool, ColumnBinding::ColumnBindingHash> foreign_key_represent;
+	// <table_index, table_entry>
+	std::unordered_map<idx_t, TableCatalogEntry *> used_table_entries;
 
 	// collect the primary/foreign key information from table entry
-	std::function<void(const LogicalOperator&, std::pair<std::string, std::string>)> find_set;
-	find_set = [&used_table_entries, &foreign_key_represent]
-	    (const LogicalOperator& join_op, const std::pair<std::string, std::string>& current_join_pair) {
-		for (const auto&child : join_op.children) {
+	std::function<void(const LogicalOperator &, std::vector<std::pair<ColumnBinding, ColumnBinding>>)> find_set;
+	find_set = [&find_set, &used_table_entries,
+	            &foreign_key_represent](const LogicalOperator &join_op,
+	                                    const std::vector<std::pair<ColumnBinding, ColumnBinding>> &join_column_pairs) {
+		for (const auto &child : join_op.children) {
 			auto child_op = child.get();
 			if (LogicalOperatorType::LOGICAL_GET == child_op->type) {
 				auto &get = child_op->Cast<LogicalGet>();
+				auto current_table_index = get.table_index;
 				auto &table_entry = get.GetTable()->Cast<TableCatalogEntry>();
 
-//				// It's better to check if this column has a foreign key immediately.
-//				// But there's no API supported.
-//				// Keep this code in comments in case we can use it in the future.
-//				if (table_entry.ColumnExists(current_join_pair.first)) {
-//					const auto& column = table_entry.GetColumn(current_join_pair.first);
-//					// check if this column has a foreign key
-//				}
-
-				used_table_entries.emplace_back(&table_entry);
+				used_table_entries.emplace(current_table_index, &table_entry);
 
 				// find the foreign key through iteration tables,
 				// but this method cost a lot of time due to the big loop
-				for (const auto & constraint : table_entry.GetConstraints()) {
+				for (const auto &constraint : table_entry.GetConstraints()) {
 					if (ConstraintType::FOREIGN_KEY == constraint->type) {
 						auto &fk = constraint->Cast<ForeignKeyConstraint>();
-						if (std::find(fk.fk_columns.begin(), fk.fk_columns.end(), current_join_pair.first)
-						    != fk.fk_columns.end()) {
-							foreign_key_represent[current_join_pair.first] = true;
+						for (const auto &column_pair : join_column_pairs) {
+							if (auto find_left =
+							        std::find_if(fk.info.fk_keys.begin(), fk.info.fk_keys.end(),
+							                     [column_pair, current_table_index, &get](const PhysicalIndex &idx) {
+								                     // todo: confirm if the `get.column_ids` is a mapping
+								                     // from ColumnBinding to PhysicalIndex
+								                     return current_table_index == column_pair.first.table_index &&
+								                            idx.index == get.column_ids[column_pair.first.column_index];
+							                     });
+							    find_left != fk.info.fk_keys.end()) {
+								foreign_key_represent[column_pair.first] = true;
+							}
 						}
-						if (std::find(fk.fk_columns.begin(), fk.fk_columns.end(), current_join_pair.second)
-						    != fk.fk_columns.end()) {
-							foreign_key_represent[current_join_pair.second] = true;
+
+						for (const auto &column_pair : join_column_pairs) {
+							if (auto find_right = std::find_if(
+							        fk.info.fk_keys.begin(), fk.info.fk_keys.end(),
+							        [column_pair, current_table_index, &get](const PhysicalIndex &idx) {
+								        return current_table_index == column_pair.second.table_index &&
+								               idx.index == get.column_ids[column_pair.second.column_index];
+							        });
+							    find_right != fk.info.fk_keys.end()) {
+								foreign_key_represent[column_pair.second] = true;
+							}
 						}
 					}
 				}
-
 			}
+			find_set(*child_op, join_column_pairs);
 		}
 	};
 
-
 	// find the join operation
 	// check children node of the join operation, it should be a LOGICAL_GET
-	std::function<void(const LogicalOperator&)> find_join;
-	find_join = [&find_join, &find_set, &join_column_pairs, &used_table_entries, &foreign_key_represent](const LogicalOperator& op) -> void {
-		for (const auto&child : op.children) {
+	std::function<void(const LogicalOperator &)> find_join;
+	find_join = [&find_join, &join_column_pairs, &foreign_key_represent](const LogicalOperator &op) -> void {
+		for (const auto &child : op.children) {
 			auto child_op = child.get();
 			if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child_op->type) {
 				auto &join = child_op->Cast<LogicalComparisonJoin>();
 				const auto &cond = join.conditions;
 
-				// debug: print condition string
-				Printer::Print("join conditions:");
-				for (const auto & cond_it : cond) {
-					std::string compare_op = ExpressionType::COMPARE_EQUAL == cond_it.comparison ? " = " : " != ";
-					std::string cond_str = cond_it.left->alias + compare_op + cond_it.right->alias;
-					Printer::Print(cond_str);
-
+				for (const auto &cond_it : cond) {
 					// collect the columns used
-					join_column_pairs.emplace_back(cond_it.left->alias, cond_it.right->alias);
-					// initialize the umap by false
-					if (!foreign_key_represent.count(cond_it.left->alias))
-						foreign_key_represent.emplace(cond_it.left->alias, false);
-					if (!foreign_key_represent.count(cond_it.right->alias))
-						foreign_key_represent.emplace(cond_it.right->alias, false);
-				}
+					auto &left_colref = cond_it.left->Cast<BoundColumnRefExpression>();
+					auto &right_colref = cond_it.right->Cast<BoundColumnRefExpression>();
 
-				find_set(join, join_column_pairs.back());
+					join_column_pairs.emplace_back(left_colref.binding, right_colref.binding);
+					// initialize the umap by false
+					if (!foreign_key_represent.count(left_colref.binding))
+						foreign_key_represent.emplace(left_colref.binding, false);
+					if (!foreign_key_represent.count(right_colref.binding))
+						foreign_key_represent.emplace(right_colref.binding, false);
+				}
 			}
 			find_join(*child_op);
 		}
 	};
 
-
 	// 1. DFS search to find the COMPARISON_JOIN (or Any_JOIN? todo: confirm)
 	// 2. collect the table/columns used in the join operation
 	// 3. check it is a primary key or foreign key
 	find_join(*op);
+	find_set(*op, join_column_pairs);
 
 	// todo
 	// if the DAG has multi-centers, e.g.
@@ -143,46 +146,58 @@ unique_ptr<LogicalOperator> QuerySplit::Recon(unique_ptr<LogicalOperator> origin
 		// delete the pair when left and right column are both foreign key
 		join_column_pairs.erase(
 		    std::remove_if(join_column_pairs.begin(), join_column_pairs.end(),
-		                   [&foreign_key_represent](const std::pair<std::string, std::string>& column_pair) {
-			                   return (foreign_key_represent[column_pair.first] && foreign_key_represent[column_pair.second]);
-		                   }), join_column_pairs.end());
+		                   [&foreign_key_represent](const std::pair<ColumnBinding, ColumnBinding> &column_pair) {
+			                   return (foreign_key_represent[column_pair.first] &&
+			                           foreign_key_represent[column_pair.second]);
+		                   }),
+		    join_column_pairs.end());
 	}
 
-	// <column, table>
-	std::unordered_map<std::string, std::string> column_table_map;
-	// collect tables based on the columns
-	for (const auto& fk : foreign_key_represent) {
-		for (const auto& table_entry : used_table_entries) {
-			if (table_entry->ColumnExists(fk.first)) {
-				column_table_map[fk.first] = table_entry->name;
-				break;
-			}
-		}
-	}
+	//  ┌─────────────┴─────────────┐
+	//  │      COMPARISON_JOIN      │
+	//  │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+	//  │            MARK           ├
+	//  │    (keyword = #[11.0])    │
+	//  └─────────────┬─────────────┘
+	// not sure what is this, but we should delete it from `join_column_pairs`
+	join_column_pairs.erase(std::remove_if(join_column_pairs.begin(), join_column_pairs.end(),
+	                                       [used_table_entries](std::pair<ColumnBinding, ColumnBinding> column_pair) {
+		                                       return (0 == used_table_entries.count(column_pair.first.table_index)) ||
+		                                              (0 == used_table_entries.count(column_pair.second.table_index));
+	                                       }),
+	                        join_column_pairs.end());
 
-	// debug: print the join graph (DAG),
+	//	// <column, table>
+	//	std::unordered_map<std::string, std::string> column_table_map;
+	//	// collect tables based on the columns
+	//	for (const auto& fk : foreign_key_represent) {
+	//		for (const auto& table_entry : used_table_entries) {
+	//			if (table_entry->ColumnExists(fk.first)) {
+	//				column_table_map[fk.first] = table_entry->name;
+	//				break;
+	//			}
+	//		}
+	//	}
+
 	// vertexes are columns used in the join operation
 	// edges are the join relation
 	// direction is from foreign key to primary key
 	// print as "left_table -> right_table"
 	std::vector<std::string> join_dag_str;
-	std::string begin_table, end_table;
-	for (auto& column: join_column_pairs) {
+	for (auto &column : join_column_pairs) {
 		// if the right column is the foreign key,
 		// swap the pair to make sure foreign key is always on the left
 		if (foreign_key_represent[column.second])
 			std::swap(column.first, column.second);
-		join_dag_str.emplace_back(column_table_map[column.first] + " -> " + column_table_map[column.second]);
+		join_dag_str.emplace_back(used_table_entries[column.first.table_index]->name + " -> " +
+		                          used_table_entries[column.second.table_index]->name);
 	}
-	Printer::Print("\nJoin Relations (foreign_key -> primary_key):");
-	for (const auto& str : join_dag_str) {
+	Printer::Print("Join Relations (foreign_key -> primary_key):");
+	for (const auto &str : join_dag_str) {
 		Printer::Print(str);
 	}
-
-
-
 
 	return original_plan;
 }
 
-}
+} // namespace duckdb

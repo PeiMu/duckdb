@@ -39,6 +39,13 @@ struct ColumnBinding {
 		return !(*this == rhs);
 	}
 
+	struct ColumnBindingHash {
+		std::size_t operator()(const ColumnBinding &rhs) const {
+			return rhs.table_index << 32 | rhs.column_index;
+			//		return ((std::hash<idx_t>()(rhs.table_index) ^ std::hash<idx_t>()(rhs.column_index)));
+		}
+	};
+
 	void Serialize(Serializer &serializer) const;
 	static ColumnBinding Deserialize(Deserializer &deserializer);
 };

@@ -11,6 +11,7 @@
 #include "duckdb/common/printer.hpp"
 #include "duckdb/catalog/catalog_entry/table_catalog_entry.hpp"
 #include "duckdb/parser/constraints/foreign_key_constraint.hpp"
+#include "duckdb/planner/column_binding.hpp"
 
 namespace duckdb {
 
@@ -31,7 +32,7 @@ private:
 	//! In a SELECT statement these are the relations given after the FROM key word.
 	uint64_t CollectRangeTableLength(const unique_ptr<LogicalOperator> &plan);
 	//! Split parent query by foreign key
-	unique_ptr<LogicalOperator> Recon(unique_ptr<LogicalOperator> original_plan, uint64_t length);
+	unique_ptr<LogicalOperator> Recon(unique_ptr<LogicalOperator> original_plan, uint64_t join_column_pairs);
 
 private:
 	enum EnumSplitAlgorithm {
