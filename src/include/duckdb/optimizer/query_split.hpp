@@ -42,6 +42,10 @@ private:
 	void CheckSet(fk_map &foreign_key_represent, std::unordered_map<idx_t, TableCatalogEntry *> &used_table_entries,
 	              const LogicalOperator &op,
 	              const std::vector<std::pair<ColumnBinding, ColumnBinding>> &join_column_pairs);
+	//! Generate subqueries by parsing the logical original_plan
+	unique_ptr<LogicalOperator>
+	CreateSubQuery(const unique_ptr<LogicalOperator> &original_plan, const std::vector<ColumnBinding> &target_tables,
+	               const std::unordered_map<idx_t, TableCatalogEntry *> &used_table_entries);
 
 private:
 	enum EnumSplitAlgorithm { foreign_key_center = 1, min_sub_query };

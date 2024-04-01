@@ -89,16 +89,22 @@ unique_ptr<LogicalOperator> QuerySplit::Recon(unique_ptr<LogicalOperator> origin
 	                                       }),
 	                        join_column_pairs.end());
 
+	// devide subqueries into groups
+	// <foreign key table_index, std::vector<primary key table_index>>
+	std::unordered_map<idx_t, std::vector<ColumnBinding>> subquery_group;
+
 	// vertexes are columns used in the join operation
 	// edges are the join relation
 	// direction is from foreign key to primary key
-	// print as "left_table -> right_table"
 	std::vector<std::string> join_dag_str;
 	for (auto &column_pair : join_column_pairs) {
 		// if the right column_pair is the foreign key,
 		// swap the pair to make sure foreign key is always on the left
 		if (foreign_key_represent.at(column_pair.second).second)
 			std::swap(column_pair.first, column_pair.second);
+		subquery_group[column_pair.first.table_index].emplace_back(column_pair.first);
+		subquery_group[column_pair.first.table_index].emplace_back(column_pair.second);
+		// debug: print as "foreign_key -> primary_key"
 		join_dag_str.emplace_back(used_table_entries[column_pair.first.table_index]->name + "." +
 		                          foreign_key_represent.at(column_pair.first).first.Name() + " -> " +
 		                          used_table_entries[column_pair.second.table_index]->name + "." +
@@ -107,6 +113,13 @@ unique_ptr<LogicalOperator> QuerySplit::Recon(unique_ptr<LogicalOperator> origin
 	Printer::Print("Join Relations (foreign_key -> primary_key):");
 	for (const auto &str : join_dag_str) {
 		Printer::Print(str);
+	}
+
+	// debug: try to generate the subqueries
+	std::vector<unique_ptr<LogicalOperator>> sub_queries;
+	for (const auto &ele : subquery_group) {
+		unique_ptr<LogicalOperator> subquery = CreateSubQuery(original_plan, ele.second, used_table_entries);
+		sub_queries.emplace_back(std::move(subquery));
 	}
 
 	return original_plan;
@@ -179,6 +192,91 @@ void QuerySplit::CheckSet(fk_map &foreign_key_represent,
 		}
 		CheckSet(foreign_key_represent, used_table_entries, *child_op, join_column_pairs);
 	}
+}
+
+unique_ptr<LogicalOperator>
+QuerySplit::CreateSubQuery(const unique_ptr<LogicalOperator> &original_plan,
+                           const std::vector<ColumnBinding> &target_tables,
+                           const std::unordered_map<idx_t, TableCatalogEntry *> &used_table_entries) {
+	// debug: print the foreign key table and primary key table
+	Printer::Print("Target tables: ");
+	for (const auto &primary_table : target_tables) {
+		Printer::Print(used_table_entries.at(primary_table.table_index)->name);
+	}
+
+	unique_ptr<LogicalOperator> subquery;
+	std::function<void(LogicalOperator * op, const std::vector<ColumnBinding> &target_tables)> collect_related_ops;
+	collect_related_ops = [&collect_related_ops, &subquery](LogicalOperator *op,
+	                                                        const std::vector<ColumnBinding> &target_tables) {
+		// check if current op needs the target tables
+		switch (op->type) {
+		case LogicalOperatorType::LOGICAL_PROJECTION:
+			break;
+		default:
+			Printer::Print("Do not support such operation yet");
+			Printer::Print(LogicalOperatorToString(op->type));
+			break;
+		}
+
+		if (LogicalOperatorType::LOGICAL_PROJECTION == op->type) {
+			auto &projection_op = op->Cast<LogicalProjection>();
+			auto table_index = projection_op.table_index;
+			//			auto exprs = projection_op.expressions;
+			auto table_indexs = projection_op.GetTableIndex();
+			auto col = projection_op.GetColumnBindings();
+
+		} else if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == op->type) {
+			auto &agg_group_op = op->Cast<LogicalAggregate>();
+			auto table_index = agg_group_op.GetTableIndex();
+			auto col = agg_group_op.GetColumnBindings();
+			for (auto expr_it = agg_group_op.expressions.begin(); expr_it != agg_group_op.expressions.end();) {
+				if (ExpressionClass::BOUND_AGGREGATE == (*expr_it)->expression_class) {
+					auto &agg_expr = (*expr_it)->Cast<BoundAggregateExpression>();
+					for (auto bound_col_it = agg_expr.children.begin(); bound_col_it != agg_expr.children.end();) {
+						if (ExpressionClass::BOUND_COLUMN_REF == (*bound_col_it)->expression_class) {
+							auto &col_ref = (*bound_col_it)->Cast<BoundColumnRefExpression>();
+							if (std::find_if(target_tables.begin(), target_tables.end(),
+							                 [&col_ref](const ColumnBinding &current_col) {
+								                 return col_ref.binding.table_index == current_col.table_index;
+							                 }) == target_tables.end()) {
+								// col_ref is not a target table, remove it from agg_expr
+								bound_col_it = agg_expr.children.erase(bound_col_it);
+							} else {
+								bound_col_it++;
+							}
+						} else {
+							Printer::Print("Do not support yet");
+						}
+					}
+					if (agg_expr.children.empty()) {
+						expr_it = agg_group_op.expressions.erase(expr_it);
+					} else {
+						expr_it++;
+					}
+				} else {
+					Printer::Print("Do not support yet");
+				}
+			}
+		}
+
+		for (const auto &child : op->children) {
+			auto child_op = child.get();
+			collect_related_ops(child_op, target_tables);
+			switch (child_op->type) {
+			case LogicalOperatorType::LOGICAL_GET:
+			case LogicalOperatorType::LOGICAL_CHUNK_GET:
+				break;
+			case LogicalOperatorType::LOGICAL_COMPARISON_JOIN:
+			default:
+				Printer::Print("Do not support such operation yet");
+				Printer::Print(LogicalOperatorToString(child_op->type));
+			}
+		}
+	};
+
+	collect_related_ops(original_plan.get(), target_tables);
+
+	return subquery;
 }
 
 } // namespace duckdb
