@@ -118,7 +118,14 @@ unique_ptr<LogicalOperator> QuerySplit::Recon(unique_ptr<LogicalOperator> origin
 	// debug: try to generate the subqueries
 	std::vector<unique_ptr<LogicalOperator>> sub_queries;
 	for (const auto &ele : subquery_group) {
-		unique_ptr<LogicalOperator> subquery = CreateSubQuery(original_plan, ele.second, used_table_entries);
+		target_tables = ele.second;
+		// debug: print the foreign key table and primary key table
+		Printer::Print("Target tables: ");
+		for (const auto &primary_table : target_tables) {
+			Printer::Print(used_table_entries.at(primary_table.table_index)->name);
+		}
+		unique_ptr<LogicalOperator> subquery = original_plan->Copy(context);
+		VisitOperator(*subquery);
 		sub_queries.emplace_back(std::move(subquery));
 	}
 
@@ -194,70 +201,63 @@ void QuerySplit::CheckSet(fk_map &foreign_key_represent,
 	}
 }
 
-unique_ptr<LogicalOperator>
-QuerySplit::CreateSubQuery(const unique_ptr<LogicalOperator> &original_plan,
-                           const std::vector<ColumnBinding> &target_tables,
-                           const std::unordered_map<idx_t, TableCatalogEntry *> &used_table_entries) {
-	// debug: print the foreign key table and primary key table
-	Printer::Print("Target tables: ");
-	for (const auto &primary_table : target_tables) {
-		Printer::Print(used_table_entries.at(primary_table.table_index)->name);
+unique_ptr<Expression> QuerySplit::VisitReplace(BoundAggregateExpression &expr, unique_ptr<Expression> *expr_ptr) {
+	// delete the invalid expr
+	VisitExpressionChildren(expr);
+	for (auto bound_col_it = expr.children.begin(); bound_col_it != expr.children.end();) {
+		if (ExpressionType::INVALID == (*bound_col_it)->type) {
+			bound_col_it = expr.children.erase(bound_col_it);
+		} else {
+			bound_col_it++;
+		}
 	}
 
-	unique_ptr<LogicalOperator> subquery = original_plan->Copy(context);
-	std::function<void(LogicalOperator * op, const std::vector<ColumnBinding> &target_tables)> collect_related_ops;
-	collect_related_ops = [&collect_related_ops](LogicalOperator *op,
-	                                                        const std::vector<ColumnBinding> &target_tables) {
-		if (LogicalOperatorType::LOGICAL_PROJECTION == op->type) {
-			auto &projection_op = op->Cast<LogicalProjection>();
-			auto table_index = projection_op.table_index;
-			//			auto exprs = projection_op.expressions;
-			auto table_indexs = projection_op.GetTableIndex();
-			auto col = projection_op.GetColumnBindings();
+	if (expr.children.empty()) {
+		// if it doesn't have any child, make it invalid
+		auto empty_expr = expr.Copy();
+		empty_expr->type = ExpressionType::INVALID;
+		return empty_expr;
+	} else {
+		return nullptr;
+	}
+}
+unique_ptr<Expression> QuerySplit::VisitReplace(BoundColumnRefExpression &expr, unique_ptr<Expression> *expr_ptr) {
+	VisitExpressionChildren(expr);
+	if (std::find_if(target_tables.begin(), target_tables.end(),
+	                 [&expr](const ColumnBinding &current_col) {
+		                 return expr.binding.table_index == current_col.table_index;
+	                 }) == target_tables.end()) {
+		// expr is not a target table, remove it from expr
+		auto empty_expr = expr.Copy();
+		empty_expr->type = ExpressionType::INVALID;
+		return empty_expr;
+	} else {
+		return nullptr;
+	}
+}
 
-		} else if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == op->type) {
-			auto &agg_group_op = op->Cast<LogicalAggregate>();
-			auto table_index = agg_group_op.GetTableIndex();
-			auto col = agg_group_op.GetColumnBindings();
-			for (auto expr_it = agg_group_op.expressions.begin(); expr_it != agg_group_op.expressions.end();) {
-				if (ExpressionClass::BOUND_AGGREGATE == (*expr_it)->expression_class) {
-					auto &agg_expr = (*expr_it)->Cast<BoundAggregateExpression>();
-					for (auto bound_col_it = agg_expr.children.begin(); bound_col_it != agg_expr.children.end();) {
-						if (ExpressionClass::BOUND_COLUMN_REF == (*bound_col_it)->expression_class) {
-							auto &col_ref = (*bound_col_it)->Cast<BoundColumnRefExpression>();
-							if (std::find_if(target_tables.begin(), target_tables.end(),
-							                 [&col_ref](const ColumnBinding &current_col) {
-								                 return col_ref.binding.table_index == current_col.table_index;
-							                 }) == target_tables.end()) {
-								// col_ref is not a target table, remove it from agg_expr
-								bound_col_it = agg_expr.children.erase(bound_col_it);
-							} else {
-								bound_col_it++;
-							}
-						} else {
-							Printer::Print("Do not support yet");
-						}
-					}
-					if (agg_expr.children.empty()) {
-						expr_it = agg_group_op.expressions.erase(expr_it);
-					} else {
-						expr_it++;
-					}
-				} else {
-					Printer::Print("Do not support yet");
-				}
-			}
+void QuerySplit::VisitAggregate(LogicalAggregate &op) {
+	// visit expressions and delete the unrelated child node first
+	VisitOperatorExpressions(op);
+	for (auto expr_it = op.expressions.begin(); expr_it != op.expressions.end();) {
+		if (ExpressionType::INVALID == (*expr_it)->type) {
+			expr_it = op.expressions.erase(expr_it);
+		} else {
+			expr_it++;
 		}
+	}
+	VisitOperatorChildren(op);
+}
 
-		for (const auto &child : op->children) {
-			auto child_op = child.get();
-			collect_related_ops(child_op, target_tables);
-		}
-	};
-
-	collect_related_ops(subquery.get(), target_tables);
-
-	return subquery;
+void QuerySplit::VisitOperator(LogicalOperator &op) {
+	switch (op.type) {
+	case LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY:
+		VisitAggregate(op.Cast<LogicalAggregate>());
+		break;
+	default:
+		VisitOperatorChildren(op);
+		break;
+	}
 }
 
 } // namespace duckdb
