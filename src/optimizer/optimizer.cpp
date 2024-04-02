@@ -122,7 +122,7 @@ unique_ptr<LogicalOperator> Optimizer::Optimize(unique_ptr<LogicalOperator> plan
 
 	// apply query split algorithm
 	RunOptimizer(OptimizerType::QUERY_SPLIT, [&]() {
-		QuerySplit query_spliter;
+		QuerySplit query_spliter(context);
 		plan = query_spliter.Optimize(std::move(plan));
 	});
 

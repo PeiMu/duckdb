@@ -204,20 +204,10 @@ QuerySplit::CreateSubQuery(const unique_ptr<LogicalOperator> &original_plan,
 		Printer::Print(used_table_entries.at(primary_table.table_index)->name);
 	}
 
-	unique_ptr<LogicalOperator> subquery;
+	unique_ptr<LogicalOperator> subquery = original_plan->Copy(context);
 	std::function<void(LogicalOperator * op, const std::vector<ColumnBinding> &target_tables)> collect_related_ops;
-	collect_related_ops = [&collect_related_ops, &subquery](LogicalOperator *op,
+	collect_related_ops = [&collect_related_ops](LogicalOperator *op,
 	                                                        const std::vector<ColumnBinding> &target_tables) {
-		// check if current op needs the target tables
-		switch (op->type) {
-		case LogicalOperatorType::LOGICAL_PROJECTION:
-			break;
-		default:
-			Printer::Print("Do not support such operation yet");
-			Printer::Print(LogicalOperatorToString(op->type));
-			break;
-		}
-
 		if (LogicalOperatorType::LOGICAL_PROJECTION == op->type) {
 			auto &projection_op = op->Cast<LogicalProjection>();
 			auto table_index = projection_op.table_index;
@@ -262,19 +252,10 @@ QuerySplit::CreateSubQuery(const unique_ptr<LogicalOperator> &original_plan,
 		for (const auto &child : op->children) {
 			auto child_op = child.get();
 			collect_related_ops(child_op, target_tables);
-			switch (child_op->type) {
-			case LogicalOperatorType::LOGICAL_GET:
-			case LogicalOperatorType::LOGICAL_CHUNK_GET:
-				break;
-			case LogicalOperatorType::LOGICAL_COMPARISON_JOIN:
-			default:
-				Printer::Print("Do not support such operation yet");
-				Printer::Print(LogicalOperatorToString(child_op->type));
-			}
 		}
 	};
 
-	collect_related_ops(original_plan.get(), target_tables);
+	collect_related_ops(subquery.get(), target_tables);
 
 	return subquery;
 }

@@ -24,7 +24,7 @@ using fk_map = std::unordered_map<ColumnBinding, std::pair<ColumnDefinition, boo
 //! cardinality.
 class QuerySplit {
 public:
-	QuerySplit() = default;
+	explicit QuerySplit(ClientContext &context) : context(context) {};
 	~QuerySplit() = default;
 	//! Perform Query Split
 	unique_ptr<LogicalOperator> Optimize(unique_ptr<LogicalOperator> plan);
@@ -48,6 +48,7 @@ private:
 	               const std::unordered_map<idx_t, TableCatalogEntry *> &used_table_entries);
 
 private:
+	ClientContext &context;
 	enum EnumSplitAlgorithm { foreign_key_center = 1, min_sub_query };
 	EnumSplitAlgorithm split_algorithm = foreign_key_center;
 };
