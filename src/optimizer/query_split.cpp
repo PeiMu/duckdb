@@ -91,19 +91,22 @@ unique_ptr<LogicalOperator> QuerySplit::Recon(unique_ptr<LogicalOperator> origin
 
 	// devide subqueries into groups
 	// <foreign key table_index, std::vector<primary key table_index>>
-	std::unordered_map<idx_t, std::vector<ColumnBinding>> subquery_group;
+	std::unordered_map<idx_t, std::vector<idx_t>> subquery_group;
 
 	// vertexes are columns used in the join operation
 	// edges are the join relation
 	// direction is from foreign key to primary key
 	std::vector<std::string> join_dag_str;
 	for (auto &column_pair : join_column_pairs) {
+		//		// skip the user-defined columns, e.g. `WHERE k.keyword IN ('superhero', 'sequel', ...)`
+		//		if (0 == foreign_key_represent.count(column_pair.first) || 0 ==
+		// foreign_key_represent.count(column_pair.second)) 			continue;
+
 		// if the right column_pair is the foreign key,
 		// swap the pair to make sure foreign key is always on the left
 		if (foreign_key_represent.at(column_pair.second).second)
 			std::swap(column_pair.first, column_pair.second);
-		subquery_group[column_pair.first.table_index].emplace_back(column_pair.first);
-		subquery_group[column_pair.first.table_index].emplace_back(column_pair.second);
+		subquery_group[column_pair.first.table_index].emplace_back(column_pair.second.table_index);
 		// debug: print as "foreign_key -> primary_key"
 		join_dag_str.emplace_back(used_table_entries[column_pair.first.table_index]->name + "." +
 		                          foreign_key_represent.at(column_pair.first).first.Name() + " -> " +
@@ -118,14 +121,25 @@ unique_ptr<LogicalOperator> QuerySplit::Recon(unique_ptr<LogicalOperator> origin
 	// debug: try to generate the subqueries
 	std::vector<unique_ptr<LogicalOperator>> sub_queries;
 	for (const auto &ele : subquery_group) {
-		target_tables = ele.second;
-		// debug: print the foreign key table and primary key table
-		Printer::Print("Target tables: ");
-		for (const auto &primary_table : target_tables) {
-			Printer::Print(used_table_entries.at(primary_table.table_index)->name);
+		for (const auto &primary_table_idx : ele.second) {
+			target_tables.emplace(primary_table_idx, used_table_entries[primary_table_idx]);
+			// debug: print the foreign key table and primary key table
+			Printer::Print("Target primary tables: ");
+			Printer::Print(used_table_entries[primary_table_idx]->name);
 		}
+		target_tables.emplace(ele.first, used_table_entries[ele.first]);
+		// debug: print the foreign key table and primary key table
+		Printer::Print("Target foreign tables: ");
+		Printer::Print(used_table_entries[ele.first]->name);
+
 		unique_ptr<LogicalOperator> subquery = original_plan->Copy(context);
+		// for the first n-1 subqueries, only select the most related nodes/expressions
+		// for the last subquery, merge the previous subqueries
 		VisitOperator(*subquery);
+		// debug: print subquery
+		Printer::Print("Current subquery");
+		subquery->Print();
+
 		sub_queries.emplace_back(std::move(subquery));
 	}
 
@@ -221,12 +235,39 @@ unique_ptr<Expression> QuerySplit::VisitReplace(BoundAggregateExpression &expr, 
 		return nullptr;
 	}
 }
-unique_ptr<Expression> QuerySplit::VisitReplace(BoundColumnRefExpression &expr, unique_ptr<Expression> *expr_ptr) {
+
+unique_ptr<Expression> QuerySplit::VisitReplace(BoundFunctionExpression &expr, unique_ptr<Expression> *expr_ptr) {
+	// delete the invalid expr
 	VisitExpressionChildren(expr);
-	if (std::find_if(target_tables.begin(), target_tables.end(),
-	                 [&expr](const ColumnBinding &current_col) {
-		                 return expr.binding.table_index == current_col.table_index;
-	                 }) == target_tables.end()) {
+	bool disable = false;
+	for (const auto &bound_col : expr.children) {
+		if (ExpressionType::INVALID == bound_col->type) {
+			disable = true;
+			break;
+		}
+	}
+
+	if (disable) {
+		// if it doesn't have any child, make it invalid
+		auto empty_expr = expr.Copy();
+		empty_expr->type = ExpressionType::INVALID;
+		return empty_expr;
+	} else {
+		return nullptr;
+	}
+}
+
+unique_ptr<Expression> QuerySplit::VisitReplace(BoundColumnRefExpression &expr, unique_ptr<Expression> *expr_ptr) {
+	if (0 == target_tables.count(expr.binding.table_index)) {
+		// check projection's alias first
+		// todo: this should have a better way than matching string... it might introduce bugs...
+		for (const auto &used_table : target_tables) {
+			if (std::string::npos != expr.alias.find(used_table.second->name)) {
+				std::string warn = "Warning: We assume " + expr.alias + " uses " + used_table.second->name;
+				Printer::Print(warn);
+				return nullptr;
+			}
+		}
 		// expr is not a target table, remove it from expr
 		auto empty_expr = expr.Copy();
 		empty_expr->type = ExpressionType::INVALID;
@@ -236,9 +277,42 @@ unique_ptr<Expression> QuerySplit::VisitReplace(BoundColumnRefExpression &expr, 
 	}
 }
 
-void QuerySplit::VisitAggregate(LogicalAggregate &op) {
+void QuerySplit::VisitOperator(LogicalOperator &op) {
 	// visit expressions and delete the unrelated child node first
 	VisitOperatorExpressions(op);
+
+	switch (op.type) {
+	case LogicalOperatorType::LOGICAL_PROJECTION:
+		VisitProjection(op.Cast<LogicalProjection>());
+		break;
+	case LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY:
+		VisitAggregate(op.Cast<LogicalAggregate>());
+		break;
+	case LogicalOperatorType::LOGICAL_COMPARISON_JOIN:
+		VisitComparisonJoin(op.Cast<LogicalComparisonJoin>());
+		break;
+	case LogicalOperatorType::LOGICAL_FILTER:
+		VisitFilter(op.Cast<LogicalFilter>());
+		break;
+	case LogicalOperatorType::LOGICAL_GET:
+		VisitGet(op.Cast<LogicalGet>());
+		break;
+	default:
+		break;
+	}
+
+	VisitOperatorChildren(op);
+	// todo: lift the child node to replace it
+	bool find_valid_child = false;
+	for (const auto &child_op : op.children) {
+		if (LogicalOperatorType::LOGICAL_INVALID != child_op->type) {
+			find_valid_child = true;
+		}
+	}
+	int a = 0;
+}
+
+void QuerySplit::VisitAggregate(LogicalAggregate &op) {
 	for (auto expr_it = op.expressions.begin(); expr_it != op.expressions.end();) {
 		if (ExpressionType::INVALID == (*expr_it)->type) {
 			expr_it = op.expressions.erase(expr_it);
@@ -246,17 +320,41 @@ void QuerySplit::VisitAggregate(LogicalAggregate &op) {
 			expr_it++;
 		}
 	}
-	VisitOperatorChildren(op);
 }
 
-void QuerySplit::VisitOperator(LogicalOperator &op) {
-	switch (op.type) {
-	case LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY:
-		VisitAggregate(op.Cast<LogicalAggregate>());
-		break;
-	default:
-		VisitOperatorChildren(op);
-		break;
+void QuerySplit::VisitComparisonJoin(LogicalComparisonJoin &op) {
+	for (auto cond_it = op.conditions.begin(); cond_it != op.conditions.end();) {
+		if (ExpressionType::INVALID == cond_it->left->type || ExpressionType::INVALID == cond_it->right->type) {
+			cond_it = op.conditions.erase(cond_it);
+		} else {
+			cond_it++;
+		}
+	}
+}
+
+void QuerySplit::VisitFilter(LogicalFilter &op) {
+	for (auto expr_it = op.expressions.begin(); expr_it != op.expressions.end();) {
+		if (ExpressionType::INVALID == (*expr_it)->type) {
+			expr_it = op.expressions.erase(expr_it);
+		} else {
+			expr_it++;
+		}
+	}
+}
+
+void QuerySplit::VisitProjection(LogicalProjection &op) {
+	for (auto expr_it = op.expressions.begin(); expr_it != op.expressions.end();) {
+		if (ExpressionType::INVALID == (*expr_it)->type) {
+			expr_it = op.expressions.erase(expr_it);
+		} else {
+			expr_it++;
+		}
+	}
+}
+
+void QuerySplit::VisitGet(LogicalGet &op) {
+	if (0 == target_tables.count(op.table_index)) {
+		op.type = LogicalOperatorType::LOGICAL_INVALID;
 	}
 }
 

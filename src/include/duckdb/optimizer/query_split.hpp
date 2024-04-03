@@ -34,9 +34,14 @@ public:
 	unique_ptr<LogicalOperator> Optimize(unique_ptr<LogicalOperator> plan);
 
 protected:
-	void VisitOperator(duckdb::LogicalOperator &op) override;
+	void VisitOperator(LogicalOperator &op) override;
+	void VisitProjection(LogicalProjection &op);
 	void VisitAggregate(LogicalAggregate &op);
+	void VisitComparisonJoin(LogicalComparisonJoin &op);
+	void VisitFilter(LogicalFilter &op);
+	void VisitGet(LogicalGet &op);
 	unique_ptr<Expression> VisitReplace(BoundAggregateExpression &expr, unique_ptr<Expression> *expr_ptr) override;
+	unique_ptr<Expression> VisitReplace(BoundFunctionExpression &expr, unique_ptr<Expression> *expr_ptr) override;
 	unique_ptr<Expression> VisitReplace(BoundColumnRefExpression &expr, unique_ptr<Expression> *expr_ptr) override;
 
 private:
@@ -57,8 +62,16 @@ private:
 	ClientContext &context;
 	enum EnumSplitAlgorithm { foreign_key_center = 1, min_sub_query };
 	EnumSplitAlgorithm split_algorithm = foreign_key_center;
+
+	// Hash function
+	struct hashFunction {
+		size_t operator()(const pair<idx_t, TableCatalogEntry *> &x) const {
+			return x.first ^ x.second->oid;
+		}
+	};
 	//! For the current subquery, we only keep nodes related with the target_tables
-	std::vector<ColumnBinding> target_tables;
+	std::unordered_map<idx_t, TableCatalogEntry*> target_tables;
+//	std::unordered_set<std::pair<idx_t, TableCatalogEntry *>, hashFunction> target_tables;
 };
 
 } // namespace duckdb
