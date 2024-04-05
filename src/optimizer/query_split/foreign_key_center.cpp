@@ -1,35 +1,39 @@
-#include "duckdb/optimizer/query_split.hpp"
+#include "duckdb/optimizer/query_split/foreign_key_center.hpp"
 
 namespace duckdb {
 
-unique_ptr<LogicalOperator> QuerySplit::Optimize(unique_ptr<LogicalOperator> plan) {
+std::queue<unique_ptr<LogicalOperator>> ForeignKeyCenterSplit::Split(unique_ptr<LogicalOperator> plan) {
 	// remove redundant joins if the current query is not a CMD_UTILITY
 	// todo: check if the current query is a CMD_UTILITY
 	if (LogicalOperatorType::LOGICAL_PROJECTION != plan->type && LogicalOperatorType::LOGICAL_ORDER_BY != plan->type &&
 	    LogicalOperatorType::LOGICAL_EXPLAIN != plan->type) {
-		return plan;
+		std::queue<unique_ptr<LogicalOperator>> plan_vec;
+		plan_vec.emplace(std::move(plan));
+		return plan_vec;
 	}
 
-	Printer::Print("In QuerySplit\n");
+	Printer::Print("In ForeignKeyCenterSplit\n");
 	plan->Print();
 
 	unique_ptr<LogicalOperator> new_logical_plan = std::move(plan);
-	unique_ptr<LogicalOperator> plan_without_redundant_jon = RemoveDedundantJoin(std::move(new_logical_plan));
+	unique_ptr<LogicalOperator> plan_without_redundant_jon = RemoveRedundantJoin(std::move(new_logical_plan));
 
 	uint64_t length = CollectRangeTableLength(plan_without_redundant_jon);
 	if (length <= 2) {
-		return plan;
+		std::queue<unique_ptr<LogicalOperator>> plan_vec;
+		plan_vec.emplace(std::move(plan));
+		return plan_vec;
 	}
 
-	return Recon(std::move(plan_without_redundant_jon), length);
+	return Recon(std::move(plan_without_redundant_jon));
 }
 
-unique_ptr<LogicalOperator> QuerySplit::RemoveDedundantJoin(unique_ptr<LogicalOperator> original_plan) {
+unique_ptr<LogicalOperator> ForeignKeyCenterSplit::RemoveRedundantJoin(unique_ptr<LogicalOperator> original_plan) {
 	// todo
 	return original_plan;
 }
 
-uint64_t QuerySplit::CollectRangeTableLength(const unique_ptr<LogicalOperator> &plan) {
+uint64_t ForeignKeyCenterSplit::CollectRangeTableLength(const unique_ptr<LogicalOperator> &plan) {
 	// skip order by and explain
 	auto op = plan.get();
 	while (LogicalOperatorType::LOGICAL_PROJECTION != op->type) {
@@ -41,7 +45,7 @@ uint64_t QuerySplit::CollectRangeTableLength(const unique_ptr<LogicalOperator> &
 	return table_index[0];
 }
 
-unique_ptr<LogicalOperator> QuerySplit::Recon(unique_ptr<LogicalOperator> original_plan, uint64_t length) {
+std::queue<unique_ptr<LogicalOperator>> ForeignKeyCenterSplit::Recon(unique_ptr<LogicalOperator> original_plan) {
 	auto op = original_plan.get();
 
 	// <join_left_column_binding, join_right_column_binding>
@@ -119,7 +123,7 @@ unique_ptr<LogicalOperator> QuerySplit::Recon(unique_ptr<LogicalOperator> origin
 	}
 
 	// debug: try to generate the subqueries
-	std::vector<unique_ptr<LogicalOperator>> sub_queries;
+	std::queue<unique_ptr<LogicalOperator>> sub_queries;
 	for (const auto &ele : subquery_group) {
 		for (const auto &primary_table_idx : ele.second) {
 			target_tables.emplace(primary_table_idx, used_table_entries[primary_table_idx]);
@@ -140,13 +144,13 @@ unique_ptr<LogicalOperator> QuerySplit::Recon(unique_ptr<LogicalOperator> origin
 		Printer::Print("Current subquery");
 		subquery->Print();
 
-		sub_queries.emplace_back(std::move(subquery));
+		sub_queries.emplace(std::move(subquery));
 	}
 
-	return original_plan;
+	return sub_queries;
 }
 
-void QuerySplit::CheckJoin(std::vector<std::pair<ColumnBinding, ColumnBinding>> &join_column_pairs,
+void ForeignKeyCenterSplit::CheckJoin(std::vector<std::pair<ColumnBinding, ColumnBinding>> &join_column_pairs,
                            const LogicalOperator &op) {
 
 	for (const auto &child : op.children) {
@@ -167,7 +171,7 @@ void QuerySplit::CheckJoin(std::vector<std::pair<ColumnBinding, ColumnBinding>> 
 	}
 }
 
-void QuerySplit::CheckSet(fk_map &foreign_key_represent,
+void ForeignKeyCenterSplit::CheckSet(fk_map &foreign_key_represent,
                           std::unordered_map<idx_t, TableCatalogEntry *> &used_table_entries, const LogicalOperator &op,
                           const std::vector<std::pair<ColumnBinding, ColumnBinding>> &join_column_pairs) {
 	for (const auto &child : op.children) {
@@ -215,7 +219,7 @@ void QuerySplit::CheckSet(fk_map &foreign_key_represent,
 	}
 }
 
-unique_ptr<Expression> QuerySplit::VisitReplace(BoundAggregateExpression &expr, unique_ptr<Expression> *expr_ptr) {
+unique_ptr<Expression> ForeignKeyCenterSplit::VisitReplace(BoundAggregateExpression &expr, unique_ptr<Expression> *expr_ptr) {
 	// delete the invalid expr
 	VisitExpressionChildren(expr);
 	for (auto bound_col_it = expr.children.begin(); bound_col_it != expr.children.end();) {
@@ -236,11 +240,13 @@ unique_ptr<Expression> QuerySplit::VisitReplace(BoundAggregateExpression &expr, 
 	}
 }
 
-unique_ptr<Expression> QuerySplit::VisitReplace(BoundFunctionExpression &expr, unique_ptr<Expression> *expr_ptr) {
+unique_ptr<Expression> ForeignKeyCenterSplit::VisitReplace(BoundFunctionExpression &expr, unique_ptr<Expression> *expr_ptr) {
 	// delete the invalid expr
 	VisitExpressionChildren(expr);
 	bool disable = false;
 	for (const auto &bound_col : expr.children) {
+		// if any of the child BoundColumnRef is not used, the whole condition is not used,
+		// e.g. (name ~~ '%Downey%Robert%')
 		if (ExpressionType::INVALID == bound_col->type) {
 			disable = true;
 			break;
@@ -257,7 +263,7 @@ unique_ptr<Expression> QuerySplit::VisitReplace(BoundFunctionExpression &expr, u
 	}
 }
 
-unique_ptr<Expression> QuerySplit::VisitReplace(BoundColumnRefExpression &expr, unique_ptr<Expression> *expr_ptr) {
+unique_ptr<Expression> ForeignKeyCenterSplit::VisitReplace(BoundColumnRefExpression &expr, unique_ptr<Expression> *expr_ptr) {
 	if (0 == target_tables.count(expr.binding.table_index)) {
 		// check projection's alias first
 		// todo: this should have a better way than matching string... it might introduce bugs...
@@ -277,7 +283,7 @@ unique_ptr<Expression> QuerySplit::VisitReplace(BoundColumnRefExpression &expr, 
 	}
 }
 
-void QuerySplit::VisitOperator(LogicalOperator &op) {
+void ForeignKeyCenterSplit::VisitOperator(LogicalOperator &op) {
 	// visit expressions and delete the unrelated child node first
 	VisitOperatorExpressions(op);
 
@@ -297,22 +303,43 @@ void QuerySplit::VisitOperator(LogicalOperator &op) {
 	case LogicalOperatorType::LOGICAL_GET:
 		VisitGet(op.Cast<LogicalGet>());
 		break;
+	case LogicalOperatorType::LOGICAL_CHUNK_GET:
+		VisitColumnDataGet(op.Cast<LogicalColumnDataGet>());
+		break;
 	default:
 		break;
 	}
 
+	//	parent = op.Copy(context);
 	VisitOperatorChildren(op);
-	// todo: lift the child node to replace it
-	bool find_valid_child = false;
-	for (const auto &child_op : op.children) {
-		if (LogicalOperatorType::LOGICAL_INVALID != child_op->type) {
-			find_valid_child = true;
-		}
-	}
-	int a = 0;
+	//	if (op.children.empty()) {
+	//		return;
+	//	}
+	//
+	//	// lift the valid child node in a bottom up order
+	//	bool has_valid_child = false;
+	//	for (auto &child : op.children) {
+	//		if (LogicalOperatorType::LOGICAL_INVALID != child->type &&
+	//		    LogicalOperatorType::LOGICAL_INVALID == op.type) {
+	//			// todo: need a CROSS_PRODUCT or dummy node?
+	//			D_ASSERT(!has_valid_child);
+	//			has_valid_child = true;
+	//			// parent node remove this op (the child node of parent node)
+	//			// and add the `child` (the grandchild node of the parent node)
+	//			auto child_copy = child->Copy(context);
+	//			child_copy.swap((std::unique_ptr<duckdb::LogicalOperator> &)op);
+	////			for (auto op_it = parent->children.begin(); op_it != parent->children.end();) {
+	////				if ((*op_it)) {
+	////					parent->children.erase(op_it);
+	////				}
+	//			int a = 0;
+	////			}
+	//		}
+	//	}
+	////	op = *parent;
 }
 
-void QuerySplit::VisitAggregate(LogicalAggregate &op) {
+void ForeignKeyCenterSplit::VisitAggregate(LogicalAggregate &op) {
 	for (auto expr_it = op.expressions.begin(); expr_it != op.expressions.end();) {
 		if (ExpressionType::INVALID == (*expr_it)->type) {
 			expr_it = op.expressions.erase(expr_it);
@@ -320,9 +347,13 @@ void QuerySplit::VisitAggregate(LogicalAggregate &op) {
 			expr_it++;
 		}
 	}
+
+	//	if (op.expressions.empty()) {
+	//		op.type = LogicalOperatorType::LOGICAL_INVALID;
+	//	}
 }
 
-void QuerySplit::VisitComparisonJoin(LogicalComparisonJoin &op) {
+void ForeignKeyCenterSplit::VisitComparisonJoin(LogicalComparisonJoin &op) {
 	for (auto cond_it = op.conditions.begin(); cond_it != op.conditions.end();) {
 		if (ExpressionType::INVALID == cond_it->left->type || ExpressionType::INVALID == cond_it->right->type) {
 			cond_it = op.conditions.erase(cond_it);
@@ -330,9 +361,13 @@ void QuerySplit::VisitComparisonJoin(LogicalComparisonJoin &op) {
 			cond_it++;
 		}
 	}
+
+	//	if (op.conditions.empty()) {
+	//		op.type = LogicalOperatorType::LOGICAL_INVALID;
+	//	}
 }
 
-void QuerySplit::VisitFilter(LogicalFilter &op) {
+void ForeignKeyCenterSplit::VisitFilter(LogicalFilter &op) {
 	for (auto expr_it = op.expressions.begin(); expr_it != op.expressions.end();) {
 		if (ExpressionType::INVALID == (*expr_it)->type) {
 			expr_it = op.expressions.erase(expr_it);
@@ -340,9 +375,13 @@ void QuerySplit::VisitFilter(LogicalFilter &op) {
 			expr_it++;
 		}
 	}
+
+	//	if (op.expressions.empty()) {
+	//		op.type = LogicalOperatorType::LOGICAL_INVALID;
+	//	}
 }
 
-void QuerySplit::VisitProjection(LogicalProjection &op) {
+void ForeignKeyCenterSplit::VisitProjection(LogicalProjection &op) {
 	for (auto expr_it = op.expressions.begin(); expr_it != op.expressions.end();) {
 		if (ExpressionType::INVALID == (*expr_it)->type) {
 			expr_it = op.expressions.erase(expr_it);
@@ -350,12 +389,19 @@ void QuerySplit::VisitProjection(LogicalProjection &op) {
 			expr_it++;
 		}
 	}
+
+	//	if (op.expressions.empty()) {
+	//		op.type = LogicalOperatorType::LOGICAL_INVALID;
+	//	}
 }
 
-void QuerySplit::VisitGet(LogicalGet &op) {
-	if (0 == target_tables.count(op.table_index)) {
-		op.type = LogicalOperatorType::LOGICAL_INVALID;
-	}
+void ForeignKeyCenterSplit::VisitGet(LogicalGet &op) {
+	//	if (0 == target_tables.count(op.table_index)) {
+	//		op.type = LogicalOperatorType::LOGICAL_INVALID;
+	//	}
+}
+void ForeignKeyCenterSplit::VisitColumnDataGet(LogicalColumnDataGet &op) {
+
 }
 
 } // namespace duckdb

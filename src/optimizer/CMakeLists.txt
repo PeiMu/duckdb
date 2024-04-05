@@ -5,6 +5,7 @@ add_subdirectory(pullup)
 add_subdirectory(pushdown)
 add_subdirectory(rule)
 add_subdirectory(statistics)
+add_subdirectory(query_split)
 
 add_library_unity(
   duckdb_optimizer
@@ -27,8 +28,7 @@ add_library_unity(
   remove_duplicate_groups.cpp
   remove_unused_columns.cpp
   statistics_propagator.cpp
-  topn_optimizer.cpp
-  query_split.cpp)
+  topn_optimizer.cpp)
 set(ALL_OBJECT_FILES
     ${ALL_OBJECT_FILES} $<TARGET_OBJECTS:duckdb_optimizer>
     PARENT_SCOPE)
