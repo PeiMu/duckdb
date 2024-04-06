@@ -10,9 +10,9 @@ unique_ptr<LogicalOperator> QuerySplit::Optimize(unique_ptr<LogicalOperator> pla
 		return plan;
 	}
 
-	SplitAlgorithm *query_splitter;
-	ForeignKeyCenterSplit splitter_impl(context);
-	query_splitter = &splitter_impl;
+	EnumSplitAlgorithm split_algorithm = foreign_key_center;
+
+	std::unique_ptr<SplitAlgorithm> query_splitter = SplitAlgorithmFactor::CreateSplitter(context, split_algorithm);
 
 	if (subqueries.empty()) {
 		// todo: if the current result is not null, which means not the first time, then exist

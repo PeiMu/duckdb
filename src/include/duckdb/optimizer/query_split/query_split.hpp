@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include "duckdb/optimizer/query_split/foreign_key_center.hpp"
+#include "duckdb/optimizer/query_split/split_algo_factor.hpp"
 
 namespace duckdb {
 

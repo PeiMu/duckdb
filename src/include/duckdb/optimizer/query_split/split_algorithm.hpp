@@ -19,6 +19,8 @@
 
 namespace duckdb {
 
+enum EnumSplitAlgorithm { foreign_key_center = 1, min_sub_query, bottom_up };
+
 class SplitAlgorithm : public LogicalOperatorVisitor {
 public:
 	explicit SplitAlgorithm(ClientContext &context) : context(context) {};

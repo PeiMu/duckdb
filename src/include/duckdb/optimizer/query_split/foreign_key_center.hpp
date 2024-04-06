@@ -35,7 +35,8 @@ using fk_map = std::unordered_map<ColumnBinding, std::pair<ColumnDefinition, boo
 //! cardinality.
 class ForeignKeyCenterSplit : public SplitAlgorithm {
 public:
-	explicit ForeignKeyCenterSplit(ClientContext &context) : SplitAlgorithm(context) {};
+	explicit ForeignKeyCenterSplit(ClientContext &context, EnumSplitAlgorithm split_algorithm)
+	    : SplitAlgorithm(context), split_algorithm(split_algorithm) {};
 	~ForeignKeyCenterSplit() override = default;
 	//! Perform Query Split
 	std::queue<unique_ptr<LogicalOperator>> Split(unique_ptr<LogicalOperator> plan) override;
@@ -73,14 +74,13 @@ private:
 	              const std::vector<std::pair<ColumnBinding, ColumnBinding>> &join_column_pairs);
 
 private:
-	enum EnumSplitAlgorithm { foreign_key_center = 1, min_sub_query };
-	EnumSplitAlgorithm split_algorithm = foreign_key_center;
-
 	//! For the current subquery, we only keep nodes related with the target_tables
 	std::unordered_map<idx_t, TableCatalogEntry *> target_tables;
 
 	//! record the parent node to replace it to the valid child node
 	unique_ptr<LogicalOperator> parent;
+
+	EnumSplitAlgorithm split_algorithm;
 };
 
 } // namespace duckdb

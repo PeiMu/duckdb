@@ -3,16 +3,7 @@
 namespace duckdb {
 
 std::queue<unique_ptr<LogicalOperator>> ForeignKeyCenterSplit::Split(unique_ptr<LogicalOperator> plan) {
-	// remove redundant joins if the current query is not a CMD_UTILITY
-	// todo: check if the current query is a CMD_UTILITY
-	if (LogicalOperatorType::LOGICAL_PROJECTION != plan->type && LogicalOperatorType::LOGICAL_ORDER_BY != plan->type &&
-	    LogicalOperatorType::LOGICAL_EXPLAIN != plan->type) {
-		std::queue<unique_ptr<LogicalOperator>> plan_vec;
-		plan_vec.emplace(std::move(plan));
-		return plan_vec;
-	}
-
-	Printer::Print("In ForeignKeyCenterSplit\n");
+	// debug
 	plan->Print();
 
 	unique_ptr<LogicalOperator> new_logical_plan = std::move(plan);
@@ -151,7 +142,7 @@ std::queue<unique_ptr<LogicalOperator>> ForeignKeyCenterSplit::Recon(unique_ptr<
 }
 
 void ForeignKeyCenterSplit::CheckJoin(std::vector<std::pair<ColumnBinding, ColumnBinding>> &join_column_pairs,
-                           const LogicalOperator &op) {
+                                      const LogicalOperator &op) {
 
 	for (const auto &child : op.children) {
 		auto &child_op = child;
@@ -172,8 +163,9 @@ void ForeignKeyCenterSplit::CheckJoin(std::vector<std::pair<ColumnBinding, Colum
 }
 
 void ForeignKeyCenterSplit::CheckSet(fk_map &foreign_key_represent,
-                          std::unordered_map<idx_t, TableCatalogEntry *> &used_table_entries, const LogicalOperator &op,
-                          const std::vector<std::pair<ColumnBinding, ColumnBinding>> &join_column_pairs) {
+                                     std::unordered_map<idx_t, TableCatalogEntry *> &used_table_entries,
+                                     const LogicalOperator &op,
+                                     const std::vector<std::pair<ColumnBinding, ColumnBinding>> &join_column_pairs) {
 	for (const auto &child : op.children) {
 		auto child_op = child.get();
 		if (LogicalOperatorType::LOGICAL_GET == child_op->type) {
@@ -219,7 +211,8 @@ void ForeignKeyCenterSplit::CheckSet(fk_map &foreign_key_represent,
 	}
 }
 
-unique_ptr<Expression> ForeignKeyCenterSplit::VisitReplace(BoundAggregateExpression &expr, unique_ptr<Expression> *expr_ptr) {
+unique_ptr<Expression> ForeignKeyCenterSplit::VisitReplace(BoundAggregateExpression &expr,
+                                                           unique_ptr<Expression> *expr_ptr) {
 	// delete the invalid expr
 	VisitExpressionChildren(expr);
 	for (auto bound_col_it = expr.children.begin(); bound_col_it != expr.children.end();) {
@@ -240,7 +233,8 @@ unique_ptr<Expression> ForeignKeyCenterSplit::VisitReplace(BoundAggregateExpress
 	}
 }
 
-unique_ptr<Expression> ForeignKeyCenterSplit::VisitReplace(BoundFunctionExpression &expr, unique_ptr<Expression> *expr_ptr) {
+unique_ptr<Expression> ForeignKeyCenterSplit::VisitReplace(BoundFunctionExpression &expr,
+                                                           unique_ptr<Expression> *expr_ptr) {
 	// delete the invalid expr
 	VisitExpressionChildren(expr);
 	bool disable = false;
@@ -263,7 +257,8 @@ unique_ptr<Expression> ForeignKeyCenterSplit::VisitReplace(BoundFunctionExpressi
 	}
 }
 
-unique_ptr<Expression> ForeignKeyCenterSplit::VisitReplace(BoundColumnRefExpression &expr, unique_ptr<Expression> *expr_ptr) {
+unique_ptr<Expression> ForeignKeyCenterSplit::VisitReplace(BoundColumnRefExpression &expr,
+                                                           unique_ptr<Expression> *expr_ptr) {
 	if (0 == target_tables.count(expr.binding.table_index)) {
 		// check projection's alias first
 		// todo: this should have a better way than matching string... it might introduce bugs...
@@ -400,8 +395,8 @@ void ForeignKeyCenterSplit::VisitGet(LogicalGet &op) {
 	//		op.type = LogicalOperatorType::LOGICAL_INVALID;
 	//	}
 }
-void ForeignKeyCenterSplit::VisitColumnDataGet(LogicalColumnDataGet &op) {
 
+void ForeignKeyCenterSplit::VisitColumnDataGet(LogicalColumnDataGet &op) {
 }
 
 } // namespace duckdb
