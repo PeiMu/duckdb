@@ -1,7 +1,7 @@
 //===----------------------------------------------------------------------===//
 //                         DuckDB
 //
-// duckdb/optimizer/bottom_up.hpp
+// duckdb/optimizer/top_down.hpp
 //
 //
 //===----------------------------------------------------------------------===//
@@ -10,22 +10,25 @@
 
 #include "duckdb/optimizer/query_split/split_algorithm.hpp"
 
-#include <queue>
+#include <stack>
 
 namespace duckdb {
 
 //! Based on the DAG of the logical plan, we generate the subqueries bottom-up
-class BottomUpSplit : public SplitAlgorithm {
+class TopDownSplit : public SplitAlgorithm {
 public:
-	explicit BottomUpSplit(ClientContext &context) : SplitAlgorithm(context) {};
-	~BottomUpSplit() override = default;
+	explicit TopDownSplit(ClientContext &context) : SplitAlgorithm(context) {};
+	~TopDownSplit() override = default;
 	//! Perform Query Split
-	std::queue<unique_ptr<LogicalOperator>> Split(unique_ptr<LogicalOperator> plan) override;
+	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) override;
 
 protected:
 	void VisitOperator(LogicalOperator &op) override;
-	void VisitComparisonJoin(LogicalComparisonJoin &op);
-	void VisitFilter(LogicalFilter &op);
+
+private:
+	bool filter_parent = false;
+	std::stack<unique_ptr<LogicalOperator>> subqueries;
+	int current_fuse_level = 0;
 };
 
 } // namespace duckdb

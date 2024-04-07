@@ -19,21 +19,21 @@
 
 namespace duckdb {
 
-enum EnumSplitAlgorithm { foreign_key_center = 1, min_sub_query, bottom_up };
+enum EnumSplitAlgorithm { foreign_key_center = 1, min_sub_query, top_down };
 
 class SplitAlgorithm : public LogicalOperatorVisitor {
 public:
 	explicit SplitAlgorithm(ClientContext &context) : context(context) {};
 	~SplitAlgorithm() override = default;
 	//! Perform Query Split
-	virtual std::queue<unique_ptr<LogicalOperator>> Split(unique_ptr<LogicalOperator> plan) {
-		std::queue<unique_ptr<LogicalOperator>> plan_vec;
-		plan_vec.emplace(std::move(plan));
-		return plan_vec;
+	virtual unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) {
+		return std::move(plan);
 	};
 
 protected:
 	ClientContext &context;
+	//! record the parent node to replace it to the valid child node
+	unique_ptr<LogicalOperator> parent;
 };
 
 } // namespace duckdb

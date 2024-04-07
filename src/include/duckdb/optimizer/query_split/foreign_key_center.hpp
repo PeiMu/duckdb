@@ -39,7 +39,7 @@ public:
 	    : SplitAlgorithm(context), split_algorithm(split_algorithm) {};
 	~ForeignKeyCenterSplit() override = default;
 	//! Perform Query Split
-	std::queue<unique_ptr<LogicalOperator>> Split(unique_ptr<LogicalOperator> plan) override;
+	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) override;
 
 protected:
 	void VisitOperator(LogicalOperator &op) override;
@@ -65,7 +65,7 @@ private:
 	//! In a SELECT statement these are the relations given after the FROM key word.
 	uint64_t CollectRangeTableLength(const unique_ptr<LogicalOperator> &plan);
 	//! Split parent query by foreign key
-	std::queue<unique_ptr<LogicalOperator>> Recon(unique_ptr<LogicalOperator> original_plan);
+	unique_ptr<LogicalOperator> Recon(unique_ptr<LogicalOperator> original_plan);
 	//! Check join operations to get the join relations
 	void CheckJoin(std::vector<std::pair<ColumnBinding, ColumnBinding>> &join_column_pairs, const LogicalOperator &op);
 	//! Check set operations to get the tables and columns
@@ -76,9 +76,6 @@ private:
 private:
 	//! For the current subquery, we only keep nodes related with the target_tables
 	std::unordered_map<idx_t, TableCatalogEntry *> target_tables;
-
-	//! record the parent node to replace it to the valid child node
-	unique_ptr<LogicalOperator> parent;
 
 	EnumSplitAlgorithm split_algorithm;
 };

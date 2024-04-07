@@ -10,24 +10,11 @@ unique_ptr<LogicalOperator> QuerySplit::Optimize(unique_ptr<LogicalOperator> pla
 		return plan;
 	}
 
-	EnumSplitAlgorithm split_algorithm = foreign_key_center;
+	EnumSplitAlgorithm split_algorithm = top_down;
 
 	std::unique_ptr<SplitAlgorithm> query_splitter = SplitAlgorithmFactor::CreateSplitter(context, split_algorithm);
 
-	if (subqueries.empty()) {
-		// todo: if the current result is not null, which means not the first time, then exist
-		if (false) {
-			return nullptr;
-		}
-		subqueries = query_splitter->Split(std::move(plan));
-	} else {
-		// fuse the current result with the next subquery
-	}
-
-	auto current_subquery = std::move(subqueries.front());
-	subqueries.pop();
-
-	return current_subquery;
+	return query_splitter->Split(std::move(plan));
 }
 
 } // namespace duckdb

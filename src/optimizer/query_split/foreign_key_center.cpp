@@ -2,7 +2,7 @@
 
 namespace duckdb {
 
-std::queue<unique_ptr<LogicalOperator>> ForeignKeyCenterSplit::Split(unique_ptr<LogicalOperator> plan) {
+unique_ptr<LogicalOperator> ForeignKeyCenterSplit::Split(unique_ptr<LogicalOperator> plan) {
 	// debug
 	plan->Print();
 
@@ -11,9 +11,7 @@ std::queue<unique_ptr<LogicalOperator>> ForeignKeyCenterSplit::Split(unique_ptr<
 
 	uint64_t length = CollectRangeTableLength(plan_without_redundant_jon);
 	if (length <= 2) {
-		std::queue<unique_ptr<LogicalOperator>> plan_vec;
-		plan_vec.emplace(std::move(plan));
-		return plan_vec;
+		return std::move(plan);
 	}
 
 	return Recon(std::move(plan_without_redundant_jon));
@@ -36,7 +34,7 @@ uint64_t ForeignKeyCenterSplit::CollectRangeTableLength(const unique_ptr<Logical
 	return table_index[0];
 }
 
-std::queue<unique_ptr<LogicalOperator>> ForeignKeyCenterSplit::Recon(unique_ptr<LogicalOperator> original_plan) {
+unique_ptr<LogicalOperator> ForeignKeyCenterSplit::Recon(unique_ptr<LogicalOperator> original_plan) {
 	auto op = original_plan.get();
 
 	// <join_left_column_binding, join_right_column_binding>
@@ -114,7 +112,7 @@ std::queue<unique_ptr<LogicalOperator>> ForeignKeyCenterSplit::Recon(unique_ptr<
 	}
 
 	// debug: try to generate the subqueries
-	std::queue<unique_ptr<LogicalOperator>> sub_queries;
+	std::vector<unique_ptr<LogicalOperator>> sub_queries;
 	for (const auto &ele : subquery_group) {
 		for (const auto &primary_table_idx : ele.second) {
 			target_tables.emplace(primary_table_idx, used_table_entries[primary_table_idx]);
@@ -135,10 +133,12 @@ std::queue<unique_ptr<LogicalOperator>> ForeignKeyCenterSplit::Recon(unique_ptr<
 		Printer::Print("Current subquery");
 		subquery->Print();
 
-		sub_queries.emplace(std::move(subquery));
+		sub_queries.emplace_back(std::move(subquery));
 	}
 
-	return sub_queries;
+	// todo: decide why one to execute
+
+	return std::move(sub_queries[0]);
 }
 
 void ForeignKeyCenterSplit::CheckJoin(std::vector<std::pair<ColumnBinding, ColumnBinding>> &join_column_pairs,

@@ -3,7 +3,7 @@ add_library_unity(
   OBJECT
   query_split.cpp
   foreign_key_center.cpp
-  bottom_up.cpp)
+  top_down.cpp)
 set(ALL_OBJECT_FILES
     ${ALL_OBJECT_FILES} $<TARGET_OBJECTS:duckdb_optimizer_query_split>
     PARENT_SCOPE)
