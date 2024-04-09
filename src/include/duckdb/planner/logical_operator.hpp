@@ -41,8 +41,6 @@ public:
 	idx_t estimated_cardinality;
 	bool has_estimated_cardinality;
 
-	int fuse_level = 0;
-
 public:
 	virtual vector<ColumnBinding> GetColumnBindings();
 	static vector<ColumnBinding> GenerateColumnBindings(idx_t table_idx, idx_t column_count);

@@ -275,6 +275,8 @@ private:
 	unique_ptr<ActiveQueryContext> active_query;
 	//! The current query progress
 	QueryProgress query_progress;
+
+	friend class SelectStatement;
 };
 
 class ClientContextLock {

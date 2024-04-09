@@ -10,7 +10,7 @@
 
 #include "duckdb/optimizer/query_split/split_algorithm.hpp"
 
-#include <stack>
+#include <queue>
 
 namespace duckdb {
 
@@ -27,8 +27,9 @@ protected:
 
 private:
 	bool filter_parent = false;
-	std::stack<unique_ptr<LogicalOperator>> subqueries;
-	int current_fuse_level = 0;
+	std::queue<std::vector<LogicalOperator*>> subqueries;
+	std::queue<unique_ptr<LogicalOperator>> test_subqueries;
+	unique_ptr<LogicalOperator> test_subquery;
 };
 
 } // namespace duckdb

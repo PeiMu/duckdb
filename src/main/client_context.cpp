@@ -3,9 +3,10 @@
 #include "duckdb/catalog/catalog_entry/scalar_function_catalog_entry.hpp"
 #include "duckdb/catalog/catalog_entry/table_catalog_entry.hpp"
 #include "duckdb/catalog/catalog_search_path.hpp"
+#include "duckdb/common/error_data.hpp"
+#include "duckdb/common/exception/transaction_exception.hpp"
 #include "duckdb/common/file_system.hpp"
 #include "duckdb/common/http_state.hpp"
-#include "duckdb/common/error_data.hpp"
 #include "duckdb/common/progress_bar/progress_bar.hpp"
 #include "duckdb/common/serializer/buffered_file_writer.hpp"
 #include "duckdb/common/types/column/column_data_collection.hpp"
@@ -15,6 +16,7 @@
 #include "duckdb/main/appender.hpp"
 #include "duckdb/main/attached_database.hpp"
 #include "duckdb/main/client_context_file_opener.hpp"
+#include "duckdb/main/client_context_state.hpp"
 #include "duckdb/main/client_data.hpp"
 #include "duckdb/main/database.hpp"
 #include "duckdb/main/database_manager.hpp"
@@ -39,11 +41,9 @@
 #include "duckdb/planner/operator/logical_execute.hpp"
 #include "duckdb/planner/planner.hpp"
 #include "duckdb/planner/pragma_handler.hpp"
+#include "duckdb/storage/data_table.hpp"
 #include "duckdb/transaction/meta_transaction.hpp"
 #include "duckdb/transaction/transaction_manager.hpp"
-#include "duckdb/storage/data_table.hpp"
-#include "duckdb/common/exception/transaction_exception.hpp"
-#include "duckdb/main/client_context_state.hpp"
 
 namespace duckdb {
 
@@ -325,6 +325,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		}
 	}
 
+	auto tmp_statement = statement->Copy();
+
 	planner.CreatePlan(std::move(statement));
 	D_ASSERT(planner.plan || !planner.properties.bound_all_parameters);
 	profiler.EndPhase();
@@ -336,6 +338,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	result->types = planner.types;
 	result->value_map = std::move(planner.value_map);
 	result->catalog_version = MetaTransaction::Get(*this).catalog_version;
+	result->unbound_statement = std::move(tmp_statement);
 	if (!planner.properties.bound_all_parameters) {
 		return result;
 	}
@@ -352,6 +355,24 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #ifdef DEBUG
 		plan->Verify(*this);
 #endif
+
+		if (StatementType::SELECT_STATEMENT == result->unbound_statement->type) {
+			auto &select_statemet = result->unbound_statement->Cast<SelectStatement>();
+			if (QueryNodeType::SELECT_NODE == select_statemet.node->type) {
+				auto &select_node = select_statemet.node->Cast<SelectNode>();
+				if (!select_node.select_list.empty()) {
+					auto test_expr = select_node.select_list[0]->Copy();
+					select_node.select_list.clear();
+					select_node.select_list.emplace_back(std::move(test_expr));
+					auto test_name = result->names[0];
+					result->names.clear();
+					result->names.emplace_back(test_name);
+					auto test_type = result->types[0];
+					result->types.clear();
+					result->types.emplace_back(test_type);
+				}
+			}
+		}
 	}
 
 	profiler.StartPhase("physical_planner");
@@ -640,7 +661,7 @@ unique_ptr<PreparedStatement> ClientContext::PrepareInternal(ClientContextLock &
 	auto unbound_statement = statement->Copy();
 	RunFunctionInTransactionInternal(
 	    lock, [&]() { prepared_data = CreatePreparedStatement(lock, statement_query, std::move(statement)); }, false);
-	prepared_data->unbound_statement = std::move(unbound_statement);
+	//	prepared_data->unbound_statement = std::move(unbound_statement);
 	return make_uniq<PreparedStatement>(shared_from_this(), std::move(prepared_data), std::move(statement_query),
 	                                    n_param, std::move(named_param_map));
 }
