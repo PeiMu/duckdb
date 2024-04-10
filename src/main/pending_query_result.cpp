@@ -1,4 +1,5 @@
 #include "duckdb/main/pending_query_result.hpp"
+
 #include "duckdb/main/client_context.hpp"
 #include "duckdb/main/prepared_statement_data.hpp"
 
@@ -84,6 +85,10 @@ unique_ptr<QueryResult> PendingQueryResult::ExecuteInternal(ClientContextLock &l
 unique_ptr<QueryResult> PendingQueryResult::Execute() {
 	auto lock = LockContext();
 	return ExecuteInternal(*lock);
+}
+
+unique_ptr<QueryResult> PendingQueryResult::Execute(ClientContextLock &lock) {
+	return ExecuteInternal(lock);
 }
 
 void PendingQueryResult::Close() {

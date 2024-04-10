@@ -136,6 +136,9 @@ public:
 	DUCKDB_API unique_ptr<PendingQueryResult> PendingQuery(const string &query,
 	                                                       shared_ptr<PreparedStatementData> &prepared,
 	                                                       const PendingQueryParameters &parameters);
+	DUCKDB_API unique_ptr<PendingQueryResult> PendingQuery(ClientContextLock &lock, const string &query,
+	                                                       shared_ptr<PreparedStatementData> &prepared,
+	                                                       const PendingQueryParameters &parameters);
 
 	//! Execute a prepared statement with the given name and set of parameters
 	//! It is possible that the prepared statement will be re-bound. This will generally happen if the catalog is

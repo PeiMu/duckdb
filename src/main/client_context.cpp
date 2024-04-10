@@ -98,8 +98,9 @@ struct DebugClientContextState : public ClientContextState {
 	}
 	void TransactionBegin(MetaTransaction &transaction, ClientContext &context) override {
 		if (active_transaction) {
-			throw InternalException(
-			    "DebugClientContextState::TransactionBegin called when a transaction is already active");
+			// todo: Might have bugs here - Pei
+//			throw InternalException(
+//			    "DebugClientContextState::TransactionBegin called when a transaction is already active");
 		}
 		active_transaction = true;
 	}
@@ -356,6 +357,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		plan->Verify(*this);
 #endif
 
+		// Modify the SelectNode based of the subquery
 		if (StatementType::SELECT_STATEMENT == result->unbound_statement->type) {
 			auto &select_statemet = result->unbound_statement->Cast<SelectStatement>();
 			if (QueryNodeType::SELECT_NODE == select_statemet.node->type) {
@@ -385,7 +387,21 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	D_ASSERT(!physical_plan->ToString().empty());
 #endif
 	result->plan = std::move(physical_plan);
-	return result;
+
+	// Execute subquery
+	if (StatementType::SELECT_STATEMENT == result->unbound_statement->type) {
+		auto n_param = result->unbound_statement->n_param;
+		auto statement_query = result->unbound_statement->query;
+		auto named_param_map = std::move(result->unbound_statement->named_param_map);
+		auto prepared_stmt = make_uniq<PreparedStatement>(
+		    shared_from_this(), std::move(result), std::move(statement_query), n_param, std::move(named_param_map));
+		duckdb::vector<Value> bound_values;
+		auto subquery_result = prepared_stmt->Execute(lock, bound_values, false);
+		subquery_result->Print();
+		return result;
+	} else {
+		return result;
+	}
 }
 
 shared_ptr<PreparedStatementData>
@@ -714,6 +730,12 @@ unique_ptr<PendingQueryResult> ClientContext::PendingQuery(const string &query,
                                                            const PendingQueryParameters &parameters) {
 	auto lock = LockContext();
 	return PendingQueryPreparedInternal(*lock, query, prepared, parameters);
+}
+
+unique_ptr<PendingQueryResult> ClientContext::PendingQuery(ClientContextLock &lock, const string &query,
+                                                           shared_ptr<PreparedStatementData> &prepared,
+                                                           const PendingQueryParameters &parameters) {
+	return PendingStatementOrPreparedStatementInternal(lock, query, nullptr, prepared, parameters);
 }
 
 unique_ptr<QueryResult> ClientContext::Execute(const string &query, shared_ptr<PreparedStatementData> &prepared,

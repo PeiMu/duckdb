@@ -44,6 +44,7 @@ public:
 	//! Returns the result of the query as an actual query result.
 	//! This returns (mostly) instantly if ExecuteTask has been called until RESULT_READY was returned.
 	DUCKDB_API unique_ptr<QueryResult> Execute();
+	DUCKDB_API unique_ptr<QueryResult> Execute(ClientContextLock &lock);
 
 	DUCKDB_API void Close();
 
