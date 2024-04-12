@@ -99,8 +99,8 @@ struct DebugClientContextState : public ClientContextState {
 	void TransactionBegin(MetaTransaction &transaction, ClientContext &context) override {
 		if (active_transaction) {
 			// todo: Might have bugs here - Pei
-//			throw InternalException(
-//			    "DebugClientContextState::TransactionBegin called when a transaction is already active");
+			// throw InternalException(
+			// "DebugClientContextState::TransactionBegin called when a transaction is already active");
 		}
 		active_transaction = true;
 	}
@@ -346,35 +346,73 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #ifdef DEBUG
 	plan->Verify(*this);
 #endif
+
+	Optimizer optimizer(*planner.binder, *this);
+
+	bool subquery_loop = true;
 	if (config.enable_optimizer && plan->RequireOptimizer()) {
 		profiler.StartPhase("optimizer");
-		Optimizer optimizer(*planner.binder, *this);
-		plan = optimizer.Optimize(std::move(plan));
-		D_ASSERT(plan);
+		while (subquery_loop) {
+			plan = optimizer.PreOptimize(std::move(plan), subquery_loop);
+			D_ASSERT(plan);
+			// break the while loop if it cannot be splitted
+			if (!subquery_loop)
+				break;
+
+			// Modify the SelectNode based of the subquery
+			auto &select_statemet = result->unbound_statement->Cast<SelectStatement>();
+			D_ASSERT(QueryNodeType::SELECT_NODE == select_statemet.node->type);
+			auto &select_node = select_statemet.node->Cast<SelectNode>();
+			if (!select_node.select_list.empty()) {
+				// todo: add necessary expressions to match the select node
+				auto test_expr = select_node.select_list[0]->Copy();
+				select_node.select_list.clear();
+				select_node.select_list.emplace_back(std::move(test_expr));
+				auto test_name = result->names[0];
+				result->names.clear();
+				result->names.emplace_back(test_name);
+				auto test_type = result->types[0];
+				result->types.clear();
+				result->types.emplace_back(test_type);
+			}
+#ifdef DEBUG
+			plan->Verify(*this);
+#endif
+			// generate physical plan of the subquery
+			PhysicalPlanGenerator physical_planner(*this);
+			auto physical_plan = physical_planner.CreatePlan(std::move(plan));
+
+#ifdef DEBUG
+			D_ASSERT(!physical_plan->ToString().empty());
+#endif
+			result->plan = std::move(physical_plan);
+
+			// Execute subquery
+			auto n_param = result->unbound_statement->n_param;
+			auto statement_query = result->unbound_statement->query;
+			auto named_param_map = std::move(result->unbound_statement->named_param_map);
+			auto prepared_stmt = make_uniq<PreparedStatement>(
+			    shared_from_this(), std::move(result), std::move(statement_query), n_param, std::move(named_param_map));
+			duckdb::vector<Value> bound_values;
+			unique_ptr<QueryResult> subquery_result = prepared_stmt->Execute(lock, bound_values, false);
+#ifdef DEBUG
+			subquery_result->Print();
+#endif
+			unique_ptr<DataChunk> data_trunk;
+			ErrorData error_data;
+			D_ASSERT(subquery_result->TryFetch(data_trunk, error_data));
+#ifdef DEBUG
+			data_trunk->Print();
+#endif
+			// todo: create a new table based on the subquery result
+		}
+
+		plan = optimizer.PostOptimize(std::move(plan));
 		profiler.EndPhase();
 
 #ifdef DEBUG
 		plan->Verify(*this);
 #endif
-
-		// Modify the SelectNode based of the subquery
-		if (StatementType::SELECT_STATEMENT == result->unbound_statement->type) {
-			auto &select_statemet = result->unbound_statement->Cast<SelectStatement>();
-			if (QueryNodeType::SELECT_NODE == select_statemet.node->type) {
-				auto &select_node = select_statemet.node->Cast<SelectNode>();
-				if (!select_node.select_list.empty()) {
-					auto test_expr = select_node.select_list[0]->Copy();
-					select_node.select_list.clear();
-					select_node.select_list.emplace_back(std::move(test_expr));
-					auto test_name = result->names[0];
-					result->names.clear();
-					result->names.emplace_back(test_name);
-					auto test_type = result->types[0];
-					result->types.clear();
-					result->types.emplace_back(test_type);
-				}
-			}
-		}
 	}
 
 	profiler.StartPhase("physical_planner");
@@ -388,20 +426,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 	result->plan = std::move(physical_plan);
 
-	// Execute subquery
-	if (StatementType::SELECT_STATEMENT == result->unbound_statement->type) {
-		auto n_param = result->unbound_statement->n_param;
-		auto statement_query = result->unbound_statement->query;
-		auto named_param_map = std::move(result->unbound_statement->named_param_map);
-		auto prepared_stmt = make_uniq<PreparedStatement>(
-		    shared_from_this(), std::move(result), std::move(statement_query), n_param, std::move(named_param_map));
-		duckdb::vector<Value> bound_values;
-		auto subquery_result = prepared_stmt->Execute(lock, bound_values, false);
-		subquery_result->Print();
-		return result;
-	} else {
-		return result;
-	}
+	return result;
 }
 
 shared_ptr<PreparedStatementData>

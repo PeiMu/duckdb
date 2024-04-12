@@ -26,7 +26,7 @@ public:
 	explicit SplitAlgorithm(ClientContext &context) : context(context) {};
 	~SplitAlgorithm() override = default;
 	//! Perform Query Split
-	virtual unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) {
+	virtual unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan, bool &subquery_loop) {
 		return std::move(plan);
 	};
 

@@ -17,7 +17,7 @@ public:
 	explicit QuerySplit(ClientContext &context) : context(context) {};
 	~QuerySplit() = default;
 	//! Perform Query Split
-	unique_ptr<LogicalOperator> Optimize(unique_ptr<LogicalOperator> plan);
+	unique_ptr<LogicalOperator> Optimize(unique_ptr<LogicalOperator> plan, bool &subquery_loop);
 
 private:
 	ClientContext &context;

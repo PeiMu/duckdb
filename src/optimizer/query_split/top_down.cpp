@@ -2,7 +2,7 @@
 
 namespace duckdb {
 
-unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan) {
+unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan, bool &subquery_loop) {
 #ifdef DEBUG
 	// debug
 	plan->Print();
@@ -22,6 +22,7 @@ unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan
 	}
 	unique_ptr<LogicalOperator> subquery = subqueries.front()[0]->Copy(context);
 	subqueries.pop();
+	subquery_loop = subqueries.size() != 1;
 #ifdef DEBUG
 	// debug: print subquery
 	Printer::Print("Current subquery");

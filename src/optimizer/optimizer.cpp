@@ -78,7 +78,16 @@ void Optimizer::Verify(LogicalOperator &op) {
 }
 
 unique_ptr<LogicalOperator> Optimizer::Optimize(unique_ptr<LogicalOperator> plan_p) {
+	bool subquery_loop = false;
+	auto pre_opt_plan = PreOptimize(std::move(plan_p), subquery_loop);
+	auto post_opt_plan = PostOptimize(std::move(pre_opt_plan));
+
+	return post_opt_plan;
+}
+
+unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> plan_p, bool &subquery_loop) {
 	Verify(*plan_p);
+	subquery_loop = false;
 
 	switch (plan_p->type) {
 	case LogicalOperatorType::LOGICAL_TRANSACTION:
@@ -123,9 +132,25 @@ unique_ptr<LogicalOperator> Optimizer::Optimize(unique_ptr<LogicalOperator> plan
 	// apply query split algorithm
 	RunOptimizer(OptimizerType::QUERY_SPLIT, [&]() {
 		QuerySplit query_spliter(context);
-		plan = query_spliter.Optimize(std::move(plan));
+		plan = query_spliter.Optimize(std::move(plan), subquery_loop);
 	});
 
+	Planner::VerifyPlan(context, plan);
+
+	return std::move(plan);
+}
+
+unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> plan_p) {
+	Verify(*plan_p);
+
+	switch (plan_p->type) {
+	case LogicalOperatorType::LOGICAL_TRANSACTION:
+		return plan_p; // skip optimizing simple & often-occurring plans unaffected by rewrites
+	default:
+		break;
+	}
+
+	this->plan = std::move(plan_p);
 	// then we perform the join ordering optimization
 	// this also rewrites cross products + filters into joins and performs filter pushdowns
 	RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {
