@@ -365,15 +365,20 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			auto &select_node = select_statemet.node->Cast<SelectNode>();
 			if (!select_node.select_list.empty()) {
 				// todo: add necessary expressions to match the select node
-				auto test_expr = select_node.select_list[0]->Copy();
 				select_node.select_list.clear();
-				select_node.select_list.emplace_back(std::move(test_expr));
-				auto test_name = result->names[0];
 				result->names.clear();
-				result->names.emplace_back(test_name);
-				auto test_type = result->types[0];
 				result->types.clear();
-				result->types.emplace_back(test_type);
+				for (const auto &proj_expr : plan->expressions) {
+					if (ExpressionType::BOUND_COLUMN_REF == proj_expr->type) {
+						unique_ptr<ColumnRefExpression> new_select_expr =
+						    make_uniq<ColumnRefExpression>(proj_expr->alias);
+						select_node.select_list.emplace_back(std::move(new_select_expr));
+						auto new_name = proj_expr->alias;
+						result->names.emplace_back(new_name);
+						auto new_type = proj_expr->return_type;
+						result->types.emplace_back(new_type);
+					}
+				}
 			}
 #ifdef DEBUG
 			plan->Verify(*this);
