@@ -59,7 +59,7 @@ private:
 
 private:
 	bool filter_parent = false;
-	std::queue<std::vector<LogicalOperator *>> subqueries;
+	std::queue<std::vector<unique_ptr<LogicalOperator>>> subqueries;
 	std::stack<std::unordered_set<TableExpr, TableExprHash>> table_expr_stack;
 	// table index, table entry
 	std::unordered_map<idx_t, LogicalGet *> target_tables;

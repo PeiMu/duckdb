@@ -3,34 +3,40 @@
 namespace duckdb {
 
 unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan, bool &subquery_loop) {
-#ifdef DEBUG
-	// debug
-	plan->Print();
-#endif
-
-	auto new_plan = plan->Copy(context);
 	// for the first n-1 subqueries, only select the most related nodes/expressions
 	// for the last subquery, merge the previous subqueries
 	if (subqueries.empty()) {
+#ifdef DEBUG
+		// debug
+		plan->Print();
+#endif
 		GetTargetTables(*plan);
 		VisitOperator(*plan);
+
+
 	} else {
 		// todo: fuse the current subquery with the last result
+		auto keyword_table = target_tables.at(0);
+		auto &param = keyword_table->parameters;
+		auto &bind_data = keyword_table->bind_data;
 	}
 
 	if (subqueries.front().size() > 1) {
 		// todo: execute in parallel
 	}
-	unique_ptr<LogicalOperator> subquery = subqueries.front()[0]->Copy(context);
+	unique_ptr<LogicalOperator> subquery = std::move(subqueries.front()[0]);
 	subqueries.pop();
-	subquery_loop = subqueries.size() != 1;
+	if (1 == subqueries.size()) {
+		subquery_loop = false;
+	} else {
+		subquery_loop = true;
+	}
 #ifdef DEBUG
 	// debug: print subquery
 	Printer::Print("Current subquery");
 	subquery->Print();
 #endif
 
-	auto &proj_op = new_plan->Cast<LogicalProjection>();
 	vector<unique_ptr<Expression>> new_exprs;
 	auto expr_idx_pair = table_expr_stack.top();
 	table_expr_stack.pop();
@@ -59,21 +65,21 @@ unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan
 		new_exprs.emplace_back(std::move(col_ref_select_expr));
 	}
 
-	proj_op.children.clear();
-	proj_op.AddChild(std::move(subquery));
-	proj_op.expressions.clear();
-	proj_op.expressions = std::move(new_exprs);
+	plan->children.clear();
+	plan->AddChild(std::move(subquery));
+	plan->expressions.clear();
+	plan->expressions = std::move(new_exprs);
 
 #ifdef DEBUG
 	// debug: print subquery
 	Printer::Print("Current subquery with projection");
-	new_plan->Print();
+	plan->Print();
 #endif
-	return new_plan;
+	return plan;
 }
 
 void TopDownSplit::VisitOperator(LogicalOperator &op) {
-	std::vector<LogicalOperator *> same_level_subqueries;
+	std::vector<unique_ptr<LogicalOperator>> same_level_subqueries;
 
 	// todo: collect table_expr_stack from projection node
 	// if (op.type == LogicalOperatorType::LOGICAL_PROJECTION)
@@ -88,7 +94,7 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 		case LogicalOperatorType::LOGICAL_FILTER:
 			// check if it's a filter node, otherwise set false
 			filter_parent = true;
-			same_level_subqueries.emplace_back(child.get());
+			same_level_subqueries.emplace_back(child->Copy(context));
 			// todo: do we need to add filter's column usage?
 			// GetFilterTableExpr(child->Cast<LogicalFilter>());
 			break;
@@ -97,7 +103,7 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 			if (filter_parent) {
 				filter_parent = false;
 			} else {
-				same_level_subqueries.emplace_back(child.get());
+				same_level_subqueries.emplace_back(child->Copy(context));
 			}
 			break;
 		default:
@@ -109,7 +115,7 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 
 	D_ASSERT(same_level_subqueries.size() <= 2);
 	if (!same_level_subqueries.empty()) {
-		subqueries.emplace(same_level_subqueries);
+		subqueries.emplace(std::move(same_level_subqueries));
 	}
 }
 

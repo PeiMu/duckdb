@@ -10,9 +10,10 @@ unique_ptr<LogicalOperator> QuerySplit::Optimize(unique_ptr<LogicalOperator> pla
 		return plan;
 	}
 
+	// todo: move it to the constructor
 	EnumSplitAlgorithm split_algorithm = top_down;
-
-	std::unique_ptr<SplitAlgorithm> query_splitter = SplitAlgorithmFactor::CreateSplitter(context, split_algorithm);
+	if (nullptr == query_splitter)
+		query_splitter = SplitAlgorithmFactor::CreateSplitter(context, split_algorithm);
 
 	return query_splitter->Split(std::move(plan), subquery_loop);
 }

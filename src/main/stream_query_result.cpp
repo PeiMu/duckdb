@@ -52,7 +52,7 @@ unique_ptr<DataChunk> StreamQueryResult::FetchInternal(ClientContextLock &lock) 
 		}
 		chunk = buffered_data->Scan();
 		if (!chunk || chunk->ColumnCount() == 0 || chunk->size() == 0) {
-			context->CleanupInternal(lock, this);
+			context->CleanupInternal(lock, this, false, false);
 			chunk = nullptr;
 		}
 		return chunk;
@@ -74,7 +74,7 @@ unique_ptr<DataChunk> StreamQueryResult::FetchInternal(ClientContextLock &lock) 
 	} catch (...) { // LCOV_EXCL_START
 		SetError(ErrorData("Unhandled exception in FetchInternal"));
 	} // LCOV_EXCL_STOP
-	context->CleanupInternal(lock, this, invalidate_query);
+	context->CleanupInternal(lock, this, invalidate_query, false);
 	return nullptr;
 }
 

@@ -27,6 +27,7 @@
 #include "duckdb/main/relation.hpp"
 #include "duckdb/main/stream_query_result.hpp"
 #include "duckdb/optimizer/optimizer.hpp"
+#include "duckdb/optimizer/query_split/query_split.hpp"
 #include "duckdb/parser/expression/constant_expression.hpp"
 #include "duckdb/parser/expression/parameter_expression.hpp"
 #include "duckdb/parser/parsed_data/create_function_info.hpp"
@@ -203,7 +204,8 @@ void ClientContext::BeginQueryInternal(ClientContextLock &lock, const string &qu
 	}
 }
 
-ErrorData ClientContext::EndQueryInternal(ClientContextLock &lock, bool success, bool invalidate_transaction) {
+ErrorData ClientContext::EndQueryInternal(ClientContextLock &lock, bool success, bool invalidate_transaction,
+                                          bool continue_exec) {
 	client_data->profiler->EndQuery();
 
 	if (active_query->executor) {
@@ -219,6 +221,9 @@ ErrorData ClientContext::EndQueryInternal(ClientContextLock &lock, bool success,
 	active_query.reset();
 	query_progress.Initialize();
 	ErrorData error;
+	if (continue_exec)
+		return error;
+
 	try {
 		if (transaction.HasActiveTransaction()) {
 			transaction.ResetActiveQuery();
@@ -245,7 +250,8 @@ ErrorData ClientContext::EndQueryInternal(ClientContextLock &lock, bool success,
 	return error;
 }
 
-void ClientContext::CleanupInternal(ClientContextLock &lock, BaseQueryResult *result, bool invalidate_transaction) {
+void ClientContext::CleanupInternal(ClientContextLock &lock, BaseQueryResult *result, bool invalidate_transaction,
+                                    bool continue_exec) {
 	if (!active_query) {
 		// no query currently active
 		return;
@@ -259,7 +265,7 @@ void ClientContext::CleanupInternal(ClientContextLock &lock, BaseQueryResult *re
 	auto &scheduler = TaskScheduler::GetScheduler(*this);
 	scheduler.RelaunchThreads();
 
-	auto error = EndQueryInternal(lock, result ? !result->HasError() : false, invalidate_transaction);
+	auto error = EndQueryInternal(lock, result ? !result->HasError() : false, invalidate_transaction, continue_exec);
 	if (result && !result->HasError()) {
 		// if an error occurred while committing report it in the result
 		result->SetError(error);
@@ -278,7 +284,8 @@ const string &ClientContext::GetCurrentQuery() {
 	return active_query->query;
 }
 
-unique_ptr<QueryResult> ClientContext::FetchResultInternal(ClientContextLock &lock, PendingQueryResult &pending) {
+unique_ptr<QueryResult> ClientContext::FetchResultInternal(ClientContextLock &lock, PendingQueryResult &pending,
+                                                           bool continue_exec) {
 	D_ASSERT(active_query);
 	D_ASSERT(active_query->IsOpenResult(pending));
 	D_ASSERT(active_query->prepared);
@@ -290,7 +297,7 @@ unique_ptr<QueryResult> ClientContext::FetchResultInternal(ClientContextLock &lo
 	// we have a result collector - fetch the result directly from the result collector
 	result = executor.GetResult();
 	if (!create_stream_result) {
-		CleanupInternal(lock, result.get(), false);
+		CleanupInternal(lock, result.get(), false, continue_exec);
 	} else {
 		active_query->SetOpenResult(*result);
 	}
@@ -352,31 +359,47 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	bool subquery_loop = true;
 	if (config.enable_optimizer && plan->RequireOptimizer()) {
 		profiler.StartPhase("optimizer");
+		plan = optimizer.PreOptimize(std::move(plan));
+		D_ASSERT(plan);
+		auto temp_sub_plan = plan->Copy(optimizer.context);
+
+		QuerySplit query_splitter(optimizer.context);
 		while (subquery_loop) {
-			plan = optimizer.PreOptimize(std::move(plan), subquery_loop);
-			D_ASSERT(plan);
-			// break the while loop if it cannot be splitted
-			if (!subquery_loop)
+			if (LogicalOperatorType::LOGICAL_TRANSACTION == plan->type) {
 				break;
+			}
+			plan = query_splitter.Optimize(std::move(plan), subquery_loop);
+			Planner::VerifyPlan(optimizer.context, plan);
+
+			auto subquery_stmt = make_shared<PreparedStatementData>(statement_type);
+			// copy from `result`
+			subquery_stmt->properties = result->properties;
+			subquery_stmt->names = result->names;
+			subquery_stmt->types = result->types;
+			for (const auto &v : result->value_map) {
+				// todo: may have bugs here, can we just copy or need `std::move`?
+				subquery_stmt->value_map.at(v.first) = v.second;
+			}
+			subquery_stmt->catalog_version = result->catalog_version;
+			subquery_stmt->unbound_statement = result->unbound_statement->Copy();
 
 			// Modify the SelectNode based of the subquery
-			auto &select_statemet = result->unbound_statement->Cast<SelectStatement>();
+			auto &select_statemet = subquery_stmt->unbound_statement->Cast<SelectStatement>();
 			D_ASSERT(QueryNodeType::SELECT_NODE == select_statemet.node->type);
 			auto &select_node = select_statemet.node->Cast<SelectNode>();
 			if (!select_node.select_list.empty()) {
-				// todo: add necessary expressions to match the select node
 				select_node.select_list.clear();
-				result->names.clear();
-				result->types.clear();
+				subquery_stmt->names.clear();
+				subquery_stmt->types.clear();
 				for (const auto &proj_expr : plan->expressions) {
 					if (ExpressionType::BOUND_COLUMN_REF == proj_expr->type) {
 						unique_ptr<ColumnRefExpression> new_select_expr =
 						    make_uniq<ColumnRefExpression>(proj_expr->alias);
 						select_node.select_list.emplace_back(std::move(new_select_expr));
 						auto new_name = proj_expr->alias;
-						result->names.emplace_back(new_name);
+						subquery_stmt->names.emplace_back(new_name);
 						auto new_type = proj_expr->return_type;
-						result->types.emplace_back(new_type);
+						subquery_stmt->types.emplace_back(new_type);
 					}
 				}
 			}
@@ -390,14 +413,17 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #ifdef DEBUG
 			D_ASSERT(!physical_plan->ToString().empty());
 #endif
-			result->plan = std::move(physical_plan);
+			subquery_stmt->plan = std::move(physical_plan);
+
+			plan = temp_sub_plan->Copy(optimizer.context);
 
 			// Execute subquery
-			auto n_param = result->unbound_statement->n_param;
-			auto statement_query = result->unbound_statement->query;
-			auto named_param_map = std::move(result->unbound_statement->named_param_map);
-			auto prepared_stmt = make_uniq<PreparedStatement>(
-			    shared_from_this(), std::move(result), std::move(statement_query), n_param, std::move(named_param_map));
+			auto n_param = subquery_stmt->unbound_statement->n_param;
+			auto statement_query = subquery_stmt->unbound_statement->query;
+			auto named_param_map = std::move(subquery_stmt->unbound_statement->named_param_map);
+			auto prepared_stmt =
+			    make_uniq<PreparedStatement>(shared_from_this(), std::move(subquery_stmt), std::move(statement_query),
+			                                 n_param, std::move(named_param_map));
 			duckdb::vector<Value> bound_values;
 			unique_ptr<QueryResult> subquery_result = prepared_stmt->Execute(lock, bound_values, false);
 #ifdef DEBUG
@@ -410,6 +436,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			data_trunk->Print();
 #endif
 			// todo: create a new table based on the subquery result
+			auto value = data_trunk->GetValue(1, 1);
+			auto &data = data_trunk->data;
 		}
 
 		plan = optimizer.PostOptimize(std::move(plan));

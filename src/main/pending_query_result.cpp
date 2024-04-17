@@ -64,7 +64,7 @@ PendingExecutionResult PendingQueryResult::ExecuteTaskInternal(ClientContextLock
 	return context->ExecuteTaskInternal(lock, *this, false);
 }
 
-unique_ptr<QueryResult> PendingQueryResult::ExecuteInternal(ClientContextLock &lock) {
+unique_ptr<QueryResult> PendingQueryResult::ExecuteInternal(ClientContextLock &lock, bool continue_exec) {
 	CheckExecutableInternal(lock);
 	// Busy wait while execution is not finished
 	if (allow_stream_result) {
@@ -77,8 +77,9 @@ unique_ptr<QueryResult> PendingQueryResult::ExecuteInternal(ClientContextLock &l
 	if (HasError()) {
 		return make_uniq<MaterializedQueryResult>(error);
 	}
-	auto result = context->FetchResultInternal(lock, *this);
-	Close();
+	auto result = context->FetchResultInternal(lock, *this, continue_exec);
+	if (!continue_exec)
+		Close();
 	return result;
 }
 
@@ -88,7 +89,7 @@ unique_ptr<QueryResult> PendingQueryResult::Execute() {
 }
 
 unique_ptr<QueryResult> PendingQueryResult::Execute(ClientContextLock &lock) {
-	return ExecuteInternal(lock);
+	return ExecuteInternal(lock, true);
 }
 
 void PendingQueryResult::Close() {

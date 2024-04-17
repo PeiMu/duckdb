@@ -22,6 +22,7 @@ public:
 private:
 	ClientContext &context;
 	std::queue<unique_ptr<LogicalOperator>> subqueries;
+	std::unique_ptr<SplitAlgorithm> query_splitter;
 };
 
 } // namespace duckdb
