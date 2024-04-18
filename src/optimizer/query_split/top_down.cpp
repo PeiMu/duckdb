@@ -69,6 +69,7 @@ unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan
 		};
 		get_insert_point_test(*subquery);
 		subquery->Print();
+		// todo: update statistics?
 	}
 
 #ifdef DEBUG

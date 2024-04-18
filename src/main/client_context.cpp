@@ -371,6 +371,12 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				break;
 			}
 			plan = query_splitter.Optimize(std::move(plan), std::move(data_trunk), subquery_loop);
+			plan = optimizer.PostOptimize(std::move(plan));
+#ifdef DEBUG
+			// debug: print subquery
+			Printer::Print("After PostOptimization");
+			plan->Print();
+#endif
 			Planner::VerifyPlan(optimizer.context, plan);
 
 			auto subquery_stmt = make_shared<PreparedStatementData>(statement_type);
@@ -428,9 +434,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			                                 n_param, std::move(named_param_map));
 			duckdb::vector<Value> bound_values;
 			unique_ptr<QueryResult> subquery_result = prepared_stmt->Execute(lock, bound_values, false);
-#ifdef DEBUG
-			subquery_result->Print();
-#endif
 			ErrorData error_data;
 			D_ASSERT(subquery_result->TryFetch(data_trunk, error_data));
 #ifdef DEBUG
