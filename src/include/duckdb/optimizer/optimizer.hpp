@@ -28,7 +28,6 @@ public:
 	unique_ptr<LogicalOperator> PreOptimize(unique_ptr<LogicalOperator> plan_p);
 	//! Optimize a plan by running specialized optimizers after join order optimization
 	unique_ptr<LogicalOperator> PostOptimize(unique_ptr<LogicalOperator> plan);
-	unique_ptr<LogicalOperator> QuerySplitLoop(unique_ptr<LogicalOperator> plan, bool &subquery_loop);
 	//! Return a reference to the client context of this optimizer
 	ClientContext &GetContext();
 

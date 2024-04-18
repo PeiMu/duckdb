@@ -2,7 +2,8 @@
 
 namespace duckdb {
 
-unique_ptr<LogicalOperator> QuerySplit::Optimize(unique_ptr<LogicalOperator> plan, bool &subquery_loop) {
+unique_ptr<LogicalOperator> QuerySplit::Optimize(unique_ptr<LogicalOperator> plan,
+                                                 unique_ptr<DataChunk> previous_result, bool &subquery_loop) {
 	// remove redundant joins if the current query is not a CMD_UTILITY
 	// todo: check if the current query is a CMD_UTILITY
 	if (LogicalOperatorType::LOGICAL_PROJECTION != plan->type && LogicalOperatorType::LOGICAL_ORDER_BY != plan->type &&
@@ -15,7 +16,7 @@ unique_ptr<LogicalOperator> QuerySplit::Optimize(unique_ptr<LogicalOperator> pla
 	if (nullptr == query_splitter)
 		query_splitter = SplitAlgorithmFactor::CreateSplitter(context, split_algorithm);
 
-	return query_splitter->Split(std::move(plan), subquery_loop);
+	return query_splitter->Split(std::move(plan), std::move(previous_result), subquery_loop);
 }
 
 } // namespace duckdb

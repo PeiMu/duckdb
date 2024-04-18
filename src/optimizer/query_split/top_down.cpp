@@ -2,9 +2,11 @@
 
 namespace duckdb {
 
-unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan, bool &subquery_loop) {
+unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan, unique_ptr<DataChunk> previous_result,
+                                                bool &subquery_loop) {
 	// for the first n-1 subqueries, only select the most related nodes/expressions
 	// for the last subquery, merge the previous subqueries
+	unique_ptr<LogicalOperator> subquery;
 	if (subqueries.empty()) {
 #ifdef DEBUG
 		// debug
@@ -13,24 +15,62 @@ unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan
 		GetTargetTables(*plan);
 		VisitOperator(*plan);
 
+		if (subqueries.front().size() > 1) {
+			// todo: execute in parallel
+		}
+		subquery = std::move(subqueries.front()[0]);
+		subqueries.pop();
+		if (0 == subqueries.size()) {
+			subquery_loop = false;
+		} else {
+			subquery_loop = true;
+		}
 
 	} else {
-		// todo: fuse the current subquery with the last result
-		auto keyword_table = target_tables.at(0);
-		auto &param = keyword_table->parameters;
-		auto &bind_data = keyword_table->bind_data;
+		if (subqueries.front().size() > 1) {
+			// todo: execute in parallel
+		}
+		subquery = std::move(subqueries.front()[0]);
+		subqueries.pop();
+		if (0 == subqueries.size()) {
+			subquery_loop = false;
+		} else {
+			subquery_loop = true;
+		}
+
+		// todo: reorder the chunks with the column_ids
+		DataChunk test_data_chunk;
+		previous_result->Split(test_data_chunk, 1);
+		test_data_chunk.Fuse(*previous_result);
+		// todo: get types
+		vector<LogicalType> types {LogicalType::VARCHAR, LogicalType::INTEGER};
+		auto collection = make_uniq<ColumnDataCollection>(context, types);
+		collection->Append(test_data_chunk);
+		// todo: get table index
+		idx_t table_idx = 1;
+
+		auto chunk_scan = make_uniq<LogicalColumnDataGet>(table_idx, types, std::move(collection));
+		chunk_scan->Print();
+		// todo: find the insert point and insert the `ColumnDataGet` node to the logical plan
+		std::function<void(LogicalOperator & op)> get_insert_point_test;
+		get_insert_point_test = [&chunk_scan, &get_insert_point_test](LogicalOperator &op) {
+			for (auto child_it = op.children.begin(); child_it != op.children.end(); child_it++) {
+				if (LogicalOperatorType::LOGICAL_FILTER == (*child_it)->type) {
+					op.children.erase(child_it);
+					op.children.emplace_back(std::move(chunk_scan));
+					return;
+				} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == (*child_it)->type) {
+					auto &join_op = (*child_it)->Cast<LogicalComparisonJoin>();
+
+				} else {
+					get_insert_point_test(*(*child_it));
+				}
+			}
+		};
+		get_insert_point_test(*subquery);
+		subquery->Print();
 	}
 
-	if (subqueries.front().size() > 1) {
-		// todo: execute in parallel
-	}
-	unique_ptr<LogicalOperator> subquery = std::move(subqueries.front()[0]);
-	subqueries.pop();
-	if (1 == subqueries.size()) {
-		subquery_loop = false;
-	} else {
-		subquery_loop = true;
-	}
 #ifdef DEBUG
 	// debug: print subquery
 	Printer::Print("Current subquery");

@@ -39,7 +39,8 @@ public:
 	explicit TopDownSplit(ClientContext &context) : SplitAlgorithm(context) {};
 	~TopDownSplit() override = default;
 	//! Perform Query Split
-	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan, bool &subquery_loop) override;
+	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan, unique_ptr<DataChunk> previous_result,
+	                                  bool &subquery_loop) override;
 
 protected:
 	//! Extract the subquery in the top-down order, and insert

@@ -356,19 +356,21 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 	Optimizer optimizer(*planner.binder, *this);
 
-	bool subquery_loop = true;
 	if (config.enable_optimizer && plan->RequireOptimizer()) {
 		profiler.StartPhase("optimizer");
 		plan = optimizer.PreOptimize(std::move(plan));
 		D_ASSERT(plan);
-		auto temp_sub_plan = plan->Copy(optimizer.context);
 
+		// execute subqueries
+		auto temp_sub_plan = plan->Copy(optimizer.context);
+		bool subquery_loop = true;
+		unique_ptr<DataChunk> data_trunk;
 		QuerySplit query_splitter(optimizer.context);
 		while (subquery_loop) {
 			if (LogicalOperatorType::LOGICAL_TRANSACTION == plan->type) {
 				break;
 			}
-			plan = query_splitter.Optimize(std::move(plan), subquery_loop);
+			plan = query_splitter.Optimize(std::move(plan), std::move(data_trunk), subquery_loop);
 			Planner::VerifyPlan(optimizer.context, plan);
 
 			auto subquery_stmt = make_shared<PreparedStatementData>(statement_type);
@@ -429,15 +431,11 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #ifdef DEBUG
 			subquery_result->Print();
 #endif
-			unique_ptr<DataChunk> data_trunk;
 			ErrorData error_data;
 			D_ASSERT(subquery_result->TryFetch(data_trunk, error_data));
 #ifdef DEBUG
 			data_trunk->Print();
 #endif
-			// todo: create a new table based on the subquery result
-			auto value = data_trunk->GetValue(1, 1);
-			auto &data = data_trunk->data;
 		}
 
 		plan = optimizer.PostOptimize(std::move(plan));

@@ -9,6 +9,7 @@
 #pragma once
 
 #include "duckdb/common/enums/logical_operator_type.hpp"
+#include "duckdb/common/types/data_chunk.hpp"
 #include "duckdb/planner/logical_operator.hpp"
 #include "duckdb/planner/logical_operator_visitor.hpp"
 
@@ -26,7 +27,8 @@ public:
 	explicit SplitAlgorithm(ClientContext &context) : context(context) {};
 	~SplitAlgorithm() override = default;
 	//! Perform Query Split
-	virtual unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan, bool &subquery_loop) {
+	virtual unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan, unique_ptr<DataChunk> previous_result,
+	                                          bool &subquery_loop) {
 		return std::move(plan);
 	};
 

@@ -2,7 +2,8 @@
 
 namespace duckdb {
 
-unique_ptr<LogicalOperator> ForeignKeyCenterSplit::Split(unique_ptr<LogicalOperator> plan, bool &subquery_loop) {
+unique_ptr<LogicalOperator> ForeignKeyCenterSplit::Split(unique_ptr<LogicalOperator> plan,
+                                                         unique_ptr<DataChunk> previous_result, bool &subquery_loop) {
 	// debug
 	plan->Print();
 

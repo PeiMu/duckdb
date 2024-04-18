@@ -229,26 +229,4 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 	return std::move(plan);
 }
 
-unique_ptr<LogicalOperator> Optimizer::QuerySplitLoop(unique_ptr<LogicalOperator> plan_p, bool &subquery_loop) {
-	Verify(*plan_p);
-
-	switch (plan_p->type) {
-	case LogicalOperatorType::LOGICAL_TRANSACTION:
-		subquery_loop = false;
-		return plan_p; // skip optimizing simple & often-occurring plans unaffected by rewrites
-	default:
-		break;
-	}
-
-	this->plan = std::move(plan_p);
-	// apply query split algorithm
-	RunOptimizer(OptimizerType::QUERY_SPLIT, [&]() {
-		QuerySplit query_splitter(context);
-		plan = query_splitter.Optimize(std::move(plan), subquery_loop);
-	});
-
-	Planner::VerifyPlan(context, plan);
-	return std::move(plan);
-}
-
 } // namespace duckdb
