@@ -28,6 +28,7 @@
 #include "duckdb/main/stream_query_result.hpp"
 #include "duckdb/optimizer/optimizer.hpp"
 #include "duckdb/optimizer/query_split/query_split.hpp"
+#include "duckdb/optimizer/query_split/subquery_preparer.hpp"
 #include "duckdb/parser/expression/constant_expression.hpp"
 #include "duckdb/parser/expression/parameter_expression.hpp"
 #include "duckdb/parser/parsed_data/create_function_info.hpp"
@@ -362,68 +363,42 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		D_ASSERT(plan);
 
 		// execute subqueries
-		auto temp_sub_plan = plan->Copy(optimizer.context);
-		bool subquery_loop = true;
 		unique_ptr<DataChunk> data_trunk;
-		QuerySplit query_splitter(optimizer.context);
-		while (subquery_loop) {
-			if (LogicalOperatorType::LOGICAL_TRANSACTION == plan->type) {
-				break;
+		QuerySplit query_splitter(*this);
+		plan = query_splitter.Split(std::move(plan));
+		SubqueryPreparer subquery_preparer(*planner.binder, *this);
+
+		auto subqueries = query_splitter.GetSubqueries();
+		while (!subqueries.empty() && subqueries.size() != 1) {
+			if (subqueries.front().size() > 1) {
+				// todo: execute in parallel
 			}
-			plan = query_splitter.Optimize(std::move(plan), std::move(data_trunk), subquery_loop);
-			plan = optimizer.PostOptimize(std::move(plan));
+
+			auto sub_plan = subquery_preparer.GenerateProjHead(plan, std::move(subqueries.front()[0]),
+			                                                   query_splitter.GetTableExprStack());
+			subqueries.pop();
+			query_splitter.PopTableExprStack();
+
+			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
 #ifdef DEBUG
 			// debug: print subquery
 			Printer::Print("After PostOptimization");
-			plan->Print();
+			sub_plan->Print();
 #endif
-			Planner::VerifyPlan(optimizer.context, plan);
+			Planner::VerifyPlan(optimizer.context, sub_plan);
 
-			auto subquery_stmt = make_shared<PreparedStatementData>(statement_type);
-			// copy from `result`
-			subquery_stmt->properties = result->properties;
-			subquery_stmt->names = result->names;
-			subquery_stmt->types = result->types;
-			for (const auto &v : result->value_map) {
-				// todo: may have bugs here, can we just copy or need `std::move`?
-				subquery_stmt->value_map.at(v.first) = v.second;
-			}
-			subquery_stmt->catalog_version = result->catalog_version;
-			subquery_stmt->unbound_statement = result->unbound_statement->Copy();
-
-			// Modify the SelectNode based of the subquery
-			auto &select_statemet = subquery_stmt->unbound_statement->Cast<SelectStatement>();
-			D_ASSERT(QueryNodeType::SELECT_NODE == select_statemet.node->type);
-			auto &select_node = select_statemet.node->Cast<SelectNode>();
-			if (!select_node.select_list.empty()) {
-				select_node.select_list.clear();
-				subquery_stmt->names.clear();
-				subquery_stmt->types.clear();
-				for (const auto &proj_expr : plan->expressions) {
-					if (ExpressionType::BOUND_COLUMN_REF == proj_expr->type) {
-						unique_ptr<ColumnRefExpression> new_select_expr =
-						    make_uniq<ColumnRefExpression>(proj_expr->alias);
-						select_node.select_list.emplace_back(std::move(new_select_expr));
-						auto new_name = proj_expr->alias;
-						subquery_stmt->names.emplace_back(new_name);
-						auto new_type = proj_expr->return_type;
-						subquery_stmt->types.emplace_back(new_type);
-					}
-				}
-			}
+			auto subquery_stmt = subquery_preparer.AdaptSelect(result, sub_plan);
 #ifdef DEBUG
-			plan->Verify(*this);
+			sub_plan->Verify(*this);
 #endif
-			// generate physical plan of the subquery
+			// generate physical sub_plan of the subquery
 			PhysicalPlanGenerator physical_planner(*this);
-			auto physical_plan = physical_planner.CreatePlan(std::move(plan));
+			auto physical_plan = physical_planner.CreatePlan(std::move(sub_plan));
 
 #ifdef DEBUG
 			D_ASSERT(!physical_plan->ToString().empty());
 #endif
 			subquery_stmt->plan = std::move(physical_plan);
-
-			plan = temp_sub_plan->Copy(optimizer.context);
 
 			// Execute subquery
 			auto n_param = subquery_stmt->unbound_statement->n_param;
@@ -439,7 +414,12 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #ifdef DEBUG
 			data_trunk->Print();
 #endif
+			subqueries.front()[0] = subquery_preparer.MergeDataChunk(
+			    std::move(subqueries.front()[0]), std::move(data_trunk), query_splitter.GetTableExprStack().top());
 		}
+
+		if (1 == subqueries.size())
+			plan = std::move(subqueries.front()[0]);
 
 		plan = optimizer.PostOptimize(std::move(plan));
 		profiler.EndPhase();

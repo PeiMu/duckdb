@@ -2,8 +2,7 @@
 
 namespace duckdb {
 
-unique_ptr<LogicalOperator> ForeignKeyCenterSplit::Split(unique_ptr<LogicalOperator> plan,
-                                                         unique_ptr<DataChunk> previous_result, bool &subquery_loop) {
+unique_ptr<LogicalOperator> ForeignKeyCenterSplit::Split(unique_ptr<LogicalOperator> plan) {
 	// debug
 	plan->Print();
 
@@ -12,7 +11,7 @@ unique_ptr<LogicalOperator> ForeignKeyCenterSplit::Split(unique_ptr<LogicalOpera
 
 	uint64_t length = CollectRangeTableLength(plan_without_redundant_jon);
 	if (length <= 2) {
-		return std::move(plan);
+		return plan_without_redundant_jon;
 	}
 
 	return Recon(std::move(plan_without_redundant_jon));
@@ -113,8 +112,8 @@ unique_ptr<LogicalOperator> ForeignKeyCenterSplit::Recon(unique_ptr<LogicalOpera
 	}
 
 	// debug: try to generate the subqueries
-	std::vector<unique_ptr<LogicalOperator>> sub_queries;
 	for (const auto &ele : subquery_group) {
+		std::vector<unique_ptr<LogicalOperator>> current_level;
 		for (const auto &primary_table_idx : ele.second) {
 			target_tables.emplace(primary_table_idx, used_table_entries[primary_table_idx]);
 			// debug: print the foreign key table and primary key table
@@ -134,12 +133,13 @@ unique_ptr<LogicalOperator> ForeignKeyCenterSplit::Recon(unique_ptr<LogicalOpera
 		Printer::Print("Current subquery");
 		subquery->Print();
 
-		sub_queries.emplace_back(std::move(subquery));
+		current_level.emplace_back(std::move(subquery));
+		subqueries.emplace(std::move(current_level));
 	}
 
-	// todo: decide why one to execute
+	// todo: decide which one to execute
 
-	return std::move(sub_queries[0]);
+	return std::move(original_plan);
 }
 
 void ForeignKeyCenterSplit::CheckJoin(std::vector<std::pair<ColumnBinding, ColumnBinding>> &join_column_pairs,

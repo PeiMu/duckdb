@@ -17,12 +17,31 @@ public:
 	explicit QuerySplit(ClientContext &context) : context(context) {};
 	~QuerySplit() = default;
 	//! Perform Query Split
-	unique_ptr<LogicalOperator> Optimize(unique_ptr<LogicalOperator> plan, unique_ptr<DataChunk> previous_result,
-	                                     bool &subquery_loop);
+	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan);
+
+public:
+	std::stack<std::set<TableExpr>> GetTableExprStack() {
+		if (nullptr == query_splitter)
+			return std::stack<std::set<TableExpr>>();
+
+		auto top_down_splitter = dynamic_cast<TopDownSplit *>(query_splitter.get());
+		return top_down_splitter->GetTableExprStack();
+	}
+
+	void PopTableExprStack() {
+		D_ASSERT(nullptr != query_splitter);
+		auto top_down_splitter = dynamic_cast<TopDownSplit *>(query_splitter.get());
+		top_down_splitter->GetTableExprStack().pop();
+	}
+
+	subquery_queue GetSubqueries() {
+		if (nullptr == query_splitter)
+			return subquery_queue();
+		return std::move(query_splitter->subqueries);
+	}
 
 private:
 	ClientContext &context;
-	std::queue<unique_ptr<LogicalOperator>> subqueries;
 	std::unique_ptr<SplitAlgorithm> query_splitter;
 };
 

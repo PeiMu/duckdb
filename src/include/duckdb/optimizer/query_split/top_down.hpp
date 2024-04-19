@@ -11,27 +11,7 @@
 #include "duckdb/catalog/catalog_entry/table_catalog_entry.hpp"
 #include "duckdb/optimizer/query_split/split_algorithm.hpp"
 
-#include <queue>
-
 namespace duckdb {
-
-struct TableExpr {
-	idx_t table_idx;
-	idx_t column_idx;
-	std::string column_name;
-	LogicalType return_type;
-
-	bool operator==(const TableExpr &other) const {
-		return table_idx == other.table_idx && column_idx == other.column_idx && column_name == other.column_name;
-	}
-};
-
-struct TableExprHash {
-	size_t operator()(const TableExpr &table_expr) const {
-		return std::hash<idx_t> {}(table_expr.table_idx) ^ std::hash<idx_t> {}(table_expr.column_idx) ^
-		       std::hash<std::string> {}(table_expr.column_name);
-	}
-};
 
 //! Based on the DAG of the logical plan, we generate the subqueries bottom-up
 class TopDownSplit : public SplitAlgorithm {
@@ -39,8 +19,14 @@ public:
 	explicit TopDownSplit(ClientContext &context) : SplitAlgorithm(context) {};
 	~TopDownSplit() override = default;
 	//! Perform Query Split
-	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan, unique_ptr<DataChunk> previous_result,
-	                                  bool &subquery_loop) override;
+	//! the collection of all levels of subqueries in a bottom-up order, e.g. the lowest level subquery is the first
+	//! element in the queue and will be executed first
+	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) override;
+
+public:
+	std::stack<std::set<TableExpr>> &GetTableExprStack() {
+		return table_expr_stack;
+	}
 
 protected:
 	//! Extract the subquery in the top-down order, and insert
@@ -55,15 +41,17 @@ private:
 	//! get the <table_index, expression_index> pair by checking which column is used in the filter
 	void GetFilterTableExpr(const LogicalFilter &filter_op);
 
-	//! Collect all used tables into `target_tables`
+	//! Collect all used tables into `used_tables`
 	void GetTargetTables(LogicalOperator &op);
 
 private:
 	bool filter_parent = false;
-	std::queue<std::vector<unique_ptr<LogicalOperator>>> subqueries;
-	std::stack<std::unordered_set<TableExpr, TableExprHash>> table_expr_stack;
+
+	// the collection of necessary table/column information in a top-down order, e.g. the lowest level is the last
+	// element in the stack and will be got first
+	std::stack<std::set<TableExpr>> table_expr_stack;
 	// table index, table entry
-	std::unordered_map<idx_t, LogicalGet *> target_tables;
+	std::unordered_map<idx_t, LogicalGet *> used_tables;
 };
 
 } // namespace duckdb

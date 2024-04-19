@@ -2,121 +2,17 @@
 
 namespace duckdb {
 
-unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan, unique_ptr<DataChunk> previous_result,
-                                                bool &subquery_loop) {
+unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan) {
 	// for the first n-1 subqueries, only select the most related nodes/expressions
 	// for the last subquery, merge the previous subqueries
 	unique_ptr<LogicalOperator> subquery;
-	if (subqueries.empty()) {
 #ifdef DEBUG
-		// debug
-		plan->Print();
-#endif
-		GetTargetTables(*plan);
-		VisitOperator(*plan);
-
-		if (subqueries.front().size() > 1) {
-			// todo: execute in parallel
-		}
-		subquery = std::move(subqueries.front()[0]);
-		subqueries.pop();
-		if (0 == subqueries.size()) {
-			subquery_loop = false;
-		} else {
-			subquery_loop = true;
-		}
-
-	} else {
-		if (subqueries.front().size() > 1) {
-			// todo: execute in parallel
-		}
-		subquery = std::move(subqueries.front()[0]);
-		subqueries.pop();
-		if (0 == subqueries.size()) {
-			subquery_loop = false;
-		} else {
-			subquery_loop = true;
-		}
-
-		// todo: reorder the chunks with the column_ids
-		DataChunk test_data_chunk;
-		previous_result->Split(test_data_chunk, 1);
-		test_data_chunk.Fuse(*previous_result);
-		// todo: get types
-		vector<LogicalType> types {LogicalType::VARCHAR, LogicalType::INTEGER};
-		auto collection = make_uniq<ColumnDataCollection>(context, types);
-		collection->Append(test_data_chunk);
-		// todo: get table index
-		idx_t table_idx = 1;
-
-		auto chunk_scan = make_uniq<LogicalColumnDataGet>(table_idx, types, std::move(collection));
-		chunk_scan->Print();
-		// todo: find the insert point and insert the `ColumnDataGet` node to the logical plan
-		std::function<void(LogicalOperator & op)> get_insert_point_test;
-		get_insert_point_test = [&chunk_scan, &get_insert_point_test](LogicalOperator &op) {
-			for (auto child_it = op.children.begin(); child_it != op.children.end(); child_it++) {
-				if (LogicalOperatorType::LOGICAL_FILTER == (*child_it)->type) {
-					op.children.erase(child_it);
-					op.children.emplace_back(std::move(chunk_scan));
-					return;
-				} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == (*child_it)->type) {
-					auto &join_op = (*child_it)->Cast<LogicalComparisonJoin>();
-
-				} else {
-					get_insert_point_test(*(*child_it));
-				}
-			}
-		};
-		get_insert_point_test(*subquery);
-		subquery->Print();
-		// todo: update statistics?
-	}
-
-#ifdef DEBUG
-	// debug: print subquery
-	Printer::Print("Current subquery");
-	subquery->Print();
-#endif
-
-	vector<unique_ptr<Expression>> new_exprs;
-	auto expr_idx_pair = table_expr_stack.top();
-	table_expr_stack.pop();
-	// collect all columns with the same table
-	auto temp_stack = table_expr_stack;
-	while (!temp_stack.empty()) {
-		auto temp = temp_stack.top();
-		temp_stack.pop();
-		std::unordered_set<TableExpr, TableExprHash> temp_set;
-		for (const auto &current_pair : expr_idx_pair) {
-			auto same_table_it = std::find_if(temp.begin(), temp.end(), [current_pair](TableExpr table_expr) {
-				return table_expr.table_idx == current_pair.table_idx;
-			});
-			if (same_table_it != temp.end()) {
-				temp_set.emplace(*same_table_it);
-			}
-		}
-		// merge the temp_set to expr_idx_pair
-		if (!temp_set.empty())
-			expr_idx_pair.insert(temp_set.begin(), temp_set.end());
-	}
-	for (const auto &expr_pair : expr_idx_pair) {
-		ColumnBinding binding = ColumnBinding(expr_pair.table_idx, expr_pair.column_idx);
-		auto col_ref_select_expr =
-		    make_uniq<BoundColumnRefExpression>(expr_pair.column_name, expr_pair.return_type, binding, 0);
-		new_exprs.emplace_back(std::move(col_ref_select_expr));
-	}
-
-	plan->children.clear();
-	plan->AddChild(std::move(subquery));
-	plan->expressions.clear();
-	plan->expressions = std::move(new_exprs);
-
-#ifdef DEBUG
-	// debug: print subquery
-	Printer::Print("Current subquery with projection");
+	// debug
 	plan->Print();
 #endif
-	return plan;
+	GetTargetTables(*plan);
+	VisitOperator(*plan);
+	return std::move(plan);
 }
 
 void TopDownSplit::VisitOperator(LogicalOperator &op) {
@@ -161,7 +57,7 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 }
 
 void TopDownSplit::GetProjTableExpr(const LogicalProjection &proj_op) {
-	std::unordered_set<TableExpr, TableExprHash> proj_pair;
+	std::set<TableExpr> proj_pair;
 	// check which column match in the projection's expression
 	TableExpr current_pair;
 	current_pair.table_idx = UINT64_MAX;
@@ -178,7 +74,7 @@ void TopDownSplit::GetProjTableExpr(const LogicalProjection &proj_op) {
 		current_pair.column_name = expr_name;
 		current_pair.return_type = proj_op.expressions[expr_id]->return_type;
 
-		for (const auto &table : target_tables) {
+		for (const auto &table : used_tables) {
 			auto column_idx = table.second->GetTable()->GetColumnIndex(expr_name, true);
 			if (column_idx.IsValid()) {
 				current_pair.column_idx = column_idx.index;
@@ -199,7 +95,7 @@ void TopDownSplit::GetTargetTables(LogicalOperator &op) {
 	if (LogicalOperatorType::LOGICAL_GET == op.type) {
 		auto &get_op = op.Cast<LogicalGet>();
 		auto current_table_index = get_op.table_index;
-		target_tables.emplace(current_table_index, &get_op);
+		used_tables.emplace(current_table_index, &get_op);
 	}
 	for (auto &child : op.children) {
 		GetTargetTables(*child);
@@ -207,7 +103,7 @@ void TopDownSplit::GetTargetTables(LogicalOperator &op) {
 }
 
 void TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &join_op, bool same_level) {
-	std::unordered_set<TableExpr, TableExprHash> table_exprs;
+	std::set<TableExpr> table_exprs;
 	for (const auto &cond : join_op.conditions) {
 		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.left->type);
 		TableExpr current_left_table;
@@ -217,7 +113,7 @@ void TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &join_op, bool s
 		current_left_table.column_idx = left_expr.binding.column_index;
 		current_left_table.column_name = left_expr.alias;
 		current_left_table.return_type = left_expr.return_type;
-		if (target_tables.count(current_left_table.table_idx))
+		if (used_tables.count(current_left_table.table_idx))
 			table_exprs.emplace(current_left_table);
 
 		TableExpr current_right_table;
@@ -226,7 +122,7 @@ void TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &join_op, bool s
 		current_right_table.column_idx = right_expr.binding.column_index;
 		current_right_table.column_name = right_expr.alias;
 		current_right_table.return_type = right_expr.return_type;
-		if (target_tables.count(current_right_table.table_idx))
+		if (used_tables.count(current_right_table.table_idx))
 			table_exprs.emplace(current_right_table);
 	}
 	if (!table_exprs.empty()) {
@@ -239,16 +135,16 @@ void TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &join_op, bool s
 }
 
 void TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter_op) {
-	std::unordered_set<TableExpr, TableExprHash> table_exprs;
+	std::set<TableExpr> table_exprs;
 
 	auto get_column_ref_expr = [&table_exprs, this](const unique_ptr<Expression> &expr) {
 		TableExpr table_expr;
 		auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
 		table_expr.table_idx = column_ref_expr.binding.table_index;
-		table_expr.column_idx = target_tables[table_expr.table_idx]->column_ids[column_ref_expr.binding.column_index];
+		table_expr.column_idx = used_tables[table_expr.table_idx]->column_ids[column_ref_expr.binding.column_index];
 		table_expr.column_name = column_ref_expr.alias;
 		table_expr.return_type = column_ref_expr.return_type;
-		if (target_tables.count(table_expr.table_idx)) {
+		if (used_tables.count(table_expr.table_idx)) {
 			table_exprs.emplace(table_expr);
 		}
 	};

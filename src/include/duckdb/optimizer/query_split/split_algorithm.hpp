@@ -20,22 +20,48 @@
 
 namespace duckdb {
 
+struct TableExpr {
+	idx_t table_idx;
+	idx_t column_idx;
+	std::string column_name;
+	LogicalType return_type;
+
+	bool operator==(const TableExpr &other) const {
+		return table_idx == other.table_idx && column_idx == other.column_idx && column_name == other.column_name;
+	}
+
+	bool operator<(const TableExpr &other) const {
+		return ((table_idx < other.table_idx) || (table_idx == other.table_idx && column_idx < other.column_idx));
+	}
+};
+
+struct TableExprHash {
+	size_t operator()(const TableExpr &table_expr) const {
+		return std::hash<idx_t> {}(table_expr.table_idx) ^ std::hash<idx_t> {}(table_expr.column_idx) ^
+		       std::hash<std::string> {}(table_expr.column_name);
+	}
+};
+
 enum EnumSplitAlgorithm { foreign_key_center = 1, min_sub_query, top_down };
+
+using subquery_queue = std::queue<std::vector<unique_ptr<LogicalOperator>>>;
 
 class SplitAlgorithm : public LogicalOperatorVisitor {
 public:
 	explicit SplitAlgorithm(ClientContext &context) : context(context) {};
 	~SplitAlgorithm() override = default;
 	//! Perform Query Split
-	virtual unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan, unique_ptr<DataChunk> previous_result,
-	                                          bool &subquery_loop) {
+	virtual unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) {
 		return std::move(plan);
 	};
+
+public:
+	//! each subquery is an element of the queue
+	subquery_queue subqueries;
 
 protected:
 	ClientContext &context;
 	//! record the parent node to replace it to the valid child node
-	unique_ptr<LogicalOperator> parent;
 };
 
 } // namespace duckdb
