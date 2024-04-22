@@ -17,8 +17,8 @@ unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan
 
 void TopDownSplit::VisitOperator(LogicalOperator &op) {
 	std::vector<unique_ptr<LogicalOperator>> same_level_subqueries;
-
-	// todo: collect table_expr_stack from projection node
+	std::vector<std::set<TableExpr>> same_level_table_exprs;
+	// todo: collect table_expr_queue from projection node
 	// if (op.type == LogicalOperatorType::LOGICAL_PROJECTION)
 	// GetProjTableExpr(op.Cast<LogicalProjection>());
 
@@ -27,32 +27,44 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 	// but if it has a logical_filter parent, then we split at the
 	// logical_filter node.
 	for (auto &child : op.children) {
+		std::set<TableExpr> table_exprs;
 		switch (child->type) {
 		case LogicalOperatorType::LOGICAL_FILTER:
+			// add filter's column usage
+			table_exprs = GetFilterTableExpr(child->Cast<LogicalFilter>());
 			// check if it's a filter node, otherwise set false
 			filter_parent = true;
-			same_level_subqueries.emplace_back(child->Copy(context));
-			// todo: do we need to add filter's column usage?
-			// GetFilterTableExpr(child->Cast<LogicalFilter>());
+			child->split_point = true;
 			break;
 		case LogicalOperatorType::LOGICAL_COMPARISON_JOIN:
-			GetJoinTableExpr(child->Cast<LogicalComparisonJoin>(), filter_parent);
+			table_exprs = GetJoinTableExpr(child->Cast<LogicalComparisonJoin>());
 			if (filter_parent) {
 				filter_parent = false;
 			} else {
-				same_level_subqueries.emplace_back(child->Copy(context));
+				child->split_point = true;
 			}
 			break;
 		default:
 			filter_parent = false;
 			break;
 		}
+		if (!table_exprs.empty()) {
+			same_level_table_exprs.emplace_back(table_exprs);
+		}
 		VisitOperator(*child);
+
+		if (child->split_point) {
+			same_level_subqueries.emplace_back(child->Copy(context));
+		}
 	}
 
 	D_ASSERT(same_level_subqueries.size() <= 2);
 	if (!same_level_subqueries.empty()) {
 		subqueries.emplace(std::move(same_level_subqueries));
+	}
+	D_ASSERT(same_level_table_exprs.size() <= 2);
+	if (!same_level_table_exprs.empty()) {
+		table_expr_queue.emplace(same_level_table_exprs);
 	}
 }
 
@@ -87,8 +99,10 @@ void TopDownSplit::GetProjTableExpr(const LogicalProjection &proj_op) {
 		proj_pair.emplace(current_pair);
 	}
 
-	if (!proj_pair.empty())
-		table_expr_stack.emplace(proj_pair);
+	if (!proj_pair.empty()) {
+		std::vector<std::set<TableExpr>> proj_pair_vec {proj_pair};
+		table_expr_queue.emplace(proj_pair_vec);
+	}
 }
 
 void TopDownSplit::GetTargetTables(LogicalOperator &op) {
@@ -102,7 +116,7 @@ void TopDownSplit::GetTargetTables(LogicalOperator &op) {
 	}
 }
 
-void TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &join_op, bool same_level) {
+std::set<TableExpr> TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &join_op) {
 	std::set<TableExpr> table_exprs;
 	for (const auto &cond : join_op.conditions) {
 		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.left->type);
@@ -125,23 +139,17 @@ void TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &join_op, bool s
 		if (used_tables.count(current_right_table.table_idx))
 			table_exprs.emplace(current_right_table);
 	}
-	if (!table_exprs.empty()) {
-		//		if (same_level) {
-		//			table_expr_stack.top().insert(table_exprs.begin(), table_exprs.end());
-		//		} else {
-		table_expr_stack.emplace(table_exprs);
-		//		}
-	}
+	return table_exprs;
 }
 
-void TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter_op) {
+std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter_op) {
 	std::set<TableExpr> table_exprs;
 
 	auto get_column_ref_expr = [&table_exprs, this](const unique_ptr<Expression> &expr) {
 		TableExpr table_expr;
 		auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
 		table_expr.table_idx = column_ref_expr.binding.table_index;
-		table_expr.column_idx = used_tables[table_expr.table_idx]->column_ids[column_ref_expr.binding.column_index];
+		table_expr.column_idx = column_ref_expr.binding.column_index;
 		table_expr.column_name = column_ref_expr.alias;
 		table_expr.return_type = column_ref_expr.return_type;
 		if (used_tables.count(table_expr.table_idx)) {
@@ -167,8 +175,7 @@ void TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter_op) {
 			Printer::Print("Do not support yet");
 		}
 	}
-	if (!table_exprs.empty())
-		table_expr_stack.emplace(table_exprs);
+	return table_exprs;
 }
 
 } // namespace duckdb

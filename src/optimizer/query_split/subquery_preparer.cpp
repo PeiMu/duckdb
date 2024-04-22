@@ -3,8 +3,7 @@
 namespace duckdb {
 
 unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(unique_ptr<LogicalOperator> subquery,
-                                                             unique_ptr<DataChunk> previous_result,
-                                                             const set<TableExpr> &table_expr_set) {
+                                                             unique_ptr<DataChunk> previous_result) {
 	vector<LogicalType> types = previous_result->GetTypes();
 	auto collection = make_uniq<ColumnDataCollection>(context, types);
 	collection->Append(*previous_result);
@@ -13,11 +12,12 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(unique_ptr<LogicalO
 	idx_t table_idx = binder.GenerateTableIndex();
 
 	auto chunk_scan = make_uniq<LogicalColumnDataGet>(table_idx, types, std::move(collection));
-	// todo: find the insert point and insert the `ColumnDataGet` node to the logical plan
+	// find the insert point and insert the `ColumnDataGet` node to the logical plan
+	// todo: update the table_idx and column_idx
 	std::function<void(LogicalOperator & op)> get_insert_point_test;
 	get_insert_point_test = [&chunk_scan, &get_insert_point_test](LogicalOperator &op) {
 		for (auto child_it = op.children.begin(); child_it != op.children.end(); child_it++) {
-			if (LogicalOperatorType::LOGICAL_FILTER == (*child_it)->type) {
+			if ((*child_it)->split_point) {
 				op.children.erase(child_it);
 				op.children.emplace_back(std::move(chunk_scan));
 				return;
@@ -43,7 +43,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(unique_ptr<LogicalO
 unique_ptr<LogicalOperator>
 SubqueryPreparer::GenerateProjHead(const unique_ptr<LogicalOperator> &original_plan,
                                    unique_ptr<LogicalOperator> subquery,
-                                   const std::stack<std::set<TableExpr>> &table_expr_stack) {
+                                   const std::queue<std::vector<std::set<TableExpr>>> &table_expr_queue) {
 #ifdef DEBUG
 	// debug: print subquery
 	Printer::Print("Current subquery");
@@ -52,26 +52,32 @@ SubqueryPreparer::GenerateProjHead(const unique_ptr<LogicalOperator> &original_p
 
 	vector<unique_ptr<Expression>> new_exprs;
 	// get the lowest-level `TableExpr` info
-	auto expr_idx_pair = table_expr_stack.top();
+	auto expr_idx_pair_vec = table_expr_queue.front();
+	if (expr_idx_pair_vec.size() > 1) {
+		// todo: execute in parallel
+	}
+	auto expr_idx_pair = expr_idx_pair_vec[0];
 	// collect all columns with the same table
 	// `temp_stack` contains the `TableExpr` info of all the upper-level subqueries,
 	// we try to merge the matching tables in a bottom-up order by levels
-	auto temp_stack = table_expr_stack;
+	auto temp_stack = table_expr_queue;
 	while (!temp_stack.empty()) {
-		auto temp = temp_stack.top();
+		auto temp_vec = temp_stack.front();
 		temp_stack.pop();
-		std::set<TableExpr> temp_set;
-		for (const auto &current_pair : expr_idx_pair) {
-			auto same_table_it = std::find_if(temp.begin(), temp.end(), [current_pair](TableExpr table_expr) {
-				return table_expr.table_idx == current_pair.table_idx;
-			});
-			if (same_table_it != temp.end()) {
-				temp_set.emplace(*same_table_it);
+		for (const auto &temp : temp_vec) {
+			std::set<TableExpr> temp_set;
+			for (const auto &current_pair : expr_idx_pair) {
+				auto same_table_it = std::find_if(temp.begin(), temp.end(), [current_pair](TableExpr table_expr) {
+					return table_expr.table_idx == current_pair.table_idx;
+				});
+				if (same_table_it != temp.end()) {
+					temp_set.emplace(*same_table_it);
+				}
 			}
+			// merge the temp_set to expr_idx_pair
+			if (!temp_set.empty())
+				expr_idx_pair.insert(temp_set.begin(), temp_set.end());
 		}
-		// merge the temp_set to expr_idx_pair
-		if (!temp_set.empty())
-			expr_idx_pair.insert(temp_set.begin(), temp_set.end());
 	}
 	for (const auto &expr_pair : expr_idx_pair) {
 		ColumnBinding binding = ColumnBinding(expr_pair.table_idx, expr_pair.column_idx);

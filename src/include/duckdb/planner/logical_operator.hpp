@@ -41,6 +41,9 @@ public:
 	idx_t estimated_cardinality;
 	bool has_estimated_cardinality;
 
+	//! The node where need to be merged by another subquery, used by query_split
+	bool split_point = false;
+
 public:
 	virtual vector<ColumnBinding> GetColumnBindings();
 	static vector<ColumnBinding> GenerateColumnBindings(idx_t table_idx, idx_t column_count);

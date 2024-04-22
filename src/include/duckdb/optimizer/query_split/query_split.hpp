@@ -20,18 +20,12 @@ public:
 	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan);
 
 public:
-	std::stack<std::set<TableExpr>> GetTableExprStack() {
+	std::queue<std::vector<std::set<TableExpr>>> GetTableExprQueue() {
 		if (nullptr == query_splitter)
-			return std::stack<std::set<TableExpr>>();
+			return std::queue<std::vector<std::set<TableExpr>>>();
 
 		auto top_down_splitter = dynamic_cast<TopDownSplit *>(query_splitter.get());
-		return top_down_splitter->GetTableExprStack();
-	}
-
-	void PopTableExprStack() {
-		D_ASSERT(nullptr != query_splitter);
-		auto top_down_splitter = dynamic_cast<TopDownSplit *>(query_splitter.get());
-		top_down_splitter->GetTableExprStack().pop();
+		return top_down_splitter->GetTableExprQueue();
 	}
 
 	subquery_queue GetSubqueries() {

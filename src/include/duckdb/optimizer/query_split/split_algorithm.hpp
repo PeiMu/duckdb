@@ -56,7 +56,8 @@ public:
 	};
 
 public:
-	//! each subquery is an element of the queue
+	//! the collection of all levels of subqueries in a bottom-up order, e.g. the lowest level subquery is the first
+	//! element in the queue and will be executed first
 	subquery_queue subqueries;
 
 protected:

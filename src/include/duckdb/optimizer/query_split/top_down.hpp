@@ -19,13 +19,11 @@ public:
 	explicit TopDownSplit(ClientContext &context) : SplitAlgorithm(context) {};
 	~TopDownSplit() override = default;
 	//! Perform Query Split
-	//! the collection of all levels of subqueries in a bottom-up order, e.g. the lowest level subquery is the first
-	//! element in the queue and will be executed first
 	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) override;
 
 public:
-	std::stack<std::set<TableExpr>> &GetTableExprStack() {
-		return table_expr_stack;
+	std::queue<std::vector<std::set<TableExpr>>> &GetTableExprQueue() {
+		return table_expr_queue;
 	}
 
 protected:
@@ -37,9 +35,9 @@ private:
 	//! get the <table_index, expression_index> pair by checking which column is used in the projection
 	void GetProjTableExpr(const LogicalProjection &proj_op);
 	//! get the <table_index, expression_index> pair by checking which column is used in the join
-	void GetJoinTableExpr(const LogicalComparisonJoin &join_op, bool same_level);
+	std::set<TableExpr> GetJoinTableExpr(const LogicalComparisonJoin &join_op);
 	//! get the <table_index, expression_index> pair by checking which column is used in the filter
-	void GetFilterTableExpr(const LogicalFilter &filter_op);
+	std::set<TableExpr> GetFilterTableExpr(const LogicalFilter &filter_op);
 
 	//! Collect all used tables into `used_tables`
 	void GetTargetTables(LogicalOperator &op);
@@ -49,7 +47,7 @@ private:
 
 	// the collection of necessary table/column information in a top-down order, e.g. the lowest level is the last
 	// element in the stack and will be got first
-	std::stack<std::set<TableExpr>> table_expr_stack;
+	std::queue<std::vector<std::set<TableExpr>>> table_expr_queue;
 	// table index, table entry
 	std::unordered_map<idx_t, LogicalGet *> used_tables;
 };

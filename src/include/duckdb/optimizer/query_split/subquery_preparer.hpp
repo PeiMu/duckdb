@@ -26,13 +26,12 @@ public:
 
 	//! Merge the data chunk (temp table) to the current subquery
 	unique_ptr<LogicalOperator> MergeDataChunk(unique_ptr<LogicalOperator> subquery,
-	                                           unique_ptr<DataChunk> previous_result,
-	                                           const std::set<TableExpr> &table_expr_set);
+	                                           unique_ptr<DataChunk> previous_result);
 
 	//! Generate the projection head node at the top of the current subquery
 	unique_ptr<LogicalOperator> GenerateProjHead(const unique_ptr<LogicalOperator> &original_plan,
 	                                             unique_ptr<LogicalOperator> subquery,
-	                                             const std::stack<std::set<TableExpr>> &table_expr_stack);
+	                                             const std::queue<std::vector<std::set<TableExpr>>> &table_expr_queue);
 
 	//! Adapt the selection node to the query AST
 	shared_ptr<PreparedStatementData> AdaptSelect(shared_ptr<PreparedStatementData> original_stmt_data,
