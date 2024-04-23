@@ -20,9 +20,9 @@ public:
 	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan);
 
 public:
-	std::queue<std::vector<std::set<TableExpr>>> GetTableExprQueue() {
+	table_expr_info GetTableExprQueue() {
 		if (nullptr == query_splitter)
-			return std::queue<std::vector<std::set<TableExpr>>>();
+			return table_expr_info();
 
 		auto top_down_splitter = dynamic_cast<TopDownSplit *>(query_splitter.get());
 		return top_down_splitter->GetTableExprQueue();

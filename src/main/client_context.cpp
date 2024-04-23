@@ -417,6 +417,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 			subqueries.front()[0] =
 			    subquery_preparer.MergeDataChunk(std::move(subqueries.front()[0]), std::move(data_trunk));
+			table_expr_queue = subquery_preparer.UpdateTableIndex(table_expr_queue);
 		}
 
 		if (1 == subqueries.size())

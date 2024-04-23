@@ -2,48 +2,9 @@
 
 namespace duckdb {
 
-unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(unique_ptr<LogicalOperator> subquery,
-                                                             unique_ptr<DataChunk> previous_result) {
-	vector<LogicalType> types = previous_result->GetTypes();
-	auto collection = make_uniq<ColumnDataCollection>(context, types);
-	collection->Append(*previous_result);
-
-	// generate an unused table index by the binder
-	idx_t table_idx = binder.GenerateTableIndex();
-
-	auto chunk_scan = make_uniq<LogicalColumnDataGet>(table_idx, types, std::move(collection));
-	// find the insert point and insert the `ColumnDataGet` node to the logical plan
-	// todo: update the table_idx and column_idx
-	std::function<void(LogicalOperator & op)> get_insert_point_test;
-	get_insert_point_test = [&chunk_scan, &get_insert_point_test](LogicalOperator &op) {
-		for (auto child_it = op.children.begin(); child_it != op.children.end(); child_it++) {
-			if ((*child_it)->split_point) {
-				op.children.erase(child_it);
-				op.children.emplace_back(std::move(chunk_scan));
-				return;
-			} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == (*child_it)->type) {
-				auto &join_op = (*child_it)->Cast<LogicalComparisonJoin>();
-
-			} else {
-				get_insert_point_test(*(*child_it));
-			}
-		}
-	};
-	get_insert_point_test(*subquery);
-#ifdef DEBUG
-	// debug: print subquery
-	Printer::Print("After merge data chunk");
-	subquery->Print();
-#endif
-	// todo: update statistics?
-
-	return std::move(subquery);
-}
-
-unique_ptr<LogicalOperator>
-SubqueryPreparer::GenerateProjHead(const unique_ptr<LogicalOperator> &original_plan,
-                                   unique_ptr<LogicalOperator> subquery,
-                                   const std::queue<std::vector<std::set<TableExpr>>> &table_expr_queue) {
+unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<LogicalOperator> &original_plan,
+                                                               unique_ptr<LogicalOperator> subquery,
+                                                               const table_expr_info &table_expr_queue) {
 #ifdef DEBUG
 	// debug: print subquery
 	Printer::Print("Current subquery");
@@ -53,10 +14,17 @@ SubqueryPreparer::GenerateProjHead(const unique_ptr<LogicalOperator> &original_p
 	vector<unique_ptr<Expression>> new_exprs;
 	// get the lowest-level `TableExpr` info
 	auto expr_idx_pair_vec = table_expr_queue.front();
+	proj_exprs.clear();
+	proj_exprs = expr_idx_pair_vec[0];
+	if (!last_sibling_exprs.empty()) {
+		proj_exprs.insert(last_sibling_exprs.begin(), last_sibling_exprs.end());
+	}
+
 	if (expr_idx_pair_vec.size() > 1) {
 		// todo: execute in parallel
+
+		last_sibling_exprs = expr_idx_pair_vec[1];
 	}
-	auto expr_idx_pair = expr_idx_pair_vec[0];
 	// collect all columns with the same table
 	// `temp_stack` contains the `TableExpr` info of all the upper-level subqueries,
 	// we try to merge the matching tables in a bottom-up order by levels
@@ -66,7 +34,7 @@ SubqueryPreparer::GenerateProjHead(const unique_ptr<LogicalOperator> &original_p
 		temp_stack.pop();
 		for (const auto &temp : temp_vec) {
 			std::set<TableExpr> temp_set;
-			for (const auto &current_pair : expr_idx_pair) {
+			for (const auto &current_pair : proj_exprs) {
 				auto same_table_it = std::find_if(temp.begin(), temp.end(), [current_pair](TableExpr table_expr) {
 					return table_expr.table_idx == current_pair.table_idx;
 				});
@@ -74,16 +42,23 @@ SubqueryPreparer::GenerateProjHead(const unique_ptr<LogicalOperator> &original_p
 					temp_set.emplace(*same_table_it);
 				}
 			}
-			// merge the temp_set to expr_idx_pair
+			// merge the temp_set to proj_exprs
 			if (!temp_set.empty())
-				expr_idx_pair.insert(temp_set.begin(), temp_set.end());
+				proj_exprs.insert(temp_set.begin(), temp_set.end());
 		}
 	}
-	for (const auto &expr_pair : expr_idx_pair) {
+	for (const auto &expr_pair : proj_exprs) {
 		ColumnBinding binding = ColumnBinding(expr_pair.table_idx, expr_pair.column_idx);
 		auto col_ref_select_expr =
 		    make_uniq<BoundColumnRefExpression>(expr_pair.column_name, expr_pair.return_type, binding, 0);
 		new_exprs.emplace_back(std::move(col_ref_select_expr));
+#ifdef DEBUG
+		// debug
+		std::string str = "table index: " + std::to_string(binding.table_index) +
+		                  ", column index: " + std::to_string(binding.column_index) +
+		                  ", name: " + expr_pair.column_name;
+		Printer::Print(str);
+#endif
 	}
 
 	auto new_plan = original_plan->Copy(context);
@@ -134,5 +109,96 @@ shared_ptr<PreparedStatementData> SubqueryPreparer::AdaptSelect(shared_ptr<Prepa
 		}
 	}
 	return subquery_stmt;
+}
+
+unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(unique_ptr<LogicalOperator> subquery,
+                                                             unique_ptr<DataChunk> previous_result) {
+	vector<LogicalType> types = previous_result->GetTypes();
+	auto collection = make_uniq<ColumnDataCollection>(context, types);
+	collection->Append(*previous_result);
+
+	// generate an unused table index by the binder
+	new_table_idx = binder.GenerateTableIndex();
+
+	chunk_scan = make_uniq<LogicalColumnDataGet>(new_table_idx, types, std::move(collection));
+	VisitOperator(*subquery);
+
+#ifdef DEBUG
+	std::string new_idx = "New table index: " + std::to_string(new_table_idx);
+	Printer::Print(new_idx);
+	// debug: print subquery
+	Printer::Print("After merge data chunk");
+	subquery->Print();
+#endif
+	// todo: update statistics?
+
+	return std::move(subquery);
+}
+
+void SubqueryPreparer::VisitOperator(LogicalOperator &op) {
+	// update the table_idx and column_idx
+	VisitOperatorExpressions(op);
+
+	for (auto child_it = op.children.begin(); child_it != op.children.end(); child_it++) {
+		// find the insert point and insert the `ColumnDataGet` node to the logical plan
+		if ((*child_it)->split_point) {
+			op.children.erase(child_it);
+			D_ASSERT(nullptr != chunk_scan);
+			op.children.insert(child_it, std::move(chunk_scan));
+			return;
+		}
+		VisitOperator(*(*child_it));
+	}
+}
+
+unique_ptr<Expression> SubqueryPreparer::VisitReplace(BoundColumnRefExpression &expr,
+                                                      unique_ptr<Expression> *expr_ptr) {
+	auto find_table_it = std::find_if(proj_exprs.begin(), proj_exprs.end(), [&expr](const TableExpr &table_expr) {
+		return table_expr.table_idx == expr.binding.table_index;
+	});
+
+	if (find_table_it != proj_exprs.end()) {
+		expr.binding.table_index = new_table_idx;
+		old_table_idx.emplace_back(find_table_it->table_idx);
+		auto find_column_it = std::find_if(proj_exprs.begin(), proj_exprs.end(), [&expr](const TableExpr &table_expr) {
+			return table_expr.column_idx == expr.binding.column_index;
+		});
+		D_ASSERT(find_column_it != proj_exprs.end());
+		expr.binding.column_index = std::distance(proj_exprs.begin(), find_column_it);
+	}
+
+	return nullptr;
+}
+
+table_expr_info SubqueryPreparer::UpdateTableIndex(table_expr_info table_expr_queue) {
+	table_expr_info ret;
+	while (!table_expr_queue.empty()) {
+		auto table_expr_vec = table_expr_queue.front();
+		std::vector<std::set<TableExpr>> new_vec;
+		for (const auto &table_expr_set : table_expr_vec) {
+			auto find_it =
+			    std::find_if(table_expr_set.begin(), table_expr_set.end(), [this](const TableExpr &table_expr) {
+				    for (const auto &old_idx : old_table_idx) {
+					    if (old_idx == table_expr.table_idx)
+						    return true;
+				    }
+				    return false;
+			    });
+			std::set<TableExpr> new_set = table_expr_set;
+			if (table_expr_set.end() != find_it) {
+				TableExpr new_table_expr = (*find_it);
+				// replace to the new table index (gotten in `MergeDataChunk`)
+				new_table_expr.table_idx = new_table_idx;
+				new_set.emplace(new_table_expr);
+				new_set.erase(*find_it);
+			}
+			new_vec.emplace_back(new_set);
+		}
+		table_expr_queue.pop();
+		ret.push(new_vec);
+	}
+	old_table_idx.clear();
+
+	return ret;
 }
 } // namespace duckdb

@@ -22,7 +22,7 @@ public:
 	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) override;
 
 public:
-	std::queue<std::vector<std::set<TableExpr>>> &GetTableExprQueue() {
+	table_expr_info &GetTableExprQueue() {
 		return table_expr_queue;
 	}
 
@@ -47,7 +47,7 @@ private:
 
 	// the collection of necessary table/column information in a top-down order, e.g. the lowest level is the last
 	// element in the stack and will be got first
-	std::queue<std::vector<std::set<TableExpr>>> table_expr_queue;
+	table_expr_info table_expr_queue;
 	// table index, table entry
 	std::unordered_map<idx_t, LogicalGet *> used_tables;
 };
