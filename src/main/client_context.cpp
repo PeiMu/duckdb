@@ -410,13 +410,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			                                 n_param, std::move(named_param_map));
 			duckdb::vector<Value> bound_values;
 			unique_ptr<QueryResult> subquery_result = prepared_stmt->Execute(lock, bound_values, false);
-			ErrorData error_data;
-			D_ASSERT(subquery_result->TryFetch(data_trunk, error_data));
-#ifdef DEBUG
-			data_trunk->Print();
-#endif
+			//			ErrorData error_data;
+			//			D_ASSERT(subquery_result->TryFetch(data_trunk, error_data));
+			// #ifdef DEBUG
+			//			data_trunk->Print();
+			// #endif
 			subqueries.front()[0] =
-			    subquery_preparer.MergeDataChunk(std::move(subqueries.front()[0]), std::move(data_trunk));
+			    subquery_preparer.MergeDataChunk(std::move(subqueries.front()[0]), std::move(subquery_result));
 			table_expr_queue = subquery_preparer.UpdateTableIndex(table_expr_queue);
 		}
 

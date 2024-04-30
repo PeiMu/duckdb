@@ -1,5 +1,9 @@
 #include "duckdb/optimizer/query_split/subquery_preparer.hpp"
 
+#include "duckdb/main/materialized_query_result.hpp"
+#include "duckdb/main/query_result.hpp"
+#include "duckdb/main/stream_query_result.hpp"
+
 namespace duckdb {
 
 unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<LogicalOperator> &original_plan,
@@ -112,11 +116,17 @@ shared_ptr<PreparedStatementData> SubqueryPreparer::AdaptSelect(shared_ptr<Prepa
 }
 
 unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(unique_ptr<LogicalOperator> subquery,
-                                                             unique_ptr<DataChunk> previous_result) {
-	vector<LogicalType> types = previous_result->GetTypes();
-	auto collection = make_uniq<ColumnDataCollection>(context, types);
-	collection->Append(*previous_result);
+                                                             unique_ptr<QueryResult> previous_result) {
+	unique_ptr<MaterializedQueryResult> substrait_materialized;
+	if (previous_result->type == QueryResultType::STREAM_RESULT) {
+		auto &stream_query = previous_result->Cast<duckdb::StreamQueryResult>();
+		substrait_materialized = stream_query.Materialize();
+	} else if (previous_result->type == QueryResultType::MATERIALIZED_RESULT) {
+		substrait_materialized = unique_ptr_cast<QueryResult, MaterializedQueryResult>(std::move(previous_result));
+	}
+	unique_ptr<ColumnDataCollection> collection = make_uniq<ColumnDataCollection>(substrait_materialized->Collection());
 
+	vector<LogicalType> types = previous_result->types;
 	// generate an unused table index by the binder
 	new_table_idx = binder.GenerateTableIndex();
 
