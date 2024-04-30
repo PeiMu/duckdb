@@ -117,16 +117,28 @@ shared_ptr<PreparedStatementData> SubqueryPreparer::AdaptSelect(shared_ptr<Prepa
 
 unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(unique_ptr<LogicalOperator> subquery,
                                                              unique_ptr<QueryResult> previous_result) {
-	unique_ptr<MaterializedQueryResult> substrait_materialized;
+	vector<LogicalType> types = previous_result->types;
+
+	unique_ptr<MaterializedQueryResult> result_materialized;
+	auto collection = make_uniq<ColumnDataCollection>(Allocator::DefaultAllocator(), types);
 	if (previous_result->type == QueryResultType::STREAM_RESULT) {
 		auto &stream_query = previous_result->Cast<duckdb::StreamQueryResult>();
-		substrait_materialized = stream_query.Materialize();
+		result_materialized = stream_query.Materialize();
+		collection = make_uniq<ColumnDataCollection>(result_materialized->Collection());
 	} else if (previous_result->type == QueryResultType::MATERIALIZED_RESULT) {
-		substrait_materialized = unique_ptr_cast<QueryResult, MaterializedQueryResult>(std::move(previous_result));
+		ColumnDataAppendState append_state;
+		collection->InitializeAppend(append_state);
+		while (true) {
+			unique_ptr<DataChunk> chunk;
+			ErrorData error;
+			previous_result->TryFetch(chunk, error);
+			if (!chunk || chunk->size() == 0) {
+				break;
+			}
+			collection->Append(append_state, *chunk);
+		}
 	}
-	unique_ptr<ColumnDataCollection> collection = make_uniq<ColumnDataCollection>(substrait_materialized->Collection());
 
-	vector<LogicalType> types = previous_result->types;
 	// generate an unused table index by the binder
 	new_table_idx = binder.GenerateTableIndex();
 
