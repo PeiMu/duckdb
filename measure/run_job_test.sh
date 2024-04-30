@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DB_NAME=imdb_test.db
+DB_NAME=short_imdb_test.db
 
 rm -f ./${DB_NAME}
 
@@ -28,7 +28,7 @@ done
 #for i in $(eval echo {1.."${iteration}"}); do
 #  for sql in "${dir}"/*; do
 #    echo "execute ${sql}" 2>&1|tee -a skinner_explained_imdb_${i}.txt;
-#    echo -ne ".read ${sql}" | duckdb ./imdb.db 2>&1|tee -a skinner_explained_imdb_${i}.txt;
+#    echo -ne ".read ${sql}" | duckdb ./${DB_NAME} 2>&1|tee -a skinner_explained_imdb_${i}.txt;
 #  done
 #done
 #

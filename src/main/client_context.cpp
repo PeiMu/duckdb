@@ -7,7 +7,9 @@
 #include "duckdb/common/exception/transaction_exception.hpp"
 #include "duckdb/common/file_system.hpp"
 #include "duckdb/common/http_state.hpp"
+#include "duckdb/common/local_file_system.hpp"
 #include "duckdb/common/progress_bar/progress_bar.hpp"
+#include "duckdb/common/serializer/binary_serializer.hpp"
 #include "duckdb/common/serializer/buffered_file_writer.hpp"
 #include "duckdb/common/types/column/column_data_collection.hpp"
 #include "duckdb/execution/column_binding_resolver.hpp"
@@ -410,11 +412,34 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			                                 n_param, std::move(named_param_map));
 			duckdb::vector<Value> bound_values;
 			unique_ptr<QueryResult> subquery_result = prepared_stmt->Execute(lock, bound_values, false);
-			//			ErrorData error_data;
-			//			D_ASSERT(subquery_result->TryFetch(data_trunk, error_data));
-			// #ifdef DEBUG
-			//			data_trunk->Print();
-			// #endif
+
+//			ErrorData error_data;
+//			D_ASSERT(subquery_result->TryFetch(data_trunk, error_data));
+//#ifdef DEBUG
+//			data_trunk->Print();
+//			LocalFileSystem fs;
+//			auto file_path = fs.JoinPath("/home/pei/Project/duckdb/measure",
+//			                             std::to_string(data_trunk->ColumnCount()) + ".duckdb_secret");
+//
+//			if (fs.FileExists(file_path)) {
+//				fs.RemoveFile(file_path);
+//			}
+//
+//			auto open_flags = FileFlags::FILE_FLAGS_WRITE;
+//			// Ensure we are writing to a private file with 600 permission
+//			open_flags |= FileFlags::FILE_FLAGS_PRIVATE;
+//			// Ensure we overwrite anything that may have been placed there since our delete above
+//			open_flags |= FileFlags::FILE_FLAGS_FILE_CREATE_NEW;
+//
+//			auto file_writer = BufferedFileWriter(fs, file_path, open_flags);
+//
+//			auto serializer = BinarySerializer(file_writer);
+//			serializer.Begin();
+//			data_trunk->Serialize(serializer);
+//			serializer.End();
+//
+//			file_writer.Flush();
+//#endif
 			subqueries.front()[0] =
 			    subquery_preparer.MergeDataChunk(std::move(subqueries.front()[0]), std::move(subquery_result));
 			table_expr_queue = subquery_preparer.UpdateTableIndex(table_expr_queue);
