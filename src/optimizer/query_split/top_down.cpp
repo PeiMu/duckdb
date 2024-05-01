@@ -18,9 +18,6 @@ unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan
 void TopDownSplit::VisitOperator(LogicalOperator &op) {
 	std::vector<unique_ptr<LogicalOperator>> same_level_subqueries;
 	std::vector<std::set<TableExpr>> same_level_table_exprs;
-	// todo: collect table_expr_queue from projection node
-	// if (op.type == LogicalOperatorType::LOGICAL_PROJECTION)
-	// GetProjTableExpr(op.Cast<LogicalProjection>());
 
 	// For now, we only check logical_filter and logical_comparison_join.
 	// Basically, the split point is based on logical_comparison_join,
@@ -66,42 +63,10 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 	if (!same_level_table_exprs.empty()) {
 		table_expr_queue.emplace(same_level_table_exprs);
 	}
-}
 
-void TopDownSplit::GetProjTableExpr(const LogicalProjection &proj_op) {
-	std::set<TableExpr> proj_pair;
-	// check which column match in the projection's expression
-	TableExpr current_pair;
-	current_pair.table_idx = UINT64_MAX;
-	current_pair.column_idx = UINT64_MAX;
-	for (size_t expr_id = 0; expr_id < proj_op.expressions.size(); expr_id++) {
-		auto expr_name = proj_op.expressions[expr_id]->GetName();
-		// find the real column name inside the potential brackets
-		auto last_left_bracket = expr_name.find_last_of('(');
-		if (std::string::npos != last_left_bracket) {
-			auto first_right_bracket = expr_name.find_first_of(')');
-			D_ASSERT(first_right_bracket > last_left_bracket);
-			expr_name = expr_name.substr(last_left_bracket + 1, first_right_bracket - last_left_bracket - 1);
-		}
-		current_pair.column_name = expr_name;
-		current_pair.return_type = proj_op.expressions[expr_id]->return_type;
-
-		for (const auto &table : used_tables) {
-			auto column_idx = table.second->GetTable()->GetColumnIndex(expr_name, true);
-			if (column_idx.IsValid()) {
-				current_pair.column_idx = column_idx.index;
-				current_pair.table_idx = table.first;
-				break;
-			}
-		}
-		D_ASSERT(UINT64_MAX != current_pair.table_idx);
-		D_ASSERT(UINT64_MAX != current_pair.column_idx);
-		proj_pair.emplace(current_pair);
-	}
-
-	if (!proj_pair.empty()) {
-		std::vector<std::set<TableExpr>> proj_pair_vec {proj_pair};
-		table_expr_queue.emplace(proj_pair_vec);
+	// collect table_expr_queue from projection node
+	if (LogicalOperatorType::LOGICAL_PROJECTION == op.type) {
+		GetProjTableExpr(op.Cast<LogicalProjection>());
 	}
 }
 
@@ -176,6 +141,45 @@ std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter
 		}
 	}
 	return table_exprs;
+}
+
+void TopDownSplit::GetProjTableExpr(const LogicalProjection &proj_op) {
+	// if it's children is `aggregate` or `group by`, we only check the child op
+	if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == proj_op.children[0]->type) {
+		GetAggregateTableExpr(proj_op.children[0]->Cast<LogicalAggregate>());
+	} else {
+		for (const auto &expr : proj_op.expressions) {
+			D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
+			TableExpr table_expr;
+			auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
+			table_expr.table_idx = column_ref_expr.binding.table_index;
+			table_expr.column_idx = column_ref_expr.binding.column_index;
+			table_expr.column_name = column_ref_expr.alias;
+			table_expr.return_type = column_ref_expr.return_type;
+			if (used_tables.count(table_expr.table_idx)) {
+				proj_expr.emplace(table_expr);
+			}
+		}
+	}
+}
+
+void TopDownSplit::GetAggregateTableExpr(const LogicalAggregate &aggregate_op) {
+	for (const auto &agg_expr : aggregate_op.expressions) {
+		D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
+		auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
+		for (const auto &expr : aggregate_expr.children) {
+			TableExpr table_expr;
+			D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
+			auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
+			table_expr.table_idx = column_ref_expr.binding.table_index;
+			table_expr.column_idx = column_ref_expr.binding.column_index;
+			table_expr.column_name = column_ref_expr.alias;
+			table_expr.return_type = column_ref_expr.return_type;
+			if (used_tables.count(table_expr.table_idx)) {
+				proj_expr.emplace(table_expr);
+			}
+		}
+	}
 }
 
 } // namespace duckdb

@@ -27,7 +27,7 @@ struct TableExpr {
 	LogicalType return_type;
 
 	bool operator==(const TableExpr &other) const {
-		return table_idx == other.table_idx && column_idx == other.column_idx && column_name == other.column_name;
+		return table_idx == other.table_idx && column_idx == other.column_idx;
 	}
 
 	bool operator<(const TableExpr &other) const {
@@ -37,8 +37,7 @@ struct TableExpr {
 
 struct TableExprHash {
 	size_t operator()(const TableExpr &table_expr) const {
-		return std::hash<idx_t> {}(table_expr.table_idx) ^ std::hash<idx_t> {}(table_expr.column_idx) ^
-		       std::hash<std::string> {}(table_expr.column_name);
+		return std::hash<idx_t> {}(table_expr.table_idx) ^ std::hash<idx_t> {}(table_expr.column_idx);
 	}
 };
 
