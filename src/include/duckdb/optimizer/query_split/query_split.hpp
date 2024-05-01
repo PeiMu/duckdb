@@ -28,6 +28,14 @@ public:
 		return top_down_splitter->GetTableExprQueue();
 	}
 
+	std::set<TableExpr> GetProjExpr() {
+		if (nullptr == query_splitter)
+			return std::set<TableExpr>();
+
+		auto top_down_splitter = dynamic_cast<TopDownSplit *>(query_splitter.get());
+		return top_down_splitter->GetProjExpr();
+	}
+
 	subquery_queue GetSubqueries() {
 		if (nullptr == query_splitter)
 			return subquery_queue();

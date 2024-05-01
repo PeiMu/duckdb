@@ -372,13 +372,16 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 		auto subqueries = query_splitter.GetSubqueries();
 		auto table_expr_queue = query_splitter.GetTableExprQueue();
-		while (!subqueries.empty() && subqueries.size() != 1) {
+		auto proj_expr = query_splitter.GetProjExpr();
+		// if it's the last subquery, break and continue the execution of the main stream
+//		while (subqueries.size() > 1) {
+		while (!subqueries.empty()) {
 			if (subqueries.front().size() > 1) {
 				// todo: execute in parallel
 			}
 
 			auto sub_plan =
-			    subquery_preparer.GenerateProjHead(plan, std::move(subqueries.front()[0]), table_expr_queue);
+			    subquery_preparer.GenerateProjHead(plan, std::move(subqueries.front()[0]), table_expr_queue, proj_expr);
 			subqueries.pop();
 			table_expr_queue.pop();
 
@@ -442,7 +445,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 //#endif
 			subqueries.front()[0] =
 			    subquery_preparer.MergeDataChunk(std::move(subqueries.front()[0]), std::move(subquery_result));
-			table_expr_queue = subquery_preparer.UpdateTableIndex(table_expr_queue);
+			table_expr_queue = subquery_preparer.UpdateTableIndex(table_expr_queue, proj_expr);
 		}
 
 		if (1 == subqueries.size())

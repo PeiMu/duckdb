@@ -26,18 +26,19 @@ public:
 
 	//! Merge the data chunk (temp table) to the current subquery
 	unique_ptr<LogicalOperator> MergeDataChunk(unique_ptr<LogicalOperator> subquery,
-						   unique_ptr<QueryResult> previous_result);
+	                                           unique_ptr<QueryResult> previous_result);
 
 	//! Generate the projection head node at the top of the current subquery
 	unique_ptr<LogicalOperator> GenerateProjHead(const unique_ptr<LogicalOperator> &original_plan,
 	                                             unique_ptr<LogicalOperator> subquery,
-	                                             const table_expr_info &table_expr_queue);
+	                                             const table_expr_info &table_expr_queue,
+	                                             const std::set<TableExpr> &original_proj_expr);
 
 	//! Adapt the selection node to the query AST
 	shared_ptr<PreparedStatementData> AdaptSelect(shared_ptr<PreparedStatementData> original_stmt_data,
 	                                              const unique_ptr<LogicalOperator> &subquery);
 
-	table_expr_info UpdateTableIndex(table_expr_info table_expr_queue);
+	table_expr_info UpdateTableIndex(table_expr_info table_expr_queue, std::set<TableExpr> &proj_expr);
 
 private:
 	//! 1. find the insert point and insert the `ColumnDataGet` node to the logical plan;
@@ -60,6 +61,9 @@ private:
 	// `chunk_scan` will be moved, and we need one extra member to remember the new table index
 	idx_t new_table_idx;
 	// the collection of the old table indexes, to detect and be replaced to the new index by `UpdateTableIndex`
-	std::vector<idx_t> old_table_idx;
+	// collected in
+	// 1. all the `proj_exprs` are the old index for the next subquery in `GenerateProjHead`
+	// 2. check new expressions in the current subquery in `VisitReplace`
+	std::set<idx_t> old_table_idx;
 };
 } // namespace duckdb
