@@ -374,7 +374,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		auto table_expr_queue = query_splitter.GetTableExprQueue();
 		auto proj_expr = query_splitter.GetProjExpr();
 		// if it's the last subquery, break and continue the execution of the main stream
-//		while (subqueries.size() > 1) {
+		//		while (subqueries.size() > 1) {
 		while (!subqueries.empty()) {
 			if (subqueries.front().size() > 1) {
 				// todo: execute in parallel
@@ -415,37 +415,14 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			                                 n_param, std::move(named_param_map));
 			duckdb::vector<Value> bound_values;
 			unique_ptr<QueryResult> subquery_result = prepared_stmt->Execute(lock, bound_values, false);
-
-//			ErrorData error_data;
-//			D_ASSERT(subquery_result->TryFetch(data_trunk, error_data));
-//#ifdef DEBUG
-//			data_trunk->Print();
-//			LocalFileSystem fs;
-//			auto file_path = fs.JoinPath("/home/pei/Project/duckdb/measure",
-//			                             std::to_string(data_trunk->ColumnCount()) + ".duckdb_secret");
-//
-//			if (fs.FileExists(file_path)) {
-//				fs.RemoveFile(file_path);
-//			}
-//
-//			auto open_flags = FileFlags::FILE_FLAGS_WRITE;
-//			// Ensure we are writing to a private file with 600 permission
-//			open_flags |= FileFlags::FILE_FLAGS_PRIVATE;
-//			// Ensure we overwrite anything that may have been placed there since our delete above
-//			open_flags |= FileFlags::FILE_FLAGS_FILE_CREATE_NEW;
-//
-//			auto file_writer = BufferedFileWriter(fs, file_path, open_flags);
-//
-//			auto serializer = BinarySerializer(file_writer);
-//			serializer.Begin();
-//			data_trunk->Serialize(serializer);
-//			serializer.End();
-//
-//			file_writer.Flush();
-//#endif
-			subqueries.front()[0] =
-			    subquery_preparer.MergeDataChunk(std::move(subqueries.front()[0]), std::move(subquery_result));
-			table_expr_queue = subquery_preparer.UpdateTableIndex(table_expr_queue, proj_expr);
+			bool last_subquery = 1 == subqueries.size();
+			subqueries.front()[0] = subquery_preparer.MergeDataChunk(plan, std::move(subqueries.front()[0]),
+			                                                         std::move(subquery_result), last_subquery);
+			if (last_subquery) {
+				// todo: update projection head
+			} else {
+				table_expr_queue = subquery_preparer.UpdateTableIndex(table_expr_queue, proj_expr);
+			}
 		}
 
 		if (1 == subqueries.size())

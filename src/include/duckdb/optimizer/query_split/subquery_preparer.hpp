@@ -25,8 +25,9 @@ public:
 	~SubqueryPreparer() = default;
 
 	//! Merge the data chunk (temp table) to the current subquery
-	unique_ptr<LogicalOperator> MergeDataChunk(unique_ptr<LogicalOperator> subquery,
-	                                           unique_ptr<QueryResult> previous_result);
+	unique_ptr<LogicalOperator> MergeDataChunk(const unique_ptr<LogicalOperator> &original_plan,
+	                                           unique_ptr<LogicalOperator> subquery,
+	                                           unique_ptr<QueryResult> previous_result, bool last_subquery);
 
 	//! Generate the projection head node at the top of the current subquery
 	unique_ptr<LogicalOperator> GenerateProjHead(const unique_ptr<LogicalOperator> &original_plan,

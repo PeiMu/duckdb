@@ -130,8 +130,10 @@ shared_ptr<PreparedStatementData> SubqueryPreparer::AdaptSelect(shared_ptr<Prepa
 	return subquery_stmt;
 }
 
-unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(unique_ptr<LogicalOperator> subquery,
-                                                             unique_ptr<QueryResult> previous_result) {
+unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(const unique_ptr<LogicalOperator> &original_plan,
+                                                             unique_ptr<LogicalOperator> subquery,
+                                                             unique_ptr<QueryResult> previous_result,
+                                                             bool last_subquery) {
 	vector<LogicalType> types = previous_result->types;
 
 	unique_ptr<MaterializedQueryResult> result_materialized;
@@ -162,16 +164,35 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(unique_ptr<LogicalO
 	chunk_scan = make_uniq<LogicalColumnDataGet>(new_table_idx, types, std::move(collection));
 	VisitOperator(*subquery);
 
+	if (last_subquery) {
+		// add the original projection head
+		unique_ptr<LogicalOperator> ret = original_plan->Copy(context);
+		auto child = ret->children[0].get();
+		auto ret_ref = child;
+		while (!child->split_point) {
+			ret_ref = child;
+			child = child->children[0].get();
+		}
+		ret_ref->children.clear();
+		ret_ref->AddChild(std::move(subquery));
 #ifdef DEBUG
-	std::string new_idx = "New table index: " + std::to_string(new_table_idx);
-	Printer::Print(new_idx);
-	// debug: print subquery
-	Printer::Print("After merge data chunk");
-	subquery->Print();
+		// debug: print subquery
+		Printer::Print("The last subquery");
+		ret->Print();
 #endif
-	// todo: update statistics?
+		return ret;
+	} else {
+#ifdef DEBUG
+		std::string new_idx = "New table index: " + std::to_string(new_table_idx);
+		Printer::Print(new_idx);
+		// debug: print subquery
+		Printer::Print("After merge data chunk");
+		subquery->Print();
+#endif
+		// todo: update statistics?
 
-	return std::move(subquery);
+		return std::move(subquery);
+	}
 }
 
 void SubqueryPreparer::VisitOperator(LogicalOperator &op) {
