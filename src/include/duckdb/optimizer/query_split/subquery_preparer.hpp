@@ -39,12 +39,18 @@ public:
 	shared_ptr<PreparedStatementData> AdaptSelect(shared_ptr<PreparedStatementData> original_stmt_data,
 	                                              const unique_ptr<LogicalOperator> &subquery);
 
-	table_expr_info UpdateTableIndex(table_expr_info table_expr_queue, std::set<TableExpr> &proj_expr);
+	table_expr_info UpdateTableExpr(table_expr_info table_expr_queue, std::set<TableExpr> &original_proj_expr);
+
+	unique_ptr<LogicalOperator> UpdateProjHead(unique_ptr<LogicalOperator> last_subquery,
+	                                           std::set<TableExpr> &original_proj_expr);
+
+	//! update the table_idx and column_idx
+	subquery_queue UpdateSubqueriesIndex(subquery_queue subqueries);
 
 private:
 	//! 1. find the insert point and insert the `ColumnDataGet` node to the logical plan;
 	//! 2. update the table_idx and column_idx
-	void VisitOperator(LogicalOperator &op) override;
+	void MergeToSubquery(LogicalOperator &op);
 	//! Because the `chunk_scan` will create a new table index and contains the result of all tables (SEQ SCAN) of the
 	//! current level, it is necessary to replace the index of the related expressions
 	unique_ptr<Expression> VisitReplace(BoundColumnRefExpression &expr, unique_ptr<Expression> *expr_ptr) override;
@@ -61,7 +67,7 @@ private:
 	unique_ptr<LogicalColumnDataGet> chunk_scan;
 	// `chunk_scan` will be moved, and we need one extra member to remember the new table index
 	idx_t new_table_idx;
-	// the collection of the old table indexes, to detect and be replaced to the new index by `UpdateTableIndex`
+	// the collection of the old table indexes, to detect and be replaced to the new index by `UpdateTableExpr`
 	// collected in
 	// 1. all the `proj_exprs` are the old index for the next subquery in `GenerateProjHead`
 	// 2. check new expressions in the current subquery in `VisitReplace`

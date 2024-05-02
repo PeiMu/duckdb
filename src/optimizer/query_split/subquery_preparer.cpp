@@ -162,7 +162,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(const unique_ptr<Lo
 	new_table_idx = binder.GenerateTableIndex();
 
 	chunk_scan = make_uniq<LogicalColumnDataGet>(new_table_idx, types, std::move(collection));
-	VisitOperator(*subquery);
+	MergeToSubquery(*subquery);
 
 	if (last_subquery) {
 		// add the original projection head
@@ -195,10 +195,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(const unique_ptr<Lo
 	}
 }
 
-void SubqueryPreparer::VisitOperator(LogicalOperator &op) {
-	// update the table_idx and column_idx
-	VisitOperatorExpressions(op);
-
+void SubqueryPreparer::MergeToSubquery(LogicalOperator &op) {
 	for (auto child_it = op.children.begin(); child_it != op.children.end(); child_it++) {
 		// find the insert point and insert the `ColumnDataGet` node to the logical plan
 		if ((*child_it)->split_point) {
@@ -207,27 +204,12 @@ void SubqueryPreparer::VisitOperator(LogicalOperator &op) {
 			op.children.insert(child_it, std::move(chunk_scan));
 			return;
 		}
-		VisitOperator(*(*child_it));
+		MergeToSubquery(*(*child_it));
 	}
 }
 
-unique_ptr<Expression> SubqueryPreparer::VisitReplace(BoundColumnRefExpression &expr,
-                                                      unique_ptr<Expression> *expr_ptr) {
-	const auto find_expr_it = std::find_if(proj_exprs.begin(), proj_exprs.end(), [&expr](const TableExpr &table_expr) {
-		return table_expr.table_idx == expr.binding.table_index && table_expr.column_idx == expr.binding.column_index;
-	});
-
-	if (find_expr_it != proj_exprs.end()) {
-		expr.binding.table_index = new_table_idx;
-		expr.binding.column_index = std::distance(proj_exprs.begin(), find_expr_it);
-		old_table_idx.emplace(find_expr_it->table_idx);
-	}
-
-	return nullptr;
-}
-
-table_expr_info SubqueryPreparer::UpdateTableIndex(table_expr_info table_expr_queue,
-                                                   std::set<TableExpr> &original_proj_expr) {
+table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_queue,
+                                                  std::set<TableExpr> &original_proj_expr) {
 	table_expr_info ret;
 	// find if `table_expr_queue` has the `old_table_idx` that need to be updated
 	while (!table_expr_queue.empty()) {
@@ -277,6 +259,74 @@ table_expr_info SubqueryPreparer::UpdateTableIndex(table_expr_info table_expr_qu
 
 	old_table_idx.clear();
 
+	return ret;
+}
+
+unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalOperator> last_subquery,
+                                                             std::set<TableExpr> &original_proj_expr) {
+	D_ASSERT(LogicalOperatorType::LOGICAL_PROJECTION == last_subquery->type);
+	auto &proj_op = last_subquery->Cast<LogicalProjection>();
+	if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == proj_op.children[0]->type) {
+		// update aggregate expressions
+		auto &aggregate_op = proj_op.children[0]->Cast<LogicalAggregate>();
+		for (auto &agg_expr : aggregate_op.expressions) {
+			D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
+			auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
+			for (auto &expr : aggregate_expr.children) {
+				D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
+				auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
+				auto find_it = std::find_if(original_proj_expr.begin(), original_proj_expr.end(),
+				                            [&column_ref_expr](const TableExpr &original_expr) {
+					                            return original_expr.column_name == column_ref_expr.alias;
+				                            });
+				if (find_it != original_proj_expr.end()) {
+					column_ref_expr.binding.table_index = find_it->table_idx;
+					column_ref_expr.binding.column_index = find_it->column_idx;
+				}
+			}
+		}
+	} else {
+		for (auto &expr : proj_op.expressions) {
+			D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
+			auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
+			auto find_it = std::find_if(original_proj_expr.begin(), original_proj_expr.end(),
+			                            [&column_ref_expr](const TableExpr &original_expr) {
+				                            return original_expr.column_name == column_ref_expr.alias;
+			                            });
+			if (find_it != original_proj_expr.end()) {
+				column_ref_expr.binding.table_index = find_it->table_idx;
+				column_ref_expr.binding.column_index = find_it->column_idx;
+			}
+		}
+	}
+	return std::move(last_subquery);
+}
+
+unique_ptr<Expression> SubqueryPreparer::VisitReplace(BoundColumnRefExpression &expr,
+                                                      unique_ptr<Expression> *expr_ptr) {
+	const auto find_expr_it = std::find_if(proj_exprs.begin(), proj_exprs.end(), [&expr](const TableExpr &table_expr) {
+		return table_expr.table_idx == expr.binding.table_index && table_expr.column_idx == expr.binding.column_index;
+	});
+
+	if (find_expr_it != proj_exprs.end()) {
+		expr.binding.table_index = new_table_idx;
+		expr.binding.column_index = std::distance(proj_exprs.begin(), find_expr_it);
+		old_table_idx.emplace(find_expr_it->table_idx);
+	}
+
+	return nullptr;
+}
+
+subquery_queue SubqueryPreparer::UpdateSubqueriesIndex(subquery_queue subqueries) {
+	subquery_queue ret;
+	while (!subqueries.empty()) {
+		auto subquery_vec = std::move(subqueries.front());
+		for (auto &subquery : subquery_vec) {
+			VisitOperator(*subquery);
+		}
+		ret.emplace(std::move(subquery_vec));
+		subqueries.pop();
+	}
 	return ret;
 }
 } // namespace duckdb
