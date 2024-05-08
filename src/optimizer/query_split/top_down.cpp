@@ -6,7 +6,7 @@ unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan
 	// for the first n-1 subqueries, only select the most related nodes/expressions
 	// for the last subquery, merge the previous subqueries
 	unique_ptr<LogicalOperator> subquery;
-#ifdef DEBUG
+#if ENABLE_DEBUG_PRINT
 	// debug
 	plan->Print();
 #endif

@@ -10,7 +10,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
                                                                unique_ptr<LogicalOperator> subquery,
                                                                const table_expr_info &table_expr_queue,
                                                                const std::set<TableExpr> &original_proj_expr) {
-#ifdef DEBUG
+#if ENABLE_DEBUG_PRINT
 	// debug: print subquery
 	Printer::Print("Current subquery");
 	subquery->Print();
@@ -68,7 +68,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 		auto col_ref_select_expr =
 		    make_uniq<BoundColumnRefExpression>(expr_pair.column_name, expr_pair.return_type, binding, 0);
 		new_exprs.emplace_back(std::move(col_ref_select_expr));
-#ifdef DEBUG
+#if ENABLE_DEBUG_PRINT
 		// debug
 		std::string str = "table index: " + std::to_string(binding.table_index) +
 		                  ", column index: " + std::to_string(binding.column_index) +
@@ -86,7 +86,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 	new_plan->expressions.clear();
 	new_plan->expressions = std::move(new_exprs);
 
-#ifdef DEBUG
+#if ENABLE_DEBUG_PRINT
 	// debug: print subquery
 	Printer::Print("Current subquery with projection");
 	new_plan->Print();
@@ -175,14 +175,14 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(const unique_ptr<Lo
 		}
 		ret_ref->children.clear();
 		ret_ref->AddChild(std::move(subquery));
-#ifdef DEBUG
+#if ENABLE_DEBUG_PRINT
 		// debug: print subquery
 		Printer::Print("The last subquery");
 		ret->Print();
 #endif
 		return ret;
 	} else {
-#ifdef DEBUG
+#if ENABLE_DEBUG_PRINT
 		std::string new_idx = "New table index: " + std::to_string(new_table_idx);
 		Printer::Print(new_idx);
 		// debug: print subquery

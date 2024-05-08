@@ -3,8 +3,11 @@
 namespace duckdb {
 
 unique_ptr<LogicalOperator> ForeignKeyCenterSplit::Split(unique_ptr<LogicalOperator> plan) {
-	// debug
+#if ENABLE_DEBUG_PRINT
+	// debug: print subquery
+	Printer::Print("Current subquery");
 	plan->Print();
+#endif
 
 	unique_ptr<LogicalOperator> new_logical_plan = std::move(plan);
 	unique_ptr<LogicalOperator> plan_without_redundant_jon = RemoveRedundantJoin(std::move(new_logical_plan));
@@ -106,32 +109,40 @@ unique_ptr<LogicalOperator> ForeignKeyCenterSplit::Recon(unique_ptr<LogicalOpera
 		                          used_table_entries[column_pair.second.table_index]->name + "." +
 		                          foreign_key_represent.at(column_pair.second).first.Name());
 	}
+#if ENABLE_DEBUG_PRINT
 	Printer::Print("Join Relations (foreign_key -> primary_key):");
 	for (const auto &str : join_dag_str) {
 		Printer::Print(str);
 	}
+#endif
 
 	// debug: try to generate the subqueries
 	for (const auto &ele : subquery_group) {
 		std::vector<unique_ptr<LogicalOperator>> current_level;
 		for (const auto &primary_table_idx : ele.second) {
 			target_tables.emplace(primary_table_idx, used_table_entries[primary_table_idx]);
+#if ENABLE_DEBUG_PRINT
 			// debug: print the foreign key table and primary key table
 			Printer::Print("Target primary tables: ");
 			Printer::Print(used_table_entries[primary_table_idx]->name);
+#endif
 		}
 		target_tables.emplace(ele.first, used_table_entries[ele.first]);
+#if ENABLE_DEBUG_PRINT
 		// debug: print the foreign key table and primary key table
 		Printer::Print("Target foreign tables: ");
 		Printer::Print(used_table_entries[ele.first]->name);
+#endif
 
 		unique_ptr<LogicalOperator> subquery = original_plan->Copy(context);
 		// for the first n-1 subqueries, only select the most related nodes/expressions
 		// for the last subquery, merge the previous subqueries
 		VisitOperator(*subquery);
+#if ENABLE_DEBUG_PRINT
 		// debug: print subquery
 		Printer::Print("Current subquery");
 		subquery->Print();
+#endif
 
 		current_level.emplace_back(std::move(subquery));
 		subqueries.emplace(std::move(current_level));

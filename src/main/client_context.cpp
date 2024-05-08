@@ -384,7 +384,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			table_expr_queue.pop();
 
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
-#ifdef DEBUG
+#if ENABLE_DEBUG_PRINT
 			// debug: print subquery
 			Printer::Print("After PostOptimization");
 			sub_plan->Print();

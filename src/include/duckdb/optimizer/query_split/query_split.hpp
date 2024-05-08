@@ -10,7 +10,8 @@
 
 #include "duckdb/optimizer/query_split/split_algo_factor.hpp"
 
-#define ENABLE_QUERY_SPLIT false
+#define ENABLE_QUERY_SPLIT true
+#define ENABLE_DEBUG_PRINT false
 
 namespace duckdb {
 
