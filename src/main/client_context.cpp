@@ -364,8 +364,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		plan = optimizer.PreOptimize(std::move(plan));
 		D_ASSERT(plan);
 
-		// execute subqueries
-		unique_ptr<DataChunk> data_trunk;
 		QuerySplit query_splitter(*this);
 		plan = query_splitter.Split(std::move(plan));
 		SubqueryPreparer subquery_preparer(*planner.binder, *this);
@@ -373,6 +371,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		auto subqueries = query_splitter.GetSubqueries();
 		auto table_expr_queue = query_splitter.GetTableExprQueue();
 		auto proj_expr = query_splitter.GetProjExpr();
+		unique_ptr<DataChunk> data_trunk;
 		// if it's the last subquery, break and continue the execution of the main stream
 		while (subqueries.size() > 1) {
 			if (subqueries.front().size() > 1) {
