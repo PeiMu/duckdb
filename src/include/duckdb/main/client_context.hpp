@@ -28,6 +28,7 @@
 #include "duckdb/main/stream_query_result.hpp"
 #include "duckdb/main/table_description.hpp"
 #include "duckdb/transaction/transaction_context.hpp"
+#include "duckdb/optimizer/timer_util.h"
 
 namespace duckdb {
 class Appender;

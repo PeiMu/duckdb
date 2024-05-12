@@ -361,6 +361,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 	if (config.enable_optimizer && plan->RequireOptimizer()) {
 		profiler.StartPhase("optimizer");
+		plan->Print();
+		timespec timer = tic();
 		plan = optimizer.PreOptimize(std::move(plan));
 		D_ASSERT(plan);
 
@@ -429,6 +431,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			plan = std::move(subqueries.front()[0]);
 
 		plan = optimizer.PostOptimize(std::move(plan));
+		toc(&timer, "optimization time is\n");
 		profiler.EndPhase();
 
 #ifdef DEBUG
