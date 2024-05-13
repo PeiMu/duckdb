@@ -19,7 +19,7 @@
 </p>
 
 
-# Query Split algorithm based on duckdb (version 10.0.1)
+# Query Split algorithm based on duckdb (version 0.10.1)
 
 
 ## DuckDB
