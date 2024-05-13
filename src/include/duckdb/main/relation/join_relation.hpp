@@ -36,6 +36,11 @@ public:
 	string ToString(idx_t depth) override;
 
 	unique_ptr<TableRef> GetTableRef() override;
+
+	void VisitChildren() override {
+		left->VisitChildren();
+		right->VisitChildren();
+	}
 };
 
 } // namespace duckdb

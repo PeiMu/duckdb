@@ -174,6 +174,13 @@ public:
 	}
 	DUCKDB_API vector<shared_ptr<ExternalDependency>> GetAllDependencies();
 
+	virtual void VisitChildren() {
+		auto child = ChildRelation();
+		if (child) {
+			child->VisitChildren();
+		}
+	}
+
 protected:
 	DUCKDB_API string RenderWhitespace(idx_t depth);
 

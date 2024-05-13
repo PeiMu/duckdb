@@ -344,8 +344,11 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 	if (config.enable_optimizer && plan->RequireOptimizer()) {
 		profiler.StartPhase("optimizer");
+		plan->Print();
+		timespec timer = tic();
 		Optimizer optimizer(*planner.binder, *this);
 		plan = optimizer.Optimize(std::move(plan));
+		toc(&timer, "optimization time is\n");
 		D_ASSERT(plan);
 		profiler.EndPhase();
 

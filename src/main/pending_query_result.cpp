@@ -65,6 +65,7 @@ PendingExecutionResult PendingQueryResult::ExecuteTaskInternal(ClientContextLock
 
 unique_ptr<QueryResult> PendingQueryResult::ExecuteInternal(ClientContextLock &lock) {
 	CheckExecutableInternal(lock);
+	timespec timer = tic();
 	// Busy wait while execution is not finished
 	if (allow_stream_result) {
 		while (!IsFinishedOrBlocked(ExecuteTaskInternal(lock))) {
@@ -78,6 +79,7 @@ unique_ptr<QueryResult> PendingQueryResult::ExecuteInternal(ClientContextLock &l
 	}
 	auto result = context->FetchResultInternal(lock, *this);
 	Close();
+	toc(&timer, "Duckdb::ExecuteInternal execution time is\n");
 	return result;
 }
 

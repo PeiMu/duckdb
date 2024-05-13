@@ -28,6 +28,7 @@
 #include "duckdb/main/client_properties.hpp"
 #include "duckdb/main/client_context_state.hpp"
 #include "duckdb/main/settings.hpp"
+#include "duckdb/optimizer/timer_util.h"
 
 namespace duckdb {
 class Appender;

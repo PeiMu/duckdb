@@ -224,6 +224,7 @@ static constexpr ExtensionFunctionEntry EXTENSION_FUNCTIONS[] = {
     {"tpch", "tpch", CatalogType::PRAGMA_FUNCTION_ENTRY},
     {"tpch_answers", "tpch", CatalogType::TABLE_FUNCTION_ENTRY},
     {"tpch_queries", "tpch", CatalogType::TABLE_FUNCTION_ENTRY},
+    {"query_split", "substrait", CatalogType::TABLE_FUNCTION_ENTRY},
 }; // END_OF_EXTENSION_FUNCTIONS
 
 static constexpr ExtensionEntry EXTENSION_SETTINGS[] = {

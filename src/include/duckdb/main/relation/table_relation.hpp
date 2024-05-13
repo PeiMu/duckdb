@@ -30,6 +30,10 @@ public:
 
 	void Update(const string &update, const string &condition = string()) override;
 	void Delete(const string &condition = string()) override;
+
+	void VisitChildren() override {
+
+	}
 };
 
 } // namespace duckdb
