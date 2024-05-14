@@ -145,15 +145,15 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(const unique_ptr<Lo
 	} else if (previous_result->type == QueryResultType::MATERIALIZED_RESULT) {
 		ColumnDataAppendState append_state;
 		collection->InitializeAppend(append_state);
+		unique_ptr<DataChunk> chunk;
+		ErrorData error;
 		while (true) {
-			unique_ptr<DataChunk> chunk;
-			ErrorData error;
 			previous_result->TryFetch(chunk, error);
-			// todo
-			// chunk->SetCardinality(chunk->size());
 			if (!chunk || chunk->size() == 0) {
 				break;
 			}
+			// set chunk cardinality
+			chunk->SetCardinality(chunk->size());
 			collection->Append(append_state, *chunk);
 		}
 	}
