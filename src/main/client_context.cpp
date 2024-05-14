@@ -29,7 +29,6 @@
 #include "duckdb/main/relation.hpp"
 #include "duckdb/main/stream_query_result.hpp"
 #include "duckdb/optimizer/optimizer.hpp"
-#include "duckdb/optimizer/query_split/query_split.hpp"
 #include "duckdb/optimizer/query_split/subquery_preparer.hpp"
 #include "duckdb/parser/expression/constant_expression.hpp"
 #include "duckdb/parser/expression/parameter_expression.hpp"

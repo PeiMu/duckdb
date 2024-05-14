@@ -12,6 +12,7 @@
 #include "duckdb/planner/logical_operator.hpp"
 #include "duckdb/planner/logical_operator_visitor.hpp"
 #include "duckdb/common/enums/optimizer_type.hpp"
+#include "duckdb/optimizer/query_split/query_split.hpp"
 
 #include <functional>
 
