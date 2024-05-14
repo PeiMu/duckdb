@@ -29,29 +29,44 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 		case LogicalOperatorType::LOGICAL_FILTER:
 			// add filter's column usage
 			table_exprs = GetFilterTableExpr(child->Cast<LogicalFilter>());
-			// check if it's a filter node, otherwise set false
+			// check continuous filter nodes, only split the first one
+			if (!filter_parent) {
+				child->split_point = true;
+				// inherit from the children until it is not a filter
+				auto child_copy = child->Copy(context);
+				while (LogicalOperatorType::LOGICAL_FILTER == child_copy->type) {
+					auto child_exprs = GetFilterTableExpr(child_copy->Cast<LogicalFilter>());
+					table_exprs.insert(child_exprs.begin(), child_exprs.end());
+					child_copy = child_copy->children[0]->Copy(context);
+				}
+				if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child_copy->type) {
+					auto child_exprs = GetJoinTableExpr(child_copy->Cast<LogicalComparisonJoin>());
+					table_exprs.insert(child_exprs.begin(), child_exprs.end());
+				}
+			}
 			filter_parent = true;
-			child->split_point = true;
 			break;
 		case LogicalOperatorType::LOGICAL_COMPARISON_JOIN:
-			table_exprs = GetJoinTableExpr(child->Cast<LogicalComparisonJoin>());
-			if (filter_parent) {
-				filter_parent = false;
-			} else {
+			// if comp_join is the child of filter, we split at the filter node,
+			// and inherit the table_exprs by the filter node
+			if (!filter_parent) {
 				child->split_point = true;
+				table_exprs = GetJoinTableExpr(child->Cast<LogicalComparisonJoin>());
 			}
-			break;
-		default:
 			filter_parent = false;
 			break;
-		}
-		if (!table_exprs.empty()) {
-			same_level_table_exprs.emplace_back(table_exprs);
+		default:
+			child->split_point = false;
+			filter_parent = false;
+			break;
 		}
 		VisitOperator(*child);
 
 		if (child->split_point) {
 			same_level_subqueries.emplace_back(child->Copy(context));
+		}
+		if (!table_exprs.empty()) {
+			same_level_table_exprs.emplace_back(table_exprs);
 		}
 	}
 
