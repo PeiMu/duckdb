@@ -242,6 +242,12 @@ bool RelationManager::ExtractJoinRelations(LogicalOperator &input_op,
 		//		AddRelation(input_op, parent, stats);
 		return false;
 	}
+	case LogicalOperatorType::LOGICAL_CHUNK_GET: {
+		auto &chunk_get = op->Cast<LogicalColumnDataGet>();
+		auto stats = RelationStatisticsHelper::ExtractColumnDataGetStats(chunk_get, context);
+		AddRelation(input_op, parent, stats);
+		return true;
+	}
 	case LogicalOperatorType::LOGICAL_PROJECTION: {
 		auto child_stats = RelationStats();
 		// optimize the child and copy the stats

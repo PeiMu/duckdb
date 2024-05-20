@@ -17,6 +17,14 @@ vector<ColumnBinding> LogicalColumnDataGet::GetColumnBindings() {
 	return GenerateColumnBindings(table_index, chunk_types.size());
 }
 
+idx_t LogicalColumnDataGet::EstimateCardinality(ClientContext &context) {
+	if (has_estimated_cardinality) {
+		return estimated_cardinality;
+	}
+	estimated_cardinality = collection->Count();
+	return estimated_cardinality;
+}
+
 vector<idx_t> LogicalColumnDataGet::GetTableIndex() const {
 	return vector<idx_t> {table_index};
 }

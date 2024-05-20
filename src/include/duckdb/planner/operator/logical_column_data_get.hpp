@@ -31,6 +31,8 @@ public:
 public:
 	vector<ColumnBinding> GetColumnBindings() override;
 
+	idx_t EstimateCardinality(ClientContext &context) override;
+
 	void Serialize(Serializer &serializer) const override;
 	static unique_ptr<LogicalOperator> Deserialize(Deserializer &deserializer);
 

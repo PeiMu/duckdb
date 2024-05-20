@@ -151,6 +151,20 @@ RelationStats RelationStatisticsHelper::ExtractDelimGetStats(LogicalDelimGet &de
 	return stats;
 }
 
+RelationStats RelationStatisticsHelper::ExtractColumnDataGetStats(LogicalColumnDataGet &chunk_get, ClientContext &context) {
+	RelationStats stats;
+	stats.table_name = chunk_get.GetName();
+	idx_t estimated_card = chunk_get.EstimateCardinality(context);
+	stats.cardinality = estimated_card;
+	stats.stats_initialized = true;
+	for (auto &binding : chunk_get.GetColumnBindings()) {
+		stats.column_distinct_count.push_back(DistinctCount({estimated_card, false}));
+		stats.column_names.push_back("column" + to_string(binding.column_index));
+	}
+
+	return stats;
+}
+
 RelationStats RelationStatisticsHelper::ExtractProjectionStats(LogicalProjection &proj, RelationStats &child_stats) {
 	auto proj_stats = RelationStats();
 	proj_stats.cardinality = child_stats.cardinality;
