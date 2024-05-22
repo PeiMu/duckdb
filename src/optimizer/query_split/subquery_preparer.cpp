@@ -39,6 +39,8 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 		// todo: execute in parallel
 
 		last_sibling_exprs = expr_idx_pair_vec[1];
+	} else {
+		last_sibling_exprs.clear();
 	}
 	// collect all columns with the same table
 	// `temp_stack` contains the `TableExpr` info of all the upper-level subqueries,
