@@ -125,9 +125,9 @@ std::set<TableExpr> TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &
 std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter_op) {
 	std::set<TableExpr> table_exprs;
 
-	auto get_column_ref_expr = [&table_exprs, this](const unique_ptr<Expression> &expr) {
+	auto get_column_ref_expr = [&table_exprs, this](const BoundColumnRefExpression &column_ref_expr) {
 		TableExpr table_expr;
-		auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
+		//		auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
 		table_expr.table_idx = column_ref_expr.binding.table_index;
 		table_expr.column_idx = column_ref_expr.binding.column_index;
 		table_expr.column_name = column_ref_expr.alias;
@@ -137,22 +137,63 @@ std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter
 		}
 	};
 
+	auto get_function_expr = [&table_exprs, this, get_column_ref_expr](const BoundFunctionExpression &function_expr) {
+		for (const auto &func_child : function_expr.children) {
+			if (ExpressionType::BOUND_COLUMN_REF == func_child->type) {
+				get_column_ref_expr(func_child->Cast<BoundColumnRefExpression>());
+			} else if (ExpressionType::VALUE_CONSTANT == func_child->type) {
+				// it's a constant value, skip it
+			} else {
+				Printer::Print(StringUtil::Format("Do not support yet, func_child->type:  %s",
+				                                  ExpressionTypeToString(func_child->type)));
+			}
+		}
+	};
+
 	for (const auto &expr : filter_op.expressions) {
 		if (ExpressionType::BOUND_COLUMN_REF == expr->type) {
-			get_column_ref_expr(expr);
+			get_column_ref_expr(expr->Cast<BoundColumnRefExpression>());
 		} else if (ExpressionType::BOUND_FUNCTION == expr->type) {
-			auto &function_expr = expr->Cast<BoundFunctionExpression>();
-			for (const auto &func_child : function_expr.children) {
-				if (ExpressionType::BOUND_COLUMN_REF == func_child->type) {
-					get_column_ref_expr(func_child);
-				} else if (ExpressionType::VALUE_CONSTANT == func_child->type) {
-					// it's a constant value, skip it
-				} else {
-					Printer::Print("Do not support yet");
-				}
+			get_function_expr(expr->Cast<BoundFunctionExpression>());
+		} else if (ExpressionType::CONJUNCTION_OR == expr->type || ExpressionType::CONJUNCTION_AND == expr->type) {
+			auto &conjunction_expr = expr->Cast<BoundConjunctionExpression>();
+			for (const auto &child_expr : conjunction_expr.children) {
+				get_function_expr(child_expr->Cast<BoundFunctionExpression>());
+			}
+		} else if (ExpressionType::COMPARE_NOTEQUAL == expr->type || ExpressionType::COMPARE_EQUAL == expr->type ||
+		           ExpressionType::COMPARE_GREATERTHAN == expr->type ||
+		           ExpressionType::COMPARE_LESSTHAN == expr->type ||
+		           ExpressionType::COMPARE_GREATERTHANOREQUALTO == expr->type ||
+		           ExpressionType::COMPARE_LESSTHANOREQUALTO == expr->type) {
+			auto &comparison_expr = expr->Cast<BoundComparisonExpression>();
+			auto &left_expr = comparison_expr.left;
+			if (ExpressionType::BOUND_COLUMN_REF == left_expr->type) {
+				get_column_ref_expr(left_expr->Cast<BoundColumnRefExpression>());
+			} else if (ExpressionType::VALUE_CONSTANT == left_expr->type) {
+				// it's a constant value, skip it
+			} else {
+				Printer::Print(StringUtil::Format("Do not support yet, left_expr->type:  %s",
+				                                  ExpressionTypeToString(left_expr->type)));
+			}
+
+			auto &right_expr = comparison_expr.right;
+			if (ExpressionType::BOUND_COLUMN_REF == right_expr->type) {
+				get_column_ref_expr(right_expr->Cast<BoundColumnRefExpression>());
+			} else if (ExpressionType::VALUE_CONSTANT == right_expr->type) {
+				// it's a constant value, skip it
+			} else {
+				Printer::Print(StringUtil::Format("Do not support yet, right_expr->type:  %s",
+				                                  ExpressionTypeToString(right_expr->type)));
+			}
+		} else if (ExpressionType::OPERATOR_IS_NULL == expr->type ||
+		           ExpressionType::OPERATOR_IS_NOT_NULL == expr->type) {
+			auto &oper_expr = expr->Cast<BoundOperatorExpression>();
+			for (const auto &child_expr : oper_expr.children) {
+				get_column_ref_expr(child_expr->Cast<BoundColumnRefExpression>());
 			}
 		} else {
-			Printer::Print("Do not support yet");
+			Printer::Print(
+			    StringUtil::Format("Do not support yet, expr->type:  %s", ExpressionTypeToString(expr->type)));
 		}
 	}
 	return table_exprs;
