@@ -145,7 +145,7 @@ unique_ptr<LogicalOperator> ForeignKeyCenterSplit::Recon(unique_ptr<LogicalOpera
 #endif
 
 		current_level.emplace_back(std::move(subquery));
-		subqueries.emplace(std::move(current_level));
+		subqueries.emplace_back(std::move(current_level));
 	}
 
 	// todo: decide which one to execute

@@ -43,7 +43,7 @@ struct TableExprHash {
 
 enum EnumSplitAlgorithm { foreign_key_center = 1, min_sub_query, top_down };
 
-using subquery_queue = std::queue<std::vector<unique_ptr<LogicalOperator>>>;
+using subquery_queue = std::deque<std::vector<unique_ptr<LogicalOperator>>>;
 using table_expr_info = std::queue<std::vector<std::set<TableExpr>>>;
 
 class SplitAlgorithm : public LogicalOperatorVisitor {

@@ -45,6 +45,13 @@ public:
 		return std::move(query_splitter->subqueries);
 	}
 
+	std::queue<std::set<idx_t>> GetUsedTableQueue() {
+		if (nullptr == query_splitter)
+			return std::queue<std::set<idx_t>>();
+		auto top_down_splitter = dynamic_cast<TopDownSplit *>(query_splitter.get());
+		return top_down_splitter->GetUsedTableQueue();
+	}
+
 private:
 	ClientContext &context;
 	std::unique_ptr<SplitAlgorithm> query_splitter;

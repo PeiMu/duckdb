@@ -365,6 +365,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		plan = optimizer.PreOptimize(std::move(plan));
 		D_ASSERT(plan);
 
+		// todo: reconstruct to a balanced logical plan, to avoid missing the global optimization
 		QuerySplit query_splitter(*this);
 		plan = query_splitter.Split(std::move(plan));
 		SubqueryPreparer subquery_preparer(*planner.binder, *this);
@@ -372,6 +373,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		auto subqueries = query_splitter.GetSubqueries();
 		auto table_expr_queue = query_splitter.GetTableExprQueue();
 		auto proj_expr = query_splitter.GetProjExpr();
+		auto used_table_queue = query_splitter.GetUsedTableQueue();
 		unique_ptr<DataChunk> data_trunk;
 		// if it's the last subquery, break and continue the execution of the main stream
 		while (subqueries.size() > 1) {
@@ -379,10 +381,11 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				// todo: execute in parallel
 			}
 
-			auto sub_plan =
-			    subquery_preparer.GenerateProjHead(plan, std::move(subqueries.front()[0]), table_expr_queue, proj_expr);
-			subqueries.pop();
+			auto sub_plan = subquery_preparer.GenerateProjHead(plan, std::move(subqueries.front()[0]), table_expr_queue,
+			                                                   proj_expr, used_table_queue.front());
+			subqueries.pop_front();
 			table_expr_queue.pop();
+			used_table_queue.pop();
 
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
 #if ENABLE_DEBUG_PRINT
@@ -418,7 +421,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			subqueries.front()[0] = subquery_preparer.MergeDataChunk(plan, std::move(subqueries.front()[0]),
 			                                                         std::move(subquery_result), last_subquery);
 
-			subqueries = subquery_preparer.UpdateSubqueriesIndex(std::move(subqueries));
+			subquery_preparer.UpdateSubqueriesIndex(subqueries);
 			table_expr_queue = subquery_preparer.UpdateTableExpr(table_expr_queue, proj_expr);
 			if (last_subquery) {
 				// todo: update projection head

@@ -14,6 +14,8 @@
 #include "duckdb/planner/expression/bound_conjunction_expression.hpp"
 #include "duckdb/planner/expression/bound_comparison_expression.hpp"
 #include "duckdb/planner/expression/bound_operator_expression.hpp"
+#include "duckdb/planner/operator/logical_cross_product.hpp"
+#include "duckdb/planner/filter/conjunction_filter.hpp"
 
 namespace duckdb {
 
@@ -34,6 +36,10 @@ public:
 		return proj_expr;
 	}
 
+	std::queue<std::set<idx_t>> GetUsedTableQueue() {
+		return used_table_queue;
+	}
+
 protected:
 	//! Extract the subquery in the top-down order, and insert
 	//! the operations of the same level to `subqueries`
@@ -47,11 +53,18 @@ private:
 	void GetAggregateTableExpr(const LogicalAggregate &aggregate_op);
 	//! get the `table_expr_queue` by checking which column is used in the join
 	std::set<TableExpr> GetJoinTableExpr(const LogicalComparisonJoin &join_op);
+	//! get the `table_expr_queue` by checking which column is used in the cross_product
+	std::set<TableExpr> GetCrossProductTableExpr(const LogicalCrossProduct &product_op);
 	//! get the `table_expr_queue` by checking which column is used in the filter
 	std::set<TableExpr> GetFilterTableExpr(const LogicalFilter &filter_op);
+	//! get the `table_expr_queue` by checking which column is used in the SEQ_SCAN
+	std::set<TableExpr> GetSeqScanTableExpr(const LogicalGet &get_op);
 
 	//! Collect all used tables into `used_tables`
 	void GetTargetTables(LogicalOperator &op);
+
+	void CollectUsedTablePerLevel();
+	void CollectUsedTable(const unique_ptr<LogicalOperator> &subquery, std::set<idx_t> &table_in_subquery);
 
 private:
 	bool filter_parent = false;
@@ -59,6 +72,8 @@ private:
 	// the collection of necessary table/column information in a top-down order, e.g. the lowest level is the last
 	// element in the stack and will be got first. PS: we only modify it in `VisitOperator`
 	table_expr_info table_expr_queue;
+	// the collection of the used tables of the current level
+	std::queue<std::set<idx_t>> used_table_queue;
 	// table index, table entry
 	std::unordered_map<idx_t, LogicalGet *> used_tables;
 	// expressions in the projection node

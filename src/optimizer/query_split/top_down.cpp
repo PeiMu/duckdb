@@ -12,6 +12,7 @@ unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan
 #endif
 	GetTargetTables(*plan);
 	VisitOperator(*plan);
+	CollectUsedTablePerLevel();
 	return std::move(plan);
 }
 
@@ -19,13 +20,21 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 	std::vector<unique_ptr<LogicalOperator>> same_level_subqueries;
 	std::vector<std::set<TableExpr>> same_level_table_exprs;
 
+	// Since we don't split at CROSS_PRODUCT, we don't split its sibling
+	// todo: this should be fixed after supporting parallel execution
+	bool cross_product_sibling = false;
+
 	// For now, we only check logical_filter and logical_comparison_join.
 	// Basically, the split point is based on logical_comparison_join,
 	// but if it has a logical_filter parent, then we split at the
 	// logical_filter node.
 	for (auto &child : op.children) {
 		std::set<TableExpr> table_exprs;
+		if (cross_product_sibling)
+			break;
 		switch (child->type) {
+		// todo: potentially we can fuse CROSS_PRODUCT+FILTER or JOIN+FILTER,
+		// if the other child node is not CROSS_PRODUCT, JOIN nor FILTER
 		case LogicalOperatorType::LOGICAL_FILTER:
 			// add filter's column usage
 			table_exprs = GetFilterTableExpr(child->Cast<LogicalFilter>());
@@ -55,6 +64,11 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 			}
 			filter_parent = false;
 			break;
+		case LogicalOperatorType::LOGICAL_CROSS_PRODUCT:
+			cross_product_sibling = true;
+			child->split_point = false;
+			filter_parent = false;
+			break;
 		default:
 			child->split_point = false;
 			filter_parent = false;
@@ -72,7 +86,7 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 
 	D_ASSERT(same_level_subqueries.size() <= 2);
 	if (!same_level_subqueries.empty()) {
-		subqueries.emplace(std::move(same_level_subqueries));
+		subqueries.emplace_back(std::move(same_level_subqueries));
 	}
 	D_ASSERT(same_level_table_exprs.size() <= 2);
 	if (!same_level_table_exprs.empty()) {
@@ -119,6 +133,30 @@ std::set<TableExpr> TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &
 		if (used_tables.count(current_right_table.table_idx))
 			table_exprs.emplace(current_right_table);
 	}
+	return table_exprs;
+}
+
+std::set<TableExpr> TopDownSplit::GetCrossProductTableExpr(const duckdb::LogicalCrossProduct &product_op) {
+	std::set<TableExpr> table_exprs;
+	TableExpr cross_product_table_expr;
+	cross_product_table_expr.cross_product = true;
+	table_exprs.emplace(cross_product_table_expr);
+	return table_exprs;
+}
+
+std::set<TableExpr> TopDownSplit::GetSeqScanTableExpr(const LogicalGet &get_op) {
+	std::set<TableExpr> table_exprs;
+	for (const auto &table_filter : get_op.table_filters.filters) {
+		TableExpr table_filter_expr;
+		table_filter_expr.table_idx = get_op.table_index;
+		auto column_idx_it = std::find(get_op.column_ids.begin(), get_op.column_ids.end(), table_filter.first);
+		D_ASSERT(column_idx_it != get_op.column_ids.end());
+		table_filter_expr.column_idx = column_idx_it - get_op.column_ids.begin();
+		table_filter_expr.column_name = get_op.names[table_filter.first];
+		table_filter_expr.return_type = get_op.returned_types[table_filter.first];
+		table_exprs.emplace(table_filter_expr);
+	}
+
 	return table_exprs;
 }
 
@@ -235,6 +273,28 @@ void TopDownSplit::GetAggregateTableExpr(const LogicalAggregate &aggregate_op) {
 				proj_expr.emplace(table_expr);
 			}
 		}
+	}
+}
+
+void TopDownSplit::CollectUsedTable(const unique_ptr<LogicalOperator> &subquery, std::set<idx_t> &table_in_subquery) {
+	for (const auto& child : subquery->children) {
+		if (LogicalOperatorType::LOGICAL_GET == child->type) {
+			auto &get_op = child->Cast<LogicalGet>();
+			table_in_subquery.emplace(get_op.table_index);
+		}
+		if (child->split_point)
+			continue;
+		CollectUsedTable(child, table_in_subquery);
+	}
+}
+
+void TopDownSplit::CollectUsedTablePerLevel() {
+	for (const auto& temp_subquery_vec : subqueries) {
+		std::set<idx_t> table_in_current_level;
+		for (const auto& temp_subquery : temp_subquery_vec) {
+			CollectUsedTable(std::move(temp_subquery), table_in_current_level);
+		}
+		used_table_queue.emplace(table_in_current_level);
 	}
 }
 

@@ -33,7 +33,8 @@ public:
 	unique_ptr<LogicalOperator> GenerateProjHead(const unique_ptr<LogicalOperator> &original_plan,
 	                                             unique_ptr<LogicalOperator> subquery,
 	                                             const table_expr_info &table_expr_queue,
-	                                             const std::set<TableExpr> &original_proj_expr);
+	                                             const std::set<TableExpr> &original_proj_expr,
+	                                             const std::set<idx_t> &curren_level_used_table);
 
 	//! Adapt the selection node to the query AST
 	shared_ptr<PreparedStatementData> AdaptSelect(shared_ptr<PreparedStatementData> original_stmt_data,
@@ -45,12 +46,12 @@ public:
 	                                           std::set<TableExpr> &original_proj_expr);
 
 	//! update the table_idx and column_idx
-	subquery_queue UpdateSubqueriesIndex(subquery_queue subqueries);
+	void UpdateSubqueriesIndex(subquery_queue &subqueries);
 
 private:
 	//! 1. find the insert point and insert the `ColumnDataGet` node to the logical plan;
 	//! 2. update the table_idx and column_idx
-	void MergeToSubquery(LogicalOperator &op);
+	void MergeToSubquery(LogicalOperator &op, bool &merged);
 	//! Because the `chunk_scan` will create a new table index and contains the result of all tables (SEQ SCAN) of the
 	//! current level, it is necessary to replace the index of the related expressions
 	unique_ptr<Expression> VisitReplace(BoundColumnRefExpression &expr, unique_ptr<Expression> *expr_ptr) override;
