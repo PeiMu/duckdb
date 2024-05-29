@@ -40,7 +40,8 @@ public:
 	shared_ptr<PreparedStatementData> AdaptSelect(shared_ptr<PreparedStatementData> original_stmt_data,
 	                                              const unique_ptr<LogicalOperator> &subquery);
 
-	table_expr_info UpdateTableExpr(table_expr_info table_expr_queue, std::set<TableExpr> &original_proj_expr);
+	table_expr_info UpdateTableExpr(table_expr_info table_expr_queue, std::set<TableExpr> &original_proj_expr,
+	                                std::set<idx_t> &curren_level_used_table);
 
 	unique_ptr<LogicalOperator> UpdateProjHead(unique_ptr<LogicalOperator> last_subquery,
 	                                           std::set<TableExpr> &original_proj_expr);

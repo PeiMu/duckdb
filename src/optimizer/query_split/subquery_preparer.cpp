@@ -221,7 +221,8 @@ void SubqueryPreparer::MergeToSubquery(LogicalOperator &op, bool &merged) {
 }
 
 table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_queue,
-                                                  std::set<TableExpr> &original_proj_expr) {
+                                                  std::set<TableExpr> &original_proj_expr,
+                                                  std::set<idx_t> &curren_level_used_table) {
 	table_expr_info ret;
 	// find if `table_expr_queue` has the `old_table_idx` that need to be updated
 	while (!table_expr_queue.empty()) {
@@ -271,6 +272,9 @@ table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_que
 			it++;
 		}
 	}
+
+	// add new_table_idx to "curren_level_used_table" since the merged CHUNK's table index is "new_table_idx"
+	curren_level_used_table.emplace(new_table_idx);
 
 	old_table_idx.clear();
 

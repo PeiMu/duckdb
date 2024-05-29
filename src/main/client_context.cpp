@@ -422,7 +422,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			                                                         std::move(subquery_result), last_subquery);
 
 			subquery_preparer.UpdateSubqueriesIndex(subqueries);
-			table_expr_queue = subquery_preparer.UpdateTableExpr(table_expr_queue, proj_expr);
+			table_expr_queue = subquery_preparer.UpdateTableExpr(table_expr_queue, proj_expr, used_table_queue.front());
 			if (last_subquery) {
 				// todo: update projection head
 				subqueries.front()[0] = subquery_preparer.UpdateProjHead(std::move(subqueries.front()[0]), proj_expr);

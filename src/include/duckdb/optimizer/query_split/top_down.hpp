@@ -74,6 +74,8 @@ private:
 	table_expr_info table_expr_queue;
 	// the collection of the used tables of the current level
 	std::queue<std::set<idx_t>> used_table_queue;
+	// todo: fix this when supporting parallel execution
+	std::set<idx_t> sibling_used_table;
 	// table index, table entry
 	std::unordered_map<idx_t, LogicalGet *> used_tables;
 	// expressions in the projection node

@@ -291,10 +291,13 @@ void TopDownSplit::CollectUsedTable(const unique_ptr<LogicalOperator> &subquery,
 void TopDownSplit::CollectUsedTablePerLevel() {
 	for (const auto& temp_subquery_vec : subqueries) {
 		std::set<idx_t> table_in_current_level;
-		for (const auto& temp_subquery : temp_subquery_vec) {
-			CollectUsedTable(std::move(temp_subquery), table_in_current_level);
-		}
+		// todo: fix this when supporting parallel execution
+		CollectUsedTable(temp_subquery_vec[0], table_in_current_level);
+		table_in_current_level.insert(sibling_used_table.begin(), sibling_used_table.end());
 		used_table_queue.emplace(table_in_current_level);
+		sibling_used_table.clear();
+		if (2 == temp_subquery_vec.size())
+			CollectUsedTable(temp_subquery_vec[1], sibling_used_table);
 	}
 }
 
