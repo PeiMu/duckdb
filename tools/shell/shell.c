@@ -13119,7 +13119,6 @@ static int shell_exec(
   const char *zSql,                         /* SQL to be evaluated */
   char **pzErrMsg                           /* Error msg written here */
 ){
-  clock_t before = clock();
   sqlite3_stmt *pStmt = NULL;     /* Statement to execute. */
   int rc = SQLITE_OK;             /* Return Code */
   int rc2;
@@ -13265,10 +13264,6 @@ static int shell_exec(
       }
     }
   } /* end while */
-
-  clock_t difference = clock() - before;
-  int msec = difference * 1000 / CLOCKS_PER_SEC;
-  printf("Time taken %d.%d seconds\n", msec/1000, msec%1000);
 
   return rc;
 }
@@ -20063,6 +20058,7 @@ int SQLITE_CDECL main(int argc, char **argv){
 int SQLITE_CDECL wmain(int argc, wchar_t **wargv){
   char **argv;
 #endif
+	clock_t before = clock();
   char *zErrMsg = 0;
   ShellState data;
   const char *zInitFile = 0;
@@ -20629,5 +20625,10 @@ int SQLITE_CDECL wmain(int argc, wchar_t **wargv){
   /* Clear the global data structure so that valgrind will detect memory
   ** leaks */
   memset(&data, 0, sizeof(data));
+
+  clock_t difference = clock() - before;
+  int msec = difference * 1000 / CLOCKS_PER_SEC;
+  printf("Time taken %d.%d seconds\n", msec/1000, msec%1000);
+
   return rc;
 }
