@@ -139,7 +139,7 @@ std::set<TableExpr> TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &
 std::set<TableExpr> TopDownSplit::GetCrossProductTableExpr(const duckdb::LogicalCrossProduct &product_op) {
 	std::set<TableExpr> table_exprs;
 	TableExpr cross_product_table_expr;
-	cross_product_table_expr.cross_product = true;
+//	cross_product_table_expr.cross_product = true;
 	table_exprs.emplace(cross_product_table_expr);
 	return table_exprs;
 }
