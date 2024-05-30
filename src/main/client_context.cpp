@@ -360,10 +360,14 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 	if (config.enable_optimizer && plan->RequireOptimizer()) {
 		profiler.StartPhase("optimizer");
-		plan->Print();
 		timespec timer = tic();
 		plan = optimizer.PreOptimize(std::move(plan));
+#if ENABLE_DEBUG_PRINT
 		D_ASSERT(plan);
+		// debug: print subquery
+		Printer::Print("After PreOptimization");
+		plan->Print();
+#endif
 
 		// todo: reconstruct to a balanced logical plan, to avoid missing the global optimization
 		QuerySplit query_splitter(*this);
