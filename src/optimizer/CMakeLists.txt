@@ -6,6 +6,7 @@ add_subdirectory(pushdown)
 add_subdirectory(rule)
 add_subdirectory(statistics)
 add_subdirectory(query_split)
+add_subdirectory(join_push_down)
 
 add_library_unity(
   duckdb_optimizer

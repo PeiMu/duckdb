@@ -369,6 +369,12 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		plan->Print();
 #endif
 
+		// todo: check if the logical plan has CROSS_PRODUCT, and move down the last JOIN
+		JoinPushDown join_push_down(*this);
+		while (join_push_down.HasCrossProduct(plan) && join_push_down.IsNecessaryToRewrite(plan)) {
+			plan = join_push_down.Rewrite(std::move(plan));
+		}
+
 		// todo: reconstruct to a balanced logical plan, to avoid missing the global optimization
 		QuerySplit query_splitter(*this);
 		plan = query_splitter.Split(std::move(plan));
