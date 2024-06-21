@@ -18,6 +18,7 @@
 #include "duckdb/planner/operator/logical_filter.hpp"
 #include "duckdb/planner/operator/logical_get.hpp"
 
+#include <queue>
 #include <unordered_map>
 #include <vector>
 
