@@ -27,7 +27,7 @@ public:
 	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan);
 	void MergeSubquery(unique_ptr<LogicalOperator> &plan,
 	                                          unique_ptr<LogicalOperator> subquery);
-	bool Rewrite(unique_ptr<LogicalOperator> &plan);
+	unique_ptr<LogicalOperator> Rewrite(unique_ptr<LogicalOperator> &plan, bool &needToSplit);
 
 	unique_ptr<LogicalOperator> UnMergeSubquery(unique_ptr<LogicalOperator> &uniquePtr);
 

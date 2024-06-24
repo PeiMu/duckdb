@@ -380,7 +380,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			if (!subqueries.empty()) {
 				query_splitter.MergeSubquery(plan, std::move(subqueries.front()[0]));
 			}
-			needToSplit = query_splitter.Rewrite(plan) || needToSplit;
+			bool rewritten = false;
+			plan = query_splitter.Rewrite(plan, rewritten);
+			needToSplit |= rewritten;
 
 			if (needToSplit) {
 				plan = query_splitter.Split(std::move(plan));

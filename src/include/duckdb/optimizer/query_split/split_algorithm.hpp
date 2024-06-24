@@ -62,8 +62,8 @@ public:
 		return std::move(plan);
 	}
 
-	virtual bool Rewrite(unique_ptr<LogicalOperator> &plan) {
-		return false;
+	virtual unique_ptr<LogicalOperator> Rewrite(unique_ptr<LogicalOperator> &plan, bool &needToSplit) {
+		return nullptr;
 	}
 
 public:

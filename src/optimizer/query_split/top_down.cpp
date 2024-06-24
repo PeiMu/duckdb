@@ -337,11 +337,13 @@ unique_ptr<LogicalOperator> TopDownSplit::UnMergeSubquery(unique_ptr<LogicalOper
 	return std::move(plan_pointer->children[0]);
 }
 
-bool TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &plan) {
+unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &plan, bool &needToSplit) {
 	switch (plan->type) {
 	case LogicalOperatorType::LOGICAL_TRANSACTION:
-	case LogicalOperatorType::LOGICAL_PRAGMA:
-		return false; // skip optimizing simple & often-occurring plans unaffected by rewrites
+	case LogicalOperatorType::LOGICAL_PRAGMA: {
+		needToSplit = false;
+		return std::move(plan); // skip optimizing simple & often-occurring plans unaffected by rewrites
+	}
 	default:
 		break;
 	}
@@ -353,8 +355,10 @@ bool TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &plan) {
 		op_child = op_child->children[0].get();
 		op_levels++;
 	}
-	if (op_child->children.empty())
-		return false;
+	if (op_child->children.empty()) {
+		needToSplit = false;
+		return std::move(plan);
+	}
 
 	auto &last_join = op_child->Cast<LogicalComparisonJoin>();
 
@@ -375,13 +379,13 @@ bool TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &plan) {
 	// 2. collect all tables below the last JOIN
 	std::unordered_map<idx_t, unique_ptr<LogicalOperator>> table_blocks;
 
-	auto below_op = op_child;
-	while (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == below_op->children[0]->type) {
-		below_op = below_op->children[0].get();
-		auto &cross_product_op = below_op->Cast<LogicalCrossProduct>();
+	auto last_cross_product = op_child;
+	while (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == last_cross_product->children[0]->type) {
+		last_cross_product = last_cross_product->children[0].get();
+		auto &cross_product_op = last_cross_product->Cast<LogicalCrossProduct>();
 		InsertTableBlocks(cross_product_op.children[1], table_blocks);
 	}
-	auto &last_block = below_op->Cast<LogicalCrossProduct>().children[0];
+	auto &last_block = last_cross_product->Cast<LogicalCrossProduct>().children[0];
 
 #if ENABLE_DEBUG_PRINT
 	// debug
@@ -404,32 +408,51 @@ bool TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &plan) {
 		}
 	}
 
-	if (unused_blocks.empty())
-		return false;
+	if (unused_blocks.empty()) {
+		needToSplit = false;
+		return std::move(plan);
+	}
 
-	auto right_child = last_join.children[1]->Copy(context);
-	last_join.children.clear();
-	last_join.AddChild(std::move(below_cross_product));
-	last_join.AddChild(std::move(right_child));
+	last_join.children[0] = std::move(below_cross_product);
+	auto reordered_plan = plan.get();
+	for (int level_id = 0; level_id < op_levels - 1; level_id++) {
+		reordered_plan = reordered_plan->children[0].get();
+	}
+//	unique_ptr<LogicalOperator> above_cross_product(&last_join);
+	unique_ptr<LogicalOperator> above_cross_product = std::move(reordered_plan->children[0]);
 
-	auto above_cross_product = last_join.Copy(context);
 	while (!unused_blocks.empty()) {
 		above_cross_product =
 		    LogicalCrossProduct::Create(std::move(above_cross_product), std::move(unused_blocks.front()));
 		unused_blocks.pop();
 	}
+#if ENABLE_DEBUG_PRINT
+	Printer::Print("above_cross_product");
+	above_cross_product->Print();
+#endif
 
 	// get the position to reorder
-	auto reordered_plan = plan.get();
+	reordered_plan = plan.get();
 	for (int level_id = 0; level_id < op_levels - 1; level_id++) {
 		reordered_plan = reordered_plan->children[0].get();
 	}
-	right_child = reordered_plan->children[1]->Copy(context);
-	reordered_plan->children.clear();
-	reordered_plan->AddChild(std::move(above_cross_product));
-	reordered_plan->AddChild(std::move(right_child));
+	reordered_plan->children[0] = std::move(above_cross_product);
 
-	return true;
+//	right_child = reordered_plan->children[1]->Copy(context);
+//	reordered_plan->children.clear();
+//	reordered_plan->AddChild(std::move(above_cross_product));
+//	reordered_plan->AddChild(std::move(right_child));
+
+//	unique_ptr<LogicalOperator> tmp = std::move(above_cross_product);
+//	auto new_plan = plan->Copy(context);
+//	auto last_op = new_plan.get();
+//	for (int idx = 0; idx < op_levels - 1; idx++) {
+//		last_op = last_op->children[0].get();
+//	}
+//	last_op->children[0] = std::move(tmp);
+//	needToSplit = true;
+
+	return std::move(plan);
 }
 
 void TopDownSplit::InsertTableBlocks(unique_ptr<LogicalOperator> &op,

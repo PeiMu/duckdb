@@ -29,7 +29,7 @@ public:
 	// todo: extract to a stand-alone class?
 	void MergeSubquery(unique_ptr<LogicalOperator> &plan, unique_ptr<LogicalOperator> subquery) override;
 	unique_ptr<LogicalOperator> UnMergeSubquery(unique_ptr<LogicalOperator> &plan) override;
-	bool Rewrite(unique_ptr<LogicalOperator> &plan) override;
+	unique_ptr<LogicalOperator> Rewrite(unique_ptr<LogicalOperator> &plan, bool &needToSplit) override;
 
 public:
 	table_expr_info GetTableExprQueue() {
