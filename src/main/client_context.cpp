@@ -369,24 +369,36 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		plan->Print();
 #endif
 
-		// todo: check if the logical plan has CROSS_PRODUCT, and move down the last JOIN
-		JoinPushDown join_push_down(*this);
-//		while (join_push_down.HasCrossProduct(plan) && join_push_down.IsNecessaryToRewrite(plan)) {
-			plan = join_push_down.Rewrite(std::move(plan));
-//		}
-
+		bool needToSplit = ENABLE_QUERY_SPLIT;
+		subquery_queue subqueries;
+		table_expr_info table_expr_queue;
+		std::set<TableExpr> proj_expr;
+		std::queue<std::set<idx_t>> used_table_queue;
 		// todo: reconstruct to a balanced logical plan, to avoid missing the global optimization
 		QuerySplit query_splitter(*this);
-		plan = query_splitter.Split(std::move(plan));
-		SubqueryPreparer subquery_preparer(*planner.binder, *this);
+		while (ENABLE_QUERY_SPLIT) {
+			if (!subqueries.empty()) {
+				query_splitter.MergeSubquery(plan, std::move(subqueries.front()[0]));
+			}
+			needToSplit = query_splitter.Rewrite(plan) || needToSplit;
 
-		auto subqueries = query_splitter.GetSubqueries();
-		auto table_expr_queue = query_splitter.GetTableExprQueue();
-		auto proj_expr = query_splitter.GetProjExpr();
-		auto used_table_queue = query_splitter.GetUsedTableQueue();
-		unique_ptr<DataChunk> data_trunk;
-		// if it's the last subquery, break and continue the execution of the main stream
-		while (subqueries.size() > 1) {
+			if (needToSplit) {
+				plan = query_splitter.Split(std::move(plan));
+				subqueries = query_splitter.GetSubqueries();
+				table_expr_queue = query_splitter.GetTableExprQueue();
+				proj_expr = query_splitter.GetProjExpr();
+				used_table_queue = query_splitter.GetUsedTableQueue();
+				needToSplit = false;
+			} else {
+				// we don't want to copy the data chunk, so it's better to move back the `subqueries.front()[0]`
+				subqueries.front()[0] = query_splitter.UnMergeSubquery(plan);
+			}
+			if (subqueries.empty())
+				break;
+
+			SubqueryPreparer subquery_preparer(*planner.binder, *this);
+			unique_ptr<DataChunk> data_trunk;
+			// if it's the last subquery, break and continue the execution of the main stream
 			if (subqueries.front().size() > 1) {
 				// todo: execute in parallel
 			}
@@ -435,12 +447,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			table_expr_queue = subquery_preparer.UpdateTableExpr(table_expr_queue, proj_expr, used_table_queue.front());
 			if (last_subquery) {
 				// todo: update projection head
-				subqueries.front()[0] = subquery_preparer.UpdateProjHead(std::move(subqueries.front()[0]), proj_expr);
+				plan = subquery_preparer.UpdateProjHead(std::move(subqueries.front()[0]), proj_expr);
+				break;
 			}
 		}
-
-		if (1 == subqueries.size())
-			plan = std::move(subqueries.front()[0]);
 
 		plan = optimizer.PostOptimize(std::move(plan));
 		toc(&timer, "optimization time is\n");

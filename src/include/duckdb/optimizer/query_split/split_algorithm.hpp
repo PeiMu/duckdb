@@ -55,6 +55,17 @@ public:
 		return std::move(plan);
 	};
 
+	virtual void MergeSubquery(unique_ptr<LogicalOperator> &plan, unique_ptr<LogicalOperator> subquery) {
+	}
+
+	virtual unique_ptr<LogicalOperator> UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
+		return std::move(plan);
+	}
+
+	virtual bool Rewrite(unique_ptr<LogicalOperator> &plan) {
+		return false;
+	}
+
 public:
 	//! the collection of all levels of subqueries in a bottom-up order, e.g. the lowest level subquery is the first
 	//! element in the queue and will be executed first

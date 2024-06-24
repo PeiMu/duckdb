@@ -13,7 +13,6 @@
 #include "duckdb/planner/logical_operator_visitor.hpp"
 #include "duckdb/common/enums/optimizer_type.hpp"
 #include "duckdb/optimizer/query_split/query_split.hpp"
-#include "duckdb/optimizer/join_push_down/join_push_down.hpp"
 
 #include <functional>
 

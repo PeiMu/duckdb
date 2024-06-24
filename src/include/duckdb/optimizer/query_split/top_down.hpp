@@ -10,12 +10,12 @@
 
 #include "duckdb/catalog/catalog_entry/table_catalog_entry.hpp"
 #include "duckdb/optimizer/query_split/split_algorithm.hpp"
-#include "duckdb/planner/expression/bound_function_expression.hpp"
-#include "duckdb/planner/expression/bound_conjunction_expression.hpp"
 #include "duckdb/planner/expression/bound_comparison_expression.hpp"
+#include "duckdb/planner/expression/bound_conjunction_expression.hpp"
+#include "duckdb/planner/expression/bound_function_expression.hpp"
 #include "duckdb/planner/expression/bound_operator_expression.hpp"
-#include "duckdb/planner/operator/logical_cross_product.hpp"
 #include "duckdb/planner/filter/conjunction_filter.hpp"
+#include "duckdb/planner/operator/logical_cross_product.hpp"
 
 namespace duckdb {
 
@@ -26,6 +26,10 @@ public:
 	~TopDownSplit() override = default;
 	//! Perform Query Split
 	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) override;
+	// todo: extract to a stand-alone class?
+	void MergeSubquery(unique_ptr<LogicalOperator> &plan, unique_ptr<LogicalOperator> subquery) override;
+	unique_ptr<LogicalOperator> UnMergeSubquery(unique_ptr<LogicalOperator> &plan) override;
+	bool Rewrite(unique_ptr<LogicalOperator> &plan) override;
 
 public:
 	table_expr_info GetTableExprQueue() {
@@ -66,6 +70,9 @@ private:
 	void CollectUsedTablePerLevel();
 	void CollectUsedTable(const unique_ptr<LogicalOperator> &subquery, std::set<idx_t> &table_in_subquery);
 
+	void InsertTableBlocks(unique_ptr<LogicalOperator> &op,
+	                       unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks);
+
 private:
 	bool filter_parent = false;
 
@@ -80,6 +87,9 @@ private:
 	std::unordered_map<idx_t, LogicalGet *> used_tables;
 	// expressions in the projection node
 	std::set<TableExpr> proj_expr;
+
+	//
+	int op_levels = 0;
 };
 
 } // namespace duckdb

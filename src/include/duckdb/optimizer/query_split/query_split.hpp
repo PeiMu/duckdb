@@ -11,16 +11,25 @@
 #include "duckdb/optimizer/query_split/split_algo_factor.hpp"
 
 #define ENABLE_QUERY_SPLIT true
-#define ENABLE_DEBUG_PRINT false
+#define ENABLE_DEBUG_PRINT true
 
 namespace duckdb {
 
 class QuerySplit {
 public:
-	explicit QuerySplit(ClientContext &context) : context(context) {};
+	explicit QuerySplit(ClientContext &context) : context(context) {
+		EnumSplitAlgorithm split_algorithm = top_down;
+		if (nullptr == query_splitter)
+			query_splitter = SplitAlgorithmFactor::CreateSplitter(context, split_algorithm);
+	};
 	~QuerySplit() = default;
 	//! Perform Query Split
 	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan);
+	void MergeSubquery(unique_ptr<LogicalOperator> &plan,
+	                                          unique_ptr<LogicalOperator> subquery);
+	bool Rewrite(unique_ptr<LogicalOperator> &plan);
+
+	unique_ptr<LogicalOperator> UnMergeSubquery(unique_ptr<LogicalOperator> &uniquePtr);
 
 public:
 	table_expr_info GetTableExprQueue() {
