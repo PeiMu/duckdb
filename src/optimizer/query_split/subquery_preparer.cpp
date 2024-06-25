@@ -343,4 +343,12 @@ void SubqueryPreparer::UpdateSubqueriesIndex(subquery_queue &subqueries) {
 		}
 	}
 }
+
+void SubqueryPreparer::MergeSubquery(unique_ptr<LogicalOperator> &plan, unique_ptr<LogicalOperator> subquery) {
+
+}
+
+void SubqueryPreparer::UpdatePlanIndex(unique_ptr<LogicalOperator> &plan) {
+	VisitOperator(*plan);
+}
 } // namespace duckdb

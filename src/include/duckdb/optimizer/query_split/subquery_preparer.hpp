@@ -48,6 +48,9 @@ public:
 
 	//! update the table_idx and column_idx
 	void UpdateSubqueriesIndex(subquery_queue &subqueries);
+	void UpdatePlanIndex(unique_ptr<LogicalOperator> &plan);
+
+	void MergeSubquery(unique_ptr<LogicalOperator> &plan, unique_ptr<LogicalOperator> subquery);
 
 private:
 	//! 1. find the insert point and insert the `ColumnDataGet` node to the logical plan;

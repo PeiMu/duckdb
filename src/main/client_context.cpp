@@ -376,9 +376,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		std::queue<std::set<idx_t>> used_table_queue;
 		// todo: reconstruct to a balanced logical plan, to avoid missing the global optimization
 		QuerySplit query_splitter(*this);
+		SubqueryPreparer subquery_preparer(*planner.binder, *this);
 		while (ENABLE_QUERY_SPLIT) {
 			if (!subqueries.empty()) {
+				// todo: move to `subquery_preparer`
 				query_splitter.MergeSubquery(plan, std::move(subqueries.front()[0]));
+				subquery_preparer.UpdatePlanIndex(plan);
+				plan = subquery_preparer.UpdateProjHead(std::move(plan), proj_expr);
 			}
 			bool rewritten = false;
 			plan = query_splitter.Rewrite(plan, rewritten);
@@ -398,7 +402,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			if (subqueries.empty())
 				break;
 
-			SubqueryPreparer subquery_preparer(*planner.binder, *this);
 			unique_ptr<DataChunk> data_trunk;
 			// if it's the last subquery, break and continue the execution of the main stream
 			if (subqueries.front().size() > 1) {

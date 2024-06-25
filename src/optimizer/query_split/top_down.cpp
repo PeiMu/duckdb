@@ -323,10 +323,7 @@ void TopDownSplit::MergeSubquery(unique_ptr<LogicalOperator> &plan, unique_ptr<L
 	for (int level_id = 0; level_id < op_levels - 2; level_id++) {
 		new_plan = new_plan->children[0].get();
 	}
-	auto right_child = new_plan->children[1]->Copy(context);
-	new_plan->children.clear();
-	new_plan->AddChild(std::move(subquery));
-	new_plan->AddChild(std::move(right_child));
+	new_plan->children[0] = std::move(subquery);
 }
 
 unique_ptr<LogicalOperator> TopDownSplit::UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
@@ -450,7 +447,7 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 //		last_op = last_op->children[0].get();
 //	}
 //	last_op->children[0] = std::move(tmp);
-//	needToSplit = true;
+	needToSplit = true;
 
 	return std::move(plan);
 }
