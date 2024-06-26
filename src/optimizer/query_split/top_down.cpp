@@ -6,10 +6,6 @@ unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan
 	// for the first n-1 subqueries, only select the most related nodes/expressions
 	// for the last subquery, merge the previous subqueries
 	unique_ptr<LogicalOperator> subquery;
-#if ENABLE_DEBUG_PRINT
-	// debug
-	plan->Print();
-#endif
 	GetTargetTables(*plan);
 	VisitOperator(*plan);
 	CollectUsedTablePerLevel();
@@ -42,14 +38,16 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 			if (!filter_parent) {
 				child->split_point = true;
 				// inherit from the children until it is not a filter
-				auto child_copy = child->Copy(context);
-				while (LogicalOperatorType::LOGICAL_FILTER == child_copy->type) {
-					auto child_exprs = GetFilterTableExpr(child_copy->Cast<LogicalFilter>());
+				//				auto child_copy = child->Copy(context);
+				auto child_pointer = child.get();
+				while (LogicalOperatorType::LOGICAL_FILTER == child_pointer->type) {
+					auto child_exprs = GetFilterTableExpr(child_pointer->Cast<LogicalFilter>());
 					table_exprs.insert(child_exprs.begin(), child_exprs.end());
-					child_copy = child_copy->children[0]->Copy(context);
+					//					child_copy = child_copy->children[0]->Copy(context);
+					child_pointer = child_pointer->children[0].get();
 				}
-				if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child_copy->type) {
-					auto child_exprs = GetJoinTableExpr(child_copy->Cast<LogicalComparisonJoin>());
+				if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child_pointer->type) {
+					auto child_exprs = GetJoinTableExpr(child_pointer->Cast<LogicalComparisonJoin>());
 					table_exprs.insert(child_exprs.begin(), child_exprs.end());
 				}
 			}
@@ -77,7 +75,8 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 		VisitOperator(*child);
 
 		if (child->split_point) {
-			same_level_subqueries.emplace_back(child->Copy(context));
+			//			same_level_subqueries.emplace_back(child->Copy(context));
+			same_level_subqueries.emplace_back(std::move(child));
 		}
 		if (!table_exprs.empty()) {
 			same_level_table_exprs.emplace_back(table_exprs);
@@ -103,7 +102,11 @@ void TopDownSplit::GetTargetTables(LogicalOperator &op) {
 	if (LogicalOperatorType::LOGICAL_GET == op.type) {
 		auto &get_op = op.Cast<LogicalGet>();
 		auto current_table_index = get_op.table_index;
-		used_tables.emplace(current_table_index, &get_op);
+		used_tables.emplace(current_table_index);
+	} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == op.type) {
+		auto &chunk_op = op.Cast<LogicalColumnDataGet>();
+		auto current_table_index = chunk_op.table_index;
+		used_tables.emplace(current_table_index);
 	}
 	for (auto &child : op.children) {
 		GetTargetTables(*child);
@@ -294,9 +297,15 @@ void TopDownSplit::GetAggregateTableExpr(const LogicalAggregate &aggregate_op) {
 
 void TopDownSplit::CollectUsedTable(const unique_ptr<LogicalOperator> &subquery, std::set<idx_t> &table_in_subquery) {
 	for (const auto &child : subquery->children) {
+		if (nullptr == child) {
+			continue;
+		}
 		if (LogicalOperatorType::LOGICAL_GET == child->type) {
 			auto &get_op = child->Cast<LogicalGet>();
 			table_in_subquery.emplace(get_op.table_index);
+		} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == child->type) {
+			auto &chunk_op = child->Cast<LogicalColumnDataGet>();
+			table_in_subquery.emplace(chunk_op.table_index);
 		}
 		if (child->split_point)
 			continue;
@@ -317,21 +326,43 @@ void TopDownSplit::CollectUsedTablePerLevel() {
 	}
 }
 
-void TopDownSplit::MergeSubquery(unique_ptr<LogicalOperator> &plan, unique_ptr<LogicalOperator> subquery) {
+void TopDownSplit::MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries) {
 	// get the position to reorder
 	auto new_plan = plan.get();
-	for (int level_id = 0; level_id < op_levels - 2; level_id++) {
+	while (true) {
+		if (nullptr == new_plan->children[0]) {
+			auto old_subquery_pair = std::move(old_subqueries.back());
+			new_plan->children[0] = std::move(old_subquery_pair[0]);
+			if (2 == old_subquery_pair.size()) {
+				D_ASSERT(nullptr == new_plan->children[1]);
+				new_plan->children[1] = std::move(old_subquery_pair[1]);
+			}
+			old_subqueries.pop_back();
+		}
 		new_plan = new_plan->children[0].get();
+		if (old_subqueries.empty())
+			break;
 	}
-	new_plan->children[0] = std::move(subquery);
 }
 
-unique_ptr<LogicalOperator> TopDownSplit::UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
-	auto plan_pointer = plan.get();
-	for (int level_id = 0; level_id < op_levels - 2; level_id++) {
-		plan_pointer = plan_pointer->children[0].get();
-	}
-	return std::move(plan_pointer->children[0]);
+void TopDownSplit::UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
+	std::function<void (unique_ptr<LogicalOperator> &op)> unMerge;
+	subqueries.clear();
+	unMerge = [&unMerge, this](unique_ptr<LogicalOperator> &op) {
+		std::vector<unique_ptr<LogicalOperator>> same_level_subqueries;
+		for (auto &child : op->children) {
+			unMerge(child);
+			if (child->split_point) {
+				same_level_subqueries.emplace_back(std::move(child));
+			}
+		}
+		D_ASSERT(same_level_subqueries.size() <= 2);
+		if (!same_level_subqueries.empty()) {
+			subqueries.emplace_back(std::move(same_level_subqueries));
+		}
+	};
+
+	unMerge(plan);
 }
 
 unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &plan, bool &needToSplit) {
@@ -359,12 +390,6 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 
 	auto &last_join = op_child->Cast<LogicalComparisonJoin>();
 
-#if ENABLE_DEBUG_PRINT
-	// debug
-	Printer::Print("last join: ");
-	last_join.Print();
-#endif
-
 	// select the needed tables
 	std::unordered_set<idx_t> left_cond_table_index;
 	for (const auto &cond : last_join.conditions) {
@@ -384,23 +409,9 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 	}
 	auto &last_block = last_cross_product->Cast<LogicalCrossProduct>().children[0];
 
-#if ENABLE_DEBUG_PRINT
-	// debug
-	Printer::Print("table_blocks");
-	last_block->Print();
-	for (const auto &block : table_blocks) {
-		Printer::Print("block index: " + std::to_string(block.first));
-		Printer::Print("operator: ");
-		block.second->Print();
-	}
-#endif
-
 	std::queue<unique_ptr<LogicalOperator>> unused_blocks;
-	unique_ptr<LogicalOperator> below_cross_product = std::move(last_block);
 	for (auto &block : table_blocks) {
-		if (left_cond_table_index.count(block.first)) {
-			below_cross_product = LogicalCrossProduct::Create(std::move(below_cross_product), std::move(block.second));
-		} else {
+		if (!left_cond_table_index.count(block.first)) {
 			unused_blocks.push(std::move(block.second));
 		}
 	}
@@ -410,12 +421,18 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 		return std::move(plan);
 	}
 
+	unique_ptr<LogicalOperator> below_cross_product = std::move(last_block);
+	for (auto &block : table_blocks) {
+		if (left_cond_table_index.count(block.first)) {
+			below_cross_product = LogicalCrossProduct::Create(std::move(below_cross_product), std::move(block.second));
+		}
+	}
+
 	last_join.children[0] = std::move(below_cross_product);
 	auto reordered_plan = plan.get();
 	for (int level_id = 0; level_id < op_levels - 1; level_id++) {
 		reordered_plan = reordered_plan->children[0].get();
 	}
-//	unique_ptr<LogicalOperator> above_cross_product(&last_join);
 	unique_ptr<LogicalOperator> above_cross_product = std::move(reordered_plan->children[0]);
 
 	while (!unused_blocks.empty()) {
@@ -423,10 +440,6 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 		    LogicalCrossProduct::Create(std::move(above_cross_product), std::move(unused_blocks.front()));
 		unused_blocks.pop();
 	}
-#if ENABLE_DEBUG_PRINT
-	Printer::Print("above_cross_product");
-	above_cross_product->Print();
-#endif
 
 	// get the position to reorder
 	reordered_plan = plan.get();
@@ -435,18 +448,6 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 	}
 	reordered_plan->children[0] = std::move(above_cross_product);
 
-//	right_child = reordered_plan->children[1]->Copy(context);
-//	reordered_plan->children.clear();
-//	reordered_plan->AddChild(std::move(above_cross_product));
-//	reordered_plan->AddChild(std::move(right_child));
-
-//	unique_ptr<LogicalOperator> tmp = std::move(above_cross_product);
-//	auto new_plan = plan->Copy(context);
-//	auto last_op = new_plan.get();
-//	for (int idx = 0; idx < op_levels - 1; idx++) {
-//		last_op = last_op->children[0].get();
-//	}
-//	last_op->children[0] = std::move(tmp);
 	needToSplit = true;
 
 	return std::move(plan);

@@ -27,9 +27,22 @@ public:
 	//! Perform Query Split
 	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) override;
 	// todo: extract to a stand-alone class?
-	void MergeSubquery(unique_ptr<LogicalOperator> &plan, unique_ptr<LogicalOperator> subquery) override;
-	unique_ptr<LogicalOperator> UnMergeSubquery(unique_ptr<LogicalOperator> &plan) override;
+	void MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries) override;
+	void UnMergeSubquery(unique_ptr<LogicalOperator> &plan) override;
 	unique_ptr<LogicalOperator> Rewrite(unique_ptr<LogicalOperator> &plan, bool &needToSplit) override;
+	void Clear() {
+		filter_parent = false;
+		while (!table_expr_queue.empty()) {
+			table_expr_queue.pop();
+		}
+		while (!used_table_queue.empty()) {
+			used_table_queue.pop();
+		}
+		sibling_used_table.clear();
+		used_tables.clear();
+		proj_expr.clear();
+		op_levels = 0;
+	};
 
 public:
 	table_expr_info GetTableExprQueue() {
@@ -84,7 +97,8 @@ private:
 	// todo: fix this when supporting parallel execution
 	std::set<idx_t> sibling_used_table;
 	// table index, table entry
-	std::unordered_map<idx_t, LogicalGet *> used_tables;
+	std::unordered_set<idx_t> used_tables;
+//	std::unordered_map<idx_t, LogicalGet *> used_tables;
 	// expressions in the projection node
 	std::set<TableExpr> proj_expr;
 

@@ -17,9 +17,8 @@ unique_ptr<LogicalOperator> QuerySplit::Split(unique_ptr<LogicalOperator> plan) 
 	}
 }
 
-void QuerySplit::MergeSubquery(unique_ptr<LogicalOperator> &plan,
-                                                      unique_ptr<LogicalOperator> subquery) {
-	query_splitter->MergeSubquery(plan, std::move(subquery));
+void QuerySplit::MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries) {
+	query_splitter->MergeSubquery(plan, std::move(old_subqueries));
 }
 
 unique_ptr<LogicalOperator> QuerySplit::Rewrite(unique_ptr<LogicalOperator> &plan, bool &needToSplit) {
@@ -34,8 +33,8 @@ unique_ptr<LogicalOperator> QuerySplit::Rewrite(unique_ptr<LogicalOperator> &pla
 	return query_splitter->Rewrite(plan, needToSplit);
 }
 
-unique_ptr<LogicalOperator> QuerySplit::UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
-	return query_splitter->UnMergeSubquery(plan);
+void QuerySplit::UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
+	query_splitter->UnMergeSubquery(plan);
 }
 
 } // namespace duckdb

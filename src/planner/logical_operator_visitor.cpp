@@ -13,6 +13,8 @@ void LogicalOperatorVisitor::VisitOperator(LogicalOperator &op) {
 
 void LogicalOperatorVisitor::VisitOperatorChildren(LogicalOperator &op) {
 	for (auto &child : op.children) {
+		if (nullptr == child.get())
+			continue;
 		VisitOperator(*child);
 	}
 }

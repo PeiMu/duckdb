@@ -43,8 +43,8 @@ public:
 	table_expr_info UpdateTableExpr(table_expr_info table_expr_queue, std::set<TableExpr> &original_proj_expr,
 	                                std::set<idx_t> &curren_level_used_table);
 
-	unique_ptr<LogicalOperator> UpdateProjHead(unique_ptr<LogicalOperator> last_subquery,
-	                                           std::set<TableExpr> &original_proj_expr);
+	unique_ptr<LogicalOperator> UpdateProjHead(unique_ptr<LogicalOperator> plan,
+	                                           const std::set<TableExpr> &original_proj_expr);
 
 	//! update the table_idx and column_idx
 	void UpdateSubqueriesIndex(subquery_queue &subqueries);

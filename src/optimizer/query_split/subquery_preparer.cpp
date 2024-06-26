@@ -176,14 +176,11 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(const unique_ptr<Lo
 	if (last_subquery) {
 		// add the original projection head
 		unique_ptr<LogicalOperator> ret = original_plan->Copy(context);
-		auto child = ret->children[0].get();
-		auto ret_ref = child;
-		while (!child->split_point) {
-			ret_ref = child;
+		auto child = ret.get();
+		while (child->children[0]) {
 			child = child->children[0].get();
 		}
-		ret_ref->children.clear();
-		ret_ref->AddChild(std::move(subquery));
+		child->children[0] = std::move(subquery);
 #if ENABLE_DEBUG_PRINT
 		// debug: print subquery
 		Printer::Print("The last subquery");
@@ -209,7 +206,7 @@ void SubqueryPreparer::MergeToSubquery(LogicalOperator &op, bool &merged) {
 		if (merged)
 			return;
 		// find the insert point and insert the `ColumnDataGet` node to the logical plan
-		if ((*child_it)->split_point) {
+		if (nullptr == (*child_it) || (*child_it)->split_point) {
 			D_ASSERT(nullptr != chunk_scan);
 			op.children.erase(child_it);
 			op.children.insert(child_it, std::move(chunk_scan));
@@ -276,33 +273,44 @@ table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_que
 	// add new_table_idx to "curren_level_used_table" since the merged CHUNK's table index is "new_table_idx"
 	curren_level_used_table.emplace(new_table_idx);
 
-	old_table_idx.clear();
+//	old_table_idx.clear();
 
 	return ret;
 }
 
-unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalOperator> last_subquery,
-                                                             std::set<TableExpr> &original_proj_expr) {
-	D_ASSERT(LogicalOperatorType::LOGICAL_PROJECTION == last_subquery->type);
-	auto &proj_op = last_subquery->Cast<LogicalProjection>();
+unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalOperator> plan,
+                                                             const std::set<TableExpr> &original_proj_expr) {
+	D_ASSERT(LogicalOperatorType::LOGICAL_PROJECTION == plan->type);
+	auto &proj_op = plan->Cast<LogicalProjection>();
 	if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == proj_op.children[0]->type) {
 		// update aggregate expressions
 		auto &aggregate_op = proj_op.children[0]->Cast<LogicalAggregate>();
+		D_ASSERT(aggregate_op.expressions.size() == original_proj_expr.size());
+		auto it = original_proj_expr.begin();
 		for (auto &agg_expr : aggregate_op.expressions) {
 			D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
 			auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
+			// todo: check: maybe we don't need to search?
 			for (auto &expr : aggregate_expr.children) {
 				D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
 				auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
-				auto find_it = std::find_if(original_proj_expr.begin(), original_proj_expr.end(),
-				                            [&column_ref_expr](const TableExpr &original_expr) {
-					                            return original_expr.column_name == column_ref_expr.alias;
-				                            });
-				if (find_it != original_proj_expr.end()) {
-					column_ref_expr.binding.table_index = find_it->table_idx;
-					column_ref_expr.binding.column_index = find_it->column_idx;
-				}
+				column_ref_expr.binding.table_index = it->table_idx;
+				column_ref_expr.binding.column_index = it->column_idx;
 			}
+			it++;
+//			for (auto &expr : aggregate_expr.children) {
+//				D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
+//				auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
+//				auto find_it = std::find_if(original_proj_expr.begin(), original_proj_expr.end(),
+//				                            [&column_ref_expr](const TableExpr &original_expr) {
+//					                            // todo: cannot check by name
+//					                            return original_expr.column_name == column_ref_expr.alias;
+//				                            });
+//				if (find_it != original_proj_expr.end()) {
+//					column_ref_expr.binding.table_index = find_it->table_idx;
+//					column_ref_expr.binding.column_index = find_it->column_idx;
+//				}
+//			}
 		}
 	} else {
 		for (auto &expr : proj_op.expressions) {
@@ -318,7 +326,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalO
 			}
 		}
 	}
-	return std::move(last_subquery);
+	return std::move(plan);
 }
 
 unique_ptr<Expression> SubqueryPreparer::VisitReplace(BoundColumnRefExpression &expr,

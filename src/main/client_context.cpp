@@ -380,15 +380,24 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		while (ENABLE_QUERY_SPLIT) {
 			if (!subqueries.empty()) {
 				// todo: move to `subquery_preparer`
-				query_splitter.MergeSubquery(plan, std::move(subqueries.front()[0]));
-				subquery_preparer.UpdatePlanIndex(plan);
+				query_splitter.MergeSubquery(plan, std::move(subqueries));
+				Printer::Print("after MergeSubquery");
+				plan->Print();
+//				subquery_preparer.UpdatePlanIndex(plan);
+//				Printer::Print("after UpdatePlanIndex");
+//				plan->Print();
 				plan = subquery_preparer.UpdateProjHead(std::move(plan), proj_expr);
+				Printer::Print("after UpdateProjHead");
+				plan->Print();
 			}
 			bool rewritten = false;
 			plan = query_splitter.Rewrite(plan, rewritten);
 			needToSplit |= rewritten;
+			Printer::Print("after Rewrite");
+			plan->Print();
 
 			if (needToSplit) {
+				query_splitter.Clear();
 				plan = query_splitter.Split(std::move(plan));
 				subqueries = query_splitter.GetSubqueries();
 				table_expr_queue = query_splitter.GetTableExprQueue();
@@ -397,7 +406,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				needToSplit = false;
 			} else {
 				// we don't want to copy the data chunk, so it's better to move back the `subqueries.front()[0]`
-				subqueries.front()[0] = query_splitter.UnMergeSubquery(plan);
+				query_splitter.UnMergeSubquery(plan);
+				subqueries = query_splitter.GetSubqueries();
 			}
 			if (subqueries.empty())
 				break;
@@ -414,6 +424,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			table_expr_queue.pop();
 			used_table_queue.pop();
 
+			Printer::Print("after GenerateProjHead");
+			sub_plan->Print();
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
 #if ENABLE_DEBUG_PRINT
 			// debug: print subquery
@@ -447,7 +459,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			bool last_subquery = 1 == subqueries.size();
 			subqueries.front()[0] = subquery_preparer.MergeDataChunk(plan, std::move(subqueries.front()[0]),
 			                                                         std::move(subquery_result), last_subquery);
-
 			subquery_preparer.UpdateSubqueriesIndex(subqueries);
 			table_expr_queue = subquery_preparer.UpdateTableExpr(table_expr_queue, proj_expr, used_table_queue.front());
 			if (last_subquery) {

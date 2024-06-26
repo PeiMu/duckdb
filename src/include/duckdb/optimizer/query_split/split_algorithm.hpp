@@ -55,11 +55,10 @@ public:
 		return std::move(plan);
 	};
 
-	virtual void MergeSubquery(unique_ptr<LogicalOperator> &plan, unique_ptr<LogicalOperator> subquery) {
+	virtual void MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries) {
 	}
 
-	virtual unique_ptr<LogicalOperator> UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
-		return std::move(plan);
+	virtual void UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
 	}
 
 	virtual unique_ptr<LogicalOperator> Rewrite(unique_ptr<LogicalOperator> &plan, bool &needToSplit) {

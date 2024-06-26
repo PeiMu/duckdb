@@ -25,11 +25,17 @@ public:
 	~QuerySplit() = default;
 	//! Perform Query Split
 	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan);
-	void MergeSubquery(unique_ptr<LogicalOperator> &plan,
-	                                          unique_ptr<LogicalOperator> subquery);
+	void MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries);
 	unique_ptr<LogicalOperator> Rewrite(unique_ptr<LogicalOperator> &plan, bool &needToSplit);
 
-	unique_ptr<LogicalOperator> UnMergeSubquery(unique_ptr<LogicalOperator> &uniquePtr);
+	void UnMergeSubquery(unique_ptr<LogicalOperator> &plan);
+
+	void Clear() {
+		if (nullptr != query_splitter) {
+			auto top_down_splitter = dynamic_cast<TopDownSplit *>(query_splitter.get());
+			top_down_splitter->Clear();
+		}
+	};
 
 public:
 	table_expr_info GetTableExprQueue() {
