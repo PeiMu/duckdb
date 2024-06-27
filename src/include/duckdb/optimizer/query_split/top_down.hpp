@@ -84,7 +84,8 @@ private:
 	void CollectUsedTable(const unique_ptr<LogicalOperator> &subquery, std::set<idx_t> &table_in_subquery);
 
 	void InsertTableBlocks(unique_ptr<LogicalOperator> &op,
-	                       unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks);
+	                       unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks,
+	                       std::queue<idx_t> &table_blocks_key_order);
 
 private:
 	bool filter_parent = false;
@@ -98,7 +99,6 @@ private:
 	std::set<idx_t> sibling_used_table;
 	// table index, table entry
 	std::unordered_set<idx_t> used_tables;
-//	std::unordered_map<idx_t, LogicalGet *> used_tables;
 	// expressions in the projection node
 	std::set<TableExpr> proj_expr;
 

@@ -187,6 +187,7 @@ std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter
 			} else {
 				Printer::Print(StringUtil::Format("Do not support yet, func_child->type:  %s",
 				                                  ExpressionTypeToString(func_child->type)));
+				D_ASSERT(false);
 			}
 		}
 	};
@@ -203,6 +204,7 @@ std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter
 		} else {
 			Printer::Print(StringUtil::Format("Do not support yet, left_expr->type:  %s",
 			                                  ExpressionTypeToString(left_expr->type)));
+			D_ASSERT(false);
 		}
 
 		auto &right_expr = comparison_expr.right;
@@ -215,6 +217,7 @@ std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter
 		} else {
 			Printer::Print(StringUtil::Format("Do not support yet, right_expr->type:  %s",
 			                                  ExpressionTypeToString(right_expr->type)));
+			D_ASSERT(false);
 		}
 	};
 
@@ -247,6 +250,7 @@ std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter
 		} else {
 			Printer::Print(
 			    StringUtil::Format("Do not support yet, expr->type:  %s", ExpressionTypeToString(expr->type)));
+			D_ASSERT(false);
 		}
 	};
 
@@ -346,7 +350,7 @@ void TopDownSplit::MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_que
 }
 
 void TopDownSplit::UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
-	std::function<void (unique_ptr<LogicalOperator> &op)> unMerge;
+	std::function<void(unique_ptr<LogicalOperator> & op)> unMerge;
 	subqueries.clear();
 	unMerge = [&unMerge, this](unique_ptr<LogicalOperator> &op) {
 		std::vector<unique_ptr<LogicalOperator>> same_level_subqueries;
@@ -400,12 +404,13 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 
 	// 2. collect all tables below the last JOIN
 	std::unordered_map<idx_t, unique_ptr<LogicalOperator>> table_blocks;
+	std::queue<idx_t> table_blocks_key_order;
 
 	auto last_cross_product = op_child;
 	while (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == last_cross_product->children[0]->type) {
 		last_cross_product = last_cross_product->children[0].get();
 		auto &cross_product_op = last_cross_product->Cast<LogicalCrossProduct>();
-		InsertTableBlocks(cross_product_op.children[1], table_blocks);
+		InsertTableBlocks(cross_product_op.children[1], table_blocks, table_blocks_key_order);
 	}
 	auto &last_block = last_cross_product->Cast<LogicalCrossProduct>().children[0];
 
@@ -417,6 +422,16 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 	}
 
 	if (unused_blocks.empty()) {
+		// revert table blocks to plan
+		auto revert_pointer = op_child;
+		idx_t revert_idx = 0;
+		while (!table_blocks_key_order.empty() &&
+		       LogicalOperatorType::LOGICAL_CROSS_PRODUCT == revert_pointer->children[0]->type) {
+			revert_pointer = revert_pointer->children[0].get();
+			auto &revert_op = revert_pointer->Cast<LogicalCrossProduct>();
+			revert_idx = table_blocks_key_order.front();
+			revert_op.children[1] = std::move(table_blocks[revert_idx]);
+		}
 		needToSplit = false;
 		return std::move(plan);
 	}
@@ -454,14 +469,20 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 }
 
 void TopDownSplit::InsertTableBlocks(unique_ptr<LogicalOperator> &op,
-                                     unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks) {
+                                     unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks,
+                                     std::queue<idx_t> &table_blocks_key_order) {
 	if (LogicalOperatorType::LOGICAL_GET == op->type) {
 		auto &get_op = op->Cast<LogicalGet>();
-		table_blocks.emplace(get_op.table_index, get_op.Copy(context));
+		table_blocks.emplace(get_op.table_index, std::move(op));
+		table_blocks_key_order.emplace(get_op.table_index);
+	} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == op->type) {
+		auto &chunk_op = op->Cast<LogicalColumnDataGet>();
+		table_blocks.emplace(chunk_op.table_index, std::move(op));
+		table_blocks_key_order.emplace(chunk_op.table_index);
 	} else if (LogicalOperatorType::LOGICAL_FILTER == op->type) {
 		idx_t table_index;
 		std::function<void(unique_ptr<LogicalOperator> & current_op)> find_get;
-		find_get = [find_get, &table_index](unique_ptr<LogicalOperator> &current_op) {
+		find_get = [&find_get, &table_index](unique_ptr<LogicalOperator> &current_op) {
 			for (auto &child_op : current_op->children) {
 				if (LogicalOperatorType::LOGICAL_GET != child_op->type)
 					find_get(child_op);
@@ -472,7 +493,8 @@ void TopDownSplit::InsertTableBlocks(unique_ptr<LogicalOperator> &op,
 			}
 		};
 		find_get(op);
-		table_blocks.emplace(table_index, op->Copy(context));
+		table_blocks.emplace(table_index, std::move(op));
+		table_blocks_key_order.emplace(table_index);
 	} else {
 		Printer::Print(
 		    StringUtil::Format("Do not support yet, block_op->type:  %s", LogicalOperatorToString(op->type)));

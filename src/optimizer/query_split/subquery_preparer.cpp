@@ -286,7 +286,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalO
 		// update aggregate expressions
 		auto &aggregate_op = proj_op.children[0]->Cast<LogicalAggregate>();
 		D_ASSERT(aggregate_op.expressions.size() == original_proj_expr.size());
-		auto it = original_proj_expr.begin();
+		auto it = original_proj_expr.cbegin();
 		for (auto &agg_expr : aggregate_op.expressions) {
 			D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
 			auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
