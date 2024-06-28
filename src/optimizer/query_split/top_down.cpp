@@ -17,8 +17,15 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 	std::vector<std::set<TableExpr>> same_level_table_exprs;
 
 	// Since we don't split at CROSS_PRODUCT, we don't split its sibling
-	// todo: this should be fixed after supporting parallel execution
 	bool cross_product_sibling = false;
+
+	// todo: fix this when supporting parallel execution
+	// Since we currently don't support parallel execution, we have the issue
+	// e.g. comp_join --------
+	//          |            |
+	//      chunk_get      filter
+	// for now we just ignore the sibling of chunk_get
+	bool chunk_get_sibling = false;
 
 	// For now, we only check logical_filter and logical_comparison_join.
 	// Basically, the split point is based on logical_comparison_join,
@@ -26,10 +33,9 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 	// logical_filter node.
 	for (auto &child : op.children) {
 		std::set<TableExpr> table_exprs;
-		if (cross_product_sibling)
+		if (cross_product_sibling || chunk_get_sibling)
 			break;
 		switch (child->type) {
-		// todo: potentially we can fuse CROSS_PRODUCT+FILTER or JOIN+FILTER,
 		// if the other child node is not CROSS_PRODUCT, JOIN nor FILTER
 		case LogicalOperatorType::LOGICAL_FILTER:
 			// add filter's column usage
@@ -62,12 +68,15 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 			}
 			filter_parent = false;
 			break;
-		case LogicalOperatorType::LOGICAL_CROSS_PRODUCT:
-			cross_product_sibling = true;
-			child->split_point = false;
-			filter_parent = false;
-			break;
 		default:
+			if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == child->type)
+				cross_product_sibling = true;
+			else
+				cross_product_sibling = false;
+			if (LogicalOperatorType::LOGICAL_CHUNK_GET == child->type)
+				chunk_get_sibling = true;
+			else
+				chunk_get_sibling = false;
 			child->split_point = false;
 			filter_parent = false;
 			break;
@@ -102,11 +111,11 @@ void TopDownSplit::GetTargetTables(LogicalOperator &op) {
 	if (LogicalOperatorType::LOGICAL_GET == op.type) {
 		auto &get_op = op.Cast<LogicalGet>();
 		auto current_table_index = get_op.table_index;
-		used_tables.emplace(current_table_index);
+		target_tables.emplace(current_table_index);
 	} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == op.type) {
 		auto &chunk_op = op.Cast<LogicalColumnDataGet>();
 		auto current_table_index = chunk_op.table_index;
-		used_tables.emplace(current_table_index);
+		target_tables.emplace(current_table_index);
 	}
 	for (auto &child : op.children) {
 		GetTargetTables(*child);
@@ -124,7 +133,7 @@ std::set<TableExpr> TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &
 		current_left_table.column_idx = left_expr.binding.column_index;
 		current_left_table.column_name = left_expr.alias;
 		current_left_table.return_type = left_expr.return_type;
-		if (used_tables.count(current_left_table.table_idx))
+		if (target_tables.count(current_left_table.table_idx))
 			table_exprs.emplace(current_left_table);
 
 		TableExpr current_right_table;
@@ -133,7 +142,7 @@ std::set<TableExpr> TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &
 		current_right_table.column_idx = right_expr.binding.column_index;
 		current_right_table.column_name = right_expr.alias;
 		current_right_table.return_type = right_expr.return_type;
-		if (used_tables.count(current_right_table.table_idx))
+		if (target_tables.count(current_right_table.table_idx))
 			table_exprs.emplace(current_right_table);
 	}
 	return table_exprs;
@@ -173,7 +182,7 @@ std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter
 		table_expr.column_idx = column_ref_expr.binding.column_index;
 		table_expr.column_name = column_ref_expr.alias;
 		table_expr.return_type = column_ref_expr.return_type;
-		if (used_tables.count(table_expr.table_idx)) {
+		if (target_tables.count(table_expr.table_idx)) {
 			table_exprs.emplace(table_expr);
 		}
 	};
@@ -273,7 +282,7 @@ void TopDownSplit::GetProjTableExpr(const LogicalProjection &proj_op) {
 			table_expr.column_idx = column_ref_expr.binding.column_index;
 			table_expr.column_name = column_ref_expr.alias;
 			table_expr.return_type = column_ref_expr.return_type;
-			if (used_tables.count(table_expr.table_idx)) {
+			if (target_tables.count(table_expr.table_idx)) {
 				proj_expr.emplace(table_expr);
 			}
 		}
@@ -292,7 +301,7 @@ void TopDownSplit::GetAggregateTableExpr(const LogicalAggregate &aggregate_op) {
 			table_expr.column_idx = column_ref_expr.binding.column_index;
 			table_expr.column_name = column_ref_expr.alias;
 			table_expr.return_type = column_ref_expr.return_type;
-			if (used_tables.count(table_expr.table_idx)) {
+			if (target_tables.count(table_expr.table_idx)) {
 				proj_expr.emplace(table_expr);
 			}
 		}
@@ -354,7 +363,16 @@ void TopDownSplit::UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
 	subqueries.clear();
 	unMerge = [&unMerge, this](unique_ptr<LogicalOperator> &op) {
 		std::vector<unique_ptr<LogicalOperator>> same_level_subqueries;
+		// todo: fix this when supporting parallel execution (see the `chunk_get_sibling` issue in
+		// `TopDownSplit::VisitOperator`)
+		bool chunk_get_sibling = false;
 		for (auto &child : op->children) {
+			if (chunk_get_sibling)
+				break;
+			if (LogicalOperatorType::LOGICAL_CHUNK_GET == child->type)
+				chunk_get_sibling = true;
+			else
+				chunk_get_sibling = false;
 			unMerge(child);
 			if (child->split_point) {
 				same_level_subqueries.emplace_back(std::move(child));

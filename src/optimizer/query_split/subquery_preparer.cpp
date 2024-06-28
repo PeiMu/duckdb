@@ -28,9 +28,11 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 	}
 
 	if (expr_idx_pair_vec.size() > 1) {
-		// todo: execute in parallel
-
-		last_sibling_exprs = expr_idx_pair_vec[1];
+		if (ENABLE_PARALLEL_EXECUTION) {
+			// todo: execute in parallel
+		} else {
+			last_sibling_exprs = expr_idx_pair_vec[1];
+		}
 	} else {
 		last_sibling_exprs.clear();
 	}
@@ -192,8 +194,8 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(const unique_ptr<Lo
 		std::string new_idx = "New table index: " + std::to_string(new_table_idx);
 		Printer::Print(new_idx);
 		// debug: print subquery
-		Printer::Print("After merge data chunk");
-		subquery->Print();
+//		Printer::Print("After merge data chunk");
+//		subquery->Print();
 #endif
 		// todo: update statistics?
 

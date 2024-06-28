@@ -39,7 +39,7 @@ public:
 			used_table_queue.pop();
 		}
 		sibling_used_table.clear();
-		used_tables.clear();
+		target_tables.clear();
 		proj_expr.clear();
 		op_levels = 0;
 	};
@@ -77,7 +77,7 @@ private:
 	//! get the `table_expr_queue` by checking which column is used in the SEQ_SCAN
 	std::set<TableExpr> GetSeqScanTableExpr(const LogicalGet &get_op);
 
-	//! Collect all used tables into `used_tables`
+	//! Collect all used tables into `target_tables`
 	void GetTargetTables(LogicalOperator &op);
 
 	void CollectUsedTablePerLevel();
@@ -98,7 +98,7 @@ private:
 	// todo: fix this when supporting parallel execution
 	std::set<idx_t> sibling_used_table;
 	// table index, table entry
-	std::unordered_set<idx_t> used_tables;
+	std::unordered_set<idx_t> target_tables;
 	// expressions in the projection node
 	std::set<TableExpr> proj_expr;
 

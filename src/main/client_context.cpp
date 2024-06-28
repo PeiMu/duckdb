@@ -383,9 +383,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				query_splitter.MergeSubquery(plan, std::move(subqueries));
 				Printer::Print("after MergeSubquery");
 				plan->Print();
-//				subquery_preparer.UpdatePlanIndex(plan);
-//				Printer::Print("after UpdatePlanIndex");
-//				plan->Print();
 				plan = subquery_preparer.UpdateProjHead(std::move(plan), proj_expr);
 				Printer::Print("after UpdateProjHead");
 				plan->Print();
@@ -413,9 +410,15 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				break;
 
 			unique_ptr<DataChunk> data_trunk;
-			// if it's the last subquery, break and continue the execution of the main stream
 			if (subqueries.front().size() > 1) {
-				// todo: execute in parallel
+				if (ENABLE_PARALLEL_EXECUTION) {
+					// todo: execute in parallel
+				} else {
+					// merge the sibling back to the upper subquery
+					auto sibling_node = std::move(subqueries.front()[1]);
+					auto upper_subquery_it = subqueries.begin() + 1;
+					(*upper_subquery_it)[0]->children[1] = std::move(sibling_node);
+				}
 			}
 
 			auto sub_plan = subquery_preparer.GenerateProjHead(plan, std::move(subqueries.front()[0]), table_expr_queue,
@@ -462,7 +465,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			subquery_preparer.UpdateSubqueriesIndex(subqueries);
 			table_expr_queue = subquery_preparer.UpdateTableExpr(table_expr_queue, proj_expr, used_table_queue.front());
 			if (last_subquery) {
-				// todo: update projection head
+				// if it's the last subquery, break and continue the execution of the main stream
 				plan = subquery_preparer.UpdateProjHead(std::move(subqueries.front()[0]), proj_expr);
 				break;
 			}
