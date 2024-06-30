@@ -44,12 +44,10 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 			if (!filter_parent) {
 				child->split_point = true;
 				// inherit from the children until it is not a filter
-				//				auto child_copy = child->Copy(context);
 				auto child_pointer = child.get();
 				while (LogicalOperatorType::LOGICAL_FILTER == child_pointer->type) {
 					auto child_exprs = GetFilterTableExpr(child_pointer->Cast<LogicalFilter>());
 					table_exprs.insert(child_exprs.begin(), child_exprs.end());
-					//					child_copy = child_copy->children[0]->Copy(context);
 					child_pointer = child_pointer->children[0].get();
 				}
 				if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child_pointer->type) {
@@ -84,7 +82,6 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 		VisitOperator(*child);
 
 		if (child->split_point) {
-			//			same_level_subqueries.emplace_back(child->Copy(context));
 			same_level_subqueries.emplace_back(std::move(child));
 		}
 		if (!table_exprs.empty()) {
@@ -442,13 +439,12 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 	if (unused_blocks.empty()) {
 		// revert table blocks to plan
 		auto revert_pointer = op_child;
-		idx_t revert_idx = 0;
 		while (!table_blocks_key_order.empty() &&
 		       LogicalOperatorType::LOGICAL_CROSS_PRODUCT == revert_pointer->children[0]->type) {
 			revert_pointer = revert_pointer->children[0].get();
 			auto &revert_op = revert_pointer->Cast<LogicalCrossProduct>();
-			revert_idx = table_blocks_key_order.front();
-			revert_op.children[1] = std::move(table_blocks[revert_idx]);
+			revert_op.children[1] = std::move(table_blocks[table_blocks_key_order.front()]);
+			table_blocks_key_order.pop();
 		}
 		needToSplit = false;
 		return std::move(plan);
