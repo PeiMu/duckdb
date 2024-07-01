@@ -16,6 +16,7 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 	std::vector<unique_ptr<LogicalOperator>> same_level_subqueries;
 	std::vector<std::set<TableExpr>> same_level_table_exprs;
 
+	// todo: fix this when supporting parallel execution
 	// Since we don't split at CROSS_PRODUCT, we don't split its sibling
 	bool cross_product_sibling = false;
 
@@ -360,12 +361,19 @@ void TopDownSplit::UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
 	subqueries.clear();
 	unMerge = [&unMerge, this](unique_ptr<LogicalOperator> &op) {
 		std::vector<unique_ptr<LogicalOperator>> same_level_subqueries;
+		// todo: fix this when supporting parallel execution (see the `cross_product_sibling` issue in
+		// `TopDownSplit::VisitOperator`)
+		bool cross_product_sibling = false;
 		// todo: fix this when supporting parallel execution (see the `chunk_get_sibling` issue in
 		// `TopDownSplit::VisitOperator`)
 		bool chunk_get_sibling = false;
 		for (auto &child : op->children) {
-			if (chunk_get_sibling)
+			if (cross_product_sibling || chunk_get_sibling)
 				break;
+			if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == child->type)
+				cross_product_sibling = true;
+			else
+				cross_product_sibling = false;
 			if (LogicalOperatorType::LOGICAL_CHUNK_GET == child->type)
 				chunk_get_sibling = true;
 			else

@@ -390,8 +390,12 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			bool rewritten = false;
 			plan = query_splitter.Rewrite(plan, rewritten);
 			needToSplit |= rewritten;
-			Printer::Print("after Rewrite");
-			plan->Print();
+#if ENABLE_DEBUG_PRINT
+			if (rewritten) {
+				Printer::Print("after Rewrite");
+				plan->Print();
+			}
+#endif
 
 			if (needToSplit) {
 				query_splitter.Clear();
