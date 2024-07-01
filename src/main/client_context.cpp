@@ -410,14 +410,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				break;
 
 			unique_ptr<DataChunk> data_trunk;
+
+			unique_ptr<LogicalOperator> last_sibling_node = nullptr;
 			if (subqueries.front().size() > 1) {
 				if (ENABLE_PARALLEL_EXECUTION) {
 					// todo: execute in parallel
 				} else {
-					// merge the sibling back to the upper subquery
-					auto sibling_node = std::move(subqueries.front()[1]);
-					auto upper_subquery_it = subqueries.begin() + 1;
-					(*upper_subquery_it)[0]->children[1] = std::move(sibling_node);
+					last_sibling_node = std::move(subqueries.front()[1]);
 				}
 			}
 
@@ -462,6 +461,21 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			bool last_subquery = 1 == subqueries.size();
 			subqueries.front()[0] = subquery_preparer.MergeDataChunk(plan, std::move(subqueries.front()[0]),
 			                                                         std::move(subquery_result), last_subquery);
+			if (!ENABLE_PARALLEL_EXECUTION && nullptr != last_sibling_node) {
+				// merge the sibling back to the upper subquery
+				auto subquery_pointer = subqueries.front()[0].get();
+				while (!subquery_pointer->children.empty()) {
+					if (nullptr == subquery_pointer->children[1]) {
+						subquery_pointer->children[1] = std::move(last_sibling_node);
+						break;
+					}
+					subquery_pointer = subquery_pointer->children[0].get();
+				}
+				// check this is the last operator
+				D_ASSERT(!subquery_pointer->children.empty());
+				subquery_pointer = subquery_pointer->children[0].get();
+				D_ASSERT(subquery_pointer->children.empty());
+			}
 			subquery_preparer.UpdateSubqueriesIndex(subqueries);
 			table_expr_queue = subquery_preparer.UpdateTableExpr(table_expr_queue, proj_expr, used_table_queue.front());
 			if (last_subquery) {
