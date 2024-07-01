@@ -183,19 +183,11 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeDataChunk(const unique_ptr<Lo
 			child = child->children[0].get();
 		}
 		child->children[0] = std::move(subquery);
-#if ENABLE_DEBUG_PRINT
-		// debug: print subquery
-		Printer::Print("The last subquery");
-		ret->Print();
-#endif
 		return ret;
 	} else {
 #if ENABLE_DEBUG_PRINT
 		std::string new_idx = "New table index: " + std::to_string(new_table_idx);
 		Printer::Print(new_idx);
-		// debug: print subquery
-//		Printer::Print("After merge data chunk");
-//		subquery->Print();
 #endif
 		// todo: update statistics?
 

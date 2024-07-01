@@ -465,7 +465,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				// merge the sibling back to the upper subquery
 				auto subquery_pointer = subqueries.front()[0].get();
 				while (!subquery_pointer->children.empty()) {
-					if (nullptr == subquery_pointer->children[1]) {
+					if (subquery_pointer->children.size() > 1 && nullptr == subquery_pointer->children[1]) {
 						subquery_pointer->children[1] = std::move(last_sibling_node);
 						break;
 					}
@@ -476,6 +476,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				subquery_pointer = subquery_pointer->children[0].get();
 				D_ASSERT(subquery_pointer->children.empty());
 			}
+#ifdef DEBUG
+			Printer::Print("after MergeDataChunk");
+			subqueries.front()[0]->Print();
+#endif
 			subquery_preparer.UpdateSubqueriesIndex(subqueries);
 			table_expr_queue = subquery_preparer.UpdateTableExpr(table_expr_queue, proj_expr, used_table_queue.front());
 			if (last_subquery) {
