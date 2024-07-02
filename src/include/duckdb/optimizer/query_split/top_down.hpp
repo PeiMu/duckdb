@@ -53,10 +53,6 @@ public:
 		return proj_expr;
 	}
 
-	std::queue<std::set<idx_t>> GetUsedTableQueue() {
-		return used_table_queue;
-	}
-
 protected:
 	//! Extract the subquery in the top-down order, and insert
 	//! the operations of the same level to `subqueries`
@@ -79,9 +75,6 @@ private:
 
 	//! Collect all used tables into `target_tables`
 	void GetTargetTables(LogicalOperator &op);
-
-	void CollectUsedTablePerLevel();
-	void CollectUsedTable(const unique_ptr<LogicalOperator> &subquery, std::set<idx_t> &table_in_subquery);
 
 	void InsertTableBlocks(unique_ptr<LogicalOperator> &op,
 	                       unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks,

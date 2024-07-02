@@ -33,15 +33,13 @@ public:
 	unique_ptr<LogicalOperator> GenerateProjHead(const unique_ptr<LogicalOperator> &original_plan,
 	                                             unique_ptr<LogicalOperator> subquery,
 	                                             const table_expr_info &table_expr_queue,
-	                                             const std::set<TableExpr> &original_proj_expr,
-	                                             const std::set<idx_t> &curren_level_used_table);
+	                                             const std::set<TableExpr> &original_proj_expr);
 
 	//! Adapt the selection node to the query AST
 	shared_ptr<PreparedStatementData> AdaptSelect(shared_ptr<PreparedStatementData> original_stmt_data,
 	                                              const unique_ptr<LogicalOperator> &subquery);
 
-	table_expr_info UpdateTableExpr(table_expr_info table_expr_queue, std::set<TableExpr> &original_proj_expr,
-	                                std::set<idx_t> &curren_level_used_table);
+	table_expr_info UpdateTableExpr(table_expr_info table_expr_queue, std::set<TableExpr> &original_proj_expr);
 
 	unique_ptr<LogicalOperator> UpdateProjHead(unique_ptr<LogicalOperator> plan,
 	                                           const std::set<TableExpr> &original_proj_expr);
@@ -71,7 +69,7 @@ private:
 	// a new chunk scan node with the last level's result, generated and merged in `MergeDataChunk`
 	unique_ptr<LogicalColumnDataGet> chunk_scan;
 	// `chunk_scan` will be moved, and we need one extra member to remember the new table index
-	idx_t new_table_idx;
+	idx_t new_table_idx = (uint64_t)-1;
 	// the collection of the old table indexes, to detect and be replaced to the new index by `UpdateTableExpr`
 	// collected in
 	// 1. all the `proj_exprs` are the old index for the next subquery in `GenerateProjHead`

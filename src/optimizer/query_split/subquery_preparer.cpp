@@ -9,8 +9,7 @@ namespace duckdb {
 unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<LogicalOperator> &original_plan,
                                                                unique_ptr<LogicalOperator> subquery,
                                                                const table_expr_info &table_expr_queue,
-                                                               const std::set<TableExpr> &original_proj_expr,
-                                                               const std::set<idx_t> &curren_level_used_table) {
+                                                               const std::set<TableExpr> &original_proj_expr) {
 #if ENABLE_DEBUG_PRINT
 	// debug: print subquery
 	Printer::Print("Current subquery");
@@ -20,11 +19,11 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 	vector<unique_ptr<Expression>> new_exprs;
 	// get the lowest-level `TableExpr` info
 	auto expr_idx_pair_vec = table_expr_queue.front();
-	proj_exprs.clear();
-	proj_exprs = expr_idx_pair_vec[0];
+	auto temp_proj_exprs = expr_idx_pair_vec[0];
+
 	// merge sibling node's expressions
 	if (!last_sibling_exprs.empty()) {
-		proj_exprs.insert(last_sibling_exprs.begin(), last_sibling_exprs.end());
+		temp_proj_exprs.insert(last_sibling_exprs.begin(), last_sibling_exprs.end());
 	}
 
 	if (expr_idx_pair_vec.size() > 1) {
@@ -36,7 +35,10 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 	} else {
 		last_sibling_exprs.clear();
 	}
-	// collect all columns with the same table
+
+	// collect all columns with the same table from the upper levels
+	std::set<TableExpr> used_expr_in_upper_levels;
+
 	// `temp_stack` contains the `TableExpr` info of all the upper-level subqueries,
 	// we try to merge the matching tables in a bottom-up order by levels
 	auto temp_stack = table_expr_queue;
@@ -44,33 +46,41 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 	while (!temp_stack.empty()) {
 		auto temp_vec = temp_stack.front();
 		temp_stack.pop();
-		for (const auto &temp : temp_vec) {
-			std::set<TableExpr> temp_set;
-			for (const auto &table_expr : temp) {
+		for (const auto &temp_set : temp_vec) {
+			for (const auto &table_expr : temp_set) {
 				// check if expressions in the upper operators still use tables in the current level,
 				// which will be merged into DATA_CHUNK
-				auto same_table_it =
-				    std::find_if(curren_level_used_table.begin(), curren_level_used_table.end(),
-				                 [table_expr](idx_t used_table_id) { return table_expr.table_idx == used_table_id; });
-				if (same_table_it != curren_level_used_table.end()) {
-					temp_set.emplace(table_expr);
+				auto same_table_it = std::find_if(
+				    temp_proj_exprs.begin(), temp_proj_exprs.end(),
+				    [table_expr](const TableExpr &temp_expr) { return table_expr.table_idx == temp_expr.table_idx; });
+				if (same_table_it != temp_proj_exprs.end()) {
+					used_expr_in_upper_levels.emplace(table_expr);
+				}
+
+				// check if `new_table_index` (aka DATA_CHUNK) is used in the upper level
+				if (table_expr.table_idx == new_table_idx) {
+					used_expr_in_upper_levels.emplace(table_expr);
 				}
 			}
-			// merge the temp_set to proj_exprs
-			if (!temp_set.empty())
-				proj_exprs.insert(temp_set.begin(), temp_set.end());
 		}
 	}
 
 	// merge projection's expressions if they have the same table index
+	std::set<TableExpr> used_expr_in_proj;
 	for (const auto &ori_proj_expr : original_proj_expr) {
-		auto find_it = std::find_if(proj_exprs.begin(), proj_exprs.end(), [ori_proj_expr](TableExpr proj_expr) {
-			return proj_expr.table_idx == ori_proj_expr.table_idx;
-		});
-		if (proj_exprs.end() != find_it) {
-			proj_exprs.emplace(ori_proj_expr);
+		auto find_it =
+		    std::find_if(temp_proj_exprs.begin(), temp_proj_exprs.end(), [ori_proj_expr](TableExpr proj_expr) {
+			    return proj_expr.table_idx == ori_proj_expr.table_idx;
+		    });
+		if (temp_proj_exprs.end() != find_it) {
+			used_expr_in_proj.emplace(ori_proj_expr);
 		}
 	}
+
+	proj_exprs.clear();
+	// get the union set of upper_levels and proj
+	proj_exprs.insert(used_expr_in_upper_levels.begin(), used_expr_in_upper_levels.end());
+	proj_exprs.insert(used_expr_in_proj.begin(), used_expr_in_proj.end());
 
 	for (const auto &expr_pair : proj_exprs) {
 		ColumnBinding binding = ColumnBinding(expr_pair.table_idx, expr_pair.column_idx);
@@ -212,8 +222,7 @@ void SubqueryPreparer::MergeToSubquery(LogicalOperator &op, bool &merged) {
 }
 
 table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_queue,
-                                                  std::set<TableExpr> &original_proj_expr,
-                                                  std::set<idx_t> &curren_level_used_table) {
+                                                  std::set<TableExpr> &original_proj_expr) {
 	table_expr_info ret;
 	// find if `table_expr_queue` has the `old_table_idx` that need to be updated
 	while (!table_expr_queue.empty()) {
@@ -264,11 +273,6 @@ table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_que
 		}
 	}
 
-	// add new_table_idx to "curren_level_used_table" since the merged CHUNK's table index is "new_table_idx"
-	curren_level_used_table.emplace(new_table_idx);
-
-//	old_table_idx.clear();
-
 	return ret;
 }
 
@@ -292,19 +296,19 @@ unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalO
 				column_ref_expr.binding.column_index = it->column_idx;
 			}
 			it++;
-//			for (auto &expr : aggregate_expr.children) {
-//				D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
-//				auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
-//				auto find_it = std::find_if(original_proj_expr.begin(), original_proj_expr.end(),
-//				                            [&column_ref_expr](const TableExpr &original_expr) {
-//					                            // todo: cannot check by name
-//					                            return original_expr.column_name == column_ref_expr.alias;
-//				                            });
-//				if (find_it != original_proj_expr.end()) {
-//					column_ref_expr.binding.table_index = find_it->table_idx;
-//					column_ref_expr.binding.column_index = find_it->column_idx;
-//				}
-//			}
+			//			for (auto &expr : aggregate_expr.children) {
+			//				D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
+			//				auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
+			//				auto find_it = std::find_if(original_proj_expr.begin(), original_proj_expr.end(),
+			//				                            [&column_ref_expr](const TableExpr &original_expr) {
+			//					                            // todo: cannot check by name
+			//					                            return original_expr.column_name == column_ref_expr.alias;
+			//				                            });
+			//				if (find_it != original_proj_expr.end()) {
+			//					column_ref_expr.binding.table_index = find_it->table_idx;
+			//					column_ref_expr.binding.column_index = find_it->column_idx;
+			//				}
+			//			}
 		}
 	} else {
 		for (auto &expr : proj_op.expressions) {
@@ -347,7 +351,6 @@ void SubqueryPreparer::UpdateSubqueriesIndex(subquery_queue &subqueries) {
 }
 
 void SubqueryPreparer::MergeSubquery(unique_ptr<LogicalOperator> &plan, unique_ptr<LogicalOperator> subquery) {
-
 }
 
 void SubqueryPreparer::UpdatePlanIndex(unique_ptr<LogicalOperator> &plan) {

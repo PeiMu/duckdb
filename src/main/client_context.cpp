@@ -373,7 +373,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		subquery_queue subqueries;
 		table_expr_info table_expr_queue;
 		std::set<TableExpr> proj_expr;
-		std::queue<std::set<idx_t>> used_table_queue;
 		// todo: reconstruct to a balanced logical plan, to avoid missing the global optimization
 		QuerySplit query_splitter(*this);
 		SubqueryPreparer subquery_preparer(*planner.binder, *this);
@@ -403,7 +402,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				subqueries = query_splitter.GetSubqueries();
 				table_expr_queue = query_splitter.GetTableExprQueue();
 				proj_expr = query_splitter.GetProjExpr();
-				used_table_queue = query_splitter.GetUsedTableQueue();
 				needToSplit = false;
 			} else {
 				// we don't want to copy the data chunk, so it's better to move back the `subqueries.front()[0]`
@@ -424,14 +422,11 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				}
 			}
 
-			auto sub_plan = subquery_preparer.GenerateProjHead(plan, std::move(subqueries.front()[0]), table_expr_queue,
-			                                                   proj_expr, used_table_queue.front());
+			auto sub_plan =
+			    subquery_preparer.GenerateProjHead(plan, std::move(subqueries.front()[0]), table_expr_queue, proj_expr);
 			subqueries.pop_front();
 			table_expr_queue.pop();
-			used_table_queue.pop();
 
-			Printer::Print("after GenerateProjHead");
-			sub_plan->Print();
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
 #if ENABLE_DEBUG_PRINT
 			// debug: print subquery
@@ -480,12 +475,12 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				subquery_pointer = subquery_pointer->children[0].get();
 				D_ASSERT(subquery_pointer->children.empty());
 			}
-#ifdef DEBUG
+#if ENABLE_DEBUG_PRINT
 			Printer::Print("after MergeDataChunk");
 			subqueries.front()[0]->Print();
 #endif
 			subquery_preparer.UpdateSubqueriesIndex(subqueries);
-			table_expr_queue = subquery_preparer.UpdateTableExpr(table_expr_queue, proj_expr, used_table_queue.front());
+			table_expr_queue = subquery_preparer.UpdateTableExpr(table_expr_queue, proj_expr);
 			if (last_subquery) {
 				// if it's the last subquery, break and continue the execution of the main stream
 				plan = subquery_preparer.UpdateProjHead(std::move(subqueries.front()[0]), proj_expr);

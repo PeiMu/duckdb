@@ -8,7 +8,6 @@ unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan
 	unique_ptr<LogicalOperator> subquery;
 	GetTargetTables(*plan);
 	VisitOperator(*plan);
-	CollectUsedTablePerLevel();
 	return std::move(plan);
 }
 
@@ -303,37 +302,6 @@ void TopDownSplit::GetAggregateTableExpr(const LogicalAggregate &aggregate_op) {
 				proj_expr.emplace(table_expr);
 			}
 		}
-	}
-}
-
-void TopDownSplit::CollectUsedTable(const unique_ptr<LogicalOperator> &subquery, std::set<idx_t> &table_in_subquery) {
-	for (const auto &child : subquery->children) {
-		if (nullptr == child) {
-			continue;
-		}
-		if (LogicalOperatorType::LOGICAL_GET == child->type) {
-			auto &get_op = child->Cast<LogicalGet>();
-			table_in_subquery.emplace(get_op.table_index);
-		} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == child->type) {
-			auto &chunk_op = child->Cast<LogicalColumnDataGet>();
-			table_in_subquery.emplace(chunk_op.table_index);
-		}
-		if (child->split_point)
-			continue;
-		CollectUsedTable(child, table_in_subquery);
-	}
-}
-
-void TopDownSplit::CollectUsedTablePerLevel() {
-	for (const auto &temp_subquery_vec : subqueries) {
-		std::set<idx_t> table_in_current_level;
-		// todo: fix this when supporting parallel execution
-		CollectUsedTable(temp_subquery_vec[0], table_in_current_level);
-		table_in_current_level.insert(sibling_used_table.begin(), sibling_used_table.end());
-		used_table_queue.emplace(table_in_current_level);
-		sibling_used_table.clear();
-		if (2 == temp_subquery_vec.size())
-			CollectUsedTable(temp_subquery_vec[1], sibling_used_table);
 	}
 }
 
