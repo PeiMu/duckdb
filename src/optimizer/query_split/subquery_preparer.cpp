@@ -9,7 +9,7 @@ namespace duckdb {
 unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<LogicalOperator> &original_plan,
                                                                unique_ptr<LogicalOperator> subquery,
                                                                const table_expr_info &table_expr_queue,
-                                                               const std::set<TableExpr> &original_proj_expr) {
+                                                               const std::vector<TableExpr> &original_proj_expr) {
 #if ENABLE_DEBUG_PRINT
 	// debug: print subquery
 	Printer::Print("Current subquery");
@@ -222,7 +222,7 @@ void SubqueryPreparer::MergeToSubquery(LogicalOperator &op, bool &merged) {
 }
 
 table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_queue,
-                                                  std::set<TableExpr> &original_proj_expr) {
+                                                  std::vector<TableExpr> &original_proj_expr) {
 	table_expr_info ret;
 	// find if `table_expr_queue` has the `old_table_idx` that need to be updated
 	while (!table_expr_queue.empty()) {
@@ -255,21 +255,17 @@ table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_que
 	}
 
 	// find if `proj_expr` has the `old_table_idx` that need to be updated
-	for (auto it = original_proj_expr.begin(); it != original_proj_expr.end();) {
-		if (old_table_idx.count(it->table_idx)) {
-			TableExpr new_table_expr = (*it);
+	for (auto &expr : original_proj_expr) {
+		if (old_table_idx.count(expr.table_idx)) {
 			// update column index based on the current level's "proj_exprs" order
-			auto find_column_it = std::find_if(proj_exprs.begin(), proj_exprs.end(), [it](const TableExpr &proj_expr) {
-				return proj_expr.table_idx == it->table_idx && proj_expr.column_idx == it->column_idx;
-			});
+			auto find_column_it =
+			    std::find_if(proj_exprs.begin(), proj_exprs.end(), [expr](const TableExpr &proj_expr) {
+				    return proj_expr.table_idx == expr.table_idx && proj_expr.column_idx == expr.column_idx;
+			    });
 			D_ASSERT(proj_exprs.end() != find_column_it);
-			new_table_expr.column_idx = std::distance(proj_exprs.begin(), find_column_it);
+			expr.column_idx = std::distance(proj_exprs.begin(), find_column_it);
 			// replace to the new table index (gotten in `MergeDataChunk`)
-			new_table_expr.table_idx = new_table_idx;
-			it = original_proj_expr.erase(it);
-			original_proj_expr.emplace(new_table_expr);
-		} else {
-			it++;
+			expr.table_idx = new_table_idx;
 		}
 	}
 
@@ -277,51 +273,39 @@ table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_que
 }
 
 unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalOperator> plan,
-                                                             const std::set<TableExpr> &original_proj_expr) {
+                                                             const std::vector<TableExpr> &original_proj_expr) {
 	D_ASSERT(LogicalOperatorType::LOGICAL_PROJECTION == plan->type);
 	auto &proj_op = plan->Cast<LogicalProjection>();
 	if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == proj_op.children[0]->type) {
 		// update aggregate expressions
 		auto &aggregate_op = proj_op.children[0]->Cast<LogicalAggregate>();
 		D_ASSERT(aggregate_op.expressions.size() == original_proj_expr.size());
-		auto it = original_proj_expr.cbegin();
+		auto proj_expr_index = 0;
 		for (auto &agg_expr : aggregate_op.expressions) {
 			D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
 			auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
-			// todo: check: maybe we don't need to search?
 			for (auto &expr : aggregate_expr.children) {
 				D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
 				auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
-				column_ref_expr.binding.table_index = it->table_idx;
-				column_ref_expr.binding.column_index = it->column_idx;
+				column_ref_expr.binding.table_index = original_proj_expr[proj_expr_index].table_idx;
+				column_ref_expr.binding.column_index = original_proj_expr[proj_expr_index].column_idx;
+				D_ASSERT(column_ref_expr.alias == original_proj_expr[proj_expr_index].column_name);
+				D_ASSERT(column_ref_expr.return_type == original_proj_expr[proj_expr_index].return_type);
 			}
-			it++;
-			//			for (auto &expr : aggregate_expr.children) {
-			//				D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
-			//				auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
-			//				auto find_it = std::find_if(original_proj_expr.begin(), original_proj_expr.end(),
-			//				                            [&column_ref_expr](const TableExpr &original_expr) {
-			//					                            // todo: cannot check by name
-			//					                            return original_expr.column_name == column_ref_expr.alias;
-			//				                            });
-			//				if (find_it != original_proj_expr.end()) {
-			//					column_ref_expr.binding.table_index = find_it->table_idx;
-			//					column_ref_expr.binding.column_index = find_it->column_idx;
-			//				}
-			//			}
+			proj_expr_index++;
 		}
+
 	} else {
+		D_ASSERT(proj_op.expressions.size() == original_proj_expr.size());
+		auto proj_expr_index = 0;
 		for (auto &expr : proj_op.expressions) {
 			D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
 			auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
-			auto find_it = std::find_if(original_proj_expr.begin(), original_proj_expr.end(),
-			                            [&column_ref_expr](const TableExpr &original_expr) {
-				                            return original_expr.column_name == column_ref_expr.alias;
-			                            });
-			if (find_it != original_proj_expr.end()) {
-				column_ref_expr.binding.table_index = find_it->table_idx;
-				column_ref_expr.binding.column_index = find_it->column_idx;
-			}
+			column_ref_expr.binding.table_index = original_proj_expr[proj_expr_index].table_idx;
+			column_ref_expr.binding.column_index = original_proj_expr[proj_expr_index].column_idx;
+			D_ASSERT(column_ref_expr.alias == original_proj_expr[proj_expr_index].column_name);
+			D_ASSERT(column_ref_expr.return_type == original_proj_expr[proj_expr_index].return_type);
+			proj_expr_index++;
 		}
 	}
 	return std::move(plan);
