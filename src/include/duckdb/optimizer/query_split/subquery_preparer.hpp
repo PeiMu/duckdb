@@ -33,16 +33,16 @@ public:
 	unique_ptr<LogicalOperator> GenerateProjHead(const unique_ptr<LogicalOperator> &original_plan,
 	                                             unique_ptr<LogicalOperator> subquery,
 	                                             const table_expr_info &table_expr_queue,
-	                                             const std::set<TableExpr> &original_proj_expr);
+	                                             const std::vector<TableExpr> &original_proj_expr);
 
 	//! Adapt the selection node to the query AST
 	shared_ptr<PreparedStatementData> AdaptSelect(shared_ptr<PreparedStatementData> original_stmt_data,
 	                                              const unique_ptr<LogicalOperator> &subquery);
 
-	table_expr_info UpdateTableExpr(table_expr_info table_expr_queue, std::set<TableExpr> &original_proj_expr);
+	table_expr_info UpdateTableExpr(table_expr_info table_expr_queue, std::vector<TableExpr> &original_proj_expr);
 
 	unique_ptr<LogicalOperator> UpdateProjHead(unique_ptr<LogicalOperator> plan,
-	                                           const std::set<TableExpr> &original_proj_expr);
+	                                           const std::vector<TableExpr> &original_proj_expr);
 
 	//! update the table_idx and column_idx
 	void UpdateSubqueriesIndex(subquery_queue &subqueries);

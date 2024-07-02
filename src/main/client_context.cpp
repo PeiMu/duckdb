@@ -372,7 +372,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		bool needToSplit = ENABLE_QUERY_SPLIT;
 		subquery_queue subqueries;
 		table_expr_info table_expr_queue;
-		std::set<TableExpr> proj_expr;
+		std::vector<TableExpr> proj_expr;
 		// todo: reconstruct to a balanced logical plan, to avoid missing the global optimization
 		QuerySplit query_splitter(*this);
 		SubqueryPreparer subquery_preparer(*planner.binder, *this);
@@ -380,11 +380,15 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			if (!subqueries.empty()) {
 				// todo: move to `subquery_preparer`
 				query_splitter.MergeSubquery(plan, std::move(subqueries));
+#if ENABLE_DEBUG_PRINT
 				Printer::Print("after MergeSubquery");
 				plan->Print();
+#endif
 				plan = subquery_preparer.UpdateProjHead(std::move(plan), proj_expr);
+#if ENABLE_DEBUG_PRINT
 				Printer::Print("after UpdateProjHead");
 				plan->Print();
+#endif
 			}
 			bool rewritten = false;
 			plan = query_splitter.Rewrite(plan, rewritten);
@@ -484,6 +488,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			if (last_subquery) {
 				// if it's the last subquery, break and continue the execution of the main stream
 				plan = subquery_preparer.UpdateProjHead(std::move(subqueries.front()[0]), proj_expr);
+#if ENABLE_DEBUG_PRINT
+				Printer::Print("after UpdateProjHead");
+				plan->Print();
+#endif
 				break;
 			}
 		}

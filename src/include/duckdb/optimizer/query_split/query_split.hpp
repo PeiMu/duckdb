@@ -47,9 +47,9 @@ public:
 		return top_down_splitter->GetTableExprQueue();
 	}
 
-	std::set<TableExpr> GetProjExpr() {
+	std::vector<TableExpr> GetProjExpr() {
 		if (nullptr == query_splitter)
-			return std::set<TableExpr>();
+			return std::vector<TableExpr>();
 
 		auto top_down_splitter = dynamic_cast<TopDownSplit *>(query_splitter.get());
 		return top_down_splitter->GetProjExpr();

@@ -280,7 +280,7 @@ void TopDownSplit::GetProjTableExpr(const LogicalProjection &proj_op) {
 			table_expr.column_name = column_ref_expr.alias;
 			table_expr.return_type = column_ref_expr.return_type;
 			if (target_tables.count(table_expr.table_idx)) {
-				proj_expr.emplace(table_expr);
+				proj_expr.emplace_back(table_expr);
 			}
 		}
 	}
@@ -299,7 +299,7 @@ void TopDownSplit::GetAggregateTableExpr(const LogicalAggregate &aggregate_op) {
 			table_expr.column_name = column_ref_expr.alias;
 			table_expr.return_type = column_ref_expr.return_type;
 			if (target_tables.count(table_expr.table_idx)) {
-				proj_expr.emplace(table_expr);
+				proj_expr.emplace_back(table_expr);
 			}
 		}
 	}

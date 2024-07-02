@@ -49,7 +49,7 @@ public:
 		return table_expr_queue;
 	}
 
-	std::set<TableExpr> GetProjExpr() {
+	std::vector<TableExpr> GetProjExpr() {
 		return proj_expr;
 	}
 
@@ -93,7 +93,7 @@ private:
 	// table index, table entry
 	std::unordered_set<idx_t> target_tables;
 	// expressions in the projection node
-	std::set<TableExpr> proj_expr;
+	std::vector<TableExpr> proj_expr;
 
 	//
 	int op_levels = 0;
