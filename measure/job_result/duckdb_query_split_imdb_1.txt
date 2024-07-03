@@ -1,0 +1,4126 @@
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/10a.sql
+optimization time is
+0.2776 s
+Duckdb::ExecuteInternal execution time is
+0.57540 s
+optimization time is
+0.945 s
+Duckdb::ExecuteInternal execution time is
+0.25586 s
+optimization time is
+0.888 s
+Duckdb::ExecuteInternal execution time is
+0.8304 s
+optimization time is
+0.939 s
+Duckdb::ExecuteInternal execution time is
+0.15115 s
+Duckdb::ExecuteInternal execution time is
+0.118077628 s
+Duckdb::ExecuteInternal execution time is
+0.27662371 s
+Duckdb::ExecuteInternal execution time is
+0.10306326 s
+Duckdb::ExecuteInternal execution time is
+0.305883 s
+optimization time is
+0.160450785 s
+Duckdb::ExecuteInternal execution time is
+0.20300678 s
+┌─────────────────────────────┬───────────────┐
+│ uncredited_voiced_character │ russian_movie │
+│           varchar           │    varchar    │
+├─────────────────────────────┼───────────────┤
+│ Actor                       │ 12 Rounds     │
+└─────────────────────────────┴───────────────┘
+Time taken 1.894 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/10b.sql
+optimization time is
+0.7752 s
+Duckdb::ExecuteInternal execution time is
+0.60113 s
+optimization time is
+0.965 s
+Duckdb::ExecuteInternal execution time is
+0.12848 s
+optimization time is
+0.854 s
+Duckdb::ExecuteInternal execution time is
+0.8104 s
+optimization time is
+0.914 s
+Duckdb::ExecuteInternal execution time is
+0.15126 s
+Duckdb::ExecuteInternal execution time is
+0.126185085 s
+Duckdb::ExecuteInternal execution time is
+0.25551871 s
+Duckdb::ExecuteInternal execution time is
+0.7909155 s
+Duckdb::ExecuteInternal execution time is
+0.241720 s
+optimization time is
+0.180448477 s
+Duckdb::ExecuteInternal execution time is
+0.2208463 s
+┌─────────┬─────────────────────────────────┐
+│   chr   │ russian_mov_with_actor_producer │
+│ varchar │             varchar             │
+├─────────┼─────────────────────────────────┤
+│         │                                 │
+└─────────┴─────────────────────────────────┘
+Time taken 1.729 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/10c.sql
+optimization time is
+0.7784 s
+Duckdb::ExecuteInternal execution time is
+0.53666 s
+optimization time is
+0.907 s
+Duckdb::ExecuteInternal execution time is
+0.14700 s
+optimization time is
+0.1105 s
+Duckdb::ExecuteInternal execution time is
+0.11301 s
+optimization time is
+0.949 s
+Duckdb::ExecuteInternal execution time is
+0.15264 s
+Duckdb::ExecuteInternal execution time is
+0.124919814 s
+Duckdb::ExecuteInternal execution time is
+0.24454339 s
+Duckdb::ExecuteInternal execution time is
+0.9379000 s
+Duckdb::ExecuteInternal execution time is
+0.257624 s
+optimization time is
+0.179066814 s
+Duckdb::ExecuteInternal execution time is
+0.20055922 s
+┌─────────┬──────────────────────────────┐
+│   chr   │ movie_with_american_producer │
+│ varchar │           varchar            │
+├─────────┼──────────────────────────────┤
+│ Himself │ Evil Eyes: Behind the Scenes │
+└─────────┴──────────────────────────────┘
+Time taken 1.919 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/11a.sql
+optimization time is
+0.5370 s
+Duckdb::ExecuteInternal execution time is
+0.79058 s
+optimization time is
+0.987 s
+Duckdb::ExecuteInternal execution time is
+0.10873 s
+optimization time is
+0.939 s
+Duckdb::ExecuteInternal execution time is
+0.8281 s
+optimization time is
+0.964 s
+Duckdb::ExecuteInternal execution time is
+0.15176 s
+Duckdb::ExecuteInternal execution time is
+0.9556710 s
+Duckdb::ExecuteInternal execution time is
+0.23987059 s
+Duckdb::ExecuteInternal execution time is
+0.13216701 s
+Duckdb::ExecuteInternal execution time is
+0.716188 s
+optimization time is
+0.63289329 s
+Duckdb::ExecuteInternal execution time is
+0.19497551 s
+┌─────────────────┬─────────────────┬─────────────────────────┐
+│  from_company   │ movie_link_type │ non_polish_sequel_movie │
+│     varchar     │     varchar     │         varchar         │
+├─────────────────┼─────────────────┼─────────────────────────┤
+│ Churchill Films │ followed by     │ Batman Beyond           │
+└─────────────────┴─────────────────┴─────────────────────────┘
+Time taken 0.457 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/11b.sql
+optimization time is
+0.3050 s
+Duckdb::ExecuteInternal execution time is
+0.60442 s
+optimization time is
+0.1096 s
+Duckdb::ExecuteInternal execution time is
+0.11486 s
+optimization time is
+0.1037 s
+Duckdb::ExecuteInternal execution time is
+0.8454 s
+optimization time is
+0.901 s
+Duckdb::ExecuteInternal execution time is
+0.15851 s
+Duckdb::ExecuteInternal execution time is
+0.10625000 s
+Duckdb::ExecuteInternal execution time is
+0.23098669 s
+Duckdb::ExecuteInternal execution time is
+0.14697968 s
+Duckdb::ExecuteInternal execution time is
+0.869366 s
+optimization time is
+0.65482645 s
+Duckdb::ExecuteInternal execution time is
+0.17174455 s
+┌────────────────────────────┬─────────────────┬───────────────┐
+│        from_company        │ movie_link_type │ sequel_movie  │
+│          varchar           │     varchar     │    varchar    │
+├────────────────────────────┼─────────────────┼───────────────┤
+│ Filmlance International AB │ follows         │ The Money Man │
+└────────────────────────────┴─────────────────┴───────────────┘
+Time taken 0.446 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/11c.sql
+optimization time is
+0.2912 s
+Duckdb::ExecuteInternal execution time is
+0.62582 s
+optimization time is
+0.926 s
+Duckdb::ExecuteInternal execution time is
+0.12917 s
+optimization time is
+0.1019 s
+Duckdb::ExecuteInternal execution time is
+0.8236 s
+optimization time is
+0.1018 s
+Duckdb::ExecuteInternal execution time is
+0.15348 s
+Duckdb::ExecuteInternal execution time is
+0.7428931 s
+Duckdb::ExecuteInternal execution time is
+0.16982259 s
+Duckdb::ExecuteInternal execution time is
+0.10766245 s
+Duckdb::ExecuteInternal execution time is
+0.2391277 s
+optimization time is
+0.42785575 s
+Duckdb::ExecuteInternal execution time is
+0.25150675 s
+┌─────────────────────────────────────┬─────────────────────────────────────┬─────────────────────┐
+│            from_company             │           production_note           │ movie_based_on_book │
+│               varchar               │               varchar               │       varchar       │
+├─────────────────────────────────────┼─────────────────────────────────────┼─────────────────────┤
+│ 20th Century Fox Home Entertainment │ (1997-2002) (worldwide) (all media) │ 24                  │
+└─────────────────────────────────────┴─────────────────────────────────────┴─────────────────────┘
+Time taken 0.492 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/11d.sql
+optimization time is
+0.5917 s
+Duckdb::ExecuteInternal execution time is
+0.62266 s
+optimization time is
+0.1017 s
+Duckdb::ExecuteInternal execution time is
+0.12662 s
+optimization time is
+0.999 s
+Duckdb::ExecuteInternal execution time is
+0.8354 s
+optimization time is
+0.957 s
+Duckdb::ExecuteInternal execution time is
+0.15440 s
+Duckdb::ExecuteInternal execution time is
+0.9237447 s
+Duckdb::ExecuteInternal execution time is
+0.353394316 s
+Duckdb::ExecuteInternal execution time is
+0.39773810 s
+Duckdb::ExecuteInternal execution time is
+0.14242504 s
+optimization time is
+0.547818792 s
+Duckdb::ExecuteInternal execution time is
+0.30476856 s
+┌──────────────┬──────────────────┬───────────────────────────────────────┐
+│ from_company │ production_note  │          movie_based_on_book          │
+│   varchar    │     varchar      │                varchar                │
+├──────────────┼──────────────────┼───────────────────────────────────────┤
+│ 13th Street  │ (1954) (UK) (TV) │ ...denn sie wissen nicht, was sie tun │
+└──────────────┴──────────────────┴───────────────────────────────────────┘
+Time taken 1.85 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/12a.sql
+optimization time is
+0.2703 s
+Duckdb::ExecuteInternal execution time is
+0.91328 s
+optimization time is
+0.1022 s
+Duckdb::ExecuteInternal execution time is
+0.23281 s
+optimization time is
+0.933 s
+Duckdb::ExecuteInternal execution time is
+0.8088 s
+optimization time is
+0.937 s
+Duckdb::ExecuteInternal execution time is
+0.14951 s
+Duckdb::ExecuteInternal execution time is
+0.26326594 s
+Duckdb::ExecuteInternal execution time is
+0.139825277 s
+Duckdb::ExecuteInternal execution time is
+0.10738116 s
+optimization time is
+0.213795368 s
+Duckdb::ExecuteInternal execution time is
+0.19382735 s
+┌──────────────────────────┬─────────┬────────────────────┐
+│      movie_company       │ rating  │ drama_horror_movie │
+│         varchar          │ varchar │      varchar       │
+├──────────────────────────┼─────────┼────────────────────┤
+│ 10th Grade Reunion Films │ 8.1     │ 3:20               │
+└──────────────────────────┴─────────┴────────────────────┘
+Time taken 1.504 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/12b.sql
+optimization time is
+0.5252 s
+Duckdb::ExecuteInternal execution time is
+0.49697 s
+optimization time is
+0.921 s
+Duckdb::ExecuteInternal execution time is
+0.11351 s
+optimization time is
+0.935 s
+Duckdb::ExecuteInternal execution time is
+0.8460 s
+optimization time is
+0.908 s
+Duckdb::ExecuteInternal execution time is
+0.15667 s
+Duckdb::ExecuteInternal execution time is
+0.265306 s
+Duckdb::ExecuteInternal execution time is
+0.16146001 s
+Duckdb::ExecuteInternal execution time is
+0.133047088 s
+Duckdb::ExecuteInternal execution time is
+0.2845111 s
+optimization time is
+0.162753417 s
+Duckdb::ExecuteInternal execution time is
+0.24326224 s
+┌─────────┬────────────────────────────┐
+│ budget  │    unsuccsessful_movie     │
+│ varchar │          varchar           │
+├─────────┼────────────────────────────┤
+│ $10,000 │ Birdemic: Shock and Terror │
+└─────────┴────────────────────────────┘
+Time taken 1.310 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/12c.sql
+optimization time is
+0.5701 s
+Duckdb::ExecuteInternal execution time is
+0.66892 s
+optimization time is
+0.883 s
+Duckdb::ExecuteInternal execution time is
+0.12607 s
+optimization time is
+0.936 s
+Duckdb::ExecuteInternal execution time is
+0.8131 s
+optimization time is
+0.948 s
+Duckdb::ExecuteInternal execution time is
+0.15102 s
+Duckdb::ExecuteInternal execution time is
+0.25014727 s
+Duckdb::ExecuteInternal execution time is
+0.132662685 s
+Duckdb::ExecuteInternal execution time is
+0.17225187 s
+optimization time is
+0.213843629 s
+Duckdb::ExecuteInternal execution time is
+0.21579600 s
+┌────────────────┬─────────┬──────────────────┐
+│ movie_company  │ rating  │ mainstream_movie │
+│    varchar     │ varchar │     varchar      │
+├────────────────┼─────────┼──────────────────┤
+│ "Oh That Gus!" │ 7.1     │ $1.11            │
+└────────────────┴─────────┴──────────────────┘
+Time taken 1.578 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/13a.sql
+optimization time is
+0.5795 s
+Duckdb::ExecuteInternal execution time is
+0.86642 s
+optimization time is
+0.1005 s
+Duckdb::ExecuteInternal execution time is
+0.11800 s
+optimization time is
+0.943 s
+Duckdb::ExecuteInternal execution time is
+0.8334 s
+optimization time is
+0.1215 s
+Duckdb::ExecuteInternal execution time is
+0.19971 s
+Duckdb::ExecuteInternal execution time is
+0.10450255 s
+Duckdb::ExecuteInternal execution time is
+0.112497742 s
+Duckdb::ExecuteInternal execution time is
+0.39443312 s
+optimization time is
+0.186383159 s
+Duckdb::ExecuteInternal execution time is
+0.43907389 s
+┌──────────────────────────┬─────────┬──────────────┐
+│       release_date       │ rating  │ german_movie │
+│         varchar          │ varchar │   varchar    │
+├──────────────────────────┼─────────┼──────────────┤
+│ Afghanistan:24 June 2012 │ 1.0     │ &Me          │
+└──────────────────────────┴─────────┴──────────────┘
+Time taken 1.453 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/13b.sql
+optimization time is
+0.5531 s
+Duckdb::ExecuteInternal execution time is
+0.51740 s
+optimization time is
+0.926 s
+Duckdb::ExecuteInternal execution time is
+0.12839 s
+optimization time is
+0.925 s
+Duckdb::ExecuteInternal execution time is
+0.8145 s
+optimization time is
+0.986 s
+Duckdb::ExecuteInternal execution time is
+0.15406 s
+Duckdb::ExecuteInternal execution time is
+0.25845108 s
+Duckdb::ExecuteInternal execution time is
+0.117851689 s
+Duckdb::ExecuteInternal execution time is
+0.183605570 s
+optimization time is
+0.492135050 s
+Duckdb::ExecuteInternal execution time is
+0.39881177 s
+┌───────────────────┬─────────┬─────────────────────┐
+│ producing_company │ rating  │ movie_about_winning │
+│      varchar      │ varchar │       varchar       │
+├───────────────────┼─────────┼─────────────────────┤
+│ 501audio          │ 1.8     │ 5 Time Champion     │
+└───────────────────┴─────────┴─────────────────────┘
+Time taken 1.323 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/13c.sql
+optimization time is
+0.2876 s
+Duckdb::ExecuteInternal execution time is
+0.54342 s
+optimization time is
+0.992 s
+Duckdb::ExecuteInternal execution time is
+0.26189 s
+optimization time is
+0.892 s
+Duckdb::ExecuteInternal execution time is
+0.8078 s
+optimization time is
+0.921 s
+Duckdb::ExecuteInternal execution time is
+0.14783 s
+Duckdb::ExecuteInternal execution time is
+0.26246473 s
+Duckdb::ExecuteInternal execution time is
+0.118042760 s
+Duckdb::ExecuteInternal execution time is
+0.185363474 s
+optimization time is
+0.495292980 s
+Duckdb::ExecuteInternal execution time is
+0.29568229 s
+┌───────────────────┬─────────┬─────────────────────┐
+│ producing_company │ rating  │ movie_about_winning │
+│      varchar      │ varchar │       varchar       │
+├───────────────────┼─────────┼─────────────────────┤
+│ DL Sites          │ 1.8     │ Champion            │
+└───────────────────┴─────────┴─────────────────────┘
+Time taken 1.227 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/13d.sql
+optimization time is
+0.2983 s
+Duckdb::ExecuteInternal execution time is
+0.63885 s
+optimization time is
+0.897 s
+Duckdb::ExecuteInternal execution time is
+0.10408 s
+optimization time is
+0.1034 s
+Duckdb::ExecuteInternal execution time is
+0.8138 s
+optimization time is
+0.894 s
+Duckdb::ExecuteInternal execution time is
+0.15124 s
+Duckdb::ExecuteInternal execution time is
+0.28093215 s
+Duckdb::ExecuteInternal execution time is
+0.117699293 s
+Duckdb::ExecuteInternal execution time is
+0.186761041 s
+optimization time is
+0.497726652 s
+Duckdb::ExecuteInternal execution time is
+0.63746017 s
+┌───────────────────┬─────────┬───────────────┐
+│ producing_company │ rating  │     movie     │
+│      varchar      │ varchar │    varchar    │
+├───────────────────┼─────────┼───────────────┤
+│ "O" Films         │ 1.0     │ #54 Meets #47 │
+└───────────────────┴─────────┴───────────────┘
+Time taken 1.291 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/14a.sql
+optimization time is
+0.5335 s
+Duckdb::ExecuteInternal execution time is
+0.60533 s
+optimization time is
+0.979 s
+Duckdb::ExecuteInternal execution time is
+0.10936 s
+optimization time is
+0.938 s
+Duckdb::ExecuteInternal execution time is
+0.7971 s
+optimization time is
+0.974 s
+Duckdb::ExecuteInternal execution time is
+0.15571 s
+Duckdb::ExecuteInternal execution time is
+0.147808993 s
+Duckdb::ExecuteInternal execution time is
+0.7306031 s
+Duckdb::ExecuteInternal execution time is
+0.34754668 s
+Duckdb::ExecuteInternal execution time is
+0.16526108 s
+optimization time is
+0.221951594 s
+Duckdb::ExecuteInternal execution time is
+0.19228992 s
+┌─────────┬─────────────────────┐
+│ rating  │ northern_dark_movie │
+│ varchar │       varchar       │
+├─────────┼─────────────────────┤
+│ 1.0     │ $lowdown            │
+└─────────┴─────────────────────┘
+Time taken 1.699 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/14b.sql
+optimization time is
+0.4131 s
+Duckdb::ExecuteInternal execution time is
+0.63940 s
+optimization time is
+0.943 s
+Duckdb::ExecuteInternal execution time is
+0.11104 s
+optimization time is
+0.913 s
+Duckdb::ExecuteInternal execution time is
+0.8281 s
+optimization time is
+0.1229 s
+Duckdb::ExecuteInternal execution time is
+0.18450 s
+Duckdb::ExecuteInternal execution time is
+0.136312809 s
+Duckdb::ExecuteInternal execution time is
+0.7268669 s
+Duckdb::ExecuteInternal execution time is
+0.27668180 s
+Duckdb::ExecuteInternal execution time is
+0.9123810 s
+optimization time is
+0.193340763 s
+Duckdb::ExecuteInternal execution time is
+0.20802393 s
+┌─────────┬─────────────────────────┐
+│ rating  │ western_dark_production │
+│ varchar │         varchar         │
+├─────────┼─────────────────────────┤
+│ 6.4     │ Of Dolls and Murder     │
+└─────────┴─────────────────────────┘
+Time taken 1.660 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/14c.sql
+optimization time is
+0.3208 s
+Duckdb::ExecuteInternal execution time is
+0.54063 s
+optimization time is
+0.945 s
+Duckdb::ExecuteInternal execution time is
+0.14847 s
+optimization time is
+0.919 s
+Duckdb::ExecuteInternal execution time is
+0.8216 s
+optimization time is
+0.975 s
+Duckdb::ExecuteInternal execution time is
+0.15086 s
+Duckdb::ExecuteInternal execution time is
+0.137479059 s
+Duckdb::ExecuteInternal execution time is
+0.7534100 s
+Duckdb::ExecuteInternal execution time is
+0.33221003 s
+Duckdb::ExecuteInternal execution time is
+0.13375610 s
+optimization time is
+0.206622550 s
+Duckdb::ExecuteInternal execution time is
+0.20785067 s
+┌─────────┬────────────────────────────────┐
+│ rating  │ north_european_dark_production │
+│ varchar │            varchar             │
+├─────────┼────────────────────────────────┤
+│ 1.0     │ $lowdown                       │
+└─────────┴────────────────────────────────┘
+Time taken 1.646 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/15a.sql
+optimization time is
+0.2687 s
+Duckdb::ExecuteInternal execution time is
+0.58220 s
+optimization time is
+0.959 s
+Duckdb::ExecuteInternal execution time is
+0.12399 s
+optimization time is
+0.1051 s
+Duckdb::ExecuteInternal execution time is
+0.8312 s
+optimization time is
+0.993 s
+Duckdb::ExecuteInternal execution time is
+0.15303 s
+Duckdb::ExecuteInternal execution time is
+0.30996433 s
+Duckdb::ExecuteInternal execution time is
+0.111714463 s
+Duckdb::ExecuteInternal execution time is
+0.11535542 s
+optimization time is
+0.156431785 s
+Duckdb::ExecuteInternal execution time is
+0.30284011 s
+┌─────────────────┬──────────────────────────────────────┐
+│  release_date   │            internet_movie            │
+│     varchar     │               varchar                │
+├─────────────────┼──────────────────────────────────────┤
+│ USA:1 June 2007 │ Battlestar Galactica: The Resistance │
+└─────────────────┴──────────────────────────────────────┘
+Time taken 1.604 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/15b.sql
+optimization time is
+0.8142 s
+Duckdb::ExecuteInternal execution time is
+0.56005 s
+optimization time is
+0.874 s
+Duckdb::ExecuteInternal execution time is
+0.13093 s
+optimization time is
+0.903 s
+Duckdb::ExecuteInternal execution time is
+0.8084 s
+optimization time is
+0.922 s
+Duckdb::ExecuteInternal execution time is
+0.15200 s
+Duckdb::ExecuteInternal execution time is
+0.29923093 s
+Duckdb::ExecuteInternal execution time is
+0.110062543 s
+Duckdb::ExecuteInternal execution time is
+0.8962126 s
+optimization time is
+0.150890694 s
+Duckdb::ExecuteInternal execution time is
+0.20695076 s
+┌───────────────────┬───────────────────────┐
+│   release_date    │     youtube_movie     │
+│      varchar      │        varchar        │
+├───────────────────┼───────────────────────┤
+│ USA:27 April 2007 │ RoboCop vs Terminator │
+└───────────────────┴───────────────────────┘
+Time taken 1.508 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/15c.sql
+optimization time is
+0.2630 s
+Duckdb::ExecuteInternal execution time is
+0.56894 s
+optimization time is
+0.943 s
+Duckdb::ExecuteInternal execution time is
+0.11416 s
+optimization time is
+0.874 s
+Duckdb::ExecuteInternal execution time is
+0.8433 s
+optimization time is
+0.995 s
+Duckdb::ExecuteInternal execution time is
+0.20516 s
+Duckdb::ExecuteInternal execution time is
+0.46449527 s
+Duckdb::ExecuteInternal execution time is
+0.160190056 s
+Duckdb::ExecuteInternal execution time is
+0.10791473 s
+optimization time is
+0.225244386 s
+Duckdb::ExecuteInternal execution time is
+0.30209553 s
+┌──────────────────┬────────────────────────────────┐
+│   release_date   │ modern_american_internet_movie │
+│     varchar      │            varchar             │
+├──────────────────┼────────────────────────────────┤
+│ USA:1 April 2003 │ 24: Day Six - Debrief          │
+└──────────────────┴────────────────────────────────┘
+Time taken 1.880 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/15d.sql
+optimization time is
+0.2838 s
+Duckdb::ExecuteInternal execution time is
+0.54191 s
+optimization time is
+0.870 s
+Duckdb::ExecuteInternal execution time is
+0.11060 s
+optimization time is
+0.850 s
+Duckdb::ExecuteInternal execution time is
+0.7959 s
+optimization time is
+0.987 s
+Duckdb::ExecuteInternal execution time is
+0.15475 s
+Duckdb::ExecuteInternal execution time is
+0.63290795 s
+Duckdb::ExecuteInternal execution time is
+0.45939618 s
+Duckdb::ExecuteInternal execution time is
+0.13650252 s
+optimization time is
+0.158242413 s
+Duckdb::ExecuteInternal execution time is
+0.42368910 s
+┌────────────────────────┬──────────────────────┐
+│       aka_title        │ internet_movie_title │
+│        varchar         │       varchar        │
+├────────────────────────┼──────────────────────┤
+│ (Not So) Instant Photo │ 06/05                │
+└────────────────────────┴──────────────────────┘
+Time taken 1.184 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/16a.sql
+optimization time is
+0.5164 s
+Duckdb::ExecuteInternal execution time is
+0.58727 s
+optimization time is
+0.999 s
+Duckdb::ExecuteInternal execution time is
+0.10565 s
+optimization time is
+0.912 s
+Duckdb::ExecuteInternal execution time is
+0.8037 s
+optimization time is
+0.948 s
+Duckdb::ExecuteInternal execution time is
+0.16985 s
+Duckdb::ExecuteInternal execution time is
+0.336695187 s
+Duckdb::ExecuteInternal execution time is
+2.516817629 s
+Duckdb::ExecuteInternal execution time is
+1.818233550 s
+Duckdb::ExecuteInternal execution time is
+0.441776066 s
+optimization time is
+8.867497168 s
+Duckdb::ExecuteInternal execution time is
+0.57869453 s
+┌──────────────────────┬───────────────────────────────────┐
+│ cool_actor_pseudonym │      series_named_after_char      │
+│       varchar        │              varchar              │
+├──────────────────────┼───────────────────────────────────┤
+│ Adams, Stan          │ Carol Burnett vs. Anthony Perkins │
+└──────────────────────┴───────────────────────────────────┘
+Time taken 17.740 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/16b.sql
+optimization time is
+0.6065 s
+Duckdb::ExecuteInternal execution time is
+0.59877 s
+optimization time is
+0.920 s
+Duckdb::ExecuteInternal execution time is
+0.10786 s
+optimization time is
+0.909 s
+Duckdb::ExecuteInternal execution time is
+0.8215 s
+optimization time is
+0.987 s
+Duckdb::ExecuteInternal execution time is
+0.15261 s
+Duckdb::ExecuteInternal execution time is
+0.338126244 s
+Duckdb::ExecuteInternal execution time is
+2.320831023 s
+Duckdb::ExecuteInternal execution time is
+1.768497669 s
+Duckdb::ExecuteInternal execution time is
+0.452471927 s
+optimization time is
+8.593160376 s
+Duckdb::ExecuteInternal execution time is
+0.174512553 s
+┌──────────────────────┬─────────────────────────┐
+│ cool_actor_pseudonym │ series_named_after_char │
+│       varchar        │         varchar         │
+├──────────────────────┼─────────────────────────┤
+│ !!!, Toy             │ & Teller                │
+└──────────────────────┴─────────────────────────┘
+Time taken 15.346 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/16c.sql
+optimization time is
+0.5167 s
+Duckdb::ExecuteInternal execution time is
+0.53524 s
+optimization time is
+0.891 s
+Duckdb::ExecuteInternal execution time is
+0.13304 s
+optimization time is
+0.897 s
+Duckdb::ExecuteInternal execution time is
+0.8282 s
+optimization time is
+0.1101 s
+Duckdb::ExecuteInternal execution time is
+0.15372 s
+Duckdb::ExecuteInternal execution time is
+0.368229360 s
+Duckdb::ExecuteInternal execution time is
+2.335975874 s
+Duckdb::ExecuteInternal execution time is
+1.752064952 s
+Duckdb::ExecuteInternal execution time is
+0.425379418 s
+optimization time is
+8.630532650 s
+Duckdb::ExecuteInternal execution time is
+0.103382394 s
+┌───────────────────────┬─────────────────────────┐
+│ cool_actor_pseudonym  │ series_named_after_char │
+│        varchar        │         varchar         │
+├───────────────────────┼─────────────────────────┤
+│ "Brooklyn" Tony Danza │ (#1.5)                  │
+└───────────────────────┴─────────────────────────┘
+Time taken 14.877 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/16d.sql
+optimization time is
+0.5208 s
+Duckdb::ExecuteInternal execution time is
+0.60750 s
+optimization time is
+0.958 s
+Duckdb::ExecuteInternal execution time is
+0.12542 s
+optimization time is
+0.954 s
+Duckdb::ExecuteInternal execution time is
+0.8249 s
+optimization time is
+0.887 s
+Duckdb::ExecuteInternal execution time is
+0.15097 s
+Duckdb::ExecuteInternal execution time is
+0.333970192 s
+Duckdb::ExecuteInternal execution time is
+2.338740241 s
+Duckdb::ExecuteInternal execution time is
+1.784751809 s
+Duckdb::ExecuteInternal execution time is
+0.415680515 s
+optimization time is
+8.588744334 s
+Duckdb::ExecuteInternal execution time is
+0.93484932 s
+┌───────────────────────┬─────────────────────────┐
+│ cool_actor_pseudonym  │ series_named_after_char │
+│        varchar        │         varchar         │
+├───────────────────────┼─────────────────────────┤
+│ "Brooklyn" Tony Danza │ (#1.5)                  │
+└───────────────────────┴─────────────────────────┘
+Time taken 17.172 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17a.sql
+optimization time is
+0.5672 s
+Duckdb::ExecuteInternal execution time is
+0.62826 s
+optimization time is
+0.987 s
+Duckdb::ExecuteInternal execution time is
+0.12704 s
+optimization time is
+0.921 s
+Duckdb::ExecuteInternal execution time is
+0.8288 s
+optimization time is
+0.852 s
+Duckdb::ExecuteInternal execution time is
+0.15113 s
+Duckdb::ExecuteInternal execution time is
+0.338074900 s
+Duckdb::ExecuteInternal execution time is
+1.247546603 s
+Duckdb::ExecuteInternal execution time is
+0.50318967 s
+optimization time is
+1.984031822 s
+Duckdb::ExecuteInternal execution time is
+0.31082497 s
+┌────────────────────────────────────┬─────────┐
+│ member_in_charnamed_american_movie │   a1    │
+│              varchar               │ varchar │
+├────────────────────────────────────┼─────────┤
+│ B, Khaz                            │ B, Khaz │
+└────────────────────────────────────┴─────────┘
+Time taken 5.753 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17b.sql
+optimization time is
+0.5881 s
+Duckdb::ExecuteInternal execution time is
+0.56238 s
+optimization time is
+0.913 s
+Duckdb::ExecuteInternal execution time is
+0.25576 s
+optimization time is
+0.944 s
+Duckdb::ExecuteInternal execution time is
+0.7914 s
+optimization time is
+0.962 s
+Duckdb::ExecuteInternal execution time is
+0.14760 s
+Duckdb::ExecuteInternal execution time is
+0.594461601 s
+Duckdb::ExecuteInternal execution time is
+2.956647908 s
+Duckdb::ExecuteInternal execution time is
+0.73101660 s
+optimization time is
+4.429879416 s
+Duckdb::ExecuteInternal execution time is
+0.11500878 s
+┌───────────────────────────┬───────────────┐
+│ member_in_charnamed_movie │      a1       │
+│          varchar          │    varchar    │
+├───────────────────────────┼───────────────┤
+│ Z'Dar, Robert             │ Z'Dar, Robert │
+└───────────────────────────┴───────────────┘
+Time taken 10.875 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17c.sql
+optimization time is
+0.2976 s
+Duckdb::ExecuteInternal execution time is
+0.88594 s
+optimization time is
+0.889 s
+Duckdb::ExecuteInternal execution time is
+0.10667 s
+optimization time is
+0.885 s
+Duckdb::ExecuteInternal execution time is
+0.7747 s
+optimization time is
+0.991 s
+Duckdb::ExecuteInternal execution time is
+0.14679 s
+Duckdb::ExecuteInternal execution time is
+0.597716232 s
+Duckdb::ExecuteInternal execution time is
+2.985996861 s
+Duckdb::ExecuteInternal execution time is
+0.71891889 s
+optimization time is
+4.467045236 s
+Duckdb::ExecuteInternal execution time is
+0.4674929 s
+┌───────────────────────────┬──────────────────┐
+│ member_in_charnamed_movie │        a1        │
+│          varchar          │     varchar      │
+├───────────────────────────┼──────────────────┤
+│ X'Volaitis, John          │ X'Volaitis, John │
+└───────────────────────────┴──────────────────┘
+Time taken 10.899 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17d.sql
+optimization time is
+0.7951 s
+Duckdb::ExecuteInternal execution time is
+0.58945 s
+optimization time is
+0.882 s
+Duckdb::ExecuteInternal execution time is
+0.13557 s
+optimization time is
+0.942 s
+Duckdb::ExecuteInternal execution time is
+0.8218 s
+optimization time is
+0.987 s
+Duckdb::ExecuteInternal execution time is
+0.15247 s
+Duckdb::ExecuteInternal execution time is
+0.592676516 s
+Duckdb::ExecuteInternal execution time is
+2.994320024 s
+Duckdb::ExecuteInternal execution time is
+0.82261957 s
+optimization time is
+4.483650894 s
+Duckdb::ExecuteInternal execution time is
+0.6500073 s
+┌───────────────────────────┐
+│ member_in_charnamed_movie │
+│          varchar          │
+├───────────────────────────┤
+│ Abrahamsson, Bertil       │
+└───────────────────────────┘
+Time taken 10.997 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17e.sql
+optimization time is
+0.5463 s
+Duckdb::ExecuteInternal execution time is
+0.62022 s
+optimization time is
+0.963 s
+Duckdb::ExecuteInternal execution time is
+0.10973 s
+optimization time is
+0.965 s
+Duckdb::ExecuteInternal execution time is
+0.8351 s
+optimization time is
+0.936 s
+Duckdb::ExecuteInternal execution time is
+0.15412 s
+Duckdb::ExecuteInternal execution time is
+0.337224437 s
+Duckdb::ExecuteInternal execution time is
+1.238068328 s
+Duckdb::ExecuteInternal execution time is
+0.157371618 s
+optimization time is
+2.196923740 s
+Duckdb::ExecuteInternal execution time is
+0.115480734 s
+┌───────────────────────────┐
+│ member_in_charnamed_movie │
+│          varchar          │
+├───────────────────────────┤
+│ $hort, Too                │
+└───────────────────────────┘
+Time taken 7.58 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17f.sql
+optimization time is
+0.5961 s
+Duckdb::ExecuteInternal execution time is
+0.56402 s
+optimization time is
+0.953 s
+Duckdb::ExecuteInternal execution time is
+0.10841 s
+optimization time is
+0.971 s
+Duckdb::ExecuteInternal execution time is
+0.8341 s
+optimization time is
+0.991 s
+Duckdb::ExecuteInternal execution time is
+0.15585 s
+Duckdb::ExecuteInternal execution time is
+0.597629800 s
+Duckdb::ExecuteInternal execution time is
+2.948447869 s
+Duckdb::ExecuteInternal execution time is
+0.145583997 s
+optimization time is
+4.544707183 s
+Duckdb::ExecuteInternal execution time is
+0.115918854 s
+┌─────────────────────────────────┐
+│    member_in_charnamed_movie    │
+│             varchar             │
+├─────────────────────────────────┤
+│ 'El Galgo PornoStar', Blanquito │
+└─────────────────────────────────┘
+Time taken 11.636 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/18a.sql
+optimization time is
+0.2847 s
+Duckdb::ExecuteInternal execution time is
+0.56486 s
+optimization time is
+0.919 s
+Duckdb::ExecuteInternal execution time is
+0.12750 s
+optimization time is
+0.1048 s
+Duckdb::ExecuteInternal execution time is
+0.8426 s
+optimization time is
+0.895 s
+Duckdb::ExecuteInternal execution time is
+0.15366 s
+Duckdb::ExecuteInternal execution time is
+0.91736986 s
+Duckdb::ExecuteInternal execution time is
+0.156469375 s
+Duckdb::ExecuteInternal execution time is
+0.51067273 s
+Duckdb::ExecuteInternal execution time is
+0.21367432 s
+optimization time is
+0.353366946 s
+Duckdb::ExecuteInternal execution time is
+0.18615548 s
+┌──────────────┬─────────────┬───────────────────────┐
+│ movie_budget │ movie_votes │      movie_title      │
+│   varchar    │   varchar   │        varchar        │
+├──────────────┼─────────────┼───────────────────────┤
+│ $1,000       │ 10          │ 40 Days and 40 Nights │
+└──────────────┴─────────────┴───────────────────────┘
+Time taken 2.511 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/18b.sql
+optimization time is
+0.5317 s
+Duckdb::ExecuteInternal execution time is
+0.69594 s
+optimization time is
+0.986 s
+Duckdb::ExecuteInternal execution time is
+0.16671 s
+optimization time is
+0.941 s
+Duckdb::ExecuteInternal execution time is
+0.8479 s
+optimization time is
+0.917 s
+Duckdb::ExecuteInternal execution time is
+0.37122 s
+Duckdb::ExecuteInternal execution time is
+0.121897390 s
+Duckdb::ExecuteInternal execution time is
+0.144129049 s
+Duckdb::ExecuteInternal execution time is
+0.8288569 s
+Duckdb::ExecuteInternal execution time is
+0.3253657 s
+optimization time is
+0.291836012 s
+Duckdb::ExecuteInternal execution time is
+0.18479115 s
+┌──────────────┬─────────────┬─────────────┐
+│ movie_budget │ movie_votes │ movie_title │
+│   varchar    │   varchar   │   varchar   │
+├──────────────┼─────────────┼─────────────┤
+│ Horror       │ 8.1         │ Agorable    │
+└──────────────┴─────────────┴─────────────┘
+Time taken 2.862 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/18c.sql
+optimization time is
+0.7791 s
+Duckdb::ExecuteInternal execution time is
+0.65852 s
+optimization time is
+0.916 s
+Duckdb::ExecuteInternal execution time is
+0.16149 s
+optimization time is
+0.906 s
+Duckdb::ExecuteInternal execution time is
+0.8141 s
+optimization time is
+0.977 s
+Duckdb::ExecuteInternal execution time is
+0.15542 s
+Duckdb::ExecuteInternal execution time is
+0.119821590 s
+Duckdb::ExecuteInternal execution time is
+0.156857969 s
+Duckdb::ExecuteInternal execution time is
+0.27353163 s
+Duckdb::ExecuteInternal execution time is
+0.8611008 s
+optimization time is
+0.330134489 s
+Duckdb::ExecuteInternal execution time is
+0.21261097 s
+┌──────────────┬─────────────┬─────────────┐
+│ movie_budget │ movie_votes │ movie_title │
+│   varchar    │   varchar   │   varchar   │
+├──────────────┼─────────────┼─────────────┤
+│ Action       │ 10          │ #PostModem  │
+└──────────────┴─────────────┴─────────────┘
+Time taken 3.10 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/19a.sql
+optimization time is
+0.6203 s
+Duckdb::ExecuteInternal execution time is
+0.56756 s
+optimization time is
+0.943 s
+Duckdb::ExecuteInternal execution time is
+0.10927 s
+optimization time is
+0.1025 s
+Duckdb::ExecuteInternal execution time is
+0.8260 s
+optimization time is
+0.1025 s
+Duckdb::ExecuteInternal execution time is
+0.15443 s
+Duckdb::ExecuteInternal execution time is
+0.224877556 s
+Duckdb::ExecuteInternal execution time is
+0.69521082 s
+Duckdb::ExecuteInternal execution time is
+0.187146735 s
+Duckdb::ExecuteInternal execution time is
+0.22712848 s
+Duckdb::ExecuteInternal execution time is
+0.246056 s
+optimization time is
+0.559583089 s
+Duckdb::ExecuteInternal execution time is
+0.19206245 s
+┌──────────────────┬──────────────┐
+│ voicing_actress  │ voiced_movie │
+│     varchar      │   varchar    │
+├──────────────────┼──────────────┤
+│ Angeline, Moriah │ Blue Harvest │
+└──────────────────┴──────────────┘
+Time taken 4.368 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/19b.sql
+optimization time is
+0.8677 s
+Duckdb::ExecuteInternal execution time is
+0.59331 s
+optimization time is
+0.987 s
+Duckdb::ExecuteInternal execution time is
+0.14027 s
+optimization time is
+0.931 s
+Duckdb::ExecuteInternal execution time is
+0.8591 s
+optimization time is
+0.972 s
+Duckdb::ExecuteInternal execution time is
+0.15432 s
+Duckdb::ExecuteInternal execution time is
+0.239195361 s
+Duckdb::ExecuteInternal execution time is
+0.45243161 s
+Duckdb::ExecuteInternal execution time is
+0.144420884 s
+Duckdb::ExecuteInternal execution time is
+0.11694319 s
+Duckdb::ExecuteInternal execution time is
+0.355801 s
+optimization time is
+0.471044608 s
+Duckdb::ExecuteInternal execution time is
+0.18254207 s
+┌─────────────────┬───────────────┐
+│ voicing_actress │ kung_fu_panda │
+│     varchar     │    varchar    │
+├─────────────────┼───────────────┤
+│ Jolie, Angelina │ Kung Fu Panda │
+└─────────────────┴───────────────┘
+Time taken 3.463 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/19c.sql
+optimization time is
+0.2499 s
+Duckdb::ExecuteInternal execution time is
+0.61883 s
+optimization time is
+0.1197 s
+Duckdb::ExecuteInternal execution time is
+0.35060 s
+optimization time is
+0.944 s
+Duckdb::ExecuteInternal execution time is
+0.8281 s
+optimization time is
+0.944 s
+Duckdb::ExecuteInternal execution time is
+0.15093 s
+Duckdb::ExecuteInternal execution time is
+0.225181376 s
+Duckdb::ExecuteInternal execution time is
+0.83772328 s
+Duckdb::ExecuteInternal execution time is
+0.279819107 s
+Duckdb::ExecuteInternal execution time is
+0.40271602 s
+Duckdb::ExecuteInternal execution time is
+0.419971 s
+optimization time is
+0.719511915 s
+Duckdb::ExecuteInternal execution time is
+0.20255391 s
+┌────────────────────┬───────────────────────────┐
+│  voicing_actress   │   jap_engl_voiced_movie   │
+│      varchar       │          varchar          │
+├────────────────────┼───────────────────────────┤
+│ Alborg, Ana Esther │ .hack//Akusei heni vol. 2 │
+└────────────────────┴───────────────────────────┘
+Time taken 4.518 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/19d.sql
+optimization time is
+0.5078 s
+Duckdb::ExecuteInternal execution time is
+0.50780 s
+optimization time is
+0.879 s
+Duckdb::ExecuteInternal execution time is
+0.11067 s
+optimization time is
+0.982 s
+Duckdb::ExecuteInternal execution time is
+0.8089 s
+optimization time is
+0.1010 s
+Duckdb::ExecuteInternal execution time is
+0.15191 s
+Duckdb::ExecuteInternal execution time is
+0.221887551 s
+Duckdb::ExecuteInternal execution time is
+0.84960778 s
+Duckdb::ExecuteInternal execution time is
+0.442038012 s
+Duckdb::ExecuteInternal execution time is
+0.477481574 s
+Duckdb::ExecuteInternal execution time is
+0.104027990 s
+optimization time is
+1.881289110 s
+Duckdb::ExecuteInternal execution time is
+0.139432899 s
+┌─────────────────┬───────────────────────┐
+│ voicing_actress │ jap_engl_voiced_movie │
+│     varchar     │        varchar        │
+├─────────────────┼───────────────────────┤
+│ Aaron, Caroline │ $9.99                 │
+└─────────────────┴───────────────────────┘
+Time taken 5.402 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/1a.sql
+optimization time is
+0.8117 s
+Duckdb::ExecuteInternal execution time is
+0.56943 s
+optimization time is
+0.919 s
+Duckdb::ExecuteInternal execution time is
+0.10862 s
+optimization time is
+0.960 s
+Duckdb::ExecuteInternal execution time is
+0.8529 s
+optimization time is
+0.938 s
+Duckdb::ExecuteInternal execution time is
+0.15500 s
+Duckdb::ExecuteInternal execution time is
+0.26754850 s
+Duckdb::ExecuteInternal execution time is
+0.1309623 s
+Duckdb::ExecuteInternal execution time is
+0.3120118 s
+optimization time is
+0.34965944 s
+Duckdb::ExecuteInternal execution time is
+0.22941842 s
+┌────────────────────────────────────────────────────┬────────────────────┬────────────┐
+│                  production_note                   │    movie_title     │ movie_year │
+│                      varchar                       │      varchar       │   int32    │
+├────────────────────────────────────────────────────┼────────────────────┼────────────┤
+│ (A Warner Bros.-First National Picture) (presents) │ A Clockwork Orange │       1934 │
+└────────────────────────────────────────────────────┴────────────────────┴────────────┘
+Time taken 0.509 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/1b.sql
+optimization time is
+0.2705 s
+Duckdb::ExecuteInternal execution time is
+0.55301 s
+optimization time is
+0.900 s
+Duckdb::ExecuteInternal execution time is
+0.11154 s
+optimization time is
+0.930 s
+Duckdb::ExecuteInternal execution time is
+0.8346 s
+optimization time is
+0.1248 s
+Duckdb::ExecuteInternal execution time is
+0.15689 s
+Duckdb::ExecuteInternal execution time is
+0.24744767 s
+Duckdb::ExecuteInternal execution time is
+0.9312250 s
+Duckdb::ExecuteInternal execution time is
+0.2706301 s
+optimization time is
+0.116327578 s
+Duckdb::ExecuteInternal execution time is
+0.18479210 s
+┌───────────────────────────────────────┬────────────────┬────────────┐
+│            production_note            │  movie_title   │ movie_year │
+│                varchar                │    varchar     │   int32    │
+├───────────────────────────────────────┼────────────────┼────────────┤
+│ (Set Decoration Rentals) (uncredited) │ Disaster Movie │       2008 │
+└───────────────────────────────────────┴────────────────┴────────────┘
+Time taken 0.537 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/1c.sql
+optimization time is
+0.5378 s
+Duckdb::ExecuteInternal execution time is
+0.59032 s
+optimization time is
+0.971 s
+Duckdb::ExecuteInternal execution time is
+0.10601 s
+optimization time is
+0.934 s
+Duckdb::ExecuteInternal execution time is
+0.8030 s
+optimization time is
+0.974 s
+Duckdb::ExecuteInternal execution time is
+0.17099 s
+Duckdb::ExecuteInternal execution time is
+0.19276223 s
+Duckdb::ExecuteInternal execution time is
+0.1192436 s
+Duckdb::ExecuteInternal execution time is
+0.3182698 s
+optimization time is
+0.26593391 s
+Duckdb::ExecuteInternal execution time is
+0.20411489 s
+┌─────────────────┬──────────────┬────────────┐
+│ production_note │ movie_title  │ movie_year │
+│     varchar     │   varchar    │   int32    │
+├─────────────────┼──────────────┼────────────┤
+│ (co-production) │ Intouchables │       2011 │
+└─────────────────┴──────────────┴────────────┘
+Time taken 0.403 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/1d.sql
+optimization time is
+0.5481 s
+Duckdb::ExecuteInternal execution time is
+0.64990 s
+optimization time is
+0.1515 s
+Duckdb::ExecuteInternal execution time is
+0.18260 s
+optimization time is
+0.1079 s
+Duckdb::ExecuteInternal execution time is
+0.8499 s
+optimization time is
+0.1018 s
+Duckdb::ExecuteInternal execution time is
+0.15415 s
+Duckdb::ExecuteInternal execution time is
+0.25657636 s
+Duckdb::ExecuteInternal execution time is
+0.9411686 s
+Duckdb::ExecuteInternal execution time is
+0.2506145 s
+optimization time is
+0.115955470 s
+Duckdb::ExecuteInternal execution time is
+0.18188588 s
+┌───────────────────────────────────────┬────────────────┬────────────┐
+│            production_note            │  movie_title   │ movie_year │
+│                varchar                │    varchar     │   int32    │
+├───────────────────────────────────────┼────────────────┼────────────┤
+│ (Set Decoration Rentals) (uncredited) │ Disaster Movie │       2004 │
+└───────────────────────────────────────┴────────────────┴────────────┘
+Time taken 0.561 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/20a.sql
+optimization time is
+0.8820 s
+Duckdb::ExecuteInternal execution time is
+0.216100 s
+optimization time is
+0.4386 s
+Duckdb::ExecuteInternal execution time is
+0.58911 s
+optimization time is
+0.4503 s
+Duckdb::ExecuteInternal execution time is
+0.43618 s
+optimization time is
+0.4021 s
+Duckdb::ExecuteInternal execution time is
+0.84346 s
+Duckdb::ExecuteInternal execution time is
+0.5229425 s
+Duckdb::ExecuteInternal execution time is
+0.2460482 s
+Duckdb::ExecuteInternal execution time is
+0.133751741 s
+Duckdb::ExecuteInternal execution time is
+0.13982536 s
+Duckdb::ExecuteInternal execution time is
+0.3602312 s
+optimization time is
+0.166092196 s
+Duckdb::ExecuteInternal execution time is
+0.21016587 s
+┌───────────────────────────────┐
+│ complete_downey_ironman_movie │
+│            varchar            │
+├───────────────────────────────┤
+│ Disaster Movie                │
+└───────────────────────────────┘
+Time taken 1.791 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/20b.sql
+optimization time is
+0.5192 s
+Duckdb::ExecuteInternal execution time is
+0.52535 s
+optimization time is
+0.906 s
+Duckdb::ExecuteInternal execution time is
+0.10484 s
+optimization time is
+0.872 s
+Duckdb::ExecuteInternal execution time is
+0.8020 s
+optimization time is
+0.887 s
+Duckdb::ExecuteInternal execution time is
+0.14865 s
+Duckdb::ExecuteInternal execution time is
+0.2014458 s
+Duckdb::ExecuteInternal execution time is
+0.1380172 s
+Duckdb::ExecuteInternal execution time is
+0.123525610 s
+Duckdb::ExecuteInternal execution time is
+0.17200071 s
+Duckdb::ExecuteInternal execution time is
+0.29249346 s
+optimization time is
+0.176670857 s
+Duckdb::ExecuteInternal execution time is
+0.20811827 s
+┌───────────────────────────────┐
+│ complete_downey_ironman_movie │
+│            varchar            │
+├───────────────────────────────┤
+│ Iron Man                      │
+└───────────────────────────────┘
+Time taken 1.966 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/20c.sql
+optimization time is
+0.5897 s
+Duckdb::ExecuteInternal execution time is
+0.62183 s
+optimization time is
+0.949 s
+Duckdb::ExecuteInternal execution time is
+0.11275 s
+optimization time is
+0.962 s
+Duckdb::ExecuteInternal execution time is
+0.8297 s
+optimization time is
+0.989 s
+Duckdb::ExecuteInternal execution time is
+0.22379 s
+Duckdb::ExecuteInternal execution time is
+0.1781307 s
+Duckdb::ExecuteInternal execution time is
+0.988851 s
+Duckdb::ExecuteInternal execution time is
+0.140566774 s
+Duckdb::ExecuteInternal execution time is
+0.11170138 s
+Duckdb::ExecuteInternal execution time is
+0.26713790 s
+optimization time is
+0.187269699 s
+Duckdb::ExecuteInternal execution time is
+0.24016304 s
+┌─────────────────┬─────────────────────────────┐
+│   cast_member   │ complete_dynamic_hero_movie │
+│     varchar     │           varchar           │
+├─────────────────┼─────────────────────────────┤
+│ Abell, Alistair │ ...And Then I...            │
+└─────────────────┴─────────────────────────────┘
+Time taken 2.43 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/21a.sql
+optimization time is
+0.6009 s
+Duckdb::ExecuteInternal execution time is
+0.69414 s
+optimization time is
+0.997 s
+Duckdb::ExecuteInternal execution time is
+0.10485 s
+optimization time is
+0.1094 s
+Duckdb::ExecuteInternal execution time is
+0.9368 s
+optimization time is
+0.918 s
+Duckdb::ExecuteInternal execution time is
+0.15290 s
+Duckdb::ExecuteInternal execution time is
+0.10055643 s
+Duckdb::ExecuteInternal execution time is
+0.23928196 s
+Duckdb::ExecuteInternal execution time is
+0.145711902 s
+Duckdb::ExecuteInternal execution time is
+0.13143946 s
+Duckdb::ExecuteInternal execution time is
+0.768829 s
+optimization time is
+0.212539067 s
+Duckdb::ExecuteInternal execution time is
+0.26185047 s
+┌─────────────────────────┬─────────────┬─────────────────────────────────────┐
+│      company_name       │  link_type  │          western_follow_up          │
+│         varchar         │   varchar   │               varchar               │
+├─────────────────────────┼─────────────┼─────────────────────────────────────┤
+│ Det Danske Filminstitut │ followed by │ Der Serienkiller - Klinge des Todes │
+└─────────────────────────┴─────────────┴─────────────────────────────────────┘
+Time taken 1.824 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/21b.sql
+optimization time is
+0.5843 s
+Duckdb::ExecuteInternal execution time is
+0.50125 s
+optimization time is
+0.905 s
+Duckdb::ExecuteInternal execution time is
+0.26004 s
+optimization time is
+0.946 s
+Duckdb::ExecuteInternal execution time is
+0.8136 s
+optimization time is
+0.911 s
+Duckdb::ExecuteInternal execution time is
+0.16907 s
+Duckdb::ExecuteInternal execution time is
+0.9567226 s
+Duckdb::ExecuteInternal execution time is
+0.22823876 s
+Duckdb::ExecuteInternal execution time is
+0.119216309 s
+Duckdb::ExecuteInternal execution time is
+0.13477044 s
+Duckdb::ExecuteInternal execution time is
+0.772719 s
+optimization time is
+0.184382560 s
+Duckdb::ExecuteInternal execution time is
+0.22084467 s
+┌────────────────────────────┬─────────────┬──────────────────┐
+│        company_name        │  link_type  │ german_follow_up │
+│          varchar           │   varchar   │     varchar      │
+├────────────────────────────┼─────────────┼──────────────────┤
+│ Filmlance International AB │ followed by │ Hämndens pris    │
+└────────────────────────────┴─────────────┴──────────────────┘
+Time taken 1.477 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/21c.sql
+optimization time is
+0.3077 s
+Duckdb::ExecuteInternal execution time is
+0.58444 s
+optimization time is
+0.945 s
+Duckdb::ExecuteInternal execution time is
+0.10847 s
+optimization time is
+0.922 s
+Duckdb::ExecuteInternal execution time is
+0.8291 s
+optimization time is
+0.906 s
+Duckdb::ExecuteInternal execution time is
+0.15451 s
+Duckdb::ExecuteInternal execution time is
+0.10883254 s
+Duckdb::ExecuteInternal execution time is
+0.23326537 s
+Duckdb::ExecuteInternal execution time is
+0.147369614 s
+Duckdb::ExecuteInternal execution time is
+0.17143157 s
+Duckdb::ExecuteInternal execution time is
+0.1009314 s
+optimization time is
+0.223964973 s
+Duckdb::ExecuteInternal execution time is
+0.32485697 s
+┌─────────────────┬─────────────┬───────────────────┐
+│  company_name   │  link_type  │ western_follow_up │
+│     varchar     │   varchar   │      varchar      │
+├─────────────────┼─────────────┼───────────────────┤
+│ Churchill Films │ followed by │ Batman Beyond     │
+└─────────────────┴─────────────┴───────────────────┘
+Time taken 1.939 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/22a.sql
+optimization time is
+0.2892 s
+Duckdb::ExecuteInternal execution time is
+0.56768 s
+optimization time is
+0.956 s
+Duckdb::ExecuteInternal execution time is
+0.10809 s
+optimization time is
+0.931 s
+Duckdb::ExecuteInternal execution time is
+0.8005 s
+optimization time is
+0.863 s
+Duckdb::ExecuteInternal execution time is
+0.15288 s
+Duckdb::ExecuteInternal execution time is
+0.9027622 s
+Duckdb::ExecuteInternal execution time is
+0.33408528 s
+Duckdb::ExecuteInternal execution time is
+0.132708142 s
+Duckdb::ExecuteInternal execution time is
+0.25506420 s
+Duckdb::ExecuteInternal execution time is
+0.9369838 s
+optimization time is
+0.245473630 s
+Duckdb::ExecuteInternal execution time is
+0.31369151 s
+┌─────────────────┬─────────┬───────────────────────┐
+│  movie_company  │ rating  │ western_violent_movie │
+│     varchar     │ varchar │        varchar        │
+├─────────────────┼─────────┼───────────────────────┤
+│ 01 Distribution │ 2.1     │ 12 Rounds             │
+└─────────────────┴─────────┴───────────────────────┘
+Time taken 1.891 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/22b.sql
+optimization time is
+0.2689 s
+Duckdb::ExecuteInternal execution time is
+0.58372 s
+optimization time is
+0.981 s
+Duckdb::ExecuteInternal execution time is
+0.10917 s
+optimization time is
+0.1216 s
+Duckdb::ExecuteInternal execution time is
+0.10342 s
+optimization time is
+0.997 s
+Duckdb::ExecuteInternal execution time is
+0.15487 s
+Duckdb::ExecuteInternal execution time is
+0.8137622 s
+Duckdb::ExecuteInternal execution time is
+0.30702025 s
+Duckdb::ExecuteInternal execution time is
+0.136487782 s
+Duckdb::ExecuteInternal execution time is
+0.24515018 s
+Duckdb::ExecuteInternal execution time is
+0.10789087 s
+optimization time is
+0.242631062 s
+Duckdb::ExecuteInternal execution time is
+0.28285612 s
+┌──────────────────────────────────────┬─────────┬───────────────────────┐
+│            movie_company             │ rating  │ western_violent_movie │
+│               varchar                │ varchar │        varchar        │
+├──────────────────────────────────────┼─────────┼───────────────────────┤
+│ Boll Kino Beteiligungs GmbH & Co. KG │ 3.0     │ A Small Act           │
+└──────────────────────────────────────┴─────────┴───────────────────────┘
+Time taken 1.850 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/22c.sql
+optimization time is
+0.2930 s
+Duckdb::ExecuteInternal execution time is
+0.62434 s
+optimization time is
+0.915 s
+Duckdb::ExecuteInternal execution time is
+0.11028 s
+optimization time is
+0.901 s
+Duckdb::ExecuteInternal execution time is
+0.8309 s
+optimization time is
+0.920 s
+Duckdb::ExecuteInternal execution time is
+0.15376 s
+Duckdb::ExecuteInternal execution time is
+0.7969130 s
+Duckdb::ExecuteInternal execution time is
+0.31327803 s
+Duckdb::ExecuteInternal execution time is
+0.151781121 s
+Duckdb::ExecuteInternal execution time is
+0.32864577 s
+Duckdb::ExecuteInternal execution time is
+0.14787814 s
+optimization time is
+0.277221217 s
+Duckdb::ExecuteInternal execution time is
+0.40368959 s
+┌─────────────────┬─────────┬───────────────────────┐
+│  movie_company  │ rating  │ western_violent_movie │
+│     varchar     │ varchar │        varchar        │
+├─────────────────┼─────────┼───────────────────────┤
+│ 01 Distribution │ 1.9     │ (#1.1)                │
+└─────────────────┴─────────┴───────────────────────┘
+Time taken 2.149 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/22d.sql
+optimization time is
+0.5403 s
+Duckdb::ExecuteInternal execution time is
+0.61476 s
+optimization time is
+0.934 s
+Duckdb::ExecuteInternal execution time is
+0.12287 s
+optimization time is
+0.876 s
+Duckdb::ExecuteInternal execution time is
+0.8127 s
+optimization time is
+0.955 s
+Duckdb::ExecuteInternal execution time is
+0.15441 s
+Duckdb::ExecuteInternal execution time is
+0.8114266 s
+Duckdb::ExecuteInternal execution time is
+0.30249932 s
+Duckdb::ExecuteInternal execution time is
+0.185789065 s
+Duckdb::ExecuteInternal execution time is
+0.74772652 s
+Duckdb::ExecuteInternal execution time is
+0.29607134 s
+optimization time is
+0.440968920 s
+Duckdb::ExecuteInternal execution time is
+0.59607618 s
+┌─────────────────┬─────────┬───────────────────────┐
+│  movie_company  │ rating  │ western_violent_movie │
+│     varchar     │ varchar │        varchar        │
+├─────────────────┼─────────┼───────────────────────┤
+│ 01 Distribution │ 1.6     │ (#1.1)                │
+└─────────────────┴─────────┴───────────────────────┘
+Time taken 2.403 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/23a.sql
+optimization time is
+0.3053 s
+Duckdb::ExecuteInternal execution time is
+0.62261 s
+optimization time is
+0.877 s
+Duckdb::ExecuteInternal execution time is
+0.11169 s
+optimization time is
+0.990 s
+Duckdb::ExecuteInternal execution time is
+0.8348 s
+optimization time is
+0.960 s
+Duckdb::ExecuteInternal execution time is
+0.15208 s
+Duckdb::ExecuteInternal execution time is
+0.1330422 s
+Duckdb::ExecuteInternal execution time is
+0.32681142 s
+Duckdb::ExecuteInternal execution time is
+0.141204690 s
+Duckdb::ExecuteInternal execution time is
+0.7277121 s
+optimization time is
+0.186065375 s
+Duckdb::ExecuteInternal execution time is
+0.30191562 s
+┌────────────┬────────────────────────────┐
+│ movie_kind │ complete_us_internet_movie │
+│  varchar   │          varchar           │
+├────────────┼────────────────────────────┤
+│ movie      │ The Analysts               │
+└────────────┴────────────────────────────┘
+Time taken 1.737 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/23b.sql
+optimization time is
+0.2828 s
+Duckdb::ExecuteInternal execution time is
+0.57232 s
+optimization time is
+0.911 s
+Duckdb::ExecuteInternal execution time is
+0.30132 s
+optimization time is
+0.940 s
+Duckdb::ExecuteInternal execution time is
+0.8245 s
+optimization time is
+0.924 s
+Duckdb::ExecuteInternal execution time is
+0.15420 s
+Duckdb::ExecuteInternal execution time is
+0.1328079 s
+Duckdb::ExecuteInternal execution time is
+0.32637463 s
+Duckdb::ExecuteInternal execution time is
+0.114413828 s
+Duckdb::ExecuteInternal execution time is
+0.11456680 s
+optimization time is
+0.163650125 s
+Duckdb::ExecuteInternal execution time is
+0.20368007 s
+┌────────────┬───────────────────────────────┐
+│ movie_kind │ complete_nerdy_internet_movie │
+│  varchar   │            varchar            │
+├────────────┼───────────────────────────────┤
+│ movie      │ The Big Mope                  │
+└────────────┴───────────────────────────────┘
+Time taken 1.473 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/23c.sql
+optimization time is
+0.8375 s
+Duckdb::ExecuteInternal execution time is
+0.60156 s
+optimization time is
+0.877 s
+Duckdb::ExecuteInternal execution time is
+0.10743 s
+optimization time is
+0.819 s
+Duckdb::ExecuteInternal execution time is
+0.8128 s
+optimization time is
+0.930 s
+Duckdb::ExecuteInternal execution time is
+0.15192 s
+Duckdb::ExecuteInternal execution time is
+0.1472803 s
+Duckdb::ExecuteInternal execution time is
+0.33310711 s
+Duckdb::ExecuteInternal execution time is
+0.132972579 s
+Duckdb::ExecuteInternal execution time is
+0.7194385 s
+optimization time is
+0.178330941 s
+Duckdb::ExecuteInternal execution time is
+0.31901385 s
+┌────────────┬────────────────────────────┐
+│ movie_kind │ complete_us_internet_movie │
+│  varchar   │          varchar           │
+├────────────┼────────────────────────────┤
+│ movie      │ Dirt Merchant              │
+└────────────┴────────────────────────────┘
+Time taken 1.758 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/24a.sql
+optimization time is
+0.5481 s
+Duckdb::ExecuteInternal execution time is
+0.55929 s
+optimization time is
+0.960 s
+Duckdb::ExecuteInternal execution time is
+0.12908 s
+optimization time is
+0.965 s
+Duckdb::ExecuteInternal execution time is
+0.8245 s
+optimization time is
+0.936 s
+Duckdb::ExecuteInternal execution time is
+0.15492 s
+Duckdb::ExecuteInternal execution time is
+0.263882538 s
+Duckdb::ExecuteInternal execution time is
+0.112413999 s
+Duckdb::ExecuteInternal execution time is
+0.222333077 s
+Duckdb::ExecuteInternal execution time is
+0.33707894 s
+Duckdb::ExecuteInternal execution time is
+0.15900828 s
+Duckdb::ExecuteInternal execution time is
+0.298874 s
+optimization time is
+0.824697953 s
+Duckdb::ExecuteInternal execution time is
+0.20397114 s
+┌───────────────────┬──────────────────────┬─────────────────────────────┐
+│ voiced_char_name  │ voicing_actress_name │ voiced_action_movie_jap_eng │
+│      varchar      │       varchar        │           varchar           │
+├───────────────────┼──────────────────────┼─────────────────────────────┤
+│ Additional Voices │ Baker, Andrea        │ Baiohazâdo 6                │
+└───────────────────┴──────────────────────┴─────────────────────────────┘
+Time taken 5.37 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/24b.sql
+optimization time is
+0.3141 s
+Duckdb::ExecuteInternal execution time is
+0.53223 s
+optimization time is
+0.957 s
+Duckdb::ExecuteInternal execution time is
+0.12746 s
+optimization time is
+0.935 s
+Duckdb::ExecuteInternal execution time is
+0.7905 s
+optimization time is
+0.876 s
+Duckdb::ExecuteInternal execution time is
+0.38462 s
+Duckdb::ExecuteInternal execution time is
+0.264691804 s
+Duckdb::ExecuteInternal execution time is
+0.18200142 s
+Duckdb::ExecuteInternal execution time is
+0.126124236 s
+Duckdb::ExecuteInternal execution time is
+0.14912300 s
+Duckdb::ExecuteInternal execution time is
+0.11235914 s
+Duckdb::ExecuteInternal execution time is
+0.262232 s
+optimization time is
+0.506913282 s
+Duckdb::ExecuteInternal execution time is
+0.15972470 s
+┌──────────────────┬──────────────────────┬─────────────────┐
+│ voiced_char_name │ voicing_actress_name │  kung_fu_panda  │
+│     varchar      │       varchar        │     varchar     │
+├──────────────────┼──────────────────────┼─────────────────┤
+│ Tigress          │ Jolie, Angelina      │ Kung Fu Panda 2 │
+└──────────────────┴──────────────────────┴─────────────────┘
+Time taken 4.540 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/25a.sql
+optimization time is
+0.5389 s
+Duckdb::ExecuteInternal execution time is
+0.51543 s
+optimization time is
+0.957 s
+Duckdb::ExecuteInternal execution time is
+0.10818 s
+optimization time is
+0.946 s
+Duckdb::ExecuteInternal execution time is
+0.8262 s
+optimization time is
+0.947 s
+Duckdb::ExecuteInternal execution time is
+0.15118 s
+Duckdb::ExecuteInternal execution time is
+0.120388117 s
+Duckdb::ExecuteInternal execution time is
+0.124944891 s
+Duckdb::ExecuteInternal execution time is
+0.16176097 s
+Duckdb::ExecuteInternal execution time is
+0.14815265 s
+Duckdb::ExecuteInternal execution time is
+0.15651555 s
+optimization time is
+0.305299911 s
+Duckdb::ExecuteInternal execution time is
+0.34267977 s
+┌──────────────┬─────────────┬─────────────────┬──────────────────────────────────┐
+│ movie_budget │ movie_votes │   male_writer   │       violent_movie_title        │
+│   varchar    │   varchar   │     varchar     │             varchar              │
+├──────────────┼─────────────┼─────────────────┼──────────────────────────────────┤
+│ Horror       │ 10          │ Abdallah, Damon │ -- And Now the Screaming Starts! │
+└──────────────┴─────────────┴─────────────────┴──────────────────────────────────┘
+Time taken 2.940 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/25b.sql
+optimization time is
+0.20763 s
+Duckdb::ExecuteInternal execution time is
+0.86709 s
+optimization time is
+0.1064 s
+Duckdb::ExecuteInternal execution time is
+0.28760 s
+optimization time is
+0.966 s
+Duckdb::ExecuteInternal execution time is
+0.7964 s
+optimization time is
+0.962 s
+Duckdb::ExecuteInternal execution time is
+0.15143 s
+Duckdb::ExecuteInternal execution time is
+0.120577690 s
+Duckdb::ExecuteInternal execution time is
+0.115293600 s
+Duckdb::ExecuteInternal execution time is
+0.16577503 s
+Duckdb::ExecuteInternal execution time is
+0.14970479 s
+Duckdb::ExecuteInternal execution time is
+0.18197817 s
+optimization time is
+0.300165387 s
+Duckdb::ExecuteInternal execution time is
+0.17789551 s
+┌──────────────┬─────────────┬────────────────────┬─────────────────────┐
+│ movie_budget │ movie_votes │    male_writer     │ violent_movie_title │
+│   varchar    │   varchar   │      varchar       │       varchar       │
+├──────────────┼─────────────┼────────────────────┼─────────────────────┤
+│ Horror       │ 138         │ Campbell, Jeremiah │ Vampire Boys        │
+└──────────────┴─────────────┴────────────────────┴─────────────────────┘
+Time taken 2.778 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/25c.sql
+optimization time is
+0.3118 s
+Duckdb::ExecuteInternal execution time is
+0.60001 s
+optimization time is
+0.919 s
+Duckdb::ExecuteInternal execution time is
+0.12908 s
+optimization time is
+0.899 s
+Duckdb::ExecuteInternal execution time is
+0.8089 s
+optimization time is
+0.990 s
+Duckdb::ExecuteInternal execution time is
+0.15660 s
+Duckdb::ExecuteInternal execution time is
+0.120396717 s
+Duckdb::ExecuteInternal execution time is
+0.161510165 s
+Duckdb::ExecuteInternal execution time is
+0.29532987 s
+Duckdb::ExecuteInternal execution time is
+0.11181680 s
+Duckdb::ExecuteInternal execution time is
+0.19719862 s
+optimization time is
+0.363279775 s
+Duckdb::ExecuteInternal execution time is
+0.52528651 s
+┌──────────────┬─────────────┬───────────────────┬─────────────────────┐
+│ movie_budget │ movie_votes │    male_writer    │ violent_movie_title │
+│   varchar    │   varchar   │      varchar      │       varchar       │
+├──────────────┼─────────────┼───────────────────┼─────────────────────┤
+│ Action       │ 10          │ Aakeson, Kim Fupz │ $                   │
+└──────────────┴─────────────┴───────────────────┴─────────────────────┘
+Time taken 3.454 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/26a.sql
+optimization time is
+0.5360 s
+Duckdb::ExecuteInternal execution time is
+0.115631 s
+optimization time is
+0.984 s
+Duckdb::ExecuteInternal execution time is
+0.10924 s
+optimization time is
+0.938 s
+Duckdb::ExecuteInternal execution time is
+0.8120 s
+optimization time is
+0.957 s
+Duckdb::ExecuteInternal execution time is
+0.14971 s
+Duckdb::ExecuteInternal execution time is
+0.1468702 s
+Duckdb::ExecuteInternal execution time is
+0.1223866 s
+Duckdb::ExecuteInternal execution time is
+0.148740808 s
+Duckdb::ExecuteInternal execution time is
+0.16916402 s
+Duckdb::ExecuteInternal execution time is
+0.10721239 s
+Duckdb::ExecuteInternal execution time is
+0.25745668 s
+optimization time is
+0.217520149 s
+Duckdb::ExecuteInternal execution time is
+0.31577147 s
+┌────────────────┬─────────┬─────────────────┬─────────────────────┐
+│ character_name │ rating  │  playing_actor  │ complete_hero_movie │
+│    varchar     │ varchar │     varchar     │       varchar       │
+├────────────────┼─────────┼─────────────────┼─────────────────────┤
+│ 'Agua' Man     │ 7.1     │ Acereda, Hermie │ 3:10 to Yuma        │
+└────────────────┴─────────┴─────────────────┴─────────────────────┘
+Time taken 2.217 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/26b.sql
+optimization time is
+0.8271 s
+Duckdb::ExecuteInternal execution time is
+0.55404 s
+optimization time is
+0.873 s
+Duckdb::ExecuteInternal execution time is
+0.13048 s
+optimization time is
+0.1013 s
+Duckdb::ExecuteInternal execution time is
+0.8259 s
+optimization time is
+0.926 s
+Duckdb::ExecuteInternal execution time is
+0.15220 s
+Duckdb::ExecuteInternal execution time is
+0.1474657 s
+Duckdb::ExecuteInternal execution time is
+0.991692 s
+Duckdb::ExecuteInternal execution time is
+0.148656521 s
+Duckdb::ExecuteInternal execution time is
+0.11609791 s
+Duckdb::ExecuteInternal execution time is
+0.13652861 s
+Duckdb::ExecuteInternal execution time is
+0.5093795 s
+optimization time is
+0.191394369 s
+Duckdb::ExecuteInternal execution time is
+0.23500106 s
+┌────────────────┬─────────┬─────────────────────┐
+│ character_name │ rating  │ complete_hero_movie │
+│    varchar     │ varchar │       varchar       │
+├────────────────┼─────────┼─────────────────────┤
+│ Bank Manager   │ 8.2     │ Inception           │
+└────────────────┴─────────┴─────────────────────┘
+Time taken 1.982 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/26c.sql
+optimization time is
+0.7944 s
+Duckdb::ExecuteInternal execution time is
+0.77108 s
+optimization time is
+0.931 s
+Duckdb::ExecuteInternal execution time is
+0.56284 s
+optimization time is
+0.889 s
+Duckdb::ExecuteInternal execution time is
+0.23351 s
+optimization time is
+0.964 s
+Duckdb::ExecuteInternal execution time is
+0.18415 s
+Duckdb::ExecuteInternal execution time is
+0.1569398 s
+Duckdb::ExecuteInternal execution time is
+0.1092434 s
+Duckdb::ExecuteInternal execution time is
+0.146545533 s
+Duckdb::ExecuteInternal execution time is
+0.35983821 s
+Duckdb::ExecuteInternal execution time is
+0.11815076 s
+Duckdb::ExecuteInternal execution time is
+0.7927223 s
+optimization time is
+0.224381146 s
+Duckdb::ExecuteInternal execution time is
+0.35309204 s
+┌────────────────┬─────────┬─────────────────────┐
+│ character_name │ rating  │ complete_hero_movie │
+│    varchar     │ varchar │       varchar       │
+├────────────────┼─────────┼─────────────────────┤
+│ 'Agua' Man     │ 1.9     │ 12 Rounds           │
+└────────────────┴─────────┴─────────────────────┘
+Time taken 2.114 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/27a.sql
+optimization time is
+0.8112 s
+Duckdb::ExecuteInternal execution time is
+0.53436 s
+optimization time is
+0.966 s
+Duckdb::ExecuteInternal execution time is
+0.11533 s
+optimization time is
+0.1014 s
+Duckdb::ExecuteInternal execution time is
+0.7880 s
+optimization time is
+0.1179 s
+Duckdb::ExecuteInternal execution time is
+0.16338 s
+Duckdb::ExecuteInternal execution time is
+0.233755 s
+Duckdb::ExecuteInternal execution time is
+0.1900822 s
+Duckdb::ExecuteInternal execution time is
+0.1907104 s
+Duckdb::ExecuteInternal execution time is
+0.32975314 s
+Duckdb::ExecuteInternal execution time is
+0.120403724 s
+Duckdb::ExecuteInternal execution time is
+0.13283132 s
+Duckdb::ExecuteInternal execution time is
+0.786500 s
+optimization time is
+0.177824761 s
+Duckdb::ExecuteInternal execution time is
+0.20844814 s
+┌─────────────────────────┬─────────────┬─────────────────────────┐
+│    producing_company    │  link_type  │ complete_western_sequel │
+│         varchar         │   varchar   │         varchar         │
+├─────────────────────────┼─────────────┼─────────────────────────┤
+│ Det Danske Filminstitut │ followed by │ Spår i mörker           │
+└─────────────────────────┴─────────────┴─────────────────────────┘
+Time taken 1.600 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/27b.sql
+optimization time is
+0.6013 s
+Duckdb::ExecuteInternal execution time is
+0.61939 s
+optimization time is
+0.925 s
+Duckdb::ExecuteInternal execution time is
+0.10597 s
+optimization time is
+0.925 s
+Duckdb::ExecuteInternal execution time is
+0.7801 s
+optimization time is
+0.969 s
+Duckdb::ExecuteInternal execution time is
+0.15490 s
+Duckdb::ExecuteInternal execution time is
+0.226296 s
+Duckdb::ExecuteInternal execution time is
+0.2132552 s
+Duckdb::ExecuteInternal execution time is
+0.1528162 s
+Duckdb::ExecuteInternal execution time is
+0.32258418 s
+Duckdb::ExecuteInternal execution time is
+0.126772164 s
+Duckdb::ExecuteInternal execution time is
+0.13125738 s
+Duckdb::ExecuteInternal execution time is
+0.807521 s
+optimization time is
+0.183434933 s
+Duckdb::ExecuteInternal execution time is
+0.16590067 s
+┌────────────────────────────┬─────────────┬─────────────────────────┐
+│     producing_company      │  link_type  │ complete_western_sequel │
+│          varchar           │   varchar   │         varchar         │
+├────────────────────────────┼─────────────┼─────────────────────────┤
+│ Filmlance International AB │ followed by │ Vita nätter             │
+└────────────────────────────┴─────────────┴─────────────────────────┘
+Time taken 1.594 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/27c.sql
+optimization time is
+0.5461 s
+Duckdb::ExecuteInternal execution time is
+0.52869 s
+optimization time is
+0.890 s
+Duckdb::ExecuteInternal execution time is
+0.27062 s
+optimization time is
+0.853 s
+Duckdb::ExecuteInternal execution time is
+0.7989 s
+optimization time is
+0.1100 s
+Duckdb::ExecuteInternal execution time is
+0.18094 s
+Duckdb::ExecuteInternal execution time is
+0.1550660 s
+Duckdb::ExecuteInternal execution time is
+0.1393412 s
+Duckdb::ExecuteInternal execution time is
+0.37125891 s
+Duckdb::ExecuteInternal execution time is
+0.141494847 s
+Duckdb::ExecuteInternal execution time is
+0.11932439 s
+Duckdb::ExecuteInternal execution time is
+0.814982 s
+optimization time is
+0.200756235 s
+Duckdb::ExecuteInternal execution time is
+0.22767945 s
+┌─────────────────────────┬─────────────┬─────────────────────────┐
+│    producing_company    │  link_type  │ complete_western_sequel │
+│         varchar         │   varchar   │         varchar         │
+├─────────────────────────┼─────────────┼─────────────────────────┤
+│ Det Danske Filminstitut │ followed by │ Spår i mörker           │
+└─────────────────────────┴─────────────┴─────────────────────────┘
+Time taken 1.786 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/28a.sql
+optimization time is
+0.5221 s
+Duckdb::ExecuteInternal execution time is
+0.57013 s
+optimization time is
+0.1044 s
+Duckdb::ExecuteInternal execution time is
+0.11009 s
+optimization time is
+0.971 s
+Duckdb::ExecuteInternal execution time is
+0.8248 s
+optimization time is
+0.970 s
+Duckdb::ExecuteInternal execution time is
+0.15483 s
+Duckdb::ExecuteInternal execution time is
+0.1279464 s
+Duckdb::ExecuteInternal execution time is
+0.629928 s
+Duckdb::ExecuteInternal execution time is
+0.38224909 s
+Duckdb::ExecuteInternal execution time is
+0.141065687 s
+Duckdb::ExecuteInternal execution time is
+0.17513000 s
+Duckdb::ExecuteInternal execution time is
+0.9672910 s
+optimization time is
+0.215865504 s
+Duckdb::ExecuteInternal execution time is
+0.23289700 s
+┌──────────────────┬─────────┬──────────────────────────┐
+│  movie_company   │ rating  │ complete_euro_dark_movie │
+│     varchar      │ varchar │         varchar          │
+├──────────────────┼─────────┼──────────────────────────┤
+│ 01 Distribuzione │ 2.9     │ (#1.1)                   │
+└──────────────────┴─────────┴──────────────────────────┘
+Time taken 1.966 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/28b.sql
+optimization time is
+0.5823 s
+Duckdb::ExecuteInternal execution time is
+0.54925 s
+optimization time is
+0.977 s
+Duckdb::ExecuteInternal execution time is
+0.11278 s
+optimization time is
+0.976 s
+Duckdb::ExecuteInternal execution time is
+0.8100 s
+optimization time is
+0.944 s
+Duckdb::ExecuteInternal execution time is
+0.15123 s
+Duckdb::ExecuteInternal execution time is
+0.1222328 s
+Duckdb::ExecuteInternal execution time is
+0.627162 s
+Duckdb::ExecuteInternal execution time is
+0.38750315 s
+Duckdb::ExecuteInternal execution time is
+0.126878727 s
+Duckdb::ExecuteInternal execution time is
+0.7281418 s
+Duckdb::ExecuteInternal execution time is
+0.28079474 s
+optimization time is
+0.208159583 s
+Duckdb::ExecuteInternal execution time is
+0.22113736 s
+┌──────────────────┬─────────┬──────────────────────────┐
+│  movie_company   │ rating  │ complete_euro_dark_movie │
+│     varchar      │ varchar │         varchar          │
+├──────────────────┼─────────┼──────────────────────────┤
+│ 20th Century Fox │ 6.6     │ (#1.1)                   │
+└──────────────────┴─────────┴──────────────────────────┘
+Time taken 1.926 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/28c.sql
+optimization time is
+0.8229 s
+Duckdb::ExecuteInternal execution time is
+0.68763 s
+optimization time is
+0.1096 s
+Duckdb::ExecuteInternal execution time is
+0.15518 s
+optimization time is
+0.1063 s
+Duckdb::ExecuteInternal execution time is
+0.17949 s
+optimization time is
+0.993 s
+Duckdb::ExecuteInternal execution time is
+0.24046 s
+Duckdb::ExecuteInternal execution time is
+0.1951341 s
+Duckdb::ExecuteInternal execution time is
+0.997552 s
+Duckdb::ExecuteInternal execution time is
+0.37393517 s
+Duckdb::ExecuteInternal execution time is
+0.147970236 s
+Duckdb::ExecuteInternal execution time is
+0.15779525 s
+Duckdb::ExecuteInternal execution time is
+0.11084715 s
+optimization time is
+0.226462126 s
+Duckdb::ExecuteInternal execution time is
+0.24798042 s
+┌──────────────────┬─────────┬──────────────────────────┐
+│  movie_company   │ rating  │ complete_euro_dark_movie │
+│     varchar      │ varchar │         varchar          │
+├──────────────────┼─────────┼──────────────────────────┤
+│ 01 Distribuzione │ 1.9     │ (#1.1)                   │
+└──────────────────┴─────────┴──────────────────────────┘
+Time taken 1.947 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/29a.sql
+optimization time is
+0.5517 s
+Duckdb::ExecuteInternal execution time is
+0.56913 s
+optimization time is
+0.942 s
+Duckdb::ExecuteInternal execution time is
+0.15281 s
+optimization time is
+0.986 s
+Duckdb::ExecuteInternal execution time is
+0.8285 s
+optimization time is
+0.1257 s
+Duckdb::ExecuteInternal execution time is
+0.19835 s
+Duckdb::ExecuteInternal execution time is
+0.1442575 s
+Duckdb::ExecuteInternal execution time is
+0.1055821 s
+Duckdb::ExecuteInternal execution time is
+0.137001324 s
+Duckdb::ExecuteInternal execution time is
+0.9674046 s
+Duckdb::ExecuteInternal execution time is
+0.144610618 s
+Duckdb::ExecuteInternal execution time is
+0.11642555 s
+Duckdb::ExecuteInternal execution time is
+0.10544103 s
+Duckdb::ExecuteInternal execution time is
+0.4895976 s
+Duckdb::ExecuteInternal execution time is
+0.366635 s
+optimization time is
+0.326738012 s
+Duckdb::ExecuteInternal execution time is
+0.15987155 s
+┌─────────────┬─────────────────┬──────────────────┐
+│ voiced_char │ voicing_actress │ voiced_animation │
+│   varchar   │     varchar     │     varchar      │
+├─────────────┼─────────────────┼──────────────────┤
+│ Queen       │ Andrews, Julie  │ Shrek 2          │
+└─────────────┴─────────────────┴──────────────────┘
+Time taken 3.258 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/29b.sql
+optimization time is
+0.5548 s
+Duckdb::ExecuteInternal execution time is
+0.53797 s
+optimization time is
+0.983 s
+Duckdb::ExecuteInternal execution time is
+0.10678 s
+optimization time is
+0.1043 s
+Duckdb::ExecuteInternal execution time is
+0.10734 s
+optimization time is
+0.941 s
+Duckdb::ExecuteInternal execution time is
+0.15217 s
+Duckdb::ExecuteInternal execution time is
+0.1655831 s
+Duckdb::ExecuteInternal execution time is
+0.742543 s
+Duckdb::ExecuteInternal execution time is
+0.139497551 s
+Duckdb::ExecuteInternal execution time is
+0.9883296 s
+Duckdb::ExecuteInternal execution time is
+0.107045755 s
+Duckdb::ExecuteInternal execution time is
+0.12642077 s
+Duckdb::ExecuteInternal execution time is
+0.10534035 s
+Duckdb::ExecuteInternal execution time is
+0.4713944 s
+Duckdb::ExecuteInternal execution time is
+0.285147 s
+optimization time is
+0.292041835 s
+Duckdb::ExecuteInternal execution time is
+0.16083982 s
+┌─────────────┬─────────────────┬──────────────────┐
+│ voiced_char │ voicing_actress │ voiced_animation │
+│   varchar   │     varchar     │     varchar      │
+├─────────────┼─────────────────┼──────────────────┤
+│ Queen       │ Andrews, Julie  │ Shrek 2          │
+└─────────────┴─────────────────┴──────────────────┘
+Time taken 2.883 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/29c.sql
+optimization time is
+0.5485 s
+Duckdb::ExecuteInternal execution time is
+0.57721 s
+optimization time is
+0.868 s
+Duckdb::ExecuteInternal execution time is
+0.10795 s
+optimization time is
+0.943 s
+Duckdb::ExecuteInternal execution time is
+0.7958 s
+optimization time is
+0.893 s
+Duckdb::ExecuteInternal execution time is
+0.14981 s
+Duckdb::ExecuteInternal execution time is
+0.1477910 s
+Duckdb::ExecuteInternal execution time is
+0.732005 s
+Duckdb::ExecuteInternal execution time is
+0.158587804 s
+Duckdb::ExecuteInternal execution time is
+0.23872593 s
+Duckdb::ExecuteInternal execution time is
+0.142326175 s
+Duckdb::ExecuteInternal execution time is
+0.11768092 s
+Duckdb::ExecuteInternal execution time is
+0.12029973 s
+Duckdb::ExecuteInternal execution time is
+0.5919936 s
+Duckdb::ExecuteInternal execution time is
+0.970444 s
+optimization time is
+0.377674722 s
+Duckdb::ExecuteInternal execution time is
+0.36512397 s
+┌─────────────┬─────────────────┬──────────────────┐
+│ voiced_char │ voicing_actress │ voiced_animation │
+│   varchar   │     varchar     │     varchar      │
+├─────────────┼─────────────────┼──────────────────┤
+│ Lola        │ Andrews, Julie  │ Hoodwinked!      │
+└─────────────┴─────────────────┴──────────────────┘
+Time taken 3.692 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/2a.sql
+optimization time is
+0.2512 s
+Duckdb::ExecuteInternal execution time is
+0.62521 s
+optimization time is
+0.957 s
+Duckdb::ExecuteInternal execution time is
+0.11644 s
+optimization time is
+0.996 s
+Duckdb::ExecuteInternal execution time is
+0.8334 s
+optimization time is
+0.894 s
+Duckdb::ExecuteInternal execution time is
+0.15117 s
+Duckdb::ExecuteInternal execution time is
+0.9498003 s
+Duckdb::ExecuteInternal execution time is
+0.17689784 s
+optimization time is
+0.28997438 s
+Duckdb::ExecuteInternal execution time is
+0.29232510 s
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│ 'Doc'       │
+└─────────────┘
+Time taken 0.418 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/2b.sql
+optimization time is
+0.5577 s
+Duckdb::ExecuteInternal execution time is
+0.55735 s
+optimization time is
+0.943 s
+Duckdb::ExecuteInternal execution time is
+0.10880 s
+optimization time is
+0.977 s
+Duckdb::ExecuteInternal execution time is
+0.8137 s
+optimization time is
+0.952 s
+Duckdb::ExecuteInternal execution time is
+0.15517 s
+Duckdb::ExecuteInternal execution time is
+0.8861400 s
+Duckdb::ExecuteInternal execution time is
+0.14828448 s
+optimization time is
+0.25133978 s
+Duckdb::ExecuteInternal execution time is
+0.25852449 s
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│ 'Doc'       │
+└─────────────┘
+Time taken 0.388 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/2c.sql
+optimization time is
+0.7859 s
+Duckdb::ExecuteInternal execution time is
+0.57636 s
+optimization time is
+0.936 s
+Duckdb::ExecuteInternal execution time is
+0.14508 s
+optimization time is
+0.1034 s
+Duckdb::ExecuteInternal execution time is
+0.8667 s
+optimization time is
+0.1097 s
+Duckdb::ExecuteInternal execution time is
+0.16110 s
+Duckdb::ExecuteInternal execution time is
+0.7803635 s
+Duckdb::ExecuteInternal execution time is
+0.11234627 s
+optimization time is
+0.19993499 s
+Duckdb::ExecuteInternal execution time is
+0.1540069 s
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│             │
+└─────────────┘
+Time taken 0.121 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/2d.sql
+optimization time is
+0.2804 s
+Duckdb::ExecuteInternal execution time is
+0.60618 s
+optimization time is
+0.966 s
+Duckdb::ExecuteInternal execution time is
+0.11146 s
+optimization time is
+0.909 s
+Duckdb::ExecuteInternal execution time is
+0.8476 s
+optimization time is
+0.1028 s
+Duckdb::ExecuteInternal execution time is
+0.15912 s
+Duckdb::ExecuteInternal execution time is
+0.12301411 s
+Duckdb::ExecuteInternal execution time is
+0.26445046 s
+optimization time is
+0.45149940 s
+Duckdb::ExecuteInternal execution time is
+0.32034199 s
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│ & Teller    │
+└─────────────┘
+Time taken 0.438 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/30a.sql
+optimization time is
+0.5655 s
+Duckdb::ExecuteInternal execution time is
+0.58338 s
+optimization time is
+0.1039 s
+Duckdb::ExecuteInternal execution time is
+0.11098 s
+optimization time is
+0.922 s
+Duckdb::ExecuteInternal execution time is
+0.8141 s
+optimization time is
+0.951 s
+Duckdb::ExecuteInternal execution time is
+0.15397 s
+Duckdb::ExecuteInternal execution time is
+0.225742 s
+Duckdb::ExecuteInternal execution time is
+0.2130583 s
+Duckdb::ExecuteInternal execution time is
+0.1395887 s
+Duckdb::ExecuteInternal execution time is
+0.120382795 s
+Duckdb::ExecuteInternal execution time is
+0.118302428 s
+Duckdb::ExecuteInternal execution time is
+0.6740279 s
+Duckdb::ExecuteInternal execution time is
+0.43386887 s
+Duckdb::ExecuteInternal execution time is
+0.18097068 s
+optimization time is
+0.316546738 s
+Duckdb::ExecuteInternal execution time is
+0.24344927 s
+┌──────────────┬─────────────┬──────────────┬────────────────────────┐
+│ movie_budget │ movie_votes │    writer    │ complete_violent_movie │
+│   varchar    │   varchar   │   varchar    │        varchar         │
+├──────────────┼─────────────┼──────────────┼────────────────────────┤
+│ Horror       │ 100356      │ Abrams, J.J. │ 16 Blocks              │
+└──────────────┴─────────────┴──────────────┴────────────────────────┘
+Time taken 3.284 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/30b.sql
+optimization time is
+0.8202 s
+Duckdb::ExecuteInternal execution time is
+0.57366 s
+optimization time is
+0.920 s
+Duckdb::ExecuteInternal execution time is
+0.11090 s
+optimization time is
+0.912 s
+Duckdb::ExecuteInternal execution time is
+0.8193 s
+optimization time is
+0.956 s
+Duckdb::ExecuteInternal execution time is
+0.15286 s
+Duckdb::ExecuteInternal execution time is
+0.229601 s
+Duckdb::ExecuteInternal execution time is
+0.1864806 s
+Duckdb::ExecuteInternal execution time is
+0.1399012 s
+Duckdb::ExecuteInternal execution time is
+0.121819403 s
+Duckdb::ExecuteInternal execution time is
+0.115551550 s
+Duckdb::ExecuteInternal execution time is
+0.7925356 s
+Duckdb::ExecuteInternal execution time is
+0.43485160 s
+Duckdb::ExecuteInternal execution time is
+0.19269575 s
+optimization time is
+0.317608324 s
+Duckdb::ExecuteInternal execution time is
+0.26775090 s
+┌──────────────┬─────────────┬─────────────────┬─────────────────────┐
+│ movie_budget │ movie_votes │     writer      │ complete_gore_movie │
+│   varchar    │   varchar   │     varchar     │       varchar       │
+├──────────────┼─────────────┼─────────────────┼─────────────────────┤
+│ Horror       │ 194782      │ Shannon, Damian │ Freddy vs. Jason    │
+└──────────────┴─────────────┴─────────────────┴─────────────────────┘
+Time taken 3.319 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/30c.sql
+optimization time is
+0.2779 s
+Duckdb::ExecuteInternal execution time is
+0.58673 s
+optimization time is
+0.1015 s
+Duckdb::ExecuteInternal execution time is
+0.11647 s
+optimization time is
+0.903 s
+Duckdb::ExecuteInternal execution time is
+0.8126 s
+optimization time is
+0.948 s
+Duckdb::ExecuteInternal execution time is
+0.15292 s
+Duckdb::ExecuteInternal execution time is
+0.1447980 s
+Duckdb::ExecuteInternal execution time is
+0.1103025 s
+Duckdb::ExecuteInternal execution time is
+0.123009030 s
+Duckdb::ExecuteInternal execution time is
+0.137351658 s
+Duckdb::ExecuteInternal execution time is
+0.7300783 s
+Duckdb::ExecuteInternal execution time is
+0.48476798 s
+Duckdb::ExecuteInternal execution time is
+0.19191405 s
+optimization time is
+0.344016204 s
+Duckdb::ExecuteInternal execution time is
+0.23276983 s
+┌──────────────┬─────────────┬──────────────────┬────────────────────────┐
+│ movie_budget │ movie_votes │      writer      │ complete_violent_movie │
+│   varchar    │   varchar   │     varchar      │        varchar         │
+├──────────────┼─────────────┼──────────────────┼────────────────────────┤
+│ Action       │ 100356      │ Abernathy, Lewis │ $                      │
+└──────────────┴─────────────┴──────────────────┴────────────────────────┘
+Time taken 3.604 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/31a.sql
+optimization time is
+0.6017 s
+Duckdb::ExecuteInternal execution time is
+0.60382 s
+optimization time is
+0.1015 s
+Duckdb::ExecuteInternal execution time is
+0.12798 s
+optimization time is
+0.974 s
+Duckdb::ExecuteInternal execution time is
+0.8196 s
+optimization time is
+0.996 s
+Duckdb::ExecuteInternal execution time is
+0.17407 s
+Duckdb::ExecuteInternal execution time is
+0.120401510 s
+Duckdb::ExecuteInternal execution time is
+0.26460681 s
+Duckdb::ExecuteInternal execution time is
+0.108472744 s
+Duckdb::ExecuteInternal execution time is
+0.6525692 s
+Duckdb::ExecuteInternal execution time is
+0.28687161 s
+Duckdb::ExecuteInternal execution time is
+0.17017517 s
+optimization time is
+0.321335583 s
+Duckdb::ExecuteInternal execution time is
+0.21209776 s
+┌──────────────┬─────────────┬────────────┬────────────────────────┐
+│ movie_budget │ movie_votes │   writer   │ violent_liongate_movie │
+│   varchar    │   varchar   │  varchar   │        varchar         │
+├──────────────┼─────────────┼────────────┼────────────────────────┤
+│ Horror       │ 1040        │ Agnew, Jim │ 2001 Maniacs           │
+└──────────────┴─────────────┴────────────┴────────────────────────┘
+Time taken 3.82 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/31b.sql
+optimization time is
+0.2988 s
+Duckdb::ExecuteInternal execution time is
+0.58113 s
+optimization time is
+0.867 s
+Duckdb::ExecuteInternal execution time is
+0.10866 s
+optimization time is
+0.887 s
+Duckdb::ExecuteInternal execution time is
+0.7943 s
+optimization time is
+0.936 s
+Duckdb::ExecuteInternal execution time is
+0.15874 s
+Duckdb::ExecuteInternal execution time is
+0.124228255 s
+Duckdb::ExecuteInternal execution time is
+0.27812712 s
+Duckdb::ExecuteInternal execution time is
+0.116958363 s
+Duckdb::ExecuteInternal execution time is
+0.6525007 s
+Duckdb::ExecuteInternal execution time is
+0.21483175 s
+Duckdb::ExecuteInternal execution time is
+0.15276616 s
+optimization time is
+0.326683773 s
+Duckdb::ExecuteInternal execution time is
+0.26080665 s
+┌──────────────┬─────────────┬──────────────────────┬────────────────────────┐
+│ movie_budget │ movie_votes │        writer        │ violent_liongate_movie │
+│   varchar    │   varchar   │       varchar        │        varchar         │
+├──────────────┼─────────────┼──────────────────────┼────────────────────────┤
+│ Horror       │ 129755      │ Bousman, Darren Lynn │ Saw                    │
+└──────────────┴─────────────┴──────────────────────┴────────────────────────┘
+Time taken 3.179 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/31c.sql
+optimization time is
+0.5593 s
+Duckdb::ExecuteInternal execution time is
+0.55780 s
+optimization time is
+0.975 s
+Duckdb::ExecuteInternal execution time is
+0.10948 s
+optimization time is
+0.974 s
+Duckdb::ExecuteInternal execution time is
+0.8194 s
+optimization time is
+0.941 s
+Duckdb::ExecuteInternal execution time is
+0.15521 s
+Duckdb::ExecuteInternal execution time is
+0.119913034 s
+Duckdb::ExecuteInternal execution time is
+0.24448145 s
+Duckdb::ExecuteInternal execution time is
+0.132458081 s
+Duckdb::ExecuteInternal execution time is
+0.6111616 s
+Duckdb::ExecuteInternal execution time is
+0.44673094 s
+Duckdb::ExecuteInternal execution time is
+0.26596138 s
+optimization time is
+0.368289706 s
+Duckdb::ExecuteInternal execution time is
+0.22995012 s
+┌──────────────┬─────────────┬───────────────┬────────────────────────┐
+│ movie_budget │ movie_votes │    writer     │ violent_liongate_movie │
+│   varchar    │   varchar   │    varchar    │        varchar         │
+├──────────────┼─────────────┼───────────────┼────────────────────────┤
+│ Action       │ 1008        │ Abraham, Brad │ 11:14                  │
+└──────────────┴─────────────┴───────────────┴────────────────────────┘
+Time taken 3.635 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/32a.sql
+optimization time is
+0.2539 s
+Duckdb::ExecuteInternal execution time is
+0.54225 s
+optimization time is
+0.960 s
+Duckdb::ExecuteInternal execution time is
+0.12541 s
+optimization time is
+0.975 s
+Duckdb::ExecuteInternal execution time is
+0.8073 s
+optimization time is
+0.914 s
+Duckdb::ExecuteInternal execution time is
+0.15097 s
+Duckdb::ExecuteInternal execution time is
+0.12455846 s
+Duckdb::ExecuteInternal execution time is
+0.1177622 s
+Duckdb::ExecuteInternal execution time is
+0.1830952 s
+optimization time is
+0.16575989 s
+Duckdb::ExecuteInternal execution time is
+0.410851 s
+┌───────────┬─────────────┬──────────────┐
+│ link_type │ first_movie │ second_movie │
+│  varchar  │   varchar   │   varchar    │
+├───────────┼─────────────┼──────────────┤
+│           │             │              │
+└───────────┴─────────────┴──────────────┘
+Time taken 0.83 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/32b.sql
+optimization time is
+0.2906 s
+Duckdb::ExecuteInternal execution time is
+0.58832 s
+optimization time is
+0.983 s
+Duckdb::ExecuteInternal execution time is
+0.10892 s
+optimization time is
+0.895 s
+Duckdb::ExecuteInternal execution time is
+0.8144 s
+optimization time is
+0.931 s
+Duckdb::ExecuteInternal execution time is
+0.15526 s
+Duckdb::ExecuteInternal execution time is
+0.12099015 s
+Duckdb::ExecuteInternal execution time is
+0.3911163 s
+Duckdb::ExecuteInternal execution time is
+0.29311320 s
+optimization time is
+0.47338005 s
+Duckdb::ExecuteInternal execution time is
+0.16469542 s
+┌───────────────────────────────┬──────────────┬────────────────────────────┐
+│           link_type           │ first_movie  │        second_movie        │
+│            varchar            │   varchar    │          varchar           │
+├───────────────────────────────┼──────────────┼────────────────────────────┤
+│ alternate language version of │ 12 oz. Mouse │ 'Angel': Season 2 Overview │
+└───────────────────────────────┴──────────────┴────────────────────────────┘
+Time taken 0.526 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/33a.sql
+optimization time is
+0.8470 s
+Duckdb::ExecuteInternal execution time is
+0.57949 s
+optimization time is
+0.985 s
+Duckdb::ExecuteInternal execution time is
+0.11388 s
+optimization time is
+0.931 s
+Duckdb::ExecuteInternal execution time is
+0.8571 s
+optimization time is
+0.938 s
+Duckdb::ExecuteInternal execution time is
+0.16271 s
+Duckdb::ExecuteInternal execution time is
+0.38059539 s
+Duckdb::ExecuteInternal execution time is
+0.31509004 s
+Duckdb::ExecuteInternal execution time is
+0.64463800 s
+Duckdb::ExecuteInternal execution time is
+0.35094741 s
+Duckdb::ExecuteInternal execution time is
+0.8834137 s
+Duckdb::ExecuteInternal execution time is
+0.17423812 s
+optimization time is
+0.409265060 s
+Duckdb::ExecuteInternal execution time is
+0.16496034 s
+┌─────────────────┬─────────────────┬──────────────┬───────────────┬──────────────────────┬────────────────────────────┐
+│  first_company  │ second_company  │ first_rating │ second_rating │     first_movie      │        second_movie        │
+│     varchar     │     varchar     │   varchar    │    varchar    │       varchar        │          varchar           │
+├─────────────────┼─────────────────┼──────────────┼───────────────┼──────────────────────┼────────────────────────────┤
+│ 495 Productions │ 495 Productions │ 3.3          │ 2.7           │ A Double Shot at L…  │ A Shot at Love with Tila…  │
+└─────────────────┴─────────────────┴──────────────┴───────────────┴──────────────────────┴────────────────────────────┘
+Time taken 1.128 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/33b.sql
+optimization time is
+0.5464 s
+Duckdb::ExecuteInternal execution time is
+0.59895 s
+optimization time is
+0.999 s
+Duckdb::ExecuteInternal execution time is
+0.14365 s
+optimization time is
+0.969 s
+Duckdb::ExecuteInternal execution time is
+0.8199 s
+optimization time is
+0.968 s
+Duckdb::ExecuteInternal execution time is
+0.15355 s
+Duckdb::ExecuteInternal execution time is
+0.16120241 s
+Duckdb::ExecuteInternal execution time is
+0.32318099 s
+Duckdb::ExecuteInternal execution time is
+0.15045321 s
+Duckdb::ExecuteInternal execution time is
+0.35568093 s
+Duckdb::ExecuteInternal execution time is
+0.2702126 s
+Duckdb::ExecuteInternal execution time is
+0.17406557 s
+optimization time is
+0.240010406 s
+Duckdb::ExecuteInternal execution time is
+0.14784892 s
+┌─────────────────┬─────────────────┬──────────────┬───────────────┬──────────────────────┬────────────────────────────┐
+│  first_company  │ second_company  │ first_rating │ second_rating │     first_movie      │        second_movie        │
+│     varchar     │     varchar     │   varchar    │    varchar    │       varchar        │          varchar           │
+├─────────────────┼─────────────────┼──────────────┼───────────────┼──────────────────────┼────────────────────────────┤
+│ MTV Netherlands │ 495 Productions │ 3.3          │ 2.7           │ A Double Shot at L…  │ A Shot at Love with Tila…  │
+└─────────────────┴─────────────────┴──────────────┴───────────────┴──────────────────────┴────────────────────────────┘
+Time taken 0.869 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/33c.sql
+optimization time is
+0.8319 s
+Duckdb::ExecuteInternal execution time is
+0.56668 s
+optimization time is
+0.928 s
+Duckdb::ExecuteInternal execution time is
+0.13754 s
+optimization time is
+0.935 s
+Duckdb::ExecuteInternal execution time is
+0.8214 s
+optimization time is
+0.949 s
+Duckdb::ExecuteInternal execution time is
+0.15592 s
+Duckdb::ExecuteInternal execution time is
+0.8001487 s
+Duckdb::ExecuteInternal execution time is
+0.27897383 s
+Duckdb::ExecuteInternal execution time is
+0.29275232 s
+Duckdb::ExecuteInternal execution time is
+0.71361106 s
+Duckdb::ExecuteInternal execution time is
+0.34771510 s
+Duckdb::ExecuteInternal execution time is
+0.11937789 s
+Duckdb::ExecuteInternal execution time is
+0.17883116 s
+optimization time is
+0.424467808 s
+Duckdb::ExecuteInternal execution time is
+0.17598789 s
+┌───────────────┬─────────────────┬──────────────┬───────────────┬───────────────────────┬───────────────────────┐
+│ first_company │ second_company  │ first_rating │ second_rating │      first_movie      │     second_movie      │
+│    varchar    │     varchar     │   varchar    │    varchar    │        varchar        │        varchar        │
+├───────────────┼─────────────────┼──────────────┼───────────────┼───────────────────────┼───────────────────────┤
+│ 2BE           │ 495 Productions │ 1.3          │ 1.0           │ A Double Shot at Love │ A Double Shot at Love │
+└───────────────┴─────────────────┴──────────────┴───────────────┴───────────────────────┴───────────────────────┘
+Time taken 1.195 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/3a.sql
+optimization time is
+0.5802 s
+Duckdb::ExecuteInternal execution time is
+0.50636 s
+optimization time is
+0.967 s
+Duckdb::ExecuteInternal execution time is
+0.24339 s
+optimization time is
+0.1006 s
+Duckdb::ExecuteInternal execution time is
+0.8371 s
+optimization time is
+0.943 s
+Duckdb::ExecuteInternal execution time is
+0.15422 s
+Duckdb::ExecuteInternal execution time is
+0.6541686 s
+Duckdb::ExecuteInternal execution time is
+0.152277865 s
+optimization time is
+0.159931194 s
+Duckdb::ExecuteInternal execution time is
+0.21653216 s
+┌────────────────────┐
+│    movie_title     │
+│      varchar       │
+├────────────────────┤
+│ 2 Days in New York │
+└────────────────────┘
+Time taken 1.593 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/3b.sql
+optimization time is
+0.3129 s
+Duckdb::ExecuteInternal execution time is
+0.75845 s
+optimization time is
+0.962 s
+Duckdb::ExecuteInternal execution time is
+0.11707 s
+optimization time is
+0.929 s
+Duckdb::ExecuteInternal execution time is
+0.8105 s
+optimization time is
+0.825 s
+Duckdb::ExecuteInternal execution time is
+0.17832 s
+Duckdb::ExecuteInternal execution time is
+0.6557876 s
+Duckdb::ExecuteInternal execution time is
+0.124145583 s
+optimization time is
+0.131797561 s
+Duckdb::ExecuteInternal execution time is
+0.17650877 s
+┌────────────────────────┐
+│      movie_title       │
+│        varchar         │
+├────────────────────────┤
+│ 300: Rise of an Empire │
+└────────────────────────┘
+Time taken 1.193 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/3c.sql
+optimization time is
+0.7819 s
+Duckdb::ExecuteInternal execution time is
+0.55232 s
+optimization time is
+0.844 s
+Duckdb::ExecuteInternal execution time is
+0.10619 s
+optimization time is
+0.862 s
+Duckdb::ExecuteInternal execution time is
+0.8069 s
+optimization time is
+0.899 s
+Duckdb::ExecuteInternal execution time is
+0.15253 s
+Duckdb::ExecuteInternal execution time is
+0.6834398 s
+Duckdb::ExecuteInternal execution time is
+0.150136676 s
+optimization time is
+0.158070443 s
+Duckdb::ExecuteInternal execution time is
+0.26769840 s
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│ & Teller 2  │
+└─────────────┘
+Time taken 1.633 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/4a.sql
+optimization time is
+0.5129 s
+Duckdb::ExecuteInternal execution time is
+0.55376 s
+optimization time is
+0.931 s
+Duckdb::ExecuteInternal execution time is
+0.12761 s
+optimization time is
+0.937 s
+Duckdb::ExecuteInternal execution time is
+0.8279 s
+optimization time is
+0.925 s
+Duckdb::ExecuteInternal execution time is
+0.15215 s
+Duckdb::ExecuteInternal execution time is
+0.10824361 s
+Duckdb::ExecuteInternal execution time is
+0.18129275 s
+optimization time is
+0.37219255 s
+Duckdb::ExecuteInternal execution time is
+0.23182931 s
+┌─────────┬─────────────┐
+│ rating  │ movie_title │
+│ varchar │   varchar   │
+├─────────┼─────────────┤
+│ 5.1     │ & Teller 2  │
+└─────────┴─────────────┘
+Time taken 0.389 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/4b.sql
+optimization time is
+0.5309 s
+Duckdb::ExecuteInternal execution time is
+0.56087 s
+optimization time is
+0.1038 s
+Duckdb::ExecuteInternal execution time is
+0.11368 s
+optimization time is
+0.1012 s
+Duckdb::ExecuteInternal execution time is
+0.8541 s
+optimization time is
+0.1057 s
+Duckdb::ExecuteInternal execution time is
+0.16049 s
+Duckdb::ExecuteInternal execution time is
+0.9705811 s
+Duckdb::ExecuteInternal execution time is
+0.18111018 s
+optimization time is
+0.28971997 s
+Duckdb::ExecuteInternal execution time is
+0.17906509 s
+┌─────────┬─────────────────────┐
+│ rating  │     movie_title     │
+│ varchar │       varchar       │
+├─────────┼─────────────────────┤
+│ 9.1     │ Batman: Arkham City │
+└─────────┴─────────────────────┘
+Time taken 0.321 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/4c.sql
+optimization time is
+0.5338 s
+Duckdb::ExecuteInternal execution time is
+0.54909 s
+optimization time is
+0.938 s
+Duckdb::ExecuteInternal execution time is
+0.13998 s
+optimization time is
+0.956 s
+Duckdb::ExecuteInternal execution time is
+0.8584 s
+optimization time is
+0.1011 s
+Duckdb::ExecuteInternal execution time is
+0.16153 s
+Duckdb::ExecuteInternal execution time is
+0.10414498 s
+Duckdb::ExecuteInternal execution time is
+0.30738056 s
+optimization time is
+0.52134481 s
+Duckdb::ExecuteInternal execution time is
+0.29099210 s
+┌─────────┬─────────────┐
+│ rating  │ movie_title │
+│ varchar │   varchar   │
+├─────────┼─────────────┤
+│ 2.1     │ & Teller 2  │
+└─────────┴─────────────┘
+Time taken 0.482 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/5a.sql
+optimization time is
+0.8147 s
+Duckdb::ExecuteInternal execution time is
+0.54929 s
+optimization time is
+0.924 s
+Duckdb::ExecuteInternal execution time is
+0.10951 s
+optimization time is
+0.916 s
+Duckdb::ExecuteInternal execution time is
+0.8324 s
+optimization time is
+0.1000 s
+Duckdb::ExecuteInternal execution time is
+0.15348 s
+Duckdb::ExecuteInternal execution time is
+0.17989368 s
+Duckdb::ExecuteInternal execution time is
+0.383735 s
+Duckdb::ExecuteInternal execution time is
+0.330188503 s
+optimization time is
+0.349788232 s
+Duckdb::ExecuteInternal execution time is
+0.2157976 s
+┌────────────────────────┐
+│ typical_european_movie │
+│        varchar         │
+├────────────────────────┤
+│                        │
+└────────────────────────┘
+Time taken 1.227 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/5b.sql
+optimization time is
+0.5164 s
+Duckdb::ExecuteInternal execution time is
+0.56381 s
+optimization time is
+0.929 s
+Duckdb::ExecuteInternal execution time is
+0.27320 s
+optimization time is
+0.916 s
+Duckdb::ExecuteInternal execution time is
+0.8080 s
+optimization time is
+0.956 s
+Duckdb::ExecuteInternal execution time is
+0.15032 s
+Duckdb::ExecuteInternal execution time is
+0.20702660 s
+Duckdb::ExecuteInternal execution time is
+0.385958 s
+Duckdb::ExecuteInternal execution time is
+0.117543911 s
+optimization time is
+0.139744544 s
+Duckdb::ExecuteInternal execution time is
+0.2050416 s
+┌────────────────────┐
+│ american_vhs_movie │
+│      varchar       │
+├────────────────────┤
+│                    │
+└────────────────────┘
+Time taken 1.204 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/5c.sql
+optimization time is
+0.2518 s
+Duckdb::ExecuteInternal execution time is
+0.90873 s
+optimization time is
+0.883 s
+Duckdb::ExecuteInternal execution time is
+0.10372 s
+optimization time is
+0.881 s
+Duckdb::ExecuteInternal execution time is
+0.20597 s
+optimization time is
+0.883 s
+Duckdb::ExecuteInternal execution time is
+0.14889 s
+Duckdb::ExecuteInternal execution time is
+0.21828246 s
+Duckdb::ExecuteInternal execution time is
+0.1668345 s
+Duckdb::ExecuteInternal execution time is
+0.134703464 s
+optimization time is
+0.161817773 s
+Duckdb::ExecuteInternal execution time is
+0.25212872 s
+┌────────────────┐
+│ american_movie │
+│    varchar     │
+├────────────────┤
+│ 11,830,420     │
+└────────────────┘
+Time taken 1.729 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6a.sql
+optimization time is
+0.8221 s
+Duckdb::ExecuteInternal execution time is
+0.56294 s
+optimization time is
+0.925 s
+Duckdb::ExecuteInternal execution time is
+0.13355 s
+optimization time is
+0.1013 s
+Duckdb::ExecuteInternal execution time is
+0.8144 s
+optimization time is
+0.916 s
+Duckdb::ExecuteInternal execution time is
+0.15237 s
+Duckdb::ExecuteInternal execution time is
+0.59786467 s
+Duckdb::ExecuteInternal execution time is
+0.29622073 s
+optimization time is
+0.90685252 s
+Duckdb::ExecuteInternal execution time is
+0.19168187 s
+┌───────────────────────────┬────────────────────┬──────────────┐
+│       movie_keyword       │     actor_name     │ marvel_movie │
+│          varchar          │      varchar       │   varchar    │
+├───────────────────────────┼────────────────────┼──────────────┤
+│ marvel-cinematic-universe │ Downey Jr., Robert │ Iron Man 3   │
+└───────────────────────────┴────────────────────┴──────────────┘
+Time taken 1.147 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6b.sql
+optimization time is
+0.5787 s
+Duckdb::ExecuteInternal execution time is
+0.56987 s
+optimization time is
+0.974 s
+Duckdb::ExecuteInternal execution time is
+0.13063 s
+optimization time is
+0.916 s
+Duckdb::ExecuteInternal execution time is
+0.7941 s
+optimization time is
+0.980 s
+Duckdb::ExecuteInternal execution time is
+0.15295 s
+Duckdb::ExecuteInternal execution time is
+0.7310052 s
+Duckdb::ExecuteInternal execution time is
+0.99493435 s
+Duckdb::ExecuteInternal execution time is
+0.36195521 s
+optimization time is
+0.185858109 s
+Duckdb::ExecuteInternal execution time is
+0.7112668 s
+┌────────────────┬────────────────────┬────────────────┐
+│ movie_keyword  │     actor_name     │   hero_movie   │
+│    varchar     │      varchar       │    varchar     │
+├────────────────┼────────────────────┼────────────────┤
+│ based-on-comic │ Downey Jr., Robert │ The Avengers 2 │
+└────────────────┴────────────────────┴────────────────┘
+Time taken 1.485 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6c.sql
+optimization time is
+0.5368 s
+Duckdb::ExecuteInternal execution time is
+0.52140 s
+optimization time is
+0.960 s
+Duckdb::ExecuteInternal execution time is
+0.29434 s
+optimization time is
+0.1232 s
+Duckdb::ExecuteInternal execution time is
+0.10380 s
+optimization time is
+0.1231 s
+Duckdb::ExecuteInternal execution time is
+0.19872 s
+Duckdb::ExecuteInternal execution time is
+0.61260537 s
+Duckdb::ExecuteInternal execution time is
+0.30810486 s
+optimization time is
+0.93318414 s
+Duckdb::ExecuteInternal execution time is
+0.8576173 s
+┌───────────────────────────┬────────────────────┬────────────────┐
+│       movie_keyword       │     actor_name     │  marvel_movie  │
+│          varchar          │      varchar       │    varchar     │
+├───────────────────────────┼────────────────────┼────────────────┤
+│ marvel-cinematic-universe │ Downey Jr., Robert │ The Avengers 2 │
+└───────────────────────────┴────────────────────┴────────────────┘
+Time taken 1.20 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6d.sql
+optimization time is
+0.5669 s
+Duckdb::ExecuteInternal execution time is
+0.54844 s
+optimization time is
+0.989 s
+Duckdb::ExecuteInternal execution time is
+0.23957 s
+optimization time is
+0.965 s
+Duckdb::ExecuteInternal execution time is
+0.8110 s
+optimization time is
+0.1028 s
+Duckdb::ExecuteInternal execution time is
+0.17541 s
+Duckdb::ExecuteInternal execution time is
+0.6589195 s
+Duckdb::ExecuteInternal execution time is
+0.100041891 s
+Duckdb::ExecuteInternal execution time is
+0.34985975 s
+optimization time is
+0.185869448 s
+Duckdb::ExecuteInternal execution time is
+0.20637893 s
+┌────────────────┬────────────────────┬───────────────────────┐
+│ movie_keyword  │     actor_name     │      hero_movie       │
+│    varchar     │      varchar       │        varchar        │
+├────────────────┼────────────────────┼───────────────────────┤
+│ based-on-comic │ Downey Jr., Robert │ 2008 MTV Movie Awards │
+└────────────────┴────────────────────┴───────────────────────┘
+Time taken 1.633 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6e.sql
+optimization time is
+0.5945 s
+Duckdb::ExecuteInternal execution time is
+0.55610 s
+optimization time is
+0.927 s
+Duckdb::ExecuteInternal execution time is
+0.11086 s
+optimization time is
+0.928 s
+Duckdb::ExecuteInternal execution time is
+0.8023 s
+optimization time is
+0.923 s
+Duckdb::ExecuteInternal execution time is
+0.15339 s
+Duckdb::ExecuteInternal execution time is
+0.60660268 s
+Duckdb::ExecuteInternal execution time is
+0.30494357 s
+optimization time is
+0.92508555 s
+Duckdb::ExecuteInternal execution time is
+0.19988150 s
+┌───────────────────────────┬────────────────────┬──────────────┐
+│       movie_keyword       │     actor_name     │ marvel_movie │
+│          varchar          │      varchar       │   varchar    │
+├───────────────────────────┼────────────────────┼──────────────┤
+│ marvel-cinematic-universe │ Downey Jr., Robert │ Iron Man 3   │
+└───────────────────────────┴────────────────────┴──────────────┘
+Time taken 1.147 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6f.sql
+optimization time is
+0.3002 s
+Duckdb::ExecuteInternal execution time is
+0.68372 s
+optimization time is
+0.1034 s
+Duckdb::ExecuteInternal execution time is
+0.11364 s
+optimization time is
+0.970 s
+Duckdb::ExecuteInternal execution time is
+0.8081 s
+optimization time is
+0.1017 s
+Duckdb::ExecuteInternal execution time is
+0.14743 s
+Duckdb::ExecuteInternal execution time is
+0.6534993 s
+Duckdb::ExecuteInternal execution time is
+0.98765901 s
+Duckdb::ExecuteInternal execution time is
+0.131118238 s
+optimization time is
+0.371978967 s
+Duckdb::ExecuteInternal execution time is
+0.264509020 s
+┌────────────────┬─────────────────────────────────┬────────────┐
+│ movie_keyword  │           actor_name            │ hero_movie │
+│    varchar     │             varchar             │  varchar   │
+├────────────────┼─────────────────────────────────┼────────────┤
+│ based-on-comic │ "Steff", Stefanie Oxmann Mcgaha │ & Teller 2 │
+└────────────────┴─────────────────────────────────┴────────────┘
+Time taken 2.702 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/7a.sql
+optimization time is
+0.2770 s
+Duckdb::ExecuteInternal execution time is
+0.68012 s
+optimization time is
+0.942 s
+Duckdb::ExecuteInternal execution time is
+0.26362 s
+optimization time is
+0.942 s
+Duckdb::ExecuteInternal execution time is
+0.8095 s
+optimization time is
+0.930 s
+Duckdb::ExecuteInternal execution time is
+0.14989 s
+Duckdb::ExecuteInternal execution time is
+0.13564541 s
+Duckdb::ExecuteInternal execution time is
+0.137165903 s
+Duckdb::ExecuteInternal execution time is
+0.267503596 s
+Duckdb::ExecuteInternal execution time is
+0.44372008 s
+Duckdb::ExecuteInternal execution time is
+0.5688197 s
+optimization time is
+0.735215785 s
+Duckdb::ExecuteInternal execution time is
+0.18236825 s
+┌─────────────────────────┬─────────────────┐
+│        of_person        │ biography_movie │
+│         varchar         │     varchar     │
+├─────────────────────────┼─────────────────┤
+│ Antonioni, Michelangelo │ Dressed to Kill │
+└─────────────────────────┴─────────────────┘
+Time taken 2.359 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/7b.sql
+optimization time is
+0.5353 s
+Duckdb::ExecuteInternal execution time is
+0.85604 s
+optimization time is
+0.959 s
+Duckdb::ExecuteInternal execution time is
+0.26187 s
+optimization time is
+0.956 s
+Duckdb::ExecuteInternal execution time is
+0.7968 s
+optimization time is
+0.907 s
+Duckdb::ExecuteInternal execution time is
+0.14879 s
+Duckdb::ExecuteInternal execution time is
+0.13079707 s
+Duckdb::ExecuteInternal execution time is
+0.134293204 s
+Duckdb::ExecuteInternal execution time is
+0.272038777 s
+Duckdb::ExecuteInternal execution time is
+0.25320544 s
+Duckdb::ExecuteInternal execution time is
+0.5047530 s
+optimization time is
+0.715307740 s
+Duckdb::ExecuteInternal execution time is
+0.17398811 s
+┌─────────────────┬─────────────────┐
+│    of_person    │ biography_movie │
+│     varchar     │     varchar     │
+├─────────────────┼─────────────────┤
+│ De Palma, Brian │ Dressed to Kill │
+└─────────────────┴─────────────────┘
+Time taken 2.219 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/7c.sql
+optimization time is
+0.3034 s
+Duckdb::ExecuteInternal execution time is
+0.90956 s
+optimization time is
+0.921 s
+Duckdb::ExecuteInternal execution time is
+0.27291 s
+optimization time is
+0.887 s
+Duckdb::ExecuteInternal execution time is
+0.8327 s
+optimization time is
+0.925 s
+Duckdb::ExecuteInternal execution time is
+0.15407 s
+Duckdb::ExecuteInternal execution time is
+0.14381005 s
+Duckdb::ExecuteInternal execution time is
+0.135254642 s
+Duckdb::ExecuteInternal execution time is
+0.379030712 s
+Duckdb::ExecuteInternal execution time is
+0.109341604 s
+Duckdb::ExecuteInternal execution time is
+0.140656529 s
+optimization time is
+1.150494929 s
+Duckdb::ExecuteInternal execution time is
+0.112083337 s
+┌──────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ cast_member_name │                                         cast_member_info                                          │
+│     varchar      │                                              varchar                                              │
+├──────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 50 Cent          │ "Boo" Arnold was born Earl Arnold in Hattiesburg, Mississippi in 1966. His father gave him the …  │
+└──────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────┘
+Time taken 3.953 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/8a.sql
+optimization time is
+0.2495 s
+Duckdb::ExecuteInternal execution time is
+0.86456 s
+optimization time is
+0.926 s
+Duckdb::ExecuteInternal execution time is
+0.40644 s
+optimization time is
+0.942 s
+Duckdb::ExecuteInternal execution time is
+0.8108 s
+optimization time is
+0.894 s
+Duckdb::ExecuteInternal execution time is
+0.14972 s
+Duckdb::ExecuteInternal execution time is
+0.95624452 s
+Duckdb::ExecuteInternal execution time is
+0.25150355 s
+Duckdb::ExecuteInternal execution time is
+0.33865342 s
+Duckdb::ExecuteInternal execution time is
+0.232185 s
+optimization time is
+0.171570485 s
+Duckdb::ExecuteInternal execution time is
+0.19692841 s
+┌───────────────────┬───────────────────────┐
+│ actress_pseudonym │ japanese_movie_dubbed │
+│      varchar      │        varchar        │
+├───────────────────┼───────────────────────┤
+│ Chambers, Linda   │ .hack//Quantum        │
+└───────────────────┴───────────────────────┘
+Time taken 1.623 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/8b.sql
+optimization time is
+0.2668 s
+Duckdb::ExecuteInternal execution time is
+0.54597 s
+optimization time is
+0.929 s
+Duckdb::ExecuteInternal execution time is
+0.25861 s
+optimization time is
+0.886 s
+Duckdb::ExecuteInternal execution time is
+0.8029 s
+optimization time is
+0.929 s
+Duckdb::ExecuteInternal execution time is
+0.15251 s
+Duckdb::ExecuteInternal execution time is
+0.93779221 s
+Duckdb::ExecuteInternal execution time is
+0.20898951 s
+Duckdb::ExecuteInternal execution time is
+0.30073627 s
+Duckdb::ExecuteInternal execution time is
+0.315124 s
+optimization time is
+0.159503608 s
+Duckdb::ExecuteInternal execution time is
+0.19399288 s
+┌──────────────────┬─────────────────────────────┐
+│ acress_pseudonym │    japanese_anime_movie     │
+│     varchar      │           varchar           │
+├──────────────────┼─────────────────────────────┤
+│ Chambers, Linda  │ Dragon Ball Z: Shin Budokai │
+└──────────────────┴─────────────────────────────┘
+Time taken 1.598 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/8c.sql
+optimization time is
+0.5655 s
+Duckdb::ExecuteInternal execution time is
+0.57692 s
+optimization time is
+0.887 s
+Duckdb::ExecuteInternal execution time is
+0.25789 s
+optimization time is
+0.892 s
+Duckdb::ExecuteInternal execution time is
+0.7999 s
+optimization time is
+0.917 s
+Duckdb::ExecuteInternal execution time is
+0.14943 s
+Duckdb::ExecuteInternal execution time is
+0.352630148 s
+Duckdb::ExecuteInternal execution time is
+2.461002035 s
+Duckdb::ExecuteInternal execution time is
+3.504701689 s
+Duckdb::ExecuteInternal execution time is
+0.253903293 s
+optimization time is
+11.976846357 s
+Duckdb::ExecuteInternal execution time is
+0.249734456 s
+┌────────────────────┬─────────────────────┐
+│ writer_pseudo_name │     movie_title     │
+│      varchar       │       varchar       │
+├────────────────────┼─────────────────────┤
+│ "A.J."             │ #1 Cheerleader Camp │
+└────────────────────┴─────────────────────┘
+Time taken 17.737 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/8d.sql
+optimization time is
+0.5186 s
+Duckdb::ExecuteInternal execution time is
+0.86735 s
+optimization time is
+0.961 s
+Duckdb::ExecuteInternal execution time is
+0.13116 s
+optimization time is
+0.866 s
+Duckdb::ExecuteInternal execution time is
+0.8144 s
+optimization time is
+0.984 s
+Duckdb::ExecuteInternal execution time is
+0.15103 s
+Duckdb::ExecuteInternal execution time is
+0.350420358 s
+Duckdb::ExecuteInternal execution time is
+2.465684408 s
+Duckdb::ExecuteInternal execution time is
+3.540349709 s
+Duckdb::ExecuteInternal execution time is
+0.179888629 s
+optimization time is
+11.846613258 s
+Duckdb::ExecuteInternal execution time is
+0.81042057 s
+┌─────────────────────────┬─────────────────────┐
+│ costume_designer_pseudo │ movie_with_costumes │
+│         varchar         │       varchar       │
+├─────────────────────────┼─────────────────────┤
+│ "Jenny from the Block"  │ #1 Cheerleader Camp │
+└─────────────────────────┴─────────────────────┘
+Time taken 16.363 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/9a.sql
+optimization time is
+0.5164 s
+Duckdb::ExecuteInternal execution time is
+0.61875 s
+optimization time is
+0.960 s
+Duckdb::ExecuteInternal execution time is
+0.15667 s
+optimization time is
+0.995 s
+Duckdb::ExecuteInternal execution time is
+0.8566 s
+optimization time is
+0.1252 s
+Duckdb::ExecuteInternal execution time is
+0.26595 s
+Duckdb::ExecuteInternal execution time is
+0.282776170 s
+Duckdb::ExecuteInternal execution time is
+0.99740140 s
+Duckdb::ExecuteInternal execution time is
+0.24848085 s
+Duckdb::ExecuteInternal execution time is
+0.294460 s
+optimization time is
+0.595848278 s
+Duckdb::ExecuteInternal execution time is
+0.20965288 s
+┌──────────────────┬───────────────────┬──────────────┐
+│ alternative_name │  character_name   │    movie     │
+│     varchar      │      varchar      │   varchar    │
+├──────────────────┼───────────────────┼──────────────┤
+│ AJ               │ Airport Announcer │ Blue Harvest │
+└──────────────────┴───────────────────┴──────────────┘
+Time taken 3.888 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/9b.sql
+optimization time is
+0.5749 s
+Duckdb::ExecuteInternal execution time is
+0.52692 s
+optimization time is
+0.966 s
+Duckdb::ExecuteInternal execution time is
+0.11037 s
+optimization time is
+0.911 s
+Duckdb::ExecuteInternal execution time is
+0.8158 s
+optimization time is
+0.999 s
+Duckdb::ExecuteInternal execution time is
+0.17575 s
+Duckdb::ExecuteInternal execution time is
+0.328137821 s
+Duckdb::ExecuteInternal execution time is
+0.55269960 s
+Duckdb::ExecuteInternal execution time is
+0.23301261 s
+Duckdb::ExecuteInternal execution time is
+0.251885 s
+optimization time is
+0.540553503 s
+Duckdb::ExecuteInternal execution time is
+0.18283414 s
+┌──────────────────┬───────────────────┬─────────────────┬────────────────┐
+│ alternative_name │ voiced_character  │ voicing_actress │ american_movie │
+│     varchar      │      varchar      │     varchar     │    varchar     │
+├──────────────────┼───────────────────┼─────────────────┼────────────────┤
+│ AJ               │ Airport Announcer │ Bassett, Angela │ Blue Harvest   │
+└──────────────────┴───────────────────┴─────────────────┴────────────────┘
+Time taken 2.863 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/9c.sql
+optimization time is
+0.5791 s
+Duckdb::ExecuteInternal execution time is
+0.57002 s
+optimization time is
+0.968 s
+Duckdb::ExecuteInternal execution time is
+0.13231 s
+optimization time is
+0.920 s
+Duckdb::ExecuteInternal execution time is
+0.8200 s
+optimization time is
+0.981 s
+Duckdb::ExecuteInternal execution time is
+0.15471 s
+Duckdb::ExecuteInternal execution time is
+0.280579604 s
+Duckdb::ExecuteInternal execution time is
+0.152760548 s
+Duckdb::ExecuteInternal execution time is
+0.50821463 s
+Duckdb::ExecuteInternal execution time is
+0.723779 s
+optimization time is
+0.762797426 s
+Duckdb::ExecuteInternal execution time is
+0.29646826 s
+┌──────────────────┬───────────────────────┬────────────────────┬────────────────┐
+│ alternative_name │ voiced_character_name │  voicing_actress   │ american_movie │
+│     varchar      │        varchar        │      varchar       │    varchar     │
+├──────────────────┼───────────────────────┼────────────────────┼────────────────┤
+│ 'Annette'        │ 2nd Balladeer         │ Alborg, Ana Esther │ (1975-01-20)   │
+└──────────────────┴───────────────────────┴────────────────────┴────────────────┘
+Time taken 4.64 seconds
+execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/9d.sql
+optimization time is
+0.2969 s
+Duckdb::ExecuteInternal execution time is
+0.73097 s
+optimization time is
+0.1009 s
+Duckdb::ExecuteInternal execution time is
+0.11643 s
+optimization time is
+0.954 s
+Duckdb::ExecuteInternal execution time is
+0.8362 s
+optimization time is
+0.938 s
+Duckdb::ExecuteInternal execution time is
+0.15054 s
+Duckdb::ExecuteInternal execution time is
+0.292218480 s
+Duckdb::ExecuteInternal execution time is
+0.153036078 s
+Duckdb::ExecuteInternal execution time is
+0.286535958 s
+Duckdb::ExecuteInternal execution time is
+0.26249024 s
+optimization time is
+1.150724623 s
+Duckdb::ExecuteInternal execution time is
+0.191026258 s
+┌──────────────────┬──────────────────────────┬─────────────────┬──────────────────┐
+│ alternative_name │     voiced_char_name     │ voicing_actress │  american_movie  │
+│     varchar      │         varchar          │     varchar     │     varchar      │
+├──────────────────┼──────────────────────────┼─────────────────┼──────────────────┤
+│ !!!, Toy         │ "Cockamamie's" Salesgirl │ Aaron, Caroline │ $15,000.00 Error │
+└──────────────────┴──────────────────────────┴─────────────────┴──────────────────┘
+Time taken 6.617 seconds
