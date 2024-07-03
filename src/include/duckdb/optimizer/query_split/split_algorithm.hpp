@@ -52,7 +52,7 @@ public:
 	~SplitAlgorithm() override = default;
 	//! Perform Query Split
 	virtual unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) {
-		return std::move(plan);
+		return plan;
 	};
 
 	virtual void MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries) {

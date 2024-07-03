@@ -29,6 +29,7 @@ public:
 	// todo: extract to a stand-alone class?
 	void MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries) override;
 	void UnMergeSubquery(unique_ptr<LogicalOperator> &plan) override;
+	//! Rewrite the logical plan to make sure the last level JOIN can be optimized.
 	unique_ptr<LogicalOperator> Rewrite(unique_ptr<LogicalOperator> &plan, bool &needToSplit) override;
 	void Clear() {
 		filter_parent = false;
@@ -41,7 +42,6 @@ public:
 		sibling_used_table.clear();
 		target_tables.clear();
 		proj_expr.clear();
-		op_levels = 0;
 	};
 
 public:
@@ -78,7 +78,9 @@ private:
 
 	void InsertTableBlocks(unique_ptr<LogicalOperator> &op,
 	                       unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks,
-	                       std::queue<idx_t> &table_blocks_key_order);
+	                       std::deque<idx_t> &table_blocks_key_order);
+
+	bool BlockUsed(const unordered_set<idx_t> &left_cond_table_index, const unique_ptr<LogicalOperator> &op);
 
 private:
 	bool filter_parent = false;
@@ -94,9 +96,6 @@ private:
 	std::unordered_set<idx_t> target_tables;
 	// expressions in the projection node
 	std::vector<TableExpr> proj_expr;
-
-	//
-	int op_levels = 0;
 };
 
 } // namespace duckdb

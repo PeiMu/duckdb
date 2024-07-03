@@ -373,17 +373,26 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 
 	// 1. collect the condition of the last join
 	auto op_child = plan.get();
-	op_levels = 0;
-	while (!op_child->children.empty() && LogicalOperatorType::LOGICAL_CROSS_PRODUCT != op_child->children[0]->type) {
+	LogicalOperator *last_join_pointer;
+	int op_level = 0;
+	int last_join_level = 0;
+	int last_cross_product_level = 0;
+	while (!op_child->children.empty()) {
+		if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op_child->type) {
+			last_join_pointer = op_child;
+			last_join_level = op_level;
+		} else if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == op_child->type) {
+			last_cross_product_level = op_level;
+		}
 		op_child = op_child->children[0].get();
-		op_levels++;
+		op_level++;
 	}
-	if (op_child->children.empty()) {
+	if (last_cross_product_level < last_join_level) {
 		needToSplit = false;
 		return std::move(plan);
 	}
 
-	auto &last_join = op_child->Cast<LogicalComparisonJoin>();
+	auto &last_join = last_join_pointer->Cast<LogicalComparisonJoin>();
 
 	// select the needed tables
 	std::unordered_set<idx_t> left_cond_table_index;
@@ -393,17 +402,30 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 		left_cond_table_index.emplace(left_expr.binding.table_index);
 	}
 
-	// 2. collect all tables below the last JOIN
+	// 2. collect all tables below the last JOIN in the top-down order
 	std::unordered_map<idx_t, unique_ptr<LogicalOperator>> table_blocks;
-	std::queue<idx_t> table_blocks_key_order;
+	std::deque<idx_t> table_blocks_key_order;
 
-	auto last_cross_product = op_child;
+	auto last_cross_product = last_join_pointer;
 	while (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == last_cross_product->children[0]->type) {
 		last_cross_product = last_cross_product->children[0].get();
 		auto &cross_product_op = last_cross_product->Cast<LogicalCrossProduct>();
 		InsertTableBlocks(cross_product_op.children[1], table_blocks, table_blocks_key_order);
 	}
 	auto &last_block = last_cross_product->Cast<LogicalCrossProduct>().children[0];
+
+	// if the last block is unused in the last join, swap it with its sibling,
+	// aka the last element in the table_blocks_key_order
+	bool used = BlockUsed(left_cond_table_index, last_block);
+	if (!used) {
+		auto last_sibling_index = table_blocks_key_order.back();
+		table_blocks_key_order.pop_back();
+		D_ASSERT(left_cond_table_index.count(last_sibling_index));
+		auto last_sibling = std::move(table_blocks[last_sibling_index]);
+		table_blocks.erase(last_sibling_index);
+		InsertTableBlocks(last_block, table_blocks, table_blocks_key_order);
+		last_block = std::move(last_sibling);
+	}
 
 	std::queue<unique_ptr<LogicalOperator>> unused_blocks;
 	for (auto &block : table_blocks) {
@@ -412,46 +434,56 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 		}
 	}
 
+	// if all tables below the last join are used
 	if (unused_blocks.empty()) {
 		// revert table blocks to plan
-		auto revert_pointer = op_child;
+		auto revert_pointer = last_join_pointer;
 		while (!table_blocks_key_order.empty() &&
 		       LogicalOperatorType::LOGICAL_CROSS_PRODUCT == revert_pointer->children[0]->type) {
 			revert_pointer = revert_pointer->children[0].get();
 			auto &revert_op = revert_pointer->Cast<LogicalCrossProduct>();
 			revert_op.children[1] = std::move(table_blocks[table_blocks_key_order.front()]);
-			table_blocks_key_order.pop();
+			table_blocks_key_order.pop_front();
 		}
+		D_ASSERT(table_blocks_key_order.empty());
 		needToSplit = false;
 		return std::move(plan);
 	}
 
-	unique_ptr<LogicalOperator> below_cross_product = std::move(last_block);
+	// 3. construct the new plan tree
+	// add the cross_product with the used table
+	unique_ptr<LogicalOperator> belowed_cross_product = std::move(last_block);
 	for (auto &block : table_blocks) {
 		if (left_cond_table_index.count(block.first)) {
-			below_cross_product = LogicalCrossProduct::Create(std::move(below_cross_product), std::move(block.second));
+			belowed_cross_product =
+			    LogicalCrossProduct::Create(std::move(belowed_cross_product), std::move(block.second));
 		}
 	}
 
-	last_join.children[0] = std::move(below_cross_product);
+	// add the belowed_cross_product to the last_join
+	last_join.children[0] = std::move(belowed_cross_product);
+
+	// get the previous op of last_join by index since we cannot convert JOIN to LogicalOperator
 	auto reordered_plan = plan.get();
-	for (int level_id = 0; level_id < op_levels - 1; level_id++) {
+	for (int level_id = 0; level_id < last_join_level - 1; level_id++) {
 		reordered_plan = reordered_plan->children[0].get();
 	}
-	unique_ptr<LogicalOperator> above_cross_product = std::move(reordered_plan->children[0]);
 
+	// add the unused blocks as aboved_cross_product, on top of the last_join
+	unique_ptr<LogicalOperator> aboved_cross_product = std::move(reordered_plan->children[0]);
 	while (!unused_blocks.empty()) {
-		above_cross_product =
-		    LogicalCrossProduct::Create(std::move(above_cross_product), std::move(unused_blocks.front()));
+		aboved_cross_product =
+		    LogicalCrossProduct::Create(std::move(aboved_cross_product), std::move(unused_blocks.front()));
 		unused_blocks.pop();
 	}
 
 	// get the position to reorder
 	reordered_plan = plan.get();
-	for (int level_id = 0; level_id < op_levels - 1; level_id++) {
+	for (int level_id = 0; level_id < last_join_level - 1; level_id++) {
 		reordered_plan = reordered_plan->children[0].get();
 	}
-	reordered_plan->children[0] = std::move(above_cross_product);
+	// add the aboved_cross_product
+	reordered_plan->children[0] = std::move(aboved_cross_product);
 
 	needToSplit = true;
 
@@ -460,15 +492,15 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 
 void TopDownSplit::InsertTableBlocks(unique_ptr<LogicalOperator> &op,
                                      unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks,
-                                     std::queue<idx_t> &table_blocks_key_order) {
+                                     std::deque<idx_t> &table_blocks_key_order) {
 	if (LogicalOperatorType::LOGICAL_GET == op->type) {
 		auto &get_op = op->Cast<LogicalGet>();
 		table_blocks.emplace(get_op.table_index, std::move(op));
-		table_blocks_key_order.emplace(get_op.table_index);
+		table_blocks_key_order.emplace_back(get_op.table_index);
 	} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == op->type) {
 		auto &chunk_op = op->Cast<LogicalColumnDataGet>();
 		table_blocks.emplace(chunk_op.table_index, std::move(op));
-		table_blocks_key_order.emplace(chunk_op.table_index);
+		table_blocks_key_order.emplace_back(chunk_op.table_index);
 	} else if (LogicalOperatorType::LOGICAL_FILTER == op->type) {
 		idx_t table_index;
 		std::function<void(unique_ptr<LogicalOperator> & current_op)> find_get;
@@ -484,12 +516,45 @@ void TopDownSplit::InsertTableBlocks(unique_ptr<LogicalOperator> &op,
 		};
 		find_get(op);
 		table_blocks.emplace(table_index, std::move(op));
-		table_blocks_key_order.emplace(table_index);
+		table_blocks_key_order.emplace_back(table_index);
 	} else {
 		Printer::Print(
 		    StringUtil::Format("Do not support yet, block_op->type:  %s", LogicalOperatorToString(op->type)));
 		D_ASSERT(false);
 	}
+}
+
+bool TopDownSplit::BlockUsed(const unordered_set<idx_t> &left_cond_table_index, const unique_ptr<LogicalOperator> &op) {
+	idx_t table_index;
+	if (LogicalOperatorType::LOGICAL_GET == op->type) {
+		auto &get_op = op->Cast<LogicalGet>();
+		table_index = get_op.table_index;
+	} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == op->type) {
+		auto &chunk_op = op->Cast<LogicalColumnDataGet>();
+		table_index = chunk_op.table_index;
+	} else if (LogicalOperatorType::LOGICAL_FILTER == op->type) {
+		std::function<void(const unique_ptr<LogicalOperator> &current_op)> find_get;
+		find_get = [&find_get, &table_index](const unique_ptr<LogicalOperator> &current_op) {
+			for (auto &child_op : current_op->children) {
+				if (LogicalOperatorType::LOGICAL_GET != child_op->type)
+					find_get(child_op);
+				else {
+					auto &get_op = child_op->Cast<LogicalGet>();
+					table_index = get_op.table_index;
+				}
+			}
+		};
+		find_get(op);
+	} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->type) {
+		// if it is a JOIN, all blocks should be used
+		return true;
+	} else {
+		Printer::Print(
+		    StringUtil::Format("Do not support yet, block_op->type:  %s", LogicalOperatorToString(op->type)));
+		D_ASSERT(false);
+	}
+
+	return left_cond_table_index.count(table_index);
 }
 
 } // namespace duckdb
