@@ -57,10 +57,11 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 					used_expr_in_upper_levels.emplace(table_expr);
 				}
 
+				// no need to add new_table_index? todo: need to confirm
 				// check if `new_table_index` (aka DATA_CHUNK) is used in the upper level
-				if (table_expr.table_idx == new_table_idx) {
-					used_expr_in_upper_levels.emplace(table_expr);
-				}
+				// if (table_expr.table_idx == new_table_idx) {
+				//     used_expr_in_upper_levels.emplace(table_expr);
+				// }
 			}
 		}
 	}
