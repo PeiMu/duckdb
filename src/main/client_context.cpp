@@ -390,8 +390,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				plan->Print();
 #endif
 			}
-			bool rewritten = false;
-			plan = query_splitter.Rewrite(plan, rewritten);
+			bool rewritten = query_splitter.Rewrite(plan);
 			needToSplit |= rewritten;
 #if ENABLE_DEBUG_PRINT
 			if (rewritten) {

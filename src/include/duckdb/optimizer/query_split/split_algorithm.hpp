@@ -61,8 +61,8 @@ public:
 	virtual void UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
 	}
 
-	virtual unique_ptr<LogicalOperator> Rewrite(unique_ptr<LogicalOperator> &plan, bool &needToSplit) {
-		return nullptr;
+	virtual bool Rewrite(unique_ptr<LogicalOperator> &plan) {
+		return false;
 	}
 
 public:

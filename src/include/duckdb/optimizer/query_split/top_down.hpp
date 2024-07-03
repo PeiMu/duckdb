@@ -30,7 +30,7 @@ public:
 	void MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries) override;
 	void UnMergeSubquery(unique_ptr<LogicalOperator> &plan) override;
 	//! Rewrite the logical plan to make sure the last level JOIN can be optimized.
-	unique_ptr<LogicalOperator> Rewrite(unique_ptr<LogicalOperator> &plan, bool &needToSplit) override;
+	bool Rewrite(unique_ptr<LogicalOperator> &plan) override;
 	void Clear() {
 		filter_parent = false;
 		while (!table_expr_queue.empty()) {

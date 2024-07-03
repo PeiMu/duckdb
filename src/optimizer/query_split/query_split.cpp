@@ -21,16 +21,16 @@ void QuerySplit::MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue
 	query_splitter->MergeSubquery(plan, std::move(old_subqueries));
 }
 
-unique_ptr<LogicalOperator> QuerySplit::Rewrite(unique_ptr<LogicalOperator> &plan, bool &needToSplit) {
+bool QuerySplit::Rewrite(unique_ptr<LogicalOperator> &plan) {
 	switch (plan->type) {
 	case LogicalOperatorType::LOGICAL_TRANSACTION:
 	case LogicalOperatorType::LOGICAL_PRAGMA:
-		return std::move(plan); // skip optimizing simple & often-occurring plans unaffected by rewrites
+		return false; // skip optimizing simple & often-occurring plans unaffected by rewrites
 	default:
 		break;
 	}
 
-	return query_splitter->Rewrite(plan, needToSplit);
+	return query_splitter->Rewrite(plan);
 }
 
 void QuerySplit::UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {

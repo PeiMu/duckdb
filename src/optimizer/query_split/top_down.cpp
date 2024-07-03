@@ -360,12 +360,11 @@ void TopDownSplit::UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
 	unMerge(plan);
 }
 
-unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &plan, bool &needToSplit) {
+bool TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &plan) {
 	switch (plan->type) {
 	case LogicalOperatorType::LOGICAL_TRANSACTION:
 	case LogicalOperatorType::LOGICAL_PRAGMA: {
-		needToSplit = false;
-		return std::move(plan); // skip optimizing simple & often-occurring plans unaffected by rewrites
+		return false; // skip optimizing simple & often-occurring plans unaffected by rewrites
 	}
 	default:
 		break;
@@ -388,8 +387,7 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 		op_level++;
 	}
 	if (last_cross_product_level < last_join_level) {
-		needToSplit = false;
-		return std::move(plan);
+		return false;
 	}
 
 	auto &last_join = last_join_pointer->Cast<LogicalComparisonJoin>();
@@ -446,8 +444,7 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 			table_blocks_key_order.pop_front();
 		}
 		D_ASSERT(table_blocks_key_order.empty());
-		needToSplit = false;
-		return std::move(plan);
+		return false;
 	}
 
 	// 3. construct the new plan tree
@@ -484,10 +481,7 @@ unique_ptr<LogicalOperator> TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &p
 	}
 	// add the aboved_cross_product
 	reordered_plan->children[0] = std::move(aboved_cross_product);
-
-	needToSplit = true;
-
-	return std::move(plan);
+	return true;
 }
 
 void TopDownSplit::InsertTableBlocks(unique_ptr<LogicalOperator> &op,
