@@ -46,6 +46,8 @@ unique_ptr<NodeStatistics> StatisticsPropagator::PropagateStatistics(LogicalOper
 		return PropagateStatistics(node.Cast<LogicalFilter>(), node_ptr);
 	case LogicalOperatorType::LOGICAL_GET:
 		return PropagateStatistics(node.Cast<LogicalGet>(), node_ptr);
+	case LogicalOperatorType::LOGICAL_CHUNK_GET:
+		return PropagateStatistics(node.Cast<LogicalColumnDataGet>(), node_ptr);
 	case LogicalOperatorType::LOGICAL_PROJECTION:
 		return PropagateStatistics(node.Cast<LogicalProjection>(), node_ptr);
 	case LogicalOperatorType::LOGICAL_ANY_JOIN:

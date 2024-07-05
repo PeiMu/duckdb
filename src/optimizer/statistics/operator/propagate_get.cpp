@@ -2,6 +2,7 @@
 #include "duckdb/planner/filter/conjunction_filter.hpp"
 #include "duckdb/planner/filter/constant_filter.hpp"
 #include "duckdb/planner/operator/logical_get.hpp"
+#include "duckdb/planner/operator/logical_column_data_get.hpp"
 #include "duckdb/planner/table_filter.hpp"
 
 namespace duckdb {
@@ -94,6 +95,13 @@ unique_ptr<NodeStatistics> StatisticsPropagator::PropagateStatistics(LogicalGet 
 		}
 	}
 	return std::move(node_stats);
+}
+
+unique_ptr<NodeStatistics> StatisticsPropagator::PropagateStatistics(LogicalColumnDataGet &get,
+                                                                     unique_ptr<LogicalOperator> *node_ptr) {
+	// FIXME: update stats...
+	auto data_chunk_card = get.EstimateCardinality(context);
+	return make_uniq<NodeStatistics>(data_chunk_card);
 }
 
 } // namespace duckdb
