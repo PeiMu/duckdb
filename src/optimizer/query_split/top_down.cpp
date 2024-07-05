@@ -362,12 +362,10 @@ void TopDownSplit::UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
 
 bool TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &plan) {
 	switch (plan->type) {
-	case LogicalOperatorType::LOGICAL_TRANSACTION:
-	case LogicalOperatorType::LOGICAL_PRAGMA: {
-		return false; // skip optimizing simple & often-occurring plans unaffected by rewrites
-	}
-	default:
+	case LogicalOperatorType::LOGICAL_PROJECTION:
 		break;
+	default:
+		return false;
 	}
 
 	// 1. collect the condition of the last join
