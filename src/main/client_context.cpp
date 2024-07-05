@@ -360,7 +360,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 	if (config.enable_optimizer && plan->RequireOptimizer()) {
 		profiler.StartPhase("optimizer");
+#if TIME_BREAK_DOWN
 		timespec timer = tic();
+		bool is_real_query = false;
+#endif
 		plan = optimizer.PreOptimize(std::move(plan));
 #if ENABLE_DEBUG_PRINT
 		D_ASSERT(plan);
@@ -414,6 +417,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			if (subqueries.empty())
 				break;
 
+#if TIME_BREAK_DOWN
+			is_real_query = true;
+#endif
 			unique_ptr<DataChunk> data_trunk;
 
 			unique_ptr<LogicalOperator> last_sibling_node = nullptr;
@@ -496,7 +502,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		}
 
 		plan = optimizer.PostOptimize(std::move(plan));
-		toc(&timer, "optimization time is\n");
+#if TIME_BREAK_DOWN
+		if (is_real_query)
+			toc(&timer, "optimization time is\n");
+#endif
 		profiler.EndPhase();
 
 #ifdef DEBUG

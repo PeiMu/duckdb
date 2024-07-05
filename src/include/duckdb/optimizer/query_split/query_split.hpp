@@ -12,7 +12,8 @@
 
 #define ENABLE_QUERY_SPLIT        true
 #define ENABLE_PARALLEL_EXECUTION false
-#define ENABLE_DEBUG_PRINT        true
+#define ENABLE_DEBUG_PRINT        false
+#define TIME_BREAK_DOWN			  false
 
 namespace duckdb {
 
