@@ -380,6 +380,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		QuerySplit query_splitter(*this);
 		SubqueryPreparer subquery_preparer(*planner.binder, *this);
 		while (ENABLE_QUERY_SPLIT) {
+#if ENABLE_CROSS_PRODUCT_REWRITE
 			if (!subqueries.empty()) {
 				// todo: move to `subquery_preparer`
 				query_splitter.MergeSubquery(plan, std::move(subqueries));
@@ -410,6 +411,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				plan->Print();
 			}
 #endif
+#endif
 
 			if (needToSplit) {
 				query_splitter.Clear();
@@ -423,9 +425,11 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				proj_expr = query_splitter.GetProjExpr();
 				needToSplit = false;
 			} else {
+#if ENABLE_CROSS_PRODUCT_REWRITE
 				// we don't want to copy the data chunk, so it's better to move back the `subqueries.front()[0]`
 				query_splitter.UnMergeSubquery(plan);
 				subqueries = query_splitter.GetSubqueries();
+#endif
 			}
 			if (subqueries.empty())
 				break;
