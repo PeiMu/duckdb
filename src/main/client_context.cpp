@@ -393,7 +393,16 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				plan->Print();
 #endif
 			}
+#if TIME_BREAK_DOWN
+			if (is_real_query)
+				toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
+#endif
+
 			bool rewritten = query_splitter.Rewrite(plan);
+#if TIME_BREAK_DOWN
+			if (is_real_query)
+				toc(&timer, "Rewrite time is\n");
+#endif
 			needToSplit |= rewritten;
 #if ENABLE_DEBUG_PRINT
 			if (rewritten) {
@@ -405,6 +414,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			if (needToSplit) {
 				query_splitter.Clear();
 				plan = query_splitter.Split(std::move(plan));
+#if TIME_BREAK_DOWN
+				if (is_real_query)
+					toc(&timer, "Split time is\n");
+#endif
 				subqueries = query_splitter.GetSubqueries();
 				table_expr_queue = query_splitter.GetTableExprQueue();
 				proj_expr = query_splitter.GetProjExpr();
@@ -433,10 +446,18 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 			auto sub_plan =
 			    subquery_preparer.GenerateProjHead(plan, std::move(subqueries.front()[0]), table_expr_queue, proj_expr);
+#if TIME_BREAK_DOWN
+			if (is_real_query)
+				toc(&timer, "GenerateProjHead time is\n");
+#endif
 			subqueries.pop_front();
 			table_expr_queue.pop();
 
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
+#if TIME_BREAK_DOWN
+			if (is_real_query)
+				toc(&timer, "PostOptimize time is\n");
+#endif
 #if ENABLE_DEBUG_PRINT
 			// debug: print subquery
 			Printer::Print("After PostOptimization");
@@ -465,10 +486,22 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			    make_uniq<PreparedStatement>(shared_from_this(), std::move(subquery_stmt), std::move(statement_query),
 			                                 n_param, std::move(named_param_map));
 			duckdb::vector<Value> bound_values;
+#if TIME_BREAK_DOWN
+			if (is_real_query)
+				toc(&timer, "adapt to selection time is\n");
+#endif
 			unique_ptr<QueryResult> subquery_result = prepared_stmt->Execute(lock, bound_values, false);
+#if TIME_BREAK_DOWN
+			if (is_real_query)
+				toc(&timer, "Execute time is\n");
+#endif
 			bool last_subquery = 1 == subqueries.size();
 			subqueries.front()[0] = subquery_preparer.MergeDataChunk(plan, std::move(subqueries.front()[0]),
-			                                                         std::move(subquery_result), last_subquery);
+		                                                         std::move(subquery_result), last_subquery);
+#if TIME_BREAK_DOWN
+			if (is_real_query)
+				toc(&timer, "MergeDataChunk time is\n");
+#endif
 			if (!ENABLE_PARALLEL_EXECUTION && nullptr != last_sibling_node) {
 				// merge the sibling back to the upper subquery
 				auto subquery_pointer = subqueries.front()[0].get();
