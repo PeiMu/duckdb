@@ -423,6 +423,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				subqueries = query_splitter.GetSubqueries();
 				table_expr_queue = query_splitter.GetTableExprQueue();
 				proj_expr = query_splitter.GetProjExpr();
+				subquery_preparer.SetMergeIndex(query_splitter.GetSplitNumber());
 				needToSplit = false;
 			} else {
 #if ENABLE_CROSS_PRODUCT_REWRITE

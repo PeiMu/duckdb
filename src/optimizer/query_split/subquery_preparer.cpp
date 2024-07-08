@@ -211,11 +211,12 @@ void SubqueryPreparer::MergeToSubquery(LogicalOperator &op, bool &merged) {
 		if (merged)
 			return;
 		// find the insert point and insert the `ColumnDataGet` node to the logical plan
-		if (nullptr == (*child_it) || (*child_it)->split_point) {
+		if (nullptr == (*child_it) || (*child_it)->split_index == merge_index) {
 			D_ASSERT(nullptr != chunk_scan);
 			op.children.erase(child_it);
 			op.children.insert(child_it, std::move(chunk_scan));
 			merged = true;
+			merge_index--;
 			return;
 		}
 		MergeToSubquery(*(*child_it), merged);

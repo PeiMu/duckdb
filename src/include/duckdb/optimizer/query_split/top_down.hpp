@@ -53,6 +53,10 @@ public:
 		return proj_expr;
 	}
 
+	int GetSplitNumber() {
+		return query_split_index;
+	}
+
 protected:
 	//! Extract the subquery in the top-down order, and insert
 	//! the operations of the same level to `subqueries`
@@ -96,6 +100,7 @@ private:
 	std::unordered_set<idx_t> target_tables;
 	// expressions in the projection node
 	std::vector<TableExpr> proj_expr;
+	int query_split_index = 0;
 };
 
 } // namespace duckdb

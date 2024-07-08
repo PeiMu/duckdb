@@ -50,6 +50,10 @@ public:
 
 	void MergeSubquery(unique_ptr<LogicalOperator> &plan, unique_ptr<LogicalOperator> subquery);
 
+	void SetMergeIndex(int index) {
+		merge_index = index;
+	}
+
 private:
 	//! 1. find the insert point and insert the `ColumnDataGet` node to the logical plan;
 	//! 2. update the table_idx and column_idx
@@ -75,5 +79,7 @@ private:
 	// 1. all the `proj_exprs` are the old index for the next subquery in `GenerateProjHead`
 	// 2. check new expressions in the current subquery in `VisitReplace`
 	std::set<idx_t> old_table_idx;
+
+	int merge_index = 0;
 };
 } // namespace duckdb

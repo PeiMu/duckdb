@@ -42,7 +42,7 @@ public:
 	bool has_estimated_cardinality;
 
 	//! The node where need to be merged by another subquery, used by query_split
-	bool split_point = false;
+	int split_index = 0;
 
 public:
 	virtual vector<ColumnBinding> GetColumnBindings();

@@ -42,7 +42,8 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 			table_exprs = GetFilterTableExpr(child->Cast<LogicalFilter>());
 			// check continuous filter nodes, only split the first one
 			if (!filter_parent) {
-				child->split_point = true;
+				query_split_index++;
+				child->split_index = query_split_index;
 				// inherit from the children until it is not a filter
 				auto child_pointer = child.get();
 				while (LogicalOperatorType::LOGICAL_FILTER == child_pointer->type) {
@@ -61,7 +62,8 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 			// if comp_join is the child of filter, we split at the filter node,
 			// and inherit the table_exprs by the filter node
 			if (!filter_parent) {
-				child->split_point = true;
+				query_split_index++;
+				child->split_index = query_split_index;
 				table_exprs = GetJoinTableExpr(child->Cast<LogicalComparisonJoin>());
 			}
 			filter_parent = false;
@@ -75,13 +77,13 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 				chunk_get_sibling = true;
 			else
 				chunk_get_sibling = false;
-			child->split_point = false;
+			child->split_index = 0;
 			filter_parent = false;
 			break;
 		}
 		VisitOperator(*child);
 
-		if (child->split_point) {
+		if (child->split_index) {
 			same_level_subqueries.emplace_back(std::move(child));
 		}
 		if (!table_exprs.empty()) {
@@ -347,7 +349,7 @@ void TopDownSplit::UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
 			else
 				chunk_get_sibling = false;
 			unMerge(child);
-			if (child->split_point) {
+			if (child->split_index) {
 				same_level_subqueries.emplace_back(std::move(child));
 			}
 		}

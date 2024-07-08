@@ -63,6 +63,14 @@ public:
 		return std::move(query_splitter->subqueries);
 	}
 
+	int GetSplitNumber() {
+		if (nullptr == query_splitter)
+			return -1;
+
+		auto top_down_splitter = dynamic_cast<TopDownSplit *>(query_splitter.get());
+		return top_down_splitter->GetSplitNumber();
+	}
+
 private:
 	ClientContext &context;
 	std::unique_ptr<SplitAlgorithm> query_splitter;
