@@ -1,1017 +1,792 @@
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/10a.sql
 ┌─────────────────────────────┬───────────────┐
 │ uncredited_voiced_character │ russian_movie │
 │           varchar           │    varchar    │
 ├─────────────────────────────┼───────────────┤
 │ Actor                       │ 12 Rounds     │
 └─────────────────────────────┴───────────────┘
-Run Time (s): real 0.191 user 1.682549 sys 0.294041
-Time taken 2.24 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/10b.sql
+Run Time (s): real 0.226 user 1.686918 sys 0.239495
 ┌─────────┬─────────────────────────────────┐
 │   chr   │ russian_mov_with_actor_producer │
 │ varchar │             varchar             │
 ├─────────┼─────────────────────────────────┤
 │         │                                 │
 └─────────┴─────────────────────────────────┘
-Run Time (s): real 0.184 user 1.505006 sys 0.225479
-Time taken 1.769 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/10c.sql
+Run Time (s): real 0.162 user 1.305087 sys 0.001112
 ┌─────────┬──────────────────────────────┐
 │   chr   │ movie_with_american_producer │
 │ varchar │           varchar            │
 ├─────────┼──────────────────────────────┤
 │ Himself │ Evil Eyes: Behind the Scenes │
 └─────────┴──────────────────────────────┘
-Run Time (s): real 0.201 user 1.710224 sys 0.214448
-Time taken 1.967 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/11a.sql
+Run Time (s): real 0.692 user 2.143694 sys 0.060511
 ┌─────────────────┬─────────────────┬─────────────────────────┐
 │  from_company   │ movie_link_type │ non_polish_sequel_movie │
 │     varchar     │     varchar     │         varchar         │
 ├─────────────────┼─────────────────┼─────────────────────────┤
 │ Churchill Films │ followed by     │ Batman Beyond           │
 └─────────────────┴─────────────────┴─────────────────────────┘
-Run Time (s): real 0.082 user 0.374843 sys 0.071910
-Time taken 0.463 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/11b.sql
+Run Time (s): real 0.070 user 0.317202 sys 0.015601
 ┌────────────────────────────┬─────────────────┬───────────────┐
 │        from_company        │ movie_link_type │ sequel_movie  │
 │          varchar           │     varchar     │    varchar    │
 ├────────────────────────────┼─────────────────┼───────────────┤
 │ Filmlance International AB │ follows         │ The Money Man │
 └────────────────────────────┴─────────────────┴───────────────┘
-Run Time (s): real 0.082 user 0.396071 sys 0.028784
-Time taken 0.442 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/11c.sql
+Run Time (s): real 0.058 user 0.278146 sys 0.002152
 ┌─────────────────────────────────────┬─────────────────────────────────────┬─────────────────────┐
 │            from_company             │           production_note           │ movie_based_on_book │
 │               varchar               │               varchar               │       varchar       │
 ├─────────────────────────────────────┼─────────────────────────────────────┼─────────────────────┤
 │ 20th Century Fox Home Entertainment │ (1997-2002) (worldwide) (all media) │ 24                  │
 └─────────────────────────────────────┴─────────────────────────────────────┴─────────────────────┘
-Run Time (s): real 0.070 user 0.373679 sys 0.092787
-Time taken 0.488 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/11d.sql
+Run Time (s): real 0.282 user 0.565290 sys 0.052184
 ┌──────────────┬──────────────────┬───────────────────────────────────────┐
 │ from_company │ production_note  │          movie_based_on_book          │
 │   varchar    │     varchar      │                varchar                │
 ├──────────────┼──────────────────┼───────────────────────────────────────┤
 │ 13th Street  │ (1954) (UK) (TV) │ ...denn sie wissen nicht, was sie tun │
 └──────────────┴──────────────────┴───────────────────────────────────────┘
-Run Time (s): real 0.602 user 1.322776 sys 0.114432
-Time taken 1.457 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/12a.sql
+Run Time (s): real 0.782 user 1.626762 sys 0.132075
 ┌──────────────────────────┬─────────┬────────────────────┐
 │      movie_company       │ rating  │ drama_horror_movie │
 │         varchar          │ varchar │      varchar       │
 ├──────────────────────────┼─────────┼────────────────────┤
 │ 10th Grade Reunion Films │ 8.1     │ 3:20               │
 └──────────────────────────┴─────────┴────────────────────┘
-Run Time (s): real 0.223 user 1.109371 sys 0.311321
-Time taken 1.476 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/12b.sql
+Run Time (s): real 0.191 user 1.079803 sys 0.247638
 ┌─────────┬────────────────────────────┐
 │ budget  │    unsuccsessful_movie     │
 │ varchar │          varchar           │
 ├─────────┼────────────────────────────┤
 │ $10,000 │ Birdemic: Shock and Terror │
 └─────────┴────────────────────────────┘
-Run Time (s): real 0.182 user 0.792342 sys 0.451638
-Time taken 1.301 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/12c.sql
+Run Time (s): real 0.071 user 0.656412 sys 0.002667
 ┌────────────────┬─────────┬──────────────────┐
 │ movie_company  │ rating  │ mainstream_movie │
 │    varchar     │ varchar │     varchar      │
 ├────────────────┼─────────┼──────────────────┤
 │ "Oh That Gus!" │ 7.1     │ $1.11            │
 └────────────────┴─────────┴──────────────────┘
-Run Time (s): real 0.245 user 1.092785 sys 0.456070
-Time taken 1.606 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/13a.sql
+Run Time (s): real 0.205 user 1.122807 sys 0.011592
 ┌──────────────────────────┬─────────┬──────────────┐
 │       release_date       │ rating  │ german_movie │
 │         varchar          │ varchar │   varchar    │
 ├──────────────────────────┼─────────┼──────────────┤
 │ Afghanistan:24 June 2012 │ 1.0     │ &Me          │
 └──────────────────────────┴─────────┴──────────────┘
-Run Time (s): real 0.233 user 0.997102 sys 0.446812
-Time taken 1.501 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/13b.sql
+Run Time (s): real 0.177 user 1.060176 sys 0.025886
 ┌───────────────────┬─────────┬─────────────────────┐
 │ producing_company │ rating  │ movie_about_winning │
 │      varchar      │ varchar │       varchar       │
 ├───────────────────┼─────────┼─────────────────────┤
 │ 501audio          │ 1.8     │ 5 Time Champion     │
 └───────────────────┴─────────┴─────────────────────┘
-Run Time (s): real 0.545 user 1.228722 sys 0.136528
-Time taken 1.388 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/13c.sql
+Run Time (s): real 0.071 user 0.513939 sys 0.000000
 ┌───────────────────┬─────────┬─────────────────────┐
 │ producing_company │ rating  │ movie_about_winning │
 │      varchar      │ varchar │       varchar       │
 ├───────────────────┼─────────┼─────────────────────┤
 │ DL Sites          │ 1.8     │ Champion            │
 └───────────────────┴─────────┴─────────────────────┘
-Run Time (s): real 0.526 user 1.103632 sys 0.103888
-Time taken 1.228 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/13d.sql
+Run Time (s): real 0.057 user 0.407054 sys 0.004935
 ┌───────────────────┬─────────┬───────────────┐
 │ producing_company │ rating  │     movie     │
 │      varchar      │ varchar │    varchar    │
 ├───────────────────┼─────────┼───────────────┤
 │ "O" Films         │ 1.0     │ #54 Meets #47 │
 └───────────────────┴─────────┴───────────────┘
-Run Time (s): real 0.564 user 1.092277 sys 0.166972
-Time taken 1.281 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/14a.sql
+Run Time (s): real 0.859 user 2.607157 sys 0.174920
 ┌─────────┬─────────────────────┐
 │ rating  │ northern_dark_movie │
 │ varchar │       varchar       │
 ├─────────┼─────────────────────┤
 │ 1.0     │ $lowdown            │
 └─────────┴─────────────────────┘
-Run Time (s): real 0.231 user 1.308305 sys 0.316652
-Time taken 1.682 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/14b.sql
+Run Time (s): real 0.168 user 1.066605 sys 0.008282
 ┌─────────┬─────────────────────────┐
 │ rating  │ western_dark_production │
 │ varchar │         varchar         │
 ├─────────┼─────────────────────────┤
 │ 6.4     │ Of Dolls and Murder     │
 └─────────┴─────────────────────────┘
-Run Time (s): real 0.226 user 1.312082 sys 0.300052
-Time taken 1.670 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/14c.sql
+Run Time (s): real 0.123 user 1.027744 sys 0.007858
 ┌─────────┬────────────────────────────────┐
 │ rating  │ north_european_dark_production │
 │ varchar │            varchar             │
 ├─────────┼────────────────────────────────┤
 │ 1.0     │ $lowdown                       │
 └─────────┴────────────────────────────────┘
-Run Time (s): real 0.228 user 1.283737 sys 0.343949
-Time taken 1.686 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/15a.sql
+Run Time (s): real 0.223 user 1.213639 sys 0.004214
 ┌─────────────────┬──────────────────────────────────────┐
 │  release_date   │            internet_movie            │
 │     varchar     │               varchar                │
 ├─────────────────┼──────────────────────────────────────┤
 │ USA:1 June 2007 │ Battlestar Galactica: The Resistance │
 └─────────────────┴──────────────────────────────────────┘
-Run Time (s): real 0.193 user 1.197343 sys 0.379495
-Time taken 1.654 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/15b.sql
+Run Time (s): real 0.103 user 0.837888 sys 0.003149
 ┌───────────────────┬───────────────────────┐
 │   release_date    │     youtube_movie     │
 │      varchar      │        varchar        │
 ├───────────────────┼───────────────────────┤
 │ USA:27 April 2007 │ RoboCop vs Terminator │
 └───────────────────┴───────────────────────┘
-Run Time (s): real 0.173 user 1.046599 sys 0.407438
-Time taken 1.511 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/15c.sql
+Run Time (s): real 0.101 user 0.808699 sys 0.000338
 ┌──────────────────┬────────────────────────────────┐
 │   release_date   │ modern_american_internet_movie │
 │     varchar      │            varchar             │
 ├──────────────────┼────────────────────────────────┤
 │ USA:1 April 2003 │ 24: Day Six - Debrief          │
 └──────────────────┴────────────────────────────────┘
-Run Time (s): real 0.249 user 1.400554 sys 0.408683
-Time taken 1.867 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/15d.sql
+Run Time (s): real 0.235 user 1.546253 sys 0.032391
 ┌────────────────────────┬──────────────────────┐
 │       aka_title        │ internet_movie_title │
 │        varchar         │       varchar        │
 ├────────────────────────┼──────────────────────┤
 │ (Not So) Instant Photo │ 06/05                │
 └────────────────────────┴──────────────────────┘
-Run Time (s): real 0.197 user 1.033558 sys 0.124119
-Time taken 1.178 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/16a.sql
+Run Time (s): real 0.317 user 1.708876 sys 0.029028
 ┌──────────────────────┬───────────────────────────────────┐
 │ cool_actor_pseudonym │      series_named_after_char      │
 │       varchar        │              varchar              │
 ├──────────────────────┼───────────────────────────────────┤
 │ Adams, Stan          │ Carol Burnett vs. Anthony Perkins │
 └──────────────────────┴───────────────────────────────────┘
-Run Time (s): real 8.973 user 13.900456 sys 1.211149
-Time taken 15.179 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/16b.sql
+Run Time (s): real 0.099 user 0.796797 sys 0.015523
 ┌──────────────────────┬─────────────────────────┐
 │ cool_actor_pseudonym │ series_named_after_char │
 │       varchar        │         varchar         │
 ├──────────────────────┼─────────────────────────┤
 │ !!!, Toy             │ & Teller                │
 └──────────────────────┴─────────────────────────┘
-Run Time (s): real 8.942 user 14.224100 sys 1.201799
-Time taken 15.494 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/16c.sql
+Run Time (s): real 1.419 user 6.641149 sys 0.248265
 ┌───────────────────────┬─────────────────────────┐
 │ cool_actor_pseudonym  │ series_named_after_char │
 │        varchar        │         varchar         │
 ├───────────────────────┼─────────────────────────┤
 │ "Brooklyn" Tony Danza │ (#1.5)                  │
 └───────────────────────┴─────────────────────────┘
-Run Time (s): real 8.761 user 13.531310 sys 1.376956
-Time taken 14.973 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/16d.sql
+Run Time (s): real 0.278 user 1.977782 sys 0.000000
 ┌───────────────────────┬─────────────────────────┐
 │ cool_actor_pseudonym  │ series_named_after_char │
 │        varchar        │         varchar         │
 ├───────────────────────┼─────────────────────────┤
 │ "Brooklyn" Tony Danza │ (#1.5)                  │
 └───────────────────────┴─────────────────────────┘
-Run Time (s): real 8.801 user 13.708190 sys 1.269882
-Time taken 15.47 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17a.sql
+Run Time (s): real 0.267 user 2.072217 sys 0.000361
 ┌────────────────────────────────────┬─────────┐
 │ member_in_charnamed_american_movie │   a1    │
 │              varchar               │ varchar │
 ├────────────────────────────────────┼─────────┤
 │ B, Khaz                            │ B, Khaz │
 └────────────────────────────────────┴─────────┘
-Run Time (s): real 2.091 user 5.394816 sys 0.380243
-Time taken 5.819 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17b.sql
+Run Time (s): real 0.230 user 1.574649 sys 0.018071
 ┌───────────────────────────┬───────────────┐
 │ member_in_charnamed_movie │      a1       │
 │          varchar          │    varchar    │
 ├───────────────────────────┼───────────────┤
 │ Z'Dar, Robert             │ Z'Dar, Robert │
 └───────────────────────────┴───────────────┘
-Run Time (s): real 4.716 user 10.536559 sys 0.579036
-Time taken 11.169 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17c.sql
+Run Time (s): real 0.346 user 2.908703 sys 0.039869
 ┌───────────────────────────┬──────────────────┐
 │ member_in_charnamed_movie │        a1        │
 │          varchar          │     varchar      │
 ├───────────────────────────┼──────────────────┤
 │ X'Volaitis, John          │ X'Volaitis, John │
 └───────────────────────────┴──────────────────┘
-Run Time (s): real 4.760 user 10.544324 sys 0.571651
-Time taken 11.174 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17d.sql
+Run Time (s): real 0.308 user 2.855556 sys 0.015094
 ┌───────────────────────────┐
 │ member_in_charnamed_movie │
 │          varchar          │
 ├───────────────────────────┤
 │ Abrahamsson, Bertil       │
 └───────────────────────────┘
-Run Time (s): real 4.795 user 10.431467 sys 0.619534
-Time taken 11.101 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17e.sql
+Run Time (s): real 0.320 user 2.860065 sys 0.015824
 ┌───────────────────────────┐
 │ member_in_charnamed_movie │
 │          varchar          │
 ├───────────────────────────┤
 │ $hort, Too                │
 └───────────────────────────┘
-Run Time (s): real 2.405 user 6.699466 sys 0.473349
-Time taken 7.219 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17f.sql
+Run Time (s): real 0.285 user 2.130800 sys 0.015736
 ┌─────────────────────────────────┐
 │    member_in_charnamed_movie    │
 │             varchar             │
 ├─────────────────────────────────┤
 │ 'El Galgo PornoStar', Blanquito │
 └─────────────────────────────────┘
-Run Time (s): real 4.928 user 11.179055 sys 0.599730
-Time taken 11.832 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/18a.sql
+Run Time (s): real 0.433 user 2.965215 sys 0.016236
 ┌──────────────┬─────────────┬───────────────────────┐
 │ movie_budget │ movie_votes │      movie_title      │
 │   varchar    │   varchar   │        varchar        │
 ├──────────────┼─────────────┼───────────────────────┤
 │ $1,000       │ 10          │ 40 Days and 40 Nights │
 └──────────────┴─────────────┴───────────────────────┘
-Run Time (s): real 0.371 user 1.816470 sys 0.640209
-Time taken 2.541 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/18b.sql
+Run Time (s): real 0.314 user 1.819407 sys 0.015743
 ┌──────────────┬─────────────┬─────────────┐
 │ movie_budget │ movie_votes │ movie_title │
 │   varchar    │   varchar   │   varchar   │
 ├──────────────┼─────────────┼─────────────┤
 │ Horror       │ 8.1         │ Agorable    │
 └──────────────┴─────────────┴─────────────┘
-Run Time (s): real 0.308 user 2.169848 sys 0.663558
-Time taken 2.916 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/18c.sql
+Run Time (s): real 0.225 user 1.993510 sys 0.000000
 ┌──────────────┬─────────────┬─────────────┐
 │ movie_budget │ movie_votes │ movie_title │
 │   varchar    │   varchar   │   varchar   │
 ├──────────────┼─────────────┼─────────────┤
 │ Action       │ 10          │ #PostModem  │
 └──────────────┴─────────────┴─────────────┘
-Run Time (s): real 0.419 user 2.439239 sys 0.602155
-Time taken 3.131 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/19a.sql
+Run Time (s): real 0.311 user 2.418764 sys 0.028261
 ┌──────────────────┬──────────────┐
 │ voicing_actress  │ voiced_movie │
 │     varchar      │   varchar    │
 ├──────────────────┼──────────────┤
 │ Angeline, Moriah │ Blue Harvest │
 └──────────────────┴──────────────┘
-Run Time (s): real 0.800 user 3.838533 sys 0.619763
-Time taken 4.545 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/19b.sql
+Run Time (s): real 0.402 user 2.549450 sys 0.020155
 ┌─────────────────┬───────────────┐
 │ voicing_actress │ kung_fu_panda │
 │     varchar     │    varchar    │
 ├─────────────────┼───────────────┤
 │ Jolie, Angelina │ Kung Fu Panda │
 └─────────────────┴───────────────┘
-Run Time (s): real 0.534 user 2.887452 sys 0.556244
-Time taken 3.527 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/19c.sql
+Run Time (s): real 0.208 user 1.825632 sys 0.020405
 ┌────────────────────┬───────────────────────────┐
 │  voicing_actress   │   jap_engl_voiced_movie   │
 │      varchar       │          varchar          │
 ├────────────────────┼───────────────────────────┤
 │ Alborg, Ana Esther │ .hack//Akusei heni vol. 2 │
 └────────────────────┴───────────────────────────┘
-Run Time (s): real 0.846 user 3.897008 sys 0.606862
-Time taken 4.588 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/19d.sql
+Run Time (s): real 0.488 user 2.614203 sys 0.040501
 ┌─────────────────┬───────────────────────┐
 │ voicing_actress │ jap_engl_voiced_movie │
 │     varchar     │        varchar        │
 ├─────────────────┼───────────────────────┤
 │ Aaron, Caroline │ $9.99                 │
 └─────────────────┴───────────────────────┘
-Run Time (s): real 2.105 user 5.320597 sys 0.481489
-Time taken 5.857 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/1a.sql
+Run Time (s): real 2.208 user 7.498566 sys 0.431109
 ┌────────────────────────────────────────────────────┬────────────────────┬────────────┐
 │                  production_note                   │    movie_title     │ movie_year │
 │                      varchar                       │      varchar       │   int32    │
 ├────────────────────────────────────────────────────┼────────────────────┼────────────┤
 │ (A Warner Bros.-First National Picture) (presents) │ A Clockwork Orange │       1934 │
 └────────────────────────────────────────────────────┴────────────────────┴────────────┘
-Run Time (s): real 0.058 user 0.447795 sys 0.057399
-Time taken 0.521 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/1b.sql
+Run Time (s): real 0.044 user 0.400735 sys 0.000000
 ┌───────────────────────────────────────┬────────────────┬────────────┐
 │            production_note            │  movie_title   │ movie_year │
 │                varchar                │    varchar     │   int32    │
 ├───────────────────────────────────────┼────────────────┼────────────┤
 │ (Set Decoration Rentals) (uncredited) │ Disaster Movie │       2008 │
 └───────────────────────────────────────┴────────────────┴────────────┘
-Run Time (s): real 0.136 user 0.411681 sys 0.099053
-Time taken 0.528 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/1c.sql
+Run Time (s): real 0.098 user 0.352794 sys 0.008404
 ┌─────────────────┬──────────────┬────────────┐
 │ production_note │ movie_title  │ movie_year │
 │     varchar     │   varchar    │   int32    │
 ├─────────────────┼──────────────┼────────────┤
 │ (co-production) │ Intouchables │       2011 │
 └─────────────────┴──────────────┴────────────┘
-Run Time (s): real 0.047 user 0.337022 sys 0.038151
-Time taken 0.390 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/1d.sql
+Run Time (s): real 0.032 user 0.281888 sys 0.000000
 ┌───────────────────────────────────────┬────────────────┬────────────┐
 │            production_note            │  movie_title   │ movie_year │
 │                varchar                │    varchar     │   int32    │
 ├───────────────────────────────────────┼────────────────┼────────────┤
 │ (Set Decoration Rentals) (uncredited) │ Disaster Movie │       2004 │
 └───────────────────────────────────────┴────────────────┴────────────┘
-Run Time (s): real 0.134 user 0.419166 sys 0.101953
-Time taken 0.538 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/20a.sql
+Run Time (s): real 0.098 user 0.348748 sys 0.002103
 ┌───────────────────────────────┐
 │ complete_downey_ironman_movie │
 │            varchar            │
 ├───────────────────────────────┤
 │ Disaster Movie                │
 └───────────────────────────────┘
-Run Time (s): real 0.171 user 1.460610 sys 0.191603
-Time taken 1.691 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/20b.sql
+Run Time (s): real 0.218 user 1.718623 sys 0.004290
 ┌───────────────────────────────┐
 │ complete_downey_ironman_movie │
 │            varchar            │
 ├───────────────────────────────┤
 │ Iron Man                      │
 └───────────────────────────────┘
-Run Time (s): real 0.197 user 1.759384 sys 0.160445
-Time taken 1.973 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/20c.sql
+Run Time (s): real 0.193 user 1.718304 sys 0.011505
 ┌─────────────────┬─────────────────────────────┐
 │   cast_member   │ complete_dynamic_hero_movie │
 │     varchar     │           varchar           │
 ├─────────────────┼─────────────────────────────┤
 │ Abell, Alistair │ ...And Then I...            │
 └─────────────────┴─────────────────────────────┘
-Run Time (s): real 0.210 user 1.729163 sys 0.267067
-Time taken 2.39 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/21a.sql
+Run Time (s): real 0.192 user 1.658319 sys 0.004688
 ┌─────────────────────────┬─────────────┬─────────────────────────────────────┐
 │      company_name       │  link_type  │          western_follow_up          │
 │         varchar         │   varchar   │               varchar               │
 ├─────────────────────────┼─────────────┼─────────────────────────────────────┤
 │ Det Danske Filminstitut │ followed by │ Der Serienkiller - Klinge des Todes │
 └─────────────────────────┴─────────────┴─────────────────────────────────────┘
-Run Time (s): real 0.242 user 1.334000 sys 0.415595
-Time taken 1.808 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/21b.sql
+Run Time (s): real 0.143 user 1.046165 sys 0.000000
 ┌────────────────────────────┬─────────────┬──────────────────┐
 │        company_name        │  link_type  │ german_follow_up │
 │          varchar           │   varchar   │     varchar      │
 ├────────────────────────────┼─────────────┼──────────────────┤
 │ Filmlance International AB │ followed by │ Hämndens pris    │
 └────────────────────────────┴─────────────┴──────────────────┘
-Run Time (s): real 0.218 user 1.105390 sys 0.390826
-Time taken 1.557 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/21c.sql
+Run Time (s): real 0.115 user 0.768431 sys 0.008056
 ┌─────────────────┬─────────────┬───────────────────┐
 │  company_name   │  link_type  │ western_follow_up │
 │     varchar     │   varchar   │      varchar      │
 ├─────────────────┼─────────────┼───────────────────┤
 │ Churchill Films │ followed by │ Batman Beyond     │
 └─────────────────┴─────────────┴───────────────────┘
-Run Time (s): real 0.261 user 1.488739 sys 0.411009
-Time taken 1.966 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/22a.sql
+Run Time (s): real 0.179 user 1.095220 sys 0.012933
 ┌─────────────────┬─────────┬───────────────────────┐
 │  movie_company  │ rating  │ western_violent_movie │
 │     varchar     │ varchar │        varchar        │
 ├─────────────────┼─────────┼───────────────────────┤
 │ 01 Distribution │ 2.1     │ 12 Rounds             │
 └─────────────────┴─────────┴───────────────────────┘
-Run Time (s): real 0.276 user 1.447987 sys 0.381952
-Time taken 1.891 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/22b.sql
+Run Time (s): real 0.221 user 1.418239 sys 0.008308
 ┌──────────────────────────────────────┬─────────┬───────────────────────┐
 │            movie_company             │ rating  │ western_violent_movie │
 │               varchar                │ varchar │        varchar        │
 ├──────────────────────────────────────┼─────────┼───────────────────────┤
 │ Boll Kino Beteiligungs GmbH & Co. KG │ 3.0     │ A Small Act           │
 └──────────────────────────────────────┴─────────┴───────────────────────┘
-Run Time (s): real 0.269 user 1.345635 sys 0.468783
-Time taken 1.875 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/22c.sql
+Run Time (s): real 0.177 user 1.135816 sys 0.003937
 ┌─────────────────┬─────────┬───────────────────────┐
 │  movie_company  │ rating  │ western_violent_movie │
 │     varchar     │ varchar │        varchar        │
 ├─────────────────┼─────────┼───────────────────────┤
 │ 01 Distribution │ 1.9     │ (#1.1)                │
 └─────────────────┴─────────┴───────────────────────┘
-Run Time (s): real 0.317 user 1.671397 sys 0.380221
-Time taken 2.112 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/22d.sql
+Run Time (s): real 0.406 user 2.194068 sys 0.092294
 ┌─────────────────┬─────────┬───────────────────────┐
 │  movie_company  │ rating  │ western_violent_movie │
 │     varchar     │ varchar │        varchar        │
 ├─────────────────┼─────────┼───────────────────────┤
 │ 01 Distribution │ 1.6     │ (#1.1)                │
 └─────────────────┴─────────┴───────────────────────┘
-Run Time (s): real 0.503 user 1.994478 sys 0.399967
-Time taken 2.454 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/23a.sql
+Run Time (s): real 0.583 user 3.172017 sys 0.237293
 ┌────────────┬────────────────────────────┐
 │ movie_kind │ complete_us_internet_movie │
 │  varchar   │          varchar           │
 ├────────────┼────────────────────────────┤
 │ movie      │ The Analysts               │
 └────────────┴────────────────────────────┘
-Run Time (s): real 0.216 user 1.293840 sys 0.429451
-Time taken 1.779 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/23b.sql
+Run Time (s): real 0.183 user 1.170543 sys 0.015328
 ┌────────────┬───────────────────────────────┐
 │ movie_kind │ complete_nerdy_internet_movie │
 │  varchar   │            varchar            │
 ├────────────┼───────────────────────────────┤
 │ movie      │ The Big Mope                  │
 └────────────┴───────────────────────────────┘
-Run Time (s): real 0.186 user 1.049770 sys 0.366493
-Time taken 1.471 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/23c.sql
+Run Time (s): real 0.088 user 0.706120 sys 0.000183
 ┌────────────┬────────────────────────────┐
 │ movie_kind │ complete_us_internet_movie │
 │  varchar   │          varchar           │
 ├────────────┼────────────────────────────┤
 │ movie      │ Dirt Merchant              │
 └────────────┴────────────────────────────┘
-Run Time (s): real 0.206 user 1.337160 sys 0.395115
-Time taken 1.787 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/24a.sql
+Run Time (s): real 0.229 user 1.265552 sys 0.001232
 ┌───────────────────┬──────────────────────┬─────────────────────────────┐
 │ voiced_char_name  │ voicing_actress_name │ voiced_action_movie_jap_eng │
 │      varchar      │       varchar        │           varchar           │
 ├───────────────────┼──────────────────────┼─────────────────────────────┤
 │ Additional Voices │ Baker, Andrea        │ Baiohazâdo 6                │
 └───────────────────┴──────────────────────┴─────────────────────────────┘
-Run Time (s): real 0.866 user 4.314842 sys 0.686087
-Time taken 5.91 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/24b.sql
+Run Time (s): real 0.401 user 2.806846 sys 0.025026
 ┌──────────────────┬──────────────────────┬─────────────────┐
 │ voiced_char_name │ voicing_actress_name │  kung_fu_panda  │
 │     varchar      │       varchar        │     varchar     │
 ├──────────────────┼──────────────────────┼─────────────────┤
 │ Tigress          │ Jolie, Angelina      │ Kung Fu Panda 2 │
 └──────────────────┴──────────────────────┴─────────────────┘
-Run Time (s): real 0.531 user 3.955344 sys 0.561436
-Time taken 4.607 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/25a.sql
+Run Time (s): real 0.285 user 2.428430 sys 0.004316
 ┌──────────────┬─────────────┬─────────────────┬──────────────────────────────────┐
 │ movie_budget │ movie_votes │   male_writer   │       violent_movie_title        │
 │   varchar    │   varchar   │     varchar     │             varchar              │
 ├──────────────┼─────────────┼─────────────────┼──────────────────────────────────┤
 │ Horror       │ 10          │ Abdallah, Damon │ -- And Now the Screaming Starts! │
 └──────────────┴─────────────┴─────────────────┴──────────────────────────────────┘
-Run Time (s): real 0.338 user 2.261418 sys 0.563372
-Time taken 2.902 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/25b.sql
+Run Time (s): real 0.257 user 2.005187 sys 0.015232
 ┌──────────────┬─────────────┬────────────────────┬─────────────────────┐
 │ movie_budget │ movie_votes │    male_writer     │ violent_movie_title │
 │   varchar    │   varchar   │      varchar       │       varchar       │
 ├──────────────┼─────────────┼────────────────────┼─────────────────────┤
 │ Horror       │ 138         │ Campbell, Jeremiah │ Vampire Boys        │
 └──────────────┴─────────────┴────────────────────┴─────────────────────┘
-Run Time (s): real 0.314 user 2.167939 sys 0.529123
-Time taken 2.789 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/25c.sql
+Run Time (s): real 0.202 user 1.796239 sys 0.007525
 ┌──────────────┬─────────────┬───────────────────┬─────────────────────┐
 │ movie_budget │ movie_votes │    male_writer    │ violent_movie_title │
 │   varchar    │   varchar   │      varchar      │       varchar       │
 ├──────────────┼─────────────┼───────────────────┼─────────────────────┤
 │ Action       │ 10          │ Aakeson, Kim Fupz │ $                   │
 └──────────────┴─────────────┴───────────────────┴─────────────────────┘
-Run Time (s): real 0.418 user 2.910574 sys 0.541573
-Time taken 3.530 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/26a.sql
+Run Time (s): real 0.387 user 2.950144 sys 0.020073
 ┌────────────────┬─────────┬─────────────────┬─────────────────────┐
 │ character_name │ rating  │  playing_actor  │ complete_hero_movie │
 │    varchar     │ varchar │     varchar     │       varchar       │
 ├────────────────┼─────────┼─────────────────┼─────────────────────┤
 │ 'Agua' Man     │ 7.1     │ Acereda, Hermie │ 3:10 to Yuma        │
 └────────────────┴─────────┴─────────────────┴─────────────────────┘
-Run Time (s): real 0.245 user 2.048005 sys 0.141998
-Time taken 2.233 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/26b.sql
+Run Time (s): real 0.327 user 2.888390 sys 0.011750
 ┌────────────────┬─────────┬─────────────────────┐
 │ character_name │ rating  │ complete_hero_movie │
 │    varchar     │ varchar │       varchar       │
 ├────────────────┼─────────┼─────────────────────┤
 │ Bank Manager   │ 8.2     │ Inception           │
 └────────────────┴─────────┴─────────────────────┘
-Run Time (s): real 0.212 user 1.725239 sys 0.216247
-Time taken 1.981 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/26c.sql
+Run Time (s): real 0.163 user 1.249834 sys 0.007774
 ┌────────────────┬─────────┬─────────────────────┐
 │ character_name │ rating  │ complete_hero_movie │
 │    varchar     │ varchar │       varchar       │
 ├────────────────┼─────────┼─────────────────────┤
 │ 'Agua' Man     │ 1.9     │ 12 Rounds           │
 └────────────────┴─────────┴─────────────────────┘
-Run Time (s): real 0.260 user 1.809070 sys 0.266449
-Time taken 2.115 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/27a.sql
+Run Time (s): real 0.384 user 3.244598 sys 0.008142
 ┌─────────────────────────┬─────────────┬─────────────────────────┐
 │    producing_company    │  link_type  │ complete_western_sequel │
 │         varchar         │   varchar   │         varchar         │
 ├─────────────────────────┼─────────────┼─────────────────────────┤
 │ Det Danske Filminstitut │ followed by │ Spår i mörker           │
 └─────────────────────────┴─────────────┴─────────────────────────┘
-Run Time (s): real 0.203 user 1.080019 sys 0.471271
-Time taken 1.611 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/27b.sql
+Run Time (s): real 0.155 user 0.924174 sys 0.003833
 ┌────────────────────────────┬─────────────┬─────────────────────────┐
 │     producing_company      │  link_type  │ complete_western_sequel │
 │          varchar           │   varchar   │         varchar         │
 ├────────────────────────────┼─────────────┼─────────────────────────┤
 │ Filmlance International AB │ followed by │ Vita nätter             │
 └────────────────────────────┴─────────────┴─────────────────────────┘
-Run Time (s): real 0.195 user 1.057424 sys 0.463342
-Time taken 1.587 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/27c.sql
+Run Time (s): real 0.147 user 0.894733 sys 0.008068
 ┌─────────────────────────┬─────────────┬─────────────────────────┐
 │    producing_company    │  link_type  │ complete_western_sequel │
 │         varchar         │   varchar   │         varchar         │
 ├─────────────────────────┼─────────────┼─────────────────────────┤
 │ Det Danske Filminstitut │ followed by │ Spår i mörker           │
 └─────────────────────────┴─────────────┴─────────────────────────┘
-Run Time (s): real 0.216 user 1.412999 sys 0.336683
-Time taken 1.808 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/28a.sql
+Run Time (s): real 0.189 user 1.082866 sys 0.003897
 ┌──────────────────┬─────────┬──────────────────────────┐
 │  movie_company   │ rating  │ complete_euro_dark_movie │
 │     varchar      │ varchar │         varchar          │
 ├──────────────────┼─────────┼──────────────────────────┤
 │ 01 Distribuzione │ 2.9     │ (#1.1)                   │
 └──────────────────┴─────────┴──────────────────────────┘
-Run Time (s): real 0.249 user 1.538756 sys 0.400846
-Time taken 1.998 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/28b.sql
+Run Time (s): real 0.370 user 1.637836 sys 0.031069
 ┌──────────────────┬─────────┬──────────────────────────┐
 │  movie_company   │ rating  │ complete_euro_dark_movie │
 │     varchar      │ varchar │         varchar          │
 ├──────────────────┼─────────┼──────────────────────────┤
 │ 20th Century Fox │ 6.6     │ (#1.1)                   │
 └──────────────────┴─────────┴──────────────────────────┘
-Run Time (s): real 0.225 user 1.470643 sys 0.375096
-Time taken 1.908 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/28c.sql
+Run Time (s): real 0.214 user 1.187029 sys 0.012608
 ┌──────────────────┬─────────┬──────────────────────────┐
 │  movie_company   │ rating  │ complete_euro_dark_movie │
 │     varchar      │ varchar │         varchar          │
 ├──────────────────┼─────────┼──────────────────────────┤
 │ 01 Distribuzione │ 1.9     │ (#1.1)                   │
 └──────────────────┴─────────┴──────────────────────────┘
-Run Time (s): real 0.264 user 1.589596 sys 0.336959
-Time taken 1.998 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/29a.sql
+Run Time (s): real 0.385 user 1.705778 sys 0.040126
 ┌─────────────┬─────────────────┬──────────────────┐
 │ voiced_char │ voicing_actress │ voiced_animation │
 │   varchar   │     varchar     │     varchar      │
 ├─────────────┼─────────────────┼──────────────────┤
 │ Queen       │ Andrews, Julie  │ Shrek 2          │
 └─────────────┴─────────────────┴──────────────────┘
-Run Time (s): real 0.483 user 2.666775 sys 0.659639
-Time taken 3.427 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/29b.sql
+Run Time (s): real 0.294 user 2.325298 sys 0.005444
 ┌─────────────┬─────────────────┬──────────────────┐
 │ voiced_char │ voicing_actress │ voiced_animation │
 │   varchar   │     varchar     │     varchar      │
 ├─────────────┼─────────────────┼──────────────────┤
 │ Queen       │ Andrews, Julie  │ Shrek 2          │
 └─────────────┴─────────────────┴──────────────────┘
-Run Time (s): real 0.486 user 2.302664 sys 0.588710
-Time taken 2.981 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/29c.sql
+Run Time (s): real 0.259 user 1.942306 sys 0.007967
 ┌─────────────┬─────────────────┬──────────────────┐
 │ voiced_char │ voicing_actress │ voiced_animation │
 │   varchar   │     varchar     │     varchar      │
 ├─────────────┼─────────────────┼──────────────────┤
 │ Lola        │ Andrews, Julie  │ Hoodwinked!      │
 └─────────────┴─────────────────┴──────────────────┘
-Run Time (s): real 0.637 user 3.179180 sys 0.673244
-Time taken 3.944 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/2a.sql
+Run Time (s): real 0.357 user 2.633394 sys 0.004119
 ┌─────────────┐
 │ movie_title │
 │   varchar   │
 ├─────────────┤
 │ 'Doc'       │
 └─────────────┘
-Run Time (s): real 0.073 user 0.346176 sys 0.043904
-Time taken 0.404 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/2b.sql
+Run Time (s): real 0.047 user 0.328813 sys 0.000000
 ┌─────────────┐
 │ movie_title │
 │   varchar   │
 ├─────────────┤
 │ 'Doc'       │
 └─────────────┘
-Run Time (s): real 0.064 user 0.296004 sys 0.053771
-Time taken 0.364 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/2c.sql
+Run Time (s): real 0.043 user 0.303831 sys 0.000000
 ┌─────────────┐
 │ movie_title │
 │   varchar   │
 ├─────────────┤
 │             │
 └─────────────┘
-Run Time (s): real 0.027 user 0.095180 sys 0.005698
-Time taken 0.118 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/2d.sql
+Run Time (s): real 0.020 user 0.082824 sys 0.000000
 ┌─────────────┐
 │ movie_title │
 │   varchar   │
 ├─────────────┤
 │ & Teller    │
 └─────────────┘
-Run Time (s): real 0.108 user 0.428264 sys 0.026415
-Time taken 0.470 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/30a.sql
+Run Time (s): real 0.063 user 0.381390 sys 0.000000
 ┌──────────────┬─────────────┬──────────────┬────────────────────────┐
 │ movie_budget │ movie_votes │    writer    │ complete_violent_movie │
 │   varchar    │   varchar   │   varchar    │        varchar         │
 ├──────────────┼─────────────┼──────────────┼────────────────────────┤
 │ Horror       │ 100356      │ Abrams, J.J. │ 16 Blocks              │
 └──────────────┴─────────────┴──────────────┴────────────────────────┘
-Run Time (s): real 0.518 user 2.607201 sys 0.608022
-Time taken 3.299 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/30b.sql
+Run Time (s): real 0.314 user 2.307844 sys 0.019281
 ┌──────────────┬─────────────┬─────────────────┬─────────────────────┐
 │ movie_budget │ movie_votes │     writer      │ complete_gore_movie │
 │   varchar    │   varchar   │     varchar     │       varchar       │
 ├──────────────┼─────────────┼─────────────────┼─────────────────────┤
 │ Horror       │ 194782      │ Shannon, Damian │ Freddy vs. Jason    │
 └──────────────┴─────────────┴─────────────────┴─────────────────────┘
-Run Time (s): real 0.462 user 2.702286 sys 0.547754
-Time taken 3.351 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/30c.sql
+Run Time (s): real 0.263 user 2.071506 sys 0.007433
 ┌──────────────┬─────────────┬──────────────────┬────────────────────────┐
 │ movie_budget │ movie_votes │      writer      │ complete_violent_movie │
 │   varchar    │   varchar   │     varchar      │        varchar         │
 ├──────────────┼─────────────┼──────────────────┼────────────────────────┤
 │ Action       │ 100356      │ Abernathy, Lewis │ $                      │
 └──────────────┴─────────────┴──────────────────┴────────────────────────┘
-Run Time (s): real 0.446 user 2.964222 sys 0.595206
-Time taken 3.644 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/31a.sql
+Run Time (s): real 0.385 user 2.695781 sys 0.016096
 ┌──────────────┬─────────────┬────────────┬────────────────────────┐
 │ movie_budget │ movie_votes │   writer   │ violent_liongate_movie │
 │   varchar    │   varchar   │  varchar   │        varchar         │
 ├──────────────┼─────────────┼────────────┼────────────────────────┤
 │ Horror       │ 1040        │ Agnew, Jim │ 2001 Maniacs           │
 └──────────────┴─────────────┴────────────┴────────────────────────┘
-Run Time (s): real 0.420 user 2.400816 sys 0.636655
-Time taken 3.118 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/31b.sql
+Run Time (s): real 0.330 user 2.333725 sys 0.012447
 ┌──────────────┬─────────────┬──────────────────────┬────────────────────────┐
 │ movie_budget │ movie_votes │        writer        │ violent_liongate_movie │
 │   varchar    │   varchar   │       varchar        │        varchar         │
 ├──────────────┼─────────────┼──────────────────────┼────────────────────────┤
 │ Horror       │ 129755      │ Bousman, Darren Lynn │ Saw                    │
 └──────────────┴─────────────┴──────────────────────┴────────────────────────┘
-Run Time (s): real 0.423 user 2.381527 sys 0.700609
-Time taken 3.167 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/31c.sql
+Run Time (s): real 0.264 user 2.226571 sys 0.004453
 ┌──────────────┬─────────────┬───────────────┬────────────────────────┐
 │ movie_budget │ movie_votes │    writer     │ violent_liongate_movie │
 │   varchar    │   varchar   │    varchar    │        varchar         │
 ├──────────────┼─────────────┼───────────────┼────────────────────────┤
 │ Action       │ 1008        │ Abraham, Brad │ 11:14                  │
 └──────────────┴─────────────┴───────────────┴────────────────────────┘
-Run Time (s): real 0.490 user 2.967196 sys 0.614773
-Time taken 3.667 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/32a.sql
+Run Time (s): real 0.374 user 2.761530 sys 0.016419
 ┌───────────┬─────────────┬──────────────┐
 │ link_type │ first_movie │ second_movie │
 │  varchar  │   varchar   │   varchar    │
 ├───────────┼─────────────┼──────────────┤
 │           │             │              │
 └───────────┴─────────────┴──────────────┘
-Run Time (s): real 0.017 user 0.055618 sys 0.014178
-Time taken 0.96 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/32b.sql
+Run Time (s): real 0.009 user 0.034577 sys 0.000127
 ┌───────────────────────────────┬──────────────┬────────────────────────────┐
 │           link_type           │ first_movie  │        second_movie        │
 │            varchar            │   varchar    │          varchar           │
 ├───────────────────────────────┼──────────────┼────────────────────────────┤
 │ alternate language version of │ 12 oz. Mouse │ 'Angel': Season 2 Overview │
 └───────────────────────────────┴──────────────┴────────────────────────────┘
-Run Time (s): real 0.064 user 0.486657 sys 0.022834
-Time taken 0.531 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/33a.sql
+Run Time (s): real 0.050 user 0.419703 sys 0.000071
 ┌─────────────────┬─────────────────┬──────────────┬───────────────┬──────────────────────┬────────────────────────────┐
 │  first_company  │ second_company  │ first_rating │ second_rating │     first_movie      │        second_movie        │
 │     varchar     │     varchar     │   varchar    │    varchar    │       varchar        │          varchar           │
 ├─────────────────┼─────────────────┼──────────────┼───────────────┼──────────────────────┼────────────────────────────┤
 │ 495 Productions │ 495 Productions │ 3.3          │ 2.7           │ A Double Shot at L…  │ A Shot at Love with Tila…  │
 └─────────────────┴─────────────────┴──────────────┴───────────────┴──────────────────────┴────────────────────────────┘
-Run Time (s): real 0.406 user 0.912409 sys 0.136390
-Time taken 1.69 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/33b.sql
+Run Time (s): real 0.097 user 0.493794 sys 0.003576
 ┌─────────────────┬─────────────────┬──────────────┬───────────────┬──────────────────────┬────────────────────────────┐
 │  first_company  │ second_company  │ first_rating │ second_rating │     first_movie      │        second_movie        │
 │     varchar     │     varchar     │   varchar    │    varchar    │       varchar        │          varchar           │
 ├─────────────────┼─────────────────┼──────────────┼───────────────┼──────────────────────┼────────────────────────────┤
 │ MTV Netherlands │ 495 Productions │ 3.3          │ 2.7           │ A Double Shot at L…  │ A Shot at Love with Tila…  │
 └─────────────────┴─────────────────┴──────────────┴───────────────┴──────────────────────┴────────────────────────────┘
-Run Time (s): real 0.258 user 0.774972 sys 0.088190
-Time taken 0.883 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/33c.sql
+Run Time (s): real 0.099 user 0.515127 sys 0.000442
 ┌───────────────┬─────────────────┬──────────────┬───────────────┬───────────────────────┬───────────────────────┐
 │ first_company │ second_company  │ first_rating │ second_rating │      first_movie      │     second_movie      │
 │    varchar    │     varchar     │   varchar    │    varchar    │        varchar        │        varchar        │
 ├───────────────┼─────────────────┼──────────────┼───────────────┼───────────────────────┼───────────────────────┤
 │ 2BE           │ 495 Productions │ 1.3          │ 1.0           │ A Double Shot at Love │ A Double Shot at Love │
 └───────────────┴─────────────────┴──────────────┴───────────────┴───────────────────────┴───────────────────────┘
-Run Time (s): real 0.439 user 1.026416 sys 0.156104
-Time taken 1.203 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/3a.sql
+Run Time (s): real 0.104 user 0.507702 sys 0.013138
 ┌────────────────────┐
 │    movie_title     │
 │      varchar       │
 ├────────────────────┤
 │ 2 Days in New York │
 └────────────────────┘
-Run Time (s): real 0.186 user 1.240425 sys 0.294470
-Time taken 1.589 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/3b.sql
+Run Time (s): real 0.204 user 1.150200 sys 0.056060
 ┌────────────────────────┐
 │      movie_title       │
 │        varchar         │
 ├────────────────────────┤
 │ 300: Rise of an Empire │
 └────────────────────────┘
-Run Time (s): real 0.139 user 0.784801 sys 0.335874
-Time taken 1.175 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/3c.sql
+Run Time (s): real 0.092 user 0.649416 sys 0.003792
 ┌─────────────┐
 │ movie_title │
 │   varchar   │
 ├─────────────┤
 │ & Teller 2  │
 └─────────────┘
-Run Time (s): real 0.188 user 1.180127 sys 0.389296
-Time taken 1.625 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/4a.sql
+Run Time (s): real 0.334 user 1.547105 sys 0.079769
 ┌─────────┬─────────────┐
 │ rating  │ movie_title │
 │ varchar │   varchar   │
 ├─────────┼─────────────┤
 │ 5.1     │ & Teller 2  │
 └─────────┴─────────────┘
-Run Time (s): real 0.063 user 0.303904 sys 0.075146
-Time taken 0.394 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/4b.sql
+Run Time (s): real 0.106 user 0.612684 sys 0.008247
 ┌─────────┬─────────────────────┐
 │ rating  │     movie_title     │
 │ varchar │       varchar       │
 ├─────────┼─────────────────────┤
 │ 9.1     │ Batman: Arkham City │
 └─────────┴─────────────────────┘
-Run Time (s): real 0.046 user 0.258644 sys 0.056755
-Time taken 0.329 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/4c.sql
+Run Time (s): real 0.033 user 0.247631 sys 0.000000
 ┌─────────┬─────────────┐
 │ rating  │ movie_title │
 │ varchar │   varchar   │
 ├─────────┼─────────────┤
 │ 2.1     │ & Teller 2  │
 └─────────┴─────────────┘
-Run Time (s): real 0.075 user 0.398102 sys 0.043348
-Time taken 0.456 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/5a.sql
+Run Time (s): real 0.169 user 1.013070 sys 0.034921
 ┌────────────────────────┐
 │ typical_european_movie │
 │        varchar         │
 ├────────────────────────┤
 │                        │
 └────────────────────────┘
-Run Time (s): real 0.485 user 0.966301 sys 0.148292
-Time taken 1.154 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/5b.sql
+Run Time (s): real 0.129 user 1.062599 sys 0.003582
 ┌────────────────────┐
 │ american_vhs_movie │
 │      varchar       │
 ├────────────────────┤
 │                    │
 └────────────────────┘
-Run Time (s): real 0.134 user 0.776978 sys 0.367437
-Time taken 1.199 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/5c.sql
+Run Time (s): real 0.089 user 0.768203 sys 0.011614
 ┌────────────────┐
 │ american_movie │
 │    varchar     │
 ├────────────────┤
 │ 11,830,420     │
 └────────────────┘
-Run Time (s): real 0.195 user 1.318100 sys 0.364614
-Time taken 1.738 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6a.sql
+Run Time (s): real 0.182 user 1.356888 sys 0.007711
 ┌───────────────────────────┬────────────────────┬──────────────┐
 │       movie_keyword       │     actor_name     │ marvel_movie │
 │          varchar          │      varchar       │   varchar    │
 ├───────────────────────────┼────────────────────┼──────────────┤
 │ marvel-cinematic-universe │ Downey Jr., Robert │ Iron Man 3   │
 └───────────────────────────┴────────────────────┴──────────────┘
-Run Time (s): real 0.116 user 0.911171 sys 0.190221
-Time taken 1.138 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6b.sql
+Run Time (s): real 0.088 user 0.857317 sys 0.000000
 ┌────────────────┬────────────────────┬────────────────┐
 │ movie_keyword  │     actor_name     │   hero_movie   │
 │    varchar     │      varchar       │    varchar     │
 ├────────────────┼────────────────────┼────────────────┤
 │ based-on-comic │ Downey Jr., Robert │ The Avengers 2 │
 └────────────────┴────────────────────┴────────────────┘
-Run Time (s): real 0.191 user 1.306954 sys 0.143339
-Time taken 1.484 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6c.sql
+Run Time (s): real 0.099 user 0.917149 sys 0.000000
 ┌───────────────────────────┬────────────────────┬────────────────┐
 │       movie_keyword       │     actor_name     │  marvel_movie  │
 │          varchar          │      varchar       │    varchar     │
 ├───────────────────────────┼────────────────────┼────────────────┤
 │ marvel-cinematic-universe │ Downey Jr., Robert │ The Avengers 2 │
 └───────────────────────────┴────────────────────┴────────────────┘
-Run Time (s): real 0.101 user 0.850183 sys 0.125841
-Time taken 1.16 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6d.sql
+Run Time (s): real 0.076 user 0.724148 sys 0.000000
 ┌────────────────┬────────────────────┬───────────────────────┐
 │ movie_keyword  │     actor_name     │      hero_movie       │
 │    varchar     │      varchar       │        varchar        │
 ├────────────────┼────────────────────┼───────────────────────┤
 │ based-on-comic │ Downey Jr., Robert │ 2008 MTV Movie Awards │
 └────────────────┴────────────────────┴───────────────────────┘
-Run Time (s): real 0.204 user 1.458283 sys 0.151824
-Time taken 1.643 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6e.sql
+Run Time (s): real 0.494 user 3.742981 sys 0.050693
 ┌───────────────────────────┬────────────────────┬──────────────┐
 │       movie_keyword       │     actor_name     │ marvel_movie │
 │          varchar          │      varchar       │   varchar    │
 ├───────────────────────────┼────────────────────┼──────────────┤
 │ marvel-cinematic-universe │ Downey Jr., Robert │ Iron Man 3   │
 └───────────────────────────┴────────────────────┴──────────────┘
-Run Time (s): real 0.116 user 0.931010 sys 0.179322
-Time taken 1.149 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6f.sql
+Run Time (s): real 0.090 user 0.864559 sys 0.000000
 ┌────────────────┬─────────────────────────────────┬────────────┐
 │ movie_keyword  │           actor_name            │ hero_movie │
 │    varchar     │             varchar             │  varchar   │
 ├────────────────┼─────────────────────────────────┼────────────┤
 │ based-on-comic │ "Steff", Stefanie Oxmann Mcgaha │ & Teller 2 │
 └────────────────┴─────────────────────────────────┴────────────┘
-Run Time (s): real 0.638 user 2.395825 sys 0.282704
-Time taken 2.720 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/7a.sql
+Run Time (s): real 0.559 user 3.990320 sys 0.054437
 ┌─────────────────────────┬─────────────────┐
 │        of_person        │ biography_movie │
 │         varchar         │     varchar     │
 ├─────────────────────────┼─────────────────┤
 │ Antonioni, Michelangelo │ Dressed to Kill │
 └─────────────────────────┴─────────────────┘
-Run Time (s): real 0.755 user 2.319761 sys 0.283898
-Time taken 2.646 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/7b.sql
+Run Time (s): real 0.112 user 0.792049 sys 0.008084
 ┌─────────────────┬─────────────────┐
 │    of_person    │ biography_movie │
 │     varchar     │     varchar     │
 ├─────────────────┼─────────────────┤
 │ De Palma, Brian │ Dressed to Kill │
 └─────────────────┴─────────────────┘
-Run Time (s): real 0.725 user 1.828901 sys 0.356807
-Time taken 2.226 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/7c.sql
+Run Time (s): real 0.085 user 0.659055 sys 0.000000
 ┌──────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ cast_member_name │                                         cast_member_info                                          │
 │     varchar      │                                              varchar                                              │
 ├──────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────┤
 │ 50 Cent          │ "Boo" Arnold was born Earl Arnold in Hattiesburg, Mississippi in 1966. His father gave him the …  │
 └──────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────┘
-Run Time (s): real 1.273 user 3.007894 sys 0.887496
-Time taken 3.970 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/8a.sql
+Run Time (s): real 3.288 user 6.370165 sys 3.314327
 ┌───────────────────┬───────────────────────┐
 │ actress_pseudonym │ japanese_movie_dubbed │
 │      varchar      │        varchar        │
 ├───────────────────┼───────────────────────┤
 │ Chambers, Linda   │ .hack//Quantum        │
 └───────────────────┴───────────────────────┘
-Run Time (s): real 0.194 user 1.443977 sys 0.167946
-Time taken 1.650 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/8b.sql
+Run Time (s): real 0.117 user 1.096497 sys 0.000000
 ┌──────────────────┬─────────────────────────────┐
 │ acress_pseudonym │    japanese_anime_movie     │
 │     varchar      │           varchar           │
 ├──────────────────┼─────────────────────────────┤
 │ Chambers, Linda  │ Dragon Ball Z: Shin Budokai │
 └──────────────────┴─────────────────────────────┘
-Run Time (s): real 0.185 user 1.370009 sys 0.230946
-Time taken 1.638 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/8c.sql
+Run Time (s): real 0.119 user 1.113762 sys 0.004543
 ┌────────────────────┬─────────────────────┐
 │ writer_pseudo_name │     movie_title     │
 │      varchar       │       varchar       │
 ├────────────────────┼─────────────────────┤
 │ "A.J."             │ #1 Cheerleader Camp │
 └────────────────────┴─────────────────────┘
-Run Time (s): real 12.704 user 16.552113 sys 1.587143
-Time taken 18.206 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/8d.sql
+Run Time (s): real 4.592 user 28.430274 sys 0.673153
 ┌─────────────────────────┬─────────────────────┐
 │ costume_designer_pseudo │ movie_with_costumes │
 │         varchar         │       varchar       │
 ├─────────────────────────┼─────────────────────┤
 │ "Jenny from the Block"  │ #1 Cheerleader Camp │
 └─────────────────────────┴─────────────────────┘
-Run Time (s): real 12.478 user 15.359139 sys 1.546223
-Time taken 16.972 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/9a.sql
+Run Time (s): real 3.795 user 25.066346 sys 0.420095
 ┌──────────────────┬───────────────────┬──────────────┐
 │ alternative_name │  character_name   │    movie     │
 │     varchar      │      varchar      │   varchar    │
 ├──────────────────┼───────────────────┼──────────────┤
 │ AJ               │ Airport Announcer │ Blue Harvest │
 └──────────────────┴───────────────────┴──────────────┘
-Run Time (s): real 0.620 user 3.350076 sys 0.469612
-Time taken 3.880 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/9b.sql
+Run Time (s): real 0.254 user 1.855978 sys 0.000000
 ┌──────────────────┬───────────────────┬─────────────────┬────────────────┐
 │ alternative_name │ voiced_character  │ voicing_actress │ american_movie │
 │     varchar      │      varchar      │     varchar     │    varchar     │
 ├──────────────────┼───────────────────┼─────────────────┼────────────────┤
 │ AJ               │ Airport Announcer │ Bassett, Angela │ Blue Harvest   │
 └──────────────────┴───────────────────┴─────────────────┴────────────────┘
-Run Time (s): real 0.565 user 2.434570 sys 0.368945
-Time taken 2.855 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/9c.sql
+Run Time (s): real 0.144 user 1.210785 sys 0.005241
 ┌──────────────────┬───────────────────────┬────────────────────┬────────────────┐
 │ alternative_name │ voiced_character_name │  voicing_actress   │ american_movie │
 │     varchar      │        varchar        │      varchar       │    varchar     │
 ├──────────────────┼───────────────────────┼────────────────────┼────────────────┤
 │ 'Annette'        │ 2nd Balladeer         │ Alborg, Ana Esther │ (1975-01-20)   │
 └──────────────────┴───────────────────────┴────────────────────┴────────────────┘
-Run Time (s): real 0.832 user 3.812735 sys 0.343489
-Time taken 4.231 seconds
-execute /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/9d.sql
+Run Time (s): real 0.277 user 1.931727 sys 0.012347
 ┌──────────────────┬──────────────────────────┬─────────────────┬──────────────────┐
 │ alternative_name │     voiced_char_name     │ voicing_actress │  american_movie  │
 │     varchar      │         varchar          │     varchar     │     varchar      │
 ├──────────────────┼──────────────────────────┼─────────────────┼──────────────────┤
 │ !!!, Toy         │ "Cockamamie's" Salesgirl │ Aaron, Caroline │ $15,000.00 Error │
 └──────────────────┴──────────────────────────┴─────────────────┴──────────────────┘
-Run Time (s): real 1.320 user 6.051724 sys 0.387227
-Time taken 6.502 seconds
+Run Time (s): real 0.856 user 4.601193 sys 0.020401
+Time taken 243.2 seconds

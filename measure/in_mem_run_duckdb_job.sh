@@ -114,5 +114,7 @@ queries="
 .read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/9c.sql
 .read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/9d.sql
 "
-
+i=1
 echo -ne "${queries}" | duckdb ./imdb.db 2>&1|tee -a duckdb_query_split_imdb_${i}.txt;
+
+mv duckdb_query_split_imdb_* job_result/.
