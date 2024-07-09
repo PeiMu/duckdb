@@ -91,11 +91,15 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 		}
 	}
 
+#ifdef DEBUG
 	D_ASSERT(same_level_subqueries.size() <= 2);
+#endif
 	if (!same_level_subqueries.empty()) {
 		subqueries.emplace_back(std::move(same_level_subqueries));
 	}
+#ifdef DEBUG
 	D_ASSERT(same_level_table_exprs.size() <= 2);
+#endif
 	if (!same_level_table_exprs.empty()) {
 		table_expr_queue.emplace(same_level_table_exprs);
 	}
@@ -124,7 +128,9 @@ void TopDownSplit::GetTargetTables(LogicalOperator &op) {
 std::set<TableExpr> TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &join_op) {
 	std::set<TableExpr> table_exprs;
 	for (const auto &cond : join_op.conditions) {
+#ifdef DEBUG
 		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.left->type);
+#endif
 		TableExpr current_left_table;
 		auto &left_expr = cond.left->Cast<BoundColumnRefExpression>();
 		current_left_table.table_idx = left_expr.binding.table_index;
@@ -161,7 +167,9 @@ std::set<TableExpr> TopDownSplit::GetSeqScanTableExpr(const LogicalGet &get_op) 
 		TableExpr table_filter_expr;
 		table_filter_expr.table_idx = get_op.table_index;
 		auto column_idx_it = std::find(get_op.column_ids.begin(), get_op.column_ids.end(), table_filter.first);
+#ifdef DEBUG
 		D_ASSERT(column_idx_it != get_op.column_ids.end());
+#endif
 		table_filter_expr.column_idx = column_idx_it - get_op.column_ids.begin();
 		table_filter_expr.column_name = get_op.names[table_filter.first];
 		table_filter_expr.return_type = get_op.returned_types[table_filter.first];
@@ -274,7 +282,9 @@ void TopDownSplit::GetProjTableExpr(const LogicalProjection &proj_op) {
 		GetAggregateTableExpr(proj_op.children[0]->Cast<LogicalAggregate>());
 	} else {
 		for (const auto &expr : proj_op.expressions) {
+#ifdef DEBUG
 			D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
+#endif
 			TableExpr table_expr;
 			auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
 			table_expr.table_idx = column_ref_expr.binding.table_index;
@@ -290,11 +300,15 @@ void TopDownSplit::GetProjTableExpr(const LogicalProjection &proj_op) {
 
 void TopDownSplit::GetAggregateTableExpr(const LogicalAggregate &aggregate_op) {
 	for (const auto &agg_expr : aggregate_op.expressions) {
+#ifdef DEBUG
 		D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
+#endif
 		auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
 		for (const auto &expr : aggregate_expr.children) {
 			TableExpr table_expr;
+#ifdef DEBUG
 			D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
+#endif
 			auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
 			table_expr.table_idx = column_ref_expr.binding.table_index;
 			table_expr.column_idx = column_ref_expr.binding.column_index;
@@ -315,7 +329,9 @@ void TopDownSplit::MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_que
 			auto old_subquery_pair = std::move(old_subqueries.back());
 			new_plan->children[0] = std::move(old_subquery_pair[0]);
 			if (2 == old_subquery_pair.size()) {
+#ifdef DEBUG
 				D_ASSERT(nullptr == new_plan->children[1]);
+#endif
 				new_plan->children[1] = std::move(old_subquery_pair[1]);
 			}
 			old_subqueries.pop_back();
@@ -353,7 +369,9 @@ void TopDownSplit::UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
 				same_level_subqueries.emplace_back(std::move(child));
 			}
 		}
+#ifdef DEBUG
 		D_ASSERT(same_level_subqueries.size() <= 2);
+#endif
 		if (!same_level_subqueries.empty()) {
 			subqueries.emplace_back(std::move(same_level_subqueries));
 		}
@@ -395,7 +413,9 @@ bool TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &plan) {
 	// select the needed tables
 	std::unordered_set<idx_t> left_cond_table_index;
 	for (const auto &cond : last_join.conditions) {
+#ifdef DEBUG
 		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.left->type);
+#endif
 		auto &left_expr = cond.left->Cast<BoundColumnRefExpression>();
 		left_cond_table_index.emplace(left_expr.binding.table_index);
 	}
@@ -418,7 +438,9 @@ bool TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &plan) {
 	if (!used) {
 		auto last_sibling_index = table_blocks_key_order.back();
 		table_blocks_key_order.pop_back();
+#ifdef DEBUG
 		D_ASSERT(left_cond_table_index.count(last_sibling_index));
+#endif
 		auto last_sibling = std::move(table_blocks[last_sibling_index]);
 		table_blocks.erase(last_sibling_index);
 		InsertTableBlocks(last_block, table_blocks, table_blocks_key_order);
@@ -443,7 +465,9 @@ bool TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &plan) {
 			revert_op.children[1] = std::move(table_blocks[table_blocks_key_order.front()]);
 			table_blocks_key_order.pop_front();
 		}
+#ifdef DEBUG
 		D_ASSERT(table_blocks_key_order.empty());
+#endif
 		return false;
 	}
 

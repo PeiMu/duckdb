@@ -33,7 +33,9 @@ uint64_t ForeignKeyCenterSplit::CollectRangeTableLength(const unique_ptr<Logical
 	}
 
 	vector<idx_t> table_index = op->GetTableIndex();
+#ifdef DEBUG
 	D_ASSERT(1 == table_index.size());
+#endif
 	return table_index[0];
 }
 

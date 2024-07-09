@@ -50,9 +50,6 @@ public:
 
 	//! update the table_idx and column_idx
 	void UpdateSubqueriesIndex(subquery_queue &subqueries);
-	void UpdatePlanIndex(unique_ptr<LogicalOperator> &plan);
-
-	void MergeSubquery(unique_ptr<LogicalOperator> &plan, unique_ptr<LogicalOperator> subquery);
 
 	void SetMergeIndex(int index) {
 		merge_index = index;

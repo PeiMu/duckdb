@@ -468,8 +468,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			// debug: print subquery
 			Printer::Print("After PostOptimization");
 			sub_plan->Print();
-#endif
+
 			Planner::VerifyPlan(optimizer.context, sub_plan);
+#endif
 
 			auto subquery_stmt = subquery_preparer.AdaptSelect(result, sub_plan);
 #ifdef DEBUG
@@ -527,7 +528,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				while (child->children[0]) {
 					child = child->children[0].get();
 				}
+#ifdef DEBUG
 				D_ASSERT(subqueries.front().size() == 1);
+#endif
 				child->children[0] = std::move(subqueries.front()[0]);
 
 				// if it's the last subquery, break and continue the execution of the main stream

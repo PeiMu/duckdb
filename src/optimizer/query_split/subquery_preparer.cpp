@@ -24,7 +24,9 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 
 	// merge sibling node's expressions
 	if (merge_sibling_expr) {
+#ifdef DEBUG
 		D_ASSERT(!last_sibling_exprs.empty());
+#endif
 		temp_proj_exprs.insert(last_sibling_exprs.begin(), last_sibling_exprs.end());
 	}
 
@@ -123,7 +125,9 @@ shared_ptr<PreparedStatementData> SubqueryPreparer::AdaptSelect(shared_ptr<Prepa
 
 	// Modify the SelectNode based of the subquery
 	auto &select_statemet = subquery_stmt->unbound_statement->Cast<SelectStatement>();
+#ifdef DEBUG
 	D_ASSERT(QueryNodeType::SELECT_NODE == select_statemet.node->type);
+#endif
 	auto &select_node = select_statemet.node->Cast<SelectNode>();
 	if (!select_node.select_list.empty()) {
 		select_node.select_list.clear();
@@ -176,10 +180,14 @@ void SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &
 	bool merged = false;
 	MergeToSubquery(*current_level_subqueries[0], merged);
 	if (!merged) {
+#ifdef DEBUG
 		D_ASSERT(current_level_subqueries.size() == 2);
+#endif
 		MergeToSubquery(*current_level_subqueries[1], merged);
 	}
+#ifdef DEBUG
 	D_ASSERT(merged);
+#endif
 }
 
 bool SubqueryPreparer::MergeSibling(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
@@ -187,7 +195,9 @@ bool SubqueryPreparer::MergeSibling(std::vector<unique_ptr<LogicalOperator>> &cu
 	auto merge_sibling = [&last_sibling_node](LogicalOperator *subquery_pointer) {
 		while (!subquery_pointer->children.empty()) {
 			if (subquery_pointer->children.size() > 1 && nullptr == subquery_pointer->children[1]) {
+#ifdef DEBUG
 				D_ASSERT(nullptr != last_sibling_node);
+#endif
 				subquery_pointer->children[1] = std::move(last_sibling_node);
 				return true;
 			}
@@ -201,15 +211,19 @@ bool SubqueryPreparer::MergeSibling(std::vector<unique_ptr<LogicalOperator>> &cu
 	auto subquery_pointer = current_level_subqueries[0].get();
 	bool merged = merge_sibling(subquery_pointer);
 	if (!merged) {
+#ifdef DEBUG
 		D_ASSERT(current_level_subqueries.size() == 2);
+#endif
 		subquery_pointer = current_level_subqueries[1].get();
 		merged = merge_sibling(subquery_pointer);
 		merge_to_left = false;
 	}
 	// check this is the last operator
+#ifdef DEBUG
 	D_ASSERT(merged && !subquery_pointer->children.empty());
 	subquery_pointer = subquery_pointer->children[0].get();
 	D_ASSERT(subquery_pointer->children.empty());
+#endif
 	return merge_to_left;
 }
 
@@ -235,7 +249,9 @@ void SubqueryPreparer::MergeToSubquery(LogicalOperator &op, bool &merged) {
 			return;
 		// find the insert point and insert the `ColumnDataGet` node to the logical plan
 		if (nullptr == (*child_it) || (*child_it)->split_index == merge_index) {
+#ifdef DEBUG
 			D_ASSERT(nullptr != chunk_scan);
+#endif
 			op.children.erase(child_it);
 			op.children.insert(child_it, std::move(chunk_scan));
 			merged = true;
@@ -264,7 +280,9 @@ table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_que
 						    return proj_expr.table_idx == table_expr.table_idx &&
 						           proj_expr.column_idx == table_expr.column_idx;
 					    });
+#ifdef DEBUG
 					D_ASSERT(proj_exprs.end() != find_column_it);
+#endif
 					new_table_expr.column_idx = std::distance(proj_exprs.begin(), find_column_it);
 					// replace to the new table index (gotten in `MergeDataChunk`)
 					new_table_expr.table_idx = new_table_idx;
@@ -287,7 +305,9 @@ table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_que
 			    std::find_if(proj_exprs.begin(), proj_exprs.end(), [expr](const TableExpr &proj_expr) {
 				    return proj_expr.table_idx == expr.table_idx && proj_expr.column_idx == expr.column_idx;
 			    });
+#ifdef DEBUG
 			D_ASSERT(proj_exprs.end() != find_column_it);
+#endif
 			expr.column_idx = std::distance(proj_exprs.begin(), find_column_it);
 			// replace to the new table index (gotten in `MergeDataChunk`)
 			expr.table_idx = new_table_idx;
@@ -299,37 +319,53 @@ table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_que
 
 unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalOperator> plan,
                                                              const std::vector<TableExpr> &original_proj_expr) {
+#ifdef DEBUG
 	D_ASSERT(LogicalOperatorType::LOGICAL_PROJECTION == plan->type);
+#endif
 	auto &proj_op = plan->Cast<LogicalProjection>();
 	if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == proj_op.children[0]->type) {
 		// update aggregate expressions
 		auto &aggregate_op = proj_op.children[0]->Cast<LogicalAggregate>();
+#ifdef DEBUG
 		D_ASSERT(aggregate_op.expressions.size() == original_proj_expr.size());
+#endif
 		auto proj_expr_index = 0;
 		for (auto &agg_expr : aggregate_op.expressions) {
+#ifdef DEBUG
 			D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
+#endif
 			auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
 			for (auto &expr : aggregate_expr.children) {
+#ifdef DEBUG
 				D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
+#endif
 				auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
 				column_ref_expr.binding.table_index = original_proj_expr[proj_expr_index].table_idx;
 				column_ref_expr.binding.column_index = original_proj_expr[proj_expr_index].column_idx;
+#ifdef DEBUG
 				D_ASSERT(column_ref_expr.alias == original_proj_expr[proj_expr_index].column_name);
 				D_ASSERT(column_ref_expr.return_type == original_proj_expr[proj_expr_index].return_type);
+#endif
 			}
 			proj_expr_index++;
 		}
 
 	} else {
+#ifdef DEBUG
 		D_ASSERT(proj_op.expressions.size() == original_proj_expr.size());
+#endif
 		auto proj_expr_index = 0;
 		for (auto &expr : proj_op.expressions) {
+#ifdef DEBUG
 			D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
+#endif
 			auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
 			column_ref_expr.binding.table_index = original_proj_expr[proj_expr_index].table_idx;
 			column_ref_expr.binding.column_index = original_proj_expr[proj_expr_index].column_idx;
+#ifdef DEBUG
 			D_ASSERT(column_ref_expr.alias == original_proj_expr[proj_expr_index].column_name);
 			D_ASSERT(column_ref_expr.return_type == original_proj_expr[proj_expr_index].return_type);
+#endif
 			proj_expr_index++;
 		}
 	}
@@ -356,12 +392,5 @@ void SubqueryPreparer::UpdateSubqueriesIndex(subquery_queue &subqueries) {
 			VisitOperator(*subquery);
 		}
 	}
-}
-
-void SubqueryPreparer::MergeSubquery(unique_ptr<LogicalOperator> &plan, unique_ptr<LogicalOperator> subquery) {
-}
-
-void SubqueryPreparer::UpdatePlanIndex(unique_ptr<LogicalOperator> &plan) {
-	VisitOperator(*plan);
 }
 } // namespace duckdb
