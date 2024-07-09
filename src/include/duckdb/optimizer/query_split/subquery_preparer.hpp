@@ -25,15 +25,19 @@ public:
 	~SubqueryPreparer() = default;
 
 	//! Merge the data chunk (temp table) to the current subquery
-	unique_ptr<LogicalOperator> MergeDataChunk(const unique_ptr<LogicalOperator> &original_plan,
-	                                           unique_ptr<LogicalOperator> subquery,
-	                                           unique_ptr<QueryResult> previous_result, bool last_subquery);
+	void MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
+	                    unique_ptr<QueryResult> previous_result);
+
+	//! Merge the previous sibling node. If merged to the main stream (left node), we add the sibling expr to proj.
+	bool MergeSibling(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
+	                  unique_ptr<LogicalOperator> last_sibling_node);
 
 	//! Generate the projection head node at the top of the current subquery
 	unique_ptr<LogicalOperator> GenerateProjHead(const unique_ptr<LogicalOperator> &original_plan,
 	                                             unique_ptr<LogicalOperator> subquery,
 	                                             const table_expr_info &table_expr_queue,
-	                                             const std::vector<TableExpr> &original_proj_expr);
+	                                             const std::vector<TableExpr> &original_proj_expr,
+	                                             bool merge_sibling_expr);
 
 	//! Adapt the selection node to the query AST
 	shared_ptr<PreparedStatementData> AdaptSelect(shared_ptr<PreparedStatementData> original_stmt_data,
@@ -54,6 +58,8 @@ public:
 		merge_index = index;
 	}
 
+	void AddOldTableIndex(const unique_ptr<LogicalOperator> &op);
+
 private:
 	//! 1. find the insert point and insert the `ColumnDataGet` node to the logical plan;
 	//! 2. update the table_idx and column_idx
@@ -68,16 +74,13 @@ private:
 	// all columns needed of the current level are shown in the proj's expression
 	std::set<TableExpr> proj_exprs;
 	// so far we only execute the first child node and will miss the sibling info
-	// todo: should be changed when supporting the multi-thread of sibling execution
+	// todo: should be changed when supporting the parallel execution of sibling execution
 	std::set<TableExpr> last_sibling_exprs;
 	// a new chunk scan node with the last level's result, generated and merged in `MergeDataChunk`
 	unique_ptr<LogicalColumnDataGet> chunk_scan;
 	// `chunk_scan` will be moved, and we need one extra member to remember the new table index
 	idx_t new_table_idx = (uint64_t)-1;
 	// the collection of the old table indexes, to detect and be replaced to the new index by `UpdateTableExpr`
-	// collected in
-	// 1. all the `proj_exprs` are the old index for the next subquery in `GenerateProjHead`
-	// 2. check new expressions in the current subquery in `VisitReplace`
 	std::set<idx_t> old_table_idx;
 
 	int merge_index = 0;

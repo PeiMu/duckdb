@@ -376,7 +376,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		subquery_queue subqueries;
 		table_expr_info table_expr_queue;
 		std::vector<TableExpr> proj_expr;
-		// todo: reconstruct to a balanced logical plan, to avoid missing the global optimization
+		bool merge_sibling_expr = false;
 		QuerySplit query_splitter(*this);
 		SubqueryPreparer subquery_preparer(*planner.binder, *this);
 		while (ENABLE_QUERY_SPLIT) {
@@ -449,8 +449,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				}
 			}
 
-			auto sub_plan =
-			    subquery_preparer.GenerateProjHead(plan, std::move(subqueries.front()[0]), table_expr_queue, proj_expr);
+			subquery_preparer.AddOldTableIndex(subqueries.front()[0]);
+			auto sub_plan = subquery_preparer.GenerateProjHead(plan, std::move(subqueries.front()[0]), table_expr_queue,
+			                                                   proj_expr, merge_sibling_expr);
 #if TIME_BREAK_DOWN
 			if (is_real_query)
 				toc(&timer, "GenerateProjHead time is\n");
@@ -500,39 +501,39 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			if (is_real_query)
 				toc(&timer, "Execute time is\n");
 #endif
-			bool last_subquery = 1 == subqueries.size();
-			subqueries.front()[0] = subquery_preparer.MergeDataChunk(plan, std::move(subqueries.front()[0]),
-		                                                         std::move(subquery_result), last_subquery);
+			subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result));
+			if (!ENABLE_PARALLEL_EXECUTION && nullptr != last_sibling_node) {
+				merge_sibling_expr = subquery_preparer.MergeSibling(subqueries.front(), std::move(last_sibling_node));
+			} else {
+				merge_sibling_expr = false;
+			}
 #if TIME_BREAK_DOWN
 			if (is_real_query)
 				toc(&timer, "MergeDataChunk time is\n");
 #endif
-			if (!ENABLE_PARALLEL_EXECUTION && nullptr != last_sibling_node) {
-				// merge the sibling back to the upper subquery
-				auto subquery_pointer = subqueries.front()[0].get();
-				while (!subquery_pointer->children.empty()) {
-					if (subquery_pointer->children.size() > 1 && nullptr == subquery_pointer->children[1]) {
-						subquery_pointer->children[1] = std::move(last_sibling_node);
-						break;
-					}
-					subquery_pointer = subquery_pointer->children[0].get();
-				}
-				// check this is the last operator
-				D_ASSERT(!subquery_pointer->children.empty());
-				subquery_pointer = subquery_pointer->children[0].get();
-				D_ASSERT(subquery_pointer->children.empty());
-			}
 #if ENABLE_DEBUG_PRINT
 			Printer::Print("after MergeDataChunk");
 			subqueries.front()[0]->Print();
+			if (subqueries.front().size() == 2) {
+				subqueries.front()[1]->Print();
+			}
 #endif
 			subquery_preparer.UpdateSubqueriesIndex(subqueries);
 			table_expr_queue = subquery_preparer.UpdateTableExpr(table_expr_queue, proj_expr);
-			if (last_subquery) {
+			if (1 == subqueries.size()) {
+				// add the original projection head
+				unique_ptr<LogicalOperator> last_subquery = plan->Copy(optimizer.context);
+				auto child = last_subquery.get();
+				while (child->children[0]) {
+					child = child->children[0].get();
+				}
+				D_ASSERT(subqueries.front().size() == 1);
+				child->children[0] = std::move(subqueries.front()[0]);
+
 				// if it's the last subquery, break and continue the execution of the main stream
-				plan = subquery_preparer.UpdateProjHead(std::move(subqueries.front()[0]), proj_expr);
+				plan = subquery_preparer.UpdateProjHead(std::move(last_subquery), proj_expr);
 #if ENABLE_DEBUG_PRINT
-				Printer::Print("after UpdateProjHead");
+				Printer::Print("last subquery");
 				plan->Print();
 #endif
 				break;
