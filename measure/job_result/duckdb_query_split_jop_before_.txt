@@ -1,472 +1,486 @@
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/10a.sql" ./imdb.db
-  Time (mean ± σ):     223.5 ms ±   1.9 ms    [User: 1595.7 ms, System: 299.4 ms]
-  Range (min … max):   220.5 ms … 227.3 ms    13 runs
+  Time (mean ± σ):      1.078 s ±  0.010 s    [User: 0.908 s, System: 0.170 s]
+  Range (min … max):    1.071 s …  1.102 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/10b.sql" ./imdb.db
-  Time (mean ± σ):     255.0 ms ±  42.0 ms    [User: 1474.2 ms, System: 309.3 ms]
-  Range (min … max):   230.5 ms … 332.5 ms    12 runs
- 
-  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
+  Time (mean ± σ):     995.0 ms ±   9.5 ms    [User: 844.0 ms, System: 150.9 ms]
+  Range (min … max):   987.9 ms … 1016.7 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/10c.sql" ./imdb.db
-  Time (mean ± σ):     680.2 ms ±   4.4 ms    [User: 2238.9 ms, System: 323.4 ms]
-  Range (min … max):   671.7 ms … 685.5 ms    10 runs
+  Time (mean ± σ):      1.585 s ±  0.018 s    [User: 1.360 s, System: 0.225 s]
+  Range (min … max):    1.571 s …  1.621 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/11a.sql" ./imdb.db
-  Time (mean ± σ):     101.6 ms ±   1.6 ms    [User: 359.4 ms, System: 86.1 ms]
-  Range (min … max):    99.4 ms … 105.6 ms    29 runs
+  Time (mean ± σ):     258.6 ms ±   1.8 ms    [User: 216.8 ms, System: 41.7 ms]
+  Range (min … max):   255.2 ms … 261.0 ms    11 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/11b.sql" ./imdb.db
-  Time (mean ± σ):      97.8 ms ±   2.3 ms    [User: 329.2 ms, System: 84.9 ms]
-  Range (min … max):    94.8 ms … 102.7 ms    30 runs
+  Time (mean ± σ):     236.4 ms ±   1.8 ms    [User: 195.0 ms, System: 41.3 ms]
+  Range (min … max):   234.7 ms … 239.8 ms    12 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/11c.sql" ./imdb.db
-  Time (mean ± σ):     317.8 ms ±   4.0 ms    [User: 617.4 ms, System: 147.8 ms]
-  Range (min … max):   309.1 ms … 322.0 ms    10 runs
+  Time (mean ± σ):     500.9 ms ±   5.6 ms    [User: 413.8 ms, System: 87.0 ms]
+  Range (min … max):   495.5 ms … 515.3 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/11d.sql" ./imdb.db
-  Time (mean ± σ):     799.3 ms ±  18.8 ms    [User: 1279.8 ms, System: 262.4 ms]
-  Range (min … max):   780.6 ms … 839.5 ms    10 runs
+  Time (mean ± σ):     988.2 ms ±   7.4 ms    [User: 784.3 ms, System: 203.8 ms]
+  Range (min … max):   982.1 ms … 1007.7 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/12a.sql" ./imdb.db
-  Time (mean ± σ):     255.7 ms ±   5.4 ms    [User: 1070.1 ms, System: 485.7 ms]
-  Range (min … max):   251.2 ms … 266.3 ms    11 runs
+  Time (mean ± σ):     809.7 ms ±   3.2 ms    [User: 571.0 ms, System: 238.6 ms]
+  Range (min … max):   804.8 ms … 816.0 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/12b.sql" ./imdb.db
-  Time (mean ± σ):     225.1 ms ±   6.0 ms    [User: 925.8 ms, System: 473.5 ms]
-  Range (min … max):   218.4 ms … 236.5 ms    13 runs
+  Time (mean ± σ):     718.0 ms ±   9.9 ms    [User: 464.9 ms, System: 253.1 ms]
+  Range (min … max):   711.7 ms … 744.3 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/12c.sql" ./imdb.db
-  Time (mean ± σ):     368.5 ms ±  55.7 ms    [User: 1432.5 ms, System: 465.4 ms]
-  Range (min … max):   344.0 ms … 526.0 ms    10 runs
- 
-  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
+  Time (mean ± σ):      1.006 s ±  0.016 s    [User: 0.746 s, System: 0.259 s]
+  Range (min … max):    0.995 s …  1.050 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/13a.sql" ./imdb.db
-  Time (mean ± σ):     327.3 ms ±   7.0 ms    [User: 1312.2 ms, System: 510.0 ms]
-  Range (min … max):   320.0 ms … 344.2 ms    10 runs
+  Time (mean ± σ):     988.5 ms ±  10.2 ms    [User: 705.3 ms, System: 283.2 ms]
+  Range (min … max):   980.4 ms … 1014.4 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/13b.sql" ./imdb.db
-  Time (mean ± σ):     103.4 ms ±   0.9 ms    [User: 580.3 ms, System: 89.6 ms]
-  Range (min … max):   101.9 ms … 105.8 ms    29 runs
+  Time (mean ± σ):     368.3 ms ±   4.5 ms    [User: 333.1 ms, System: 35.1 ms]
+  Range (min … max):   364.3 ms … 379.0 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/13c.sql" ./imdb.db
-  Time (mean ± σ):      92.6 ms ±   0.9 ms    [User: 484.8 ms, System: 89.3 ms]
-  Range (min … max):    91.2 ms …  95.6 ms    32 runs
+  Time (mean ± σ):     303.4 ms ±   1.0 ms    [User: 260.4 ms, System: 42.9 ms]
+  Range (min … max):   301.5 ms … 304.3 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/13d.sql" ./imdb.db
-  Time (mean ± σ):     898.6 ms ±   5.5 ms    [User: 2599.1 ms, System: 352.7 ms]
-  Range (min … max):   887.9 ms … 905.5 ms    10 runs
+  Time (mean ± σ):      1.675 s ±  0.009 s    [User: 1.496 s, System: 0.178 s]
+  Range (min … max):    1.662 s …  1.694 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/14a.sql" ./imdb.db
-  Time (mean ± σ):     322.9 ms ±   4.9 ms    [User: 1315.3 ms, System: 450.8 ms]
-  Range (min … max):   316.6 ms … 330.4 ms    10 runs
+  Time (mean ± σ):     989.3 ms ±   4.3 ms    [User: 733.0 ms, System: 256.2 ms]
+  Range (min … max):   982.9 ms … 996.8 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/14b.sql" ./imdb.db
-  Time (mean ± σ):     272.8 ms ±  14.3 ms    [User: 1282.9 ms, System: 422.4 ms]
-  Range (min … max):   262.2 ms … 311.9 ms    11 runs
+  Time (mean ± σ):     936.3 ms ±   3.0 ms    [User: 699.6 ms, System: 236.7 ms]
+  Range (min … max):   931.2 ms … 939.4 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/14c.sql" ./imdb.db
-  Time (mean ± σ):     386.5 ms ±   6.4 ms    [User: 1479.9 ms, System: 454.8 ms]
-  Range (min … max):   378.5 ms … 398.1 ms    10 runs
+  Time (mean ± σ):      1.091 s ±  0.003 s    [User: 0.829 s, System: 0.262 s]
+  Range (min … max):    1.086 s …  1.096 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/15a.sql" ./imdb.db
-  Time (mean ± σ):     254.4 ms ±   5.4 ms    [User: 1108.9 ms, System: 461.0 ms]
-  Range (min … max):   245.8 ms … 263.7 ms    12 runs
+  Time (mean ± σ):     829.5 ms ±   5.5 ms    [User: 569.1 ms, System: 260.3 ms]
+  Range (min … max):   824.0 ms … 843.3 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/15b.sql" ./imdb.db
-  Time (mean ± σ):     249.8 ms ±   6.6 ms    [User: 1069.4 ms, System: 466.3 ms]
-  Range (min … max):   241.6 ms … 260.4 ms    11 runs
+  Time (mean ± σ):     813.6 ms ±   4.4 ms    [User: 559.1 ms, System: 254.3 ms]
+  Range (min … max):   808.4 ms … 821.3 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/15c.sql" ./imdb.db
-  Time (mean ± σ):     394.3 ms ±   4.1 ms    [User: 1877.2 ms, System: 522.8 ms]
-  Range (min … max):   389.3 ms … 400.6 ms    10 runs
+  Time (mean ± σ):      1.203 s ±  0.013 s    [User: 0.933 s, System: 0.270 s]
+  Range (min … max):    1.193 s …  1.237 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/15d.sql" ./imdb.db
-  Time (mean ± σ):     351.5 ms ±   4.8 ms    [User: 1839.4 ms, System: 155.0 ms]
-  Range (min … max):   346.3 ms … 360.6 ms    10 runs
+  Time (mean ± σ):     951.6 ms ±   7.9 ms    [User: 868.1 ms, System: 82.3 ms]
+  Range (min … max):   943.8 ms … 968.0 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/16a.sql" ./imdb.db
-  Time (mean ± σ):     155.9 ms ±   1.5 ms    [User: 955.0 ms, System: 206.9 ms]
-  Range (min … max):   152.1 ms … 159.8 ms    19 runs
+  Time (mean ± σ):     606.0 ms ±   2.5 ms    [User: 504.3 ms, System: 101.6 ms]
+  Range (min … max):   604.0 ms … 612.8 ms    10 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/16b.sql" ./imdb.db
-  Time (mean ± σ):      1.475 s ±  0.011 s    [User: 6.745 s, System: 0.512 s]
-  Range (min … max):    1.463 s …  1.493 s    10 runs
+  Time (mean ± σ):      3.659 s ±  0.017 s    [User: 3.370 s, System: 0.289 s]
+  Range (min … max):    3.629 s …  3.683 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/16c.sql" ./imdb.db
-  Time (mean ± σ):     349.7 ms ±   4.1 ms    [User: 2120.9 ms, System: 209.6 ms]
-  Range (min … max):   345.2 ms … 359.0 ms    10 runs
+  Time (mean ± σ):      1.272 s ±  0.009 s    [User: 1.159 s, System: 0.113 s]
+  Range (min … max):    1.258 s …  1.294 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/16d.sql" ./imdb.db
-  Time (mean ± σ):     328.8 ms ±   3.6 ms    [User: 2114.8 ms, System: 218.1 ms]
-  Range (min … max):   323.0 ms … 332.8 ms    10 runs
+  Time (mean ± σ):      1.307 s ±  0.031 s    [User: 1.173 s, System: 0.128 s]
+  Range (min … max):    1.286 s …  1.393 s    10 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17a.sql" ./imdb.db
-  Time (mean ± σ):     278.2 ms ±   1.7 ms    [User: 1683.4 ms, System: 193.2 ms]
-  Range (min … max):   276.6 ms … 281.8 ms    10 runs
+  Time (mean ± σ):     999.1 ms ±   6.9 ms    [User: 886.6 ms, System: 112.3 ms]
+  Range (min … max):   989.7 ms … 1013.2 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17b.sql" ./imdb.db
-  Time (mean ± σ):     374.5 ms ±   5.4 ms    [User: 3012.8 ms, System: 255.8 ms]
-  Range (min … max):   370.7 ms … 388.9 ms    10 runs
+  Time (mean ± σ):      1.605 s ±  0.012 s    [User: 1.440 s, System: 0.165 s]
+  Range (min … max):    1.586 s …  1.631 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17c.sql" ./imdb.db
-  Time (mean ± σ):     358.0 ms ±   1.8 ms    [User: 3021.7 ms, System: 258.0 ms]
-  Range (min … max):   355.4 ms … 360.7 ms    10 runs
+  Time (mean ± σ):      1.576 s ±  0.019 s    [User: 1.409 s, System: 0.166 s]
+  Range (min … max):    1.557 s …  1.625 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17d.sql" ./imdb.db
-  Time (mean ± σ):     376.7 ms ±   3.0 ms    [User: 3022.6 ms, System: 236.2 ms]
-  Range (min … max):   370.7 ms … 379.2 ms    10 runs
+  Time (mean ± σ):      1.619 s ±  0.025 s    [User: 1.461 s, System: 0.158 s]
+  Range (min … max):    1.584 s …  1.673 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17e.sql" ./imdb.db
-  Time (mean ± σ):     335.0 ms ±   2.9 ms    [User: 2208.4 ms, System: 200.7 ms]
-  Range (min … max):   330.3 ms … 340.5 ms    10 runs
+  Time (mean ± σ):      1.281 s ±  0.014 s    [User: 1.171 s, System: 0.110 s]
+  Range (min … max):    1.264 s …  1.307 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/17f.sql" ./imdb.db
-  Time (mean ± σ):     472.3 ms ±   1.9 ms    [User: 3084.8 ms, System: 266.1 ms]
-  Range (min … max):   468.6 ms … 475.9 ms    10 runs
+  Time (mean ± σ):      1.714 s ±  0.017 s    [User: 1.552 s, System: 0.162 s]
+  Range (min … max):    1.688 s …  1.742 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/18a.sql" ./imdb.db
-  Time (mean ± σ):     507.4 ms ±   8.5 ms    [User: 2221.8 ms, System: 668.3 ms]
-  Range (min … max):   496.5 ms … 517.2 ms    10 runs
+  Time (mean ± σ):      1.645 s ±  0.016 s    [User: 1.280 s, System: 0.364 s]
+  Range (min … max):    1.632 s …  1.676 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/18b.sql" ./imdb.db
-  Time (mean ± σ):     414.8 ms ±  13.7 ms    [User: 2393.8 ms, System: 602.3 ms]
-  Range (min … max):   406.2 ms … 447.3 ms    10 runs
- 
-  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
+  Time (mean ± σ):      1.667 s ±  0.013 s    [User: 1.302 s, System: 0.365 s]
+  Range (min … max):    1.657 s …  1.702 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/18c.sql" ./imdb.db
-  Time (mean ± σ):     488.4 ms ±   7.3 ms    [User: 2765.8 ms, System: 584.9 ms]
-  Range (min … max):   479.1 ms … 499.6 ms    10 runs
+  Time (mean ± σ):      1.895 s ±  0.009 s    [User: 1.534 s, System: 0.361 s]
+  Range (min … max):    1.878 s …  1.903 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/19a.sql" ./imdb.db
-  Time (mean ± σ):     555.6 ms ±   6.8 ms    [User: 2889.7 ms, System: 627.9 ms]
-  Range (min … max):   547.9 ms … 567.4 ms    10 runs
+  Time (mean ± σ):      1.999 s ±  0.012 s    [User: 1.599 s, System: 0.400 s]
+  Range (min … max):    1.988 s …  2.032 s    10 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/19b.sql" ./imdb.db
-  Time (mean ± σ):     387.7 ms ±   5.8 ms    [User: 2197.4 ms, System: 637.3 ms]
-  Range (min … max):   382.4 ms … 397.2 ms    10 runs
+  Time (mean ± σ):      1.581 s ±  0.011 s    [User: 1.196 s, System: 0.385 s]
+  Range (min … max):    1.569 s …  1.603 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/19c.sql" ./imdb.db
-  Time (mean ± σ):     669.9 ms ±   8.4 ms    [User: 2998.8 ms, System: 643.3 ms]
-  Range (min … max):   662.3 ms … 689.5 ms    10 runs
+  Time (mean ± σ):      2.075 s ±  0.017 s    [User: 1.647 s, System: 0.427 s]
+  Range (min … max):    2.052 s …  2.111 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/19d.sql" ./imdb.db
-  Time (mean ± σ):      2.263 s ±  0.036 s    [User: 7.697 s, System: 0.758 s]
-  Range (min … max):    2.210 s …  2.314 s    10 runs
+  Time (mean ± σ):      4.809 s ±  0.035 s    [User: 4.354 s, System: 0.454 s]
+  Range (min … max):    4.769 s …  4.871 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/1a.sql" ./imdb.db
-  Time (mean ± σ):      77.9 ms ±  11.3 ms    [User: 479.1 ms, System: 66.3 ms]
-  Range (min … max):    71.2 ms … 112.9 ms    39 runs
- 
-  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
+  Time (mean ± σ):     276.0 ms ±   1.1 ms    [User: 246.9 ms, System: 28.9 ms]
+  Range (min … max):   274.2 ms … 278.1 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/1b.sql" ./imdb.db
-  Time (mean ± σ):     138.9 ms ±   1.6 ms    [User: 413.7 ms, System: 109.0 ms]
-  Range (min … max):   135.8 ms … 141.2 ms    21 runs
+  Time (mean ± σ):     296.9 ms ±   2.5 ms    [User: 251.9 ms, System: 44.9 ms]
+  Range (min … max):   293.7 ms … 301.3 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/1c.sql" ./imdb.db
-  Time (mean ± σ):      59.7 ms ±   0.5 ms    [User: 326.5 ms, System: 69.1 ms]
-  Range (min … max):    58.8 ms …  61.0 ms    50 runs
+  Time (mean ± σ):     206.6 ms ±   1.4 ms    [User: 178.7 ms, System: 27.8 ms]
+  Range (min … max):   204.4 ms … 208.7 ms    14 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/1d.sql" ./imdb.db
-  Time (mean ± σ):     139.0 ms ±   1.5 ms    [User: 420.1 ms, System: 102.6 ms]
-  Range (min … max):   136.1 ms … 142.2 ms    21 runs
+  Time (mean ± σ):     296.2 ms ±   3.8 ms    [User: 254.4 ms, System: 41.7 ms]
+  Range (min … max):   292.4 ms … 302.3 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/20a.sql" ./imdb.db
-  Time (mean ± σ):     296.5 ms ±   2.4 ms    [User: 1920.2 ms, System: 261.5 ms]
-  Range (min … max):   292.6 ms … 300.0 ms    10 runs
+  Time (mean ± σ):      1.209 s ±  0.012 s    [User: 1.066 s, System: 0.143 s]
+  Range (min … max):    1.200 s …  1.240 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/20b.sql" ./imdb.db
-  Time (mean ± σ):     275.6 ms ±   1.7 ms    [User: 1869.9 ms, System: 284.3 ms]
-  Range (min … max):   273.6 ms … 278.4 ms    10 runs
+  Time (mean ± σ):      1.194 s ±  0.009 s    [User: 1.047 s, System: 0.147 s]
+  Range (min … max):    1.186 s …  1.216 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/20c.sql" ./imdb.db
-  Time (mean ± σ):     267.6 ms ±   2.0 ms    [User: 1825.6 ms, System: 258.4 ms]
-  Range (min … max):   265.2 ms … 272.2 ms    11 runs
+  Time (mean ± σ):      1.179 s ±  0.010 s    [User: 1.042 s, System: 0.137 s]
+  Range (min … max):    1.168 s …  1.196 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/21a.sql" ./imdb.db
-  Time (mean ± σ):     294.4 ms ±   6.3 ms    [User: 1285.8 ms, System: 442.9 ms]
-  Range (min … max):   286.5 ms … 302.4 ms    10 runs
+  Time (mean ± σ):     969.4 ms ±   5.9 ms    [User: 706.3 ms, System: 263.0 ms]
+  Range (min … max):   963.9 ms … 984.7 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/21b.sql" ./imdb.db
-  Time (mean ± σ):     276.2 ms ±  13.1 ms    [User: 1063.8 ms, System: 461.1 ms]
-  Range (min … max):   262.5 ms … 310.9 ms    11 runs
+  Time (mean ± σ):     807.3 ms ±   5.4 ms    [User: 546.9 ms, System: 260.3 ms]
+  Range (min … max):   801.8 ms … 815.9 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/21c.sql" ./imdb.db
-  Time (mean ± σ):     324.3 ms ±   6.9 ms    [User: 1344.0 ms, System: 444.2 ms]
-  Range (min … max):   315.2 ms … 332.8 ms    10 runs
+  Time (mean ± σ):      1.017 s ±  0.015 s    [User: 0.749 s, System: 0.267 s]
+  Range (min … max):    1.004 s …  1.047 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/22a.sql" ./imdb.db
-  Time (mean ± σ):     387.3 ms ±   5.6 ms    [User: 1775.6 ms, System: 522.3 ms]
-  Range (min … max):   380.2 ms … 400.4 ms    10 runs
+  Time (mean ± σ):      1.248 s ±  0.057 s    [User: 0.967 s, System: 0.281 s]
+  Range (min … max):    1.213 s …  1.381 s    10 runs
+ 
+  Warning: The first benchmarking run for this command was significantly slower than the rest (1.381 s). This could be caused by (filesystem) caches that were not filled until after the first run. You are already using the '--warmup' option which helps to fill these caches before the actual benchmark. You can either try to increase the warmup count further or re-run this benchmark on a quiet system in case it was a random outlier. Alternatively, consider using the '--prepare' option to clear the caches before each timing run.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/22b.sql" ./imdb.db
-  Time (mean ± σ):     341.6 ms ±   5.6 ms    [User: 1426.2 ms, System: 513.3 ms]
-  Range (min … max):   333.2 ms … 351.2 ms    10 runs
+  Time (mean ± σ):      1.023 s ±  0.005 s    [User: 0.750 s, System: 0.273 s]
+  Range (min … max):    1.016 s …  1.031 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/22c.sql" ./imdb.db
-  Time (mean ± σ):     567.9 ms ±   6.5 ms    [User: 2511.5 ms, System: 611.6 ms]
-  Range (min … max):   558.2 ms … 579.4 ms    10 runs
+  Time (mean ± σ):      1.694 s ±  0.007 s    [User: 1.320 s, System: 0.373 s]
+  Range (min … max):    1.682 s …  1.708 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/22d.sql" ./imdb.db
-  Time (mean ± σ):     747.9 ms ±   6.8 ms    [User: 3484.8 ms, System: 762.4 ms]
-  Range (min … max):   738.0 ms … 759.7 ms    10 runs
+  Time (mean ± σ):      2.250 s ±  0.014 s    [User: 1.774 s, System: 0.476 s]
+  Range (min … max):    2.227 s …  2.276 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/23a.sql" ./imdb.db
-  Time (mean ± σ):     336.7 ms ±   6.5 ms    [User: 1430.6 ms, System: 494.8 ms]
-  Range (min … max):   330.5 ms … 347.6 ms    10 runs
+  Time (mean ± σ):      1.004 s ±  0.006 s    [User: 0.732 s, System: 0.272 s]
+  Range (min … max):    0.996 s …  1.017 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/23b.sql" ./imdb.db
-  Time (mean ± σ):     241.9 ms ±   5.8 ms    [User: 977.5 ms, System: 463.6 ms]
-  Range (min … max):   236.1 ms … 252.7 ms    12 runs
+  Time (mean ± σ):     749.5 ms ±   2.5 ms    [User: 500.9 ms, System: 248.4 ms]
+  Range (min … max):   746.4 ms … 753.5 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/23c.sql" ./imdb.db
-  Time (mean ± σ):     351.2 ms ±   7.4 ms    [User: 1490.9 ms, System: 485.9 ms]
-  Range (min … max):   342.1 ms … 365.2 ms    10 runs
+  Time (mean ± σ):      1.036 s ±  0.011 s    [User: 0.764 s, System: 0.272 s]
+  Range (min … max):    1.023 s …  1.064 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/24a.sql" ./imdb.db
-  Time (mean ± σ):     595.0 ms ±   4.9 ms    [User: 3264.8 ms, System: 648.9 ms]
-  Range (min … max):   590.6 ms … 605.5 ms    10 runs
+  Time (mean ± σ):      2.175 s ±  0.073 s    [User: 1.746 s, System: 0.429 s]
+  Range (min … max):    2.134 s …  2.380 s    10 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/24b.sql" ./imdb.db
-  Time (mean ± σ):     482.5 ms ±   5.3 ms    [User: 2785.1 ms, System: 677.0 ms]
-  Range (min … max):   474.9 ms … 490.0 ms    10 runs
+  Time (mean ± σ):      1.940 s ±  0.080 s    [User: 1.523 s, System: 0.417 s]
+  Range (min … max):    1.886 s …  2.096 s    10 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/25a.sql" ./imdb.db
-  Time (mean ± σ):     440.8 ms ±   6.1 ms    [User: 2368.4 ms, System: 616.3 ms]
-  Range (min … max):   435.3 ms … 454.5 ms    10 runs
+  Time (mean ± σ):      1.661 s ±  0.010 s    [User: 1.299 s, System: 0.362 s]
+  Range (min … max):    1.647 s …  1.674 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/25b.sql" ./imdb.db
-  Time (mean ± σ):     393.1 ms ±   6.7 ms    [User: 2117.7 ms, System: 669.2 ms]
-  Range (min … max):   380.9 ms … 400.2 ms    10 runs
+  Time (mean ± σ):      1.527 s ±  0.009 s    [User: 1.160 s, System: 0.367 s]
+  Range (min … max):    1.516 s …  1.549 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/25c.sql" ./imdb.db
-  Time (mean ± σ):     575.6 ms ±  11.9 ms    [User: 3326.3 ms, System: 617.5 ms]
-  Range (min … max):   563.6 ms … 596.5 ms    10 runs
+  Time (mean ± σ):      2.174 s ±  0.010 s    [User: 1.790 s, System: 0.384 s]
+  Range (min … max):    2.161 s …  2.192 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/26a.sql" ./imdb.db
-  Time (mean ± σ):     417.1 ms ±   2.6 ms    [User: 3343.3 ms, System: 272.4 ms]
-  Range (min … max):   414.2 ms … 423.1 ms    10 runs
+  Time (mean ± σ):      1.929 s ±  0.014 s    [User: 1.750 s, System: 0.179 s]
+  Range (min … max):    1.919 s …  1.967 s    10 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/26b.sql" ./imdb.db
-  Time (mean ± σ):     237.2 ms ±   2.8 ms    [User: 1414.0 ms, System: 248.0 ms]
-  Range (min … max):   233.9 ms … 240.9 ms    12 runs
+  Time (mean ± σ):     913.5 ms ±  11.2 ms    [User: 779.5 ms, System: 133.9 ms]
+  Range (min … max):   907.1 ms … 943.9 ms    10 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/26c.sql" ./imdb.db
-  Time (mean ± σ):     476.1 ms ±   2.1 ms    [User: 3708.4 ms, System: 258.2 ms]
-  Range (min … max):   474.1 ms … 481.5 ms    10 runs
+  Time (mean ± σ):      2.070 s ±  0.012 s    [User: 1.921 s, System: 0.148 s]
+  Range (min … max):    2.059 s …  2.094 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/27a.sql" ./imdb.db
-  Time (mean ± σ):     304.7 ms ±   5.4 ms    [User: 1185.0 ms, System: 485.4 ms]
-  Range (min … max):   298.9 ms … 312.6 ms    10 runs
+  Time (mean ± σ):     893.0 ms ±   3.8 ms    [User: 636.0 ms, System: 256.9 ms]
+  Range (min … max):   889.5 ms … 903.0 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/27b.sql" ./imdb.db
-  Time (mean ± σ):     297.9 ms ±   4.6 ms    [User: 1173.4 ms, System: 467.4 ms]
-  Range (min … max):   293.9 ms … 309.1 ms    10 runs
+  Time (mean ± σ):     881.6 ms ±  12.2 ms    [User: 616.5 ms, System: 264.9 ms]
+  Range (min … max):   872.3 ms … 914.7 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/27c.sql" ./imdb.db
-  Time (mean ± σ):     331.6 ms ±   6.5 ms    [User: 1316.3 ms, System: 440.8 ms]
-  Range (min … max):   323.6 ms … 343.4 ms    10 runs
+  Time (mean ± σ):      1.011 s ±  0.011 s    [User: 0.746 s, System: 0.264 s]
+  Range (min … max):    1.002 s …  1.041 s    10 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/28a.sql" ./imdb.db
-  Time (mean ± σ):     517.3 ms ±   7.7 ms    [User: 1852.5 ms, System: 474.1 ms]
-  Range (min … max):   510.2 ms … 532.1 ms    10 runs
+  Time (mean ± σ):      1.385 s ±  0.016 s    [User: 1.087 s, System: 0.297 s]
+  Range (min … max):    1.373 s …  1.429 s    10 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/28b.sql" ./imdb.db
-  Time (mean ± σ):     372.3 ms ±   6.1 ms    [User: 1502.7 ms, System: 472.4 ms]
-  Range (min … max):   362.2 ms … 378.7 ms    10 runs
+  Time (mean ± σ):      1.065 s ±  0.010 s    [User: 0.789 s, System: 0.276 s]
+  Range (min … max):    1.057 s …  1.092 s    10 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/28c.sql" ./imdb.db
-  Time (mean ± σ):     548.8 ms ±  11.2 ms    [User: 1924.4 ms, System: 541.8 ms]
-  Range (min … max):   536.9 ms … 575.6 ms    10 runs
+  Time (mean ± σ):      1.438 s ±  0.012 s    [User: 1.128 s, System: 0.310 s]
+  Range (min … max):    1.425 s …  1.467 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/29a.sql" ./imdb.db
-  Time (mean ± σ):     496.5 ms ±   5.9 ms    [User: 2735.7 ms, System: 669.5 ms]
-  Range (min … max):   489.0 ms … 505.6 ms    10 runs
+  Time (mean ± σ):      1.873 s ±  0.010 s    [User: 1.461 s, System: 0.412 s]
+  Range (min … max):    1.861 s …  1.894 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/29b.sql" ./imdb.db
-  Time (mean ± σ):     465.2 ms ±   7.1 ms    [User: 2344.9 ms, System: 699.1 ms]
-  Range (min … max):   452.0 ms … 473.0 ms    10 runs
+  Time (mean ± σ):      1.667 s ±  0.009 s    [User: 1.277 s, System: 0.389 s]
+  Range (min … max):    1.656 s …  1.682 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/29c.sql" ./imdb.db
-  Time (mean ± σ):     549.3 ms ±   3.2 ms    [User: 2947.6 ms, System: 709.9 ms]
-  Range (min … max):   545.5 ms … 556.5 ms    10 runs
+  Time (mean ± σ):      2.060 s ±  0.050 s    [User: 1.632 s, System: 0.428 s]
+  Range (min … max):    2.037 s …  2.200 s    10 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/2a.sql" ./imdb.db
-  Time (mean ± σ):      77.9 ms ±   1.0 ms    [User: 375.7 ms, System: 66.9 ms]
-  Range (min … max):    76.0 ms …  80.4 ms    38 runs
+  Time (mean ± σ):     240.8 ms ±   1.3 ms    [User: 210.6 ms, System: 30.0 ms]
+  Range (min … max):   239.4 ms … 243.5 ms    12 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/2b.sql" ./imdb.db
-  Time (mean ± σ):      74.9 ms ±   1.2 ms    [User: 343.8 ms, System: 69.8 ms]
-  Range (min … max):    72.4 ms …  78.5 ms    39 runs
+  Time (mean ± σ):     248.8 ms ±  13.0 ms    [User: 218.0 ms, System: 30.7 ms]
+  Range (min … max):   225.5 ms … 277.3 ms    13 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/2c.sql" ./imdb.db
-  Time (mean ± σ):      44.7 ms ±   0.8 ms    [User: 110.6 ms, System: 49.6 ms]
-  Range (min … max):    42.6 ms …  46.4 ms    67 runs
+  Time (mean ± σ):      82.2 ms ±  17.2 ms    [User: 62.8 ms, System: 16.5 ms]
+  Range (min … max):    77.7 ms … 182.0 ms    36 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/2d.sql" ./imdb.db
-  Time (mean ± σ):      96.2 ms ±  10.2 ms    [User: 402.9 ms, System: 74.0 ms]
-  Range (min … max):    92.2 ms … 150.4 ms    31 runs
- 
-  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
+  Time (mean ± σ):     268.1 ms ±   2.2 ms    [User: 238.5 ms, System: 29.5 ms]
+  Range (min … max):   265.0 ms … 272.9 ms    11 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/30a.sql" ./imdb.db
-  Time (mean ± σ):     508.3 ms ±   5.6 ms    [User: 2705.6 ms, System: 682.4 ms]
-  Range (min … max):   501.1 ms … 517.6 ms    10 runs
+  Time (mean ± σ):      1.881 s ±  0.010 s    [User: 1.506 s, System: 0.375 s]
+  Range (min … max):    1.868 s …  1.905 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/30b.sql" ./imdb.db
-  Time (mean ± σ):     434.6 ms ±   6.2 ms    [User: 2410.4 ms, System: 653.2 ms]
-  Range (min … max):   428.6 ms … 445.4 ms    10 runs
+  Time (mean ± σ):      1.703 s ±  0.009 s    [User: 1.336 s, System: 0.366 s]
+  Range (min … max):    1.694 s …  1.720 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/30c.sql" ./imdb.db
-  Time (mean ± σ):     560.0 ms ±   9.9 ms    [User: 3014.0 ms, System: 608.0 ms]
-  Range (min … max):   548.1 ms … 575.4 ms    10 runs
+  Time (mean ± σ):      2.082 s ±  0.007 s    [User: 1.710 s, System: 0.372 s]
+  Range (min … max):    2.073 s …  2.091 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/31a.sql" ./imdb.db
-  Time (mean ± σ):     528.1 ms ±   4.7 ms    [User: 2758.4 ms, System: 658.5 ms]
-  Range (min … max):   516.8 ms … 532.9 ms    10 runs
+  Time (mean ± σ):      1.885 s ±  0.015 s    [User: 1.497 s, System: 0.388 s]
+  Range (min … max):    1.870 s …  1.921 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/31b.sql" ./imdb.db
-  Time (mean ± σ):     463.4 ms ±  28.5 ms    [User: 2612.3 ms, System: 638.0 ms]
-  Range (min … max):   447.5 ms … 542.1 ms    10 runs
- 
-  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
+  Time (mean ± σ):      1.800 s ±  0.007 s    [User: 1.415 s, System: 0.385 s]
+  Range (min … max):    1.793 s …  1.818 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/31c.sql" ./imdb.db
-  Time (mean ± σ):     561.9 ms ±   8.2 ms    [User: 3145.0 ms, System: 611.8 ms]
-  Range (min … max):   552.6 ms … 575.5 ms    10 runs
+  Time (mean ± σ):      2.140 s ±  0.010 s    [User: 1.740 s, System: 0.400 s]
+  Range (min … max):    2.125 s …  2.157 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/32a.sql" ./imdb.db
-  Time (mean ± σ):      29.0 ms ±   0.4 ms    [User: 52.7 ms, System: 43.3 ms]
-  Range (min … max):    27.9 ms …  30.4 ms    101 runs
+  Time (mean ± σ):      38.2 ms ±   9.7 ms    [User: 27.1 ms, System: 10.0 ms]
+  Range (min … max):    36.3 ms … 116.9 ms    80 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/32b.sql" ./imdb.db
-  Time (mean ± σ):      78.7 ms ±   0.8 ms    [User: 453.3 ms, System: 66.1 ms]
-  Range (min … max):    77.1 ms …  80.3 ms    38 runs
+  Time (mean ± σ):     284.2 ms ±   3.6 ms    [User: 264.9 ms, System: 19.2 ms]
+  Range (min … max):   280.5 ms … 292.2 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/33a.sql" ./imdb.db
-  Time (mean ± σ):     123.6 ms ±   2.0 ms    [User: 533.3 ms, System: 70.2 ms]
-  Range (min … max):   121.2 ms … 130.2 ms    24 runs
+  Time (mean ± σ):     346.8 ms ±  13.3 ms    [User: 314.1 ms, System: 32.6 ms]
+  Range (min … max):   339.8 ms … 384.2 ms    10 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/33b.sql" ./imdb.db
-  Time (mean ± σ):     130.3 ms ±   2.4 ms    [User: 551.7 ms, System: 74.7 ms]
-  Range (min … max):   128.4 ms … 137.8 ms    22 runs
+  Time (mean ± σ):     349.7 ms ±   3.8 ms    [User: 320.7 ms, System: 28.9 ms]
+  Range (min … max):   344.8 ms … 359.0 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/33c.sql" ./imdb.db
-  Time (mean ± σ):     135.5 ms ±   2.6 ms    [User: 569.1 ms, System: 64.2 ms]
-  Range (min … max):   131.2 ms … 140.7 ms    21 runs
+  Time (mean ± σ):     365.4 ms ±   3.8 ms    [User: 333.7 ms, System: 31.6 ms]
+  Range (min … max):   362.5 ms … 373.5 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/3a.sql" ./imdb.db
-  Time (mean ± σ):     340.8 ms ±   7.8 ms    [User: 1415.9 ms, System: 425.1 ms]
-  Range (min … max):   331.9 ms … 352.4 ms    10 runs
+  Time (mean ± σ):      1.031 s ±  0.006 s    [User: 0.778 s, System: 0.253 s]
+  Range (min … max):    1.025 s …  1.045 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/3b.sql" ./imdb.db
-  Time (mean ± σ):     242.9 ms ±   5.8 ms    [User: 927.2 ms, System: 440.0 ms]
-  Range (min … max):   238.2 ms … 259.9 ms    12 runs
+  Time (mean ± σ):     717.1 ms ±   3.6 ms    [User: 482.0 ms, System: 234.7 ms]
+  Range (min … max):   713.5 ms … 723.2 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/3c.sql" ./imdb.db
-  Time (mean ± σ):     448.9 ms ±   6.5 ms    [User: 1809.4 ms, System: 461.7 ms]
-  Range (min … max):   440.5 ms … 460.8 ms    10 runs
+  Time (mean ± σ):      1.196 s ±  0.007 s    [User: 0.912 s, System: 0.284 s]
+  Range (min … max):    1.189 s …  1.212 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/4a.sql" ./imdb.db
-  Time (mean ± σ):     150.6 ms ±   1.8 ms    [User: 692.6 ms, System: 107.9 ms]
-  Range (min … max):   148.5 ms … 154.1 ms    19 runs
+  Time (mean ± σ):     437.4 ms ±   3.6 ms    [User: 382.3 ms, System: 54.9 ms]
+  Range (min … max):   434.3 ms … 446.5 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/4b.sql" ./imdb.db
-  Time (mean ± σ):      65.5 ms ±   1.6 ms    [User: 298.2 ms, System: 71.4 ms]
-  Range (min … max):    63.3 ms …  69.0 ms    46 runs
+  Time (mean ± σ):     189.9 ms ±   2.9 ms    [User: 163.9 ms, System: 25.9 ms]
+  Range (min … max):   187.3 ms … 196.7 ms    15 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/4c.sql" ./imdb.db
-  Time (mean ± σ):     223.6 ms ±   4.1 ms    [User: 1129.8 ms, System: 159.8 ms]
-  Range (min … max):   218.1 ms … 230.2 ms    13 runs
+  Time (mean ± σ):     660.9 ms ±   5.5 ms    [User: 566.5 ms, System: 94.3 ms]
+  Range (min … max):   652.9 ms … 671.1 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/5a.sql" ./imdb.db
-  Time (mean ± σ):     277.3 ms ±  26.2 ms    [User: 1310.3 ms, System: 402.4 ms]
-  Range (min … max):   258.8 ms … 353.4 ms    11 runs
+  Time (mean ± σ):     960.3 ms ±   4.5 ms    [User: 719.9 ms, System: 240.3 ms]
+  Range (min … max):   955.6 ms … 969.5 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/5b.sql" ./imdb.db
-  Time (mean ± σ):     233.3 ms ±   6.6 ms    [User: 1045.4 ms, System: 427.0 ms]
-  Range (min … max):   226.6 ms … 246.7 ms    12 runs
+  Time (mean ± σ):     783.3 ms ±   7.0 ms    [User: 532.8 ms, System: 250.4 ms]
+  Range (min … max):   776.1 ms … 797.6 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/5c.sql" ./imdb.db
-  Time (mean ± σ):     315.9 ms ±   6.4 ms    [User: 1545.7 ms, System: 406.4 ms]
-  Range (min … max):   309.8 ms … 326.0 ms    10 runs
+  Time (mean ± σ):      1.061 s ±  0.009 s    [User: 0.792 s, System: 0.269 s]
+  Range (min … max):    1.052 s …  1.081 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6a.sql" ./imdb.db
-  Time (mean ± σ):     161.2 ms ±   0.8 ms    [User: 1000.0 ms, System: 224.9 ms]
-  Range (min … max):   159.7 ms … 162.9 ms    18 runs
+  Time (mean ± σ):     652.1 ms ±   2.2 ms    [User: 543.6 ms, System: 108.3 ms]
+  Range (min … max):   649.5 ms … 656.2 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6b.sql" ./imdb.db
-  Time (mean ± σ):     161.7 ms ±  25.6 ms    [User: 1043.0 ms, System: 193.8 ms]
-  Range (min … max):   150.5 ms … 243.9 ms    19 runs
- 
-  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
+  Time (mean ± σ):     686.3 ms ±   5.0 ms    [User: 571.9 ms, System: 114.2 ms]
+  Range (min … max):   682.1 ms … 698.4 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6c.sql" ./imdb.db
-  Time (mean ± σ):     135.3 ms ±   1.1 ms    [User: 838.8 ms, System: 203.4 ms]
-  Range (min … max):   133.6 ms … 137.6 ms    22 runs
+  Time (mean ± σ):     539.1 ms ±   1.9 ms    [User: 438.4 ms, System: 100.6 ms]
+  Range (min … max):   536.0 ms … 542.0 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6d.sql" ./imdb.db
-  Time (mean ± σ):     532.3 ms ±   2.4 ms    [User: 3835.8 ms, System: 234.4 ms]
-  Range (min … max):   529.6 ms … 537.2 ms    10 runs
+  Time (mean ± σ):      2.157 s ±  0.023 s    [User: 2.009 s, System: 0.147 s]
+  Range (min … max):    2.129 s …  2.188 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6e.sql" ./imdb.db
-  Time (mean ± σ):     164.7 ms ±   7.4 ms    [User: 1022.9 ms, System: 213.6 ms]
-  Range (min … max):   160.9 ms … 191.6 ms    18 runs
- 
-  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
+  Time (mean ± σ):     659.7 ms ±   3.5 ms    [User: 535.8 ms, System: 123.8 ms]
+  Range (min … max):   656.4 ms … 668.5 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/6f.sql" ./imdb.db
-  Time (mean ± σ):     603.3 ms ±   3.1 ms    [User: 4086.1 ms, System: 266.5 ms]
-  Range (min … max):   596.8 ms … 606.4 ms    10 runs
+  Time (mean ± σ):      2.303 s ±  0.027 s    [User: 2.134 s, System: 0.168 s]
+  Range (min … max):    2.266 s …  2.345 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/7a.sql" ./imdb.db
-  Time (mean ± σ):     180.1 ms ±   1.3 ms    [User: 985.6 ms, System: 175.0 ms]
-  Range (min … max):   178.4 ms … 183.1 ms    16 runs
+  Time (mean ± σ):     630.7 ms ±   4.6 ms    [User: 511.5 ms, System: 119.1 ms]
+  Range (min … max):   626.8 ms … 642.4 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/7b.sql" ./imdb.db
-  Time (mean ± σ):     152.3 ms ±  22.2 ms    [User: 799.8 ms, System: 180.5 ms]
-  Range (min … max):   140.5 ms … 230.7 ms    20 runs
+  Time (mean ± σ):     521.3 ms ±   7.1 ms    [User: 417.7 ms, System: 103.5 ms]
+  Range (min … max):   517.2 ms … 539.2 ms    10 runs
  
   Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/7c.sql" ./imdb.db
-  Time (mean ± σ):      3.231 s ±  0.044 s    [User: 5.671 s, System: 3.692 s]
-  Range (min … max):    3.164 s …  3.284 s    10 runs
+  Time (mean ± σ):      4.089 s ±  0.027 s    [User: 2.523 s, System: 1.565 s]
+  Range (min … max):    4.047 s …  4.132 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/8a.sql" ./imdb.db
-  Time (mean ± σ):     189.7 ms ±   4.5 ms    [User: 1246.6 ms, System: 250.7 ms]
-  Range (min … max):   186.8 ms … 206.3 ms    16 runs
- 
-  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
+  Time (mean ± σ):     860.5 ms ±   5.1 ms    [User: 731.9 ms, System: 128.4 ms]
+  Range (min … max):   855.8 ms … 873.3 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/8b.sql" ./imdb.db
-  Time (mean ± σ):     187.0 ms ±   1.3 ms    [User: 1261.4 ms, System: 241.2 ms]
-  Range (min … max):   184.6 ms … 190.0 ms    15 runs
+  Time (mean ± σ):     863.8 ms ±   6.9 ms    [User: 719.9 ms, System: 143.8 ms]
+  Range (min … max):   857.4 ms … 879.0 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/8c.sql" ./imdb.db
-  Time (mean ± σ):      4.503 s ±  0.053 s    [User: 29.439 s, System: 1.111 s]
-  Range (min … max):    4.447 s …  4.621 s    10 runs
+  Time (mean ± σ):     10.593 s ±  0.064 s    [User: 10.070 s, System: 0.522 s]
+  Range (min … max):   10.516 s … 10.690 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/8d.sql" ./imdb.db
-  Time (mean ± σ):      3.789 s ±  0.016 s    [User: 26.710 s, System: 1.047 s]
-  Range (min … max):    3.767 s …  3.812 s    10 runs
+  Time (mean ± σ):      8.994 s ±  0.054 s    [User: 8.586 s, System: 0.407 s]
+  Range (min … max):    8.897 s …  9.076 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/9a.sql" ./imdb.db
-  Time (mean ± σ):     344.0 ms ±   1.5 ms    [User: 2070.7 ms, System: 318.7 ms]
-  Range (min … max):   341.5 ms … 346.6 ms    10 runs
+  Time (mean ± σ):      1.361 s ±  0.009 s    [User: 1.172 s, System: 0.188 s]
+  Range (min … max):    1.350 s …  1.377 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/9b.sql" ./imdb.db
-  Time (mean ± σ):     222.9 ms ±   3.0 ms    [User: 1411.3 ms, System: 295.8 ms]
-  Range (min … max):   219.6 ms … 230.2 ms    13 runs
+  Time (mean ± σ):     967.6 ms ±   6.6 ms    [User: 803.5 ms, System: 163.9 ms]
+  Range (min … max):   960.8 ms … 980.6 ms    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/9c.sql" ./imdb.db
-  Time (mean ± σ):     354.6 ms ±   1.8 ms    [User: 2104.2 ms, System: 314.4 ms]
-  Range (min … max):   352.4 ms … 358.6 ms    10 runs
+  Time (mean ± σ):      1.355 s ±  0.019 s    [User: 1.167 s, System: 0.181 s]
+  Range (min … max):    1.333 s …  1.400 s    10 runs
  
 Benchmark 1: duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries/9d.sql" ./imdb.db
-  Time (mean ± σ):     926.3 ms ±  29.2 ms    [User: 4714.3 ms, System: 370.7 ms]
-  Range (min … max):   897.6 ms … 978.7 ms    10 runs
+  Time (mean ± σ):      2.810 s ±  0.053 s    [User: 2.547 s, System: 0.249 s]
+  Range (min … max):    2.778 s …  2.958 s    10 runs
+ 
+  Warning: Statistical outliers were detected. Consider re-running this benchmark on a quiet system without any interferences from other programs. It might help to use the '--warmup' or '--prepare' options.
  
