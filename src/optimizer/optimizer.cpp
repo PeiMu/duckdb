@@ -126,12 +126,14 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 		plan = deliminator.Optimize(std::move(plan));
 	});
 
+#if !ENABLE_CROSS_PRODUCT_REWRITE
 	// then we perform the join ordering optimization
 	// this also rewrites cross products + filters into joins and performs filter pushdowns
 	RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {
 		JoinOrderOptimizer optimizer(context);
 		plan = optimizer.Optimize(std::move(plan));
 	});
+#endif
 
 	Planner::VerifyPlan(context, plan);
 
@@ -149,6 +151,15 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 	}
 
 	this->plan = std::move(plan_p);
+
+#if ENABLE_CROSS_PRODUCT_REWRITE
+	// then we perform the join ordering optimization
+	// this also rewrites cross products + filters into joins and performs filter pushdowns
+	RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {
+		JoinOrderOptimizer optimizer(context);
+		plan = optimizer.Optimize(std::move(plan));
+	});
+#endif
 
 	// rewrites UNNESTs in DelimJoins by moving them to the projection
 	RunOptimizer(OptimizerType::UNNEST_REWRITER, [&]() {

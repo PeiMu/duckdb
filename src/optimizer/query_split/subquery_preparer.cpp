@@ -234,7 +234,8 @@ void SubqueryPreparer::AddOldTableIndex(const unique_ptr<LogicalOperator> &op) {
 		old_table_idx.emplace(op->Cast<LogicalColumnDataGet>().table_index);
 	} else if (LogicalOperatorType::LOGICAL_FILTER == op->type) {
 		AddOldTableIndex(std::move(op->children[0]));
-	} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->type) {
+	} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->type ||
+	           LogicalOperatorType::LOGICAL_CROSS_PRODUCT == op->type) {
 		AddOldTableIndex(std::move(op->children[0]));
 		AddOldTableIndex(std::move(op->children[1]));
 	} else {
