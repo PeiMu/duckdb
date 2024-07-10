@@ -12,3 +12,5 @@ cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWR
 
 echo "query_split with join_order_optimization before query_split" 2>&1|tee -a compile.log
 cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWRITE=0 VERBOSE=1 make 2>&1|tee -a compile.log && cd measure && bash ./hyperfine_in_mem.sh query_split jop_before
+
+mv compile.log job_result/.
