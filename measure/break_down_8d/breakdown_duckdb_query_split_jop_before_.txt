@@ -1,0 +1,217 @@
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+8 us
+PostOptimize time is
+2 us
+Create Physical Plan time is
+18 us
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+2 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+2 us
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+2 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+2 us
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+2 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+2 us
+Init plan
+┌───────────────────────────┐                                                                                                                                                                              
+│         PROJECTION        │                                                                                                                                                                              
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                                                                              
+│  costume_designer_pseudo  │                                                                                                                                                                              
+│    movie_with_costumes    │                                                                                                                                                                              
+└─────────────┬─────────────┘                                                                                                                                                                                                           
+┌─────────────┴─────────────┐                                                                                                                                                                              
+│         AGGREGATE         │                                                                                                                                                                              
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                                                                              
+│         min(name)         │                                                                                                                                                                              
+│         min(title)        │                                                                                                                                                                              
+└─────────────┬─────────────┘                                                                                                                                                                                                           
+┌─────────────┴─────────────┐                                                                                                                                                                              
+│           FILTER          │                                                                                                                                                                              
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                                                                              
+│(country_code = CAST('[us]'│                                                                                                                                                                              
+│        AS VARCHAR))       │                                                                                                                                                                              
+│   (role = CAST('costume   │                                                                                                                                                                              
+│   designer' AS VARCHAR))  │                                                                                                                                                                              
+│      (person_id = id)     │                                                                                                                                                                              
+│      (id = person_id)     │                                                                                                                                                                              
+│      (movie_id = id)      │                                                                                                                                                                              
+│      (id = movie_id)      │                                                                                                                                                                              
+│     (company_id = id)     │                                                                                                                                                                              
+│       (role_id = id)      │                                                                                                                                                                              
+│  (person_id = person_id)  │                                                                                                                                                                              
+│   (movie_id = movie_id)   │                                                                                                                                                                              
+└─────────────┬─────────────┘                                                                                                                                                                                                           
+┌─────────────┴─────────────┐                                                                                                                                                                              
+│       CROSS_PRODUCT       ├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐              
+└─────────────┬─────────────┘                                                                                                                                                               │                                           
+┌─────────────┴─────────────┐                                                                                                                                                 ┌─────────────┴─────────────┐
+│       CROSS_PRODUCT       │                                                                                                                                                 │          SEQ_SCAN         │
+│                           ├──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│                           │                                                                                                                                  │              │           title           │
+└─────────────┬─────────────┘                                                                                                                                  │              └───────────────────────────┘                             
+┌─────────────┴─────────────┐                                                                                                                    ┌─────────────┴─────────────┐                             
+│       CROSS_PRODUCT       │                                                                                                                    │          SEQ_SCAN         │                             
+│                           ├─────────────────────────────────────────────────────────────────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                             
+│                           │                                                                                                     │              │         role_type         │                             
+└─────────────┬─────────────┘                                                                                                     │              └───────────────────────────┘                                                          
+┌─────────────┴─────────────┐                                                                                       ┌─────────────┴─────────────┐                                                          
+│       CROSS_PRODUCT       │                                                                                       │          SEQ_SCAN         │                                                          
+│                           ├────────────────────────────────────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                          
+│                           │                                                                        │              │            name           │                                                          
+└─────────────┬─────────────┘                                                                        │              └───────────────────────────┘                                                                                       
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐                                                                                       
+│       CROSS_PRODUCT       │                                                          │          SEQ_SCAN         │                                                                                       
+│                           ├───────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                       
+│                           │                                           │              │      movie_companies      │                                                                                       
+└─────────────┬─────────────┘                                           │              └───────────────────────────┘                                                                                                                    
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐                                                                                                                    
+│       CROSS_PRODUCT       │                             │          SEQ_SCAN         │                                                                                                                    
+│                           ├──────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│                           │              │              │        company_name       │                                                                                                                    
+└─────────────┬─────────────┘              │              └───────────────────────────┘                                                                                                                                                 
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐                                                                                                                                                 
+│          SEQ_SCAN         ││          SEQ_SCAN         │                                                                                                                                                 
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                                                 
+│          aka_name         ││         cast_info         │                                                                                                                                                 
+└───────────────────────────┘└───────────────────────────┘                                                                                                                                                                              
+
+PreOptimize time is
+827 us
+Split time is
+10 us
+GenerateProjHead time is
+25 us
+PostOptimize time is
+105 us
+AdaptSelect time is
+7 us
+Create Physical Plan time is
+59 us
+adapt to selection time is
+2 us
+Execute time is
+12579 us
+MergeDataChunk time is
+5262 us
+Update Index time is
+20 us
+GenerateProjHead time is
+206 us
+PostOptimize time is
+51 us
+AdaptSelect time is
+14 us
+Create Physical Plan time is
+17 us
+adapt to selection time is
+3 us
+Execute time is
+67504 us
+MergeDataChunk time is
+52375 us
+Update Index time is
+20 us
+GenerateProjHead time is
+760 us
+PostOptimize time is
+57 us
+AdaptSelect time is
+11 us
+Create Physical Plan time is
+18 us
+adapt to selection time is
+2 us
+Execute time is
+2154593 us
+MergeDataChunk time is
+1205228 us
+Update Index time is
+28 us
+GenerateProjHead time is
+5074 us
+PostOptimize time is
+48 us
+AdaptSelect time is
+14 us
+Create Physical Plan time is
+14 us
+adapt to selection time is
+2 us
+Execute time is
+138850 us
+MergeDataChunk time is
+9450 us
+Update Index time is
+12 us
+GenerateProjHead time is
+11513 us
+PostOptimize time is
+57 us
+AdaptSelect time is
+13 us
+Create Physical Plan time is
+14 us
+adapt to selection time is
+2 us
+Execute time is
+49044 us
+MergeDataChunk time is
+20275 us
+Update Index time is
+12 us
+Prepare last subquery time is
+33 us
+PostOptimize time is
+210 us
+Create Physical Plan time is
+19 us
+PreparedStatement::Execute time is
+96523 us
+┌─────────────────────────┬─────────────────────┐
+│ costume_designer_pseudo │ movie_with_costumes │
+│         varchar         │       varchar       │
+├─────────────────────────┼─────────────────────┤
+│ "Jenny from the Block"  │ #1 Cheerleader Camp │
+└─────────────────────────┴─────────────────────┘
+
+real	0m3.894s
+user	0m26.646s
+sys	0m1.161s

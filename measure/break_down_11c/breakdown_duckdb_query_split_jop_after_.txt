@@ -1,0 +1,235 @@
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+7 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+13 us
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+2 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+2 us
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+2 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+3 us
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+2 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+2 us
+Init plan
+┌───────────────────────────┐                                                                                                                                                                                                           
+│         PROJECTION        │                                                                                                                                                                                                           
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                                                                                                           
+│        from_company       │                                                                                                                                                                                                           
+│      production_note      │                                                                                                                                                                                                           
+│    movie_based_on_book    │                                                                                                                                                                                                           
+└─────────────┬─────────────┘                                                                                                                                                                                                                                        
+┌─────────────┴─────────────┐                                                                                                                                                                                                           
+│         AGGREGATE         │                                                                                                                                                                                                           
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                                                                                                           
+│         min(name)         │                                                                                                                                                                                                           
+│         min(note)         │                                                                                                                                                                                                           
+│         min(title)        │                                                                                                                                                                                                           
+└─────────────┬─────────────┘                                                                                                                                                                                                                                        
+┌─────────────┴─────────────┐                                                                                                                                                                                                           
+│           FILTER          │                                                                                                                                                                                                           
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                                                                                                           
+│(country_code != CAST('[pl]│                                                                                                                                                                                                           
+│       ' AS VARCHAR))      │                                                                                                                                                                                                           
+│((name ~~ '20th Century Fox│                                                                                                                                                                                                           
+│ %') OR (name ~~ 'Twentieth│                                                                                                                                                                                                           
+│       Century Fox%'))     │                                                                                                                                                                                                           
+│ (kind != CAST('production │                                                                                                                                                                                                           
+│   companies' AS VARCHAR)) │                                                                                                                                                                                                           
+│     (kind IS NOT NULL)    │                                                                                                                                                                                                           
+│ (keyword IN (CAST('sequel'│                                                                                                                                                                                                           
+│ AS VARCHAR), CAST('re...  │                                                                                                                                                                                                           
+│  AS VARCHAR), CAST('based │                                                                                                                                                                                                           
+│  -on-novel' AS VARCHAR))) │                                                                                                                                                                                                           
+│     (note IS NOT NULL)    │                                                                                                                                                                                                           
+│  (production_year > CAST  │                                                                                                                                                                                                           
+│     (1950 AS INTEGER))    │                                                                                                                                                                                                           
+│    (id = link_type_id)    │                                                                                                                                                                                                           
+│      (movie_id = id)      │                                                                                                                                                                                                           
+│      (id = movie_id)      │                                                                                                                                                                                                           
+│     (keyword_id = id)     │                                                                                                                                                                                                           
+│      (id = movie_id)      │                                                                                                                                                                                                           
+│   (company_type_id = id)  │                                                                                                                                                                                                           
+│     (company_id = id)     │                                                                                                                                                                                                           
+│   (movie_id = movie_id)   │                                                                                                                                                                                                           
+│   (movie_id = movie_id)   │                                                                                                                                                                                                           
+│   (movie_id = movie_id)   │                                                                                                                                                                                                           
+└─────────────┬─────────────┘                                                                                                                                                                                                                                        
+┌─────────────┴─────────────┐                                                                                                                                                                                                           
+│       CROSS_PRODUCT       ├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐              
+└─────────────┬─────────────┘                                                                                                                                                                                            │                                           
+┌─────────────┴─────────────┐                                                                                                                                                                              ┌─────────────┴─────────────┐
+│       CROSS_PRODUCT       │                                                                                                                                                                              │          SEQ_SCAN         │
+│                           ├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│                           │                                                                                                                                                               │              │           title           │
+└─────────────┬─────────────┘                                                                                                                                                               │              └───────────────────────────┘                             
+┌─────────────┴─────────────┐                                                                                                                                                 ┌─────────────┴─────────────┐                             
+│       CROSS_PRODUCT       │                                                                                                                                                 │          SEQ_SCAN         │                             
+│                           ├──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                             
+│                           │                                                                                                                                  │              │         movie_link        │                             
+└─────────────┬─────────────┘                                                                                                                                  │              └───────────────────────────┘                                                          
+┌─────────────┴─────────────┐                                                                                                                    ┌─────────────┴─────────────┐                                                          
+│       CROSS_PRODUCT       │                                                                                                                    │          SEQ_SCAN         │                                                          
+│                           ├─────────────────────────────────────────────────────────────────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                          
+│                           │                                                                                                     │              │       movie_keyword       │                                                          
+└─────────────┬─────────────┘                                                                                                     │              └───────────────────────────┘                                                                                       
+┌─────────────┴─────────────┐                                                                                       ┌─────────────┴─────────────┐                                                                                       
+│       CROSS_PRODUCT       │                                                                                       │          SEQ_SCAN         │                                                                                       
+│                           ├────────────────────────────────────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                       
+│                           │                                                                        │              │      movie_companies      │                                                                                       
+└─────────────┬─────────────┘                                                                        │              └───────────────────────────┘                                                                                                                    
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐                                                                                                                    
+│       CROSS_PRODUCT       │                                                          │          SEQ_SCAN         │                                                                                                                    
+│                           ├───────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│                           │                                           │              │         link_type         │                                                                                                                    
+└─────────────┬─────────────┘                                           │              └───────────────────────────┘                                                                                                                                                 
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐                                                                                                                                                 
+│       CROSS_PRODUCT       │                             │          SEQ_SCAN         │                                                                                                                                                 
+│                           ├──────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                                                 
+│                           │              │              │          keyword          │                                                                                                                                                 
+└─────────────┬─────────────┘              │              └───────────────────────────┘                                                                                                                                                                              
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐                                                                                                                                                                              
+│          SEQ_SCAN         ││          SEQ_SCAN         │                                                                                                                                                                              
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                                                                              
+│        company_name       ││        company_type       │                                                                                                                                                                              
+└───────────────────────────┘└───────────────────────────┘                                                                                                                                                                                                           
+
+PreOptimize time is
+277 us
+Split time is
+19 us
+GenerateProjHead time is
+27 us
+PostOptimize time is
+90 us
+AdaptSelect time is
+10 us
+Create Physical Plan time is
+15 us
+adapt to selection time is
+2 us
+Execute time is
+7553 us
+MergeDataChunk time is
+26 us
+Update Index time is
+14 us
+MergeSubquery & UpdateProjHead time is
+9 us
+Rewrite time is
+4 us
+GenerateProjHead time is
+37 us
+PostOptimize time is
+215 us
+AdaptSelect time is
+14 us
+Create Physical Plan time is
+41 us
+adapt to selection time is
+2 us
+Execute time is
+17570 us
+MergeDataChunk time is
+1627 us
+Update Index time is
+21 us
+MergeSubquery & UpdateProjHead time is
+77 us
+Rewrite time is
+5 us
+Split time is
+16 us
+GenerateProjHead time is
+47 us
+PostOptimize time is
+168 us
+AdaptSelect time is
+15 us
+Create Physical Plan time is
+27 us
+adapt to selection time is
+4 us
+Execute time is
+10490 us
+MergeDataChunk time is
+671 us
+Update Index time is
+30 us
+MergeSubquery & UpdateProjHead time is
+186 us
+Rewrite time is
+5 us
+GenerateProjHead time is
+87 us
+PostOptimize time is
+251 us
+AdaptSelect time is
+34 us
+Create Physical Plan time is
+60 us
+adapt to selection time is
+4 us
+Execute time is
+2553 us
+MergeDataChunk time is
+778 us
+Update Index time is
+11 us
+Prepare last subquery time is
+28 us
+PostOptimize time is
+191 us
+Create Physical Plan time is
+25 us
+PreparedStatement::Execute time is
+24905 us
+┌─────────────────────────────────────┬─────────────────────────────────────┬─────────────────────┐
+│            from_company             │           production_note           │ movie_based_on_book │
+│               varchar               │               varchar               │       varchar       │
+├─────────────────────────────────────┼─────────────────────────────────────┼─────────────────────┤
+│ 20th Century Fox Home Entertainment │ (1997-2002) (worldwide) (all media) │ 24                  │
+└─────────────────────────────────────┴─────────────────────────────────────┴─────────────────────┘
+
+real	0m0.088s
+user	0m0.368s
+sys	0m0.127s
