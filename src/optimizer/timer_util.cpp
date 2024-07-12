@@ -39,15 +39,33 @@ void printTimeSpec(timespec t, const char* prefix) {
 timespec tic( )
 {
 	timespec start_time;
-	clock_gettime(CLOCK_REALTIME, &start_time);
+	if (-1 == clock_gettime(CLOCK_REALTIME, &start_time)) {
+		Printer::Print("Could not get clock time!");
+		D_ASSERT(false);
+	}
 	return start_time;
 }
 
 void toc( timespec* start_time, const char* prefix )
 {
 	timespec current_time;
-	clock_gettime(CLOCK_REALTIME, &current_time);
+	if (-1 == clock_gettime(CLOCK_REALTIME, &current_time)) {
+		Printer::Print("Could not get clock time!");
+		D_ASSERT(false);
+	}
 	printTimeSpec( diff( *start_time, current_time ), prefix );
+	*start_time = current_time;
+}
+
+std::chrono::high_resolution_clock::time_point chrono_tic() {
+	return std::chrono::high_resolution_clock::now();
+}
+
+void chrono_toc(std::chrono::high_resolution_clock::time_point* start_time, const char* prefix) {
+	auto current_time = std::chrono::high_resolution_clock::now();
+	auto time_diff = duration_cast<std::chrono::microseconds>(current_time - *start_time).count();
+	std::string str = prefix + std::to_string(time_diff) + " ms";
+	Printer::Print(str);
 	*start_time = current_time;
 }
 } // namespace duckdb

@@ -356,20 +356,28 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	plan->Verify(*this);
 #endif
 
+#if TIME_BREAK_DOWN
+	// to show when have the real query
+	Printer::Print("Init plan");
+	plan->Print();
+#endif
 	Optimizer optimizer(*planner.binder, *this);
 
+#if TIME_BREAK_DOWN
+	auto timer = chrono_tic();
+	bool is_real_query = false;
+#endif
 	if (config.enable_optimizer && plan->RequireOptimizer()) {
 		profiler.StartPhase("optimizer");
-#if TIME_BREAK_DOWN
-		timespec timer = tic();
-		bool is_real_query = false;
-#endif
 		plan = optimizer.PreOptimize(std::move(plan));
 #if ENABLE_DEBUG_PRINT
 		D_ASSERT(plan);
 		// debug: print subquery
 		Printer::Print("After PreOptimization");
 		plan->Print();
+#endif
+#if TIME_BREAK_DOWN
+		chrono_toc(&timer, "PreOptimize time is\n");
 #endif
 
 		bool needToSplit = ENABLE_QUERY_SPLIT;
@@ -396,13 +404,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			}
 #if TIME_BREAK_DOWN
 			if (is_real_query)
-				toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
+				chrono_toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
 #endif
 
 			bool rewritten = query_splitter.Rewrite(plan);
 #if TIME_BREAK_DOWN
 			if (is_real_query)
-				toc(&timer, "Rewrite time is\n");
+				chrono_toc(&timer, "Rewrite time is\n");
 #endif
 			needToSplit |= rewritten;
 #if ENABLE_DEBUG_PRINT
@@ -416,15 +424,14 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			if (needToSplit) {
 				query_splitter.Clear();
 				plan = query_splitter.Split(std::move(plan));
-#if TIME_BREAK_DOWN
-				if (is_real_query)
-					toc(&timer, "Split time is\n");
-#endif
 				subqueries = query_splitter.GetSubqueries();
 				table_expr_queue = query_splitter.GetTableExprQueue();
 				proj_expr = query_splitter.GetProjExpr();
 				subquery_preparer.SetMergeIndex(query_splitter.GetSplitNumber());
 				needToSplit = false;
+#if TIME_BREAK_DOWN
+				chrono_toc(&timer, "Split time is\n");
+#endif
 			} else {
 #if ENABLE_CROSS_PRODUCT_REWRITE
 				// we don't want to copy the data chunk, so it's better to move back the `subqueries.front()[0]`
@@ -454,7 +461,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			                                                   proj_expr, merge_sibling_expr);
 #if TIME_BREAK_DOWN
 			if (is_real_query)
-				toc(&timer, "GenerateProjHead time is\n");
+				chrono_toc(&timer, "GenerateProjHead time is\n");
 #endif
 			subqueries.pop_front();
 			table_expr_queue.pop();
@@ -462,7 +469,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
 #if TIME_BREAK_DOWN
 			if (is_real_query)
-				toc(&timer, "PostOptimize time is\n");
+				chrono_toc(&timer, "PostOptimize time is\n");
 #endif
 #if ENABLE_DEBUG_PRINT
 			// debug: print subquery
@@ -473,12 +480,18 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 
 			auto subquery_stmt = subquery_preparer.AdaptSelect(result, sub_plan);
+#if TIME_BREAK_DOWN
+			chrono_toc(&timer, "AdaptSelect time is\n");
+#endif
 #ifdef DEBUG
 			sub_plan->Verify(*this);
 #endif
 			// generate physical sub_plan of the subquery
 			PhysicalPlanGenerator physical_planner(*this);
 			auto physical_plan = physical_planner.CreatePlan(std::move(sub_plan));
+#if TIME_BREAK_DOWN
+			chrono_toc(&timer, "Create Physical Plan time is\n");
+#endif
 
 #ifdef DEBUG
 			D_ASSERT(!physical_plan->ToString().empty());
@@ -495,12 +508,12 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			duckdb::vector<Value> bound_values;
 #if TIME_BREAK_DOWN
 			if (is_real_query)
-				toc(&timer, "adapt to selection time is\n");
+				chrono_toc(&timer, "adapt to selection time is\n");
 #endif
 			unique_ptr<QueryResult> subquery_result = prepared_stmt->Execute(lock, bound_values, false);
 #if TIME_BREAK_DOWN
 			if (is_real_query)
-				toc(&timer, "Execute time is\n");
+				chrono_toc(&timer, "Execute time is\n");
 #endif
 			subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result));
 			if (!ENABLE_PARALLEL_EXECUTION && nullptr != last_sibling_node) {
@@ -510,7 +523,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			}
 #if TIME_BREAK_DOWN
 			if (is_real_query)
-				toc(&timer, "MergeDataChunk time is\n");
+				chrono_toc(&timer, "MergeDataChunk time is\n");
 #endif
 #if ENABLE_DEBUG_PRINT
 			Printer::Print("after MergeDataChunk");
@@ -521,6 +534,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 			subquery_preparer.UpdateSubqueriesIndex(subqueries);
 			table_expr_queue = subquery_preparer.UpdateTableExpr(table_expr_queue, proj_expr);
+#if TIME_BREAK_DOWN
+			chrono_toc(&timer, "Update Index time is\n");
+#endif
 			if (1 == subqueries.size()) {
 				// add the original projection head
 				unique_ptr<LogicalOperator> last_subquery = plan->Copy(optimizer.context);
@@ -539,16 +555,18 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				Printer::Print("last subquery");
 				plan->Print();
 #endif
+#if TIME_BREAK_DOWN
+				chrono_toc(&timer, "Prepare last subquery time is\n");
+#endif
 				break;
 			}
 		}
 
 		plan = optimizer.PostOptimize(std::move(plan));
-#if TIME_BREAK_DOWN
-		if (is_real_query)
-			toc(&timer, "optimization time is\n");
-#endif
 		profiler.EndPhase();
+#if TIME_BREAK_DOWN
+		chrono_toc(&timer, "PostOptimize time is\n");
+#endif
 
 #ifdef DEBUG
 		plan->Verify(*this);
@@ -560,6 +578,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	PhysicalPlanGenerator physical_planner(*this);
 	auto physical_plan = physical_planner.CreatePlan(std::move(plan));
 	profiler.EndPhase();
+#if TIME_BREAK_DOWN
+	chrono_toc(&timer, "Create Physical Plan time is\n");
+#endif
 
 #ifdef DEBUG
 	D_ASSERT(!physical_plan->ToString().empty());
@@ -581,6 +602,7 @@ ClientContext::CreatePreparedStatement(ClientContextLock &lock, const string &qu
 		}
 	}
 	if (can_request_rebind) {
+		Printer::Print("can_request_rebind");
 		bool rebind = false;
 		// if any registered state can request a rebind we do the binding on a copy first
 		shared_ptr<PreparedStatementData> result;

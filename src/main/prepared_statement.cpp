@@ -79,11 +79,18 @@ unique_ptr<QueryResult> PreparedStatement::Execute(case_insensitive_map_t<Value>
 }
 
 unique_ptr<QueryResult> PreparedStatement::Execute(vector<Value> &values, bool allow_stream_result) {
+#if TIME_BREAK_DOWN
+	auto timer = chrono_tic();
+#endif
 	auto pending = PendingQuery(values, allow_stream_result);
 	if (pending->HasError()) {
 		return make_uniq<MaterializedQueryResult>(pending->GetErrorObject());
 	}
-	return pending->Execute();
+	auto ret = pending->Execute();
+#if TIME_BREAK_DOWN
+	chrono_toc(&timer, "PreparedStatement::Execute time is\n");
+#endif
+	return ret;
 }
 
 unique_ptr<PendingQueryResult> PreparedStatement::PendingQuery(vector<Value> &values, bool allow_stream_result) {
