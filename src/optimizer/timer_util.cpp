@@ -64,7 +64,7 @@ std::chrono::high_resolution_clock::time_point chrono_tic() {
 void chrono_toc(std::chrono::high_resolution_clock::time_point* start_time, const char* prefix) {
 	auto current_time = std::chrono::high_resolution_clock::now();
 	auto time_diff = duration_cast<std::chrono::microseconds>(current_time - *start_time).count();
-	std::string str = prefix + std::to_string(time_diff) + " ms";
+	std::string str = prefix + std::to_string(time_diff) + " us";
 	Printer::Print(str);
 	*start_time = current_time;
 }
