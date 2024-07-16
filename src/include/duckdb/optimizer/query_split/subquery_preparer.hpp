@@ -13,6 +13,8 @@
 #include "duckdb/parser/query_node/select_node.hpp"
 #include "duckdb/planner/binder.hpp"
 
+#include "duckdb/optimizer/timer_util.h"
+
 namespace duckdb {
 
 //! Prepare the subquery, including

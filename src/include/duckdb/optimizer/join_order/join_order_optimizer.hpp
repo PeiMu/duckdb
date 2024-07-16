@@ -21,8 +21,6 @@
 
 #include <functional>
 
-#define ENABLE_DEBUG_PRINT false
-
 namespace duckdb {
 
 class JoinOrderOptimizer {

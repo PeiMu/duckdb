@@ -567,6 +567,11 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if TIME_BREAK_DOWN
 		chrono_toc(&timer, "PostOptimize time is\n");
 #endif
+#if ENABLE_DEBUG_PRINT
+		// debug: print subquery
+		Printer::Print("After the last PostOptimization");
+		plan->Print();
+#endif
 
 #ifdef DEBUG
 		plan->Verify(*this);

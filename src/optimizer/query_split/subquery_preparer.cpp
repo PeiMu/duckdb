@@ -153,6 +153,10 @@ void SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &
 
 	unique_ptr<MaterializedQueryResult> result_materialized;
 	auto collection = make_uniq<ColumnDataCollection>(Allocator::DefaultAllocator(), types);
+#if TIME_BREAK_DOWN
+	auto timer = chrono_tic();
+#endif
+	int chunk_size = 0;
 	if (previous_result->type == QueryResultType::STREAM_RESULT) {
 		auto &stream_query = previous_result->Cast<duckdb::StreamQueryResult>();
 		result_materialized = stream_query.Materialize();
@@ -167,11 +171,16 @@ void SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &
 			if (!chunk || chunk->size() == 0) {
 				break;
 			}
+			chunk_size += chunk->size();
 			// set chunk cardinality
 			chunk->SetCardinality(chunk->size());
 			collection->Append(append_state, *chunk);
 		}
 	}
+#if TIME_BREAK_DOWN
+	chrono_toc(&timer, "generate collection time\n");
+	Printer::Print("chunk size = " + std::to_string(chunk_size));
+#endif
 
 	// generate an unused table index by the binder
 	new_table_idx = binder.GenerateTableIndex();

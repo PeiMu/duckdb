@@ -24,11 +24,6 @@ static bool HasJoin(LogicalOperator *op) {
 
 unique_ptr<LogicalOperator> JoinOrderOptimizer::Optimize(unique_ptr<LogicalOperator> plan,
                                                          optional_ptr<RelationStats> stats) {
-#if ENABLE_DEBUG_PRINT
-	Printer::Print("init plan");
-	plan->Print();
-#endif
-
 	// make sure query graph manager has not extracted a relation graph already
 	LogicalOperator *op = plan.get();
 
@@ -53,22 +48,11 @@ unique_ptr<LogicalOperator> JoinOrderOptimizer::Optimize(unique_ptr<LogicalOpera
 
 		// Ask the plan enumerator to enumerate a number of join orders
 		auto final_plan = plan_enumerator.SolveJoinOrder();
-#if ENABLE_DEBUG_PRINT
-		Printer::Print("after SolveJoinOrder");
-		final_plan->Print();
-#endif
 		// TODO: add in the check that if no plan exists, you have to add a cross product.
 
 		// now reconstruct a logical plan from the query graph plan
 		new_logical_plan = query_graph_manager.Reconstruct(std::move(plan), *final_plan);
-#if ENABLE_DEBUG_PRINT
-		Printer::Print("after Reconstruct");
-		new_logical_plan->Print();
-#endif
 	} else {
-#if ENABLE_DEBUG_PRINT
-		Printer::Print("cannot reorder");
-#endif
 		new_logical_plan = std::move(plan);
 		if (relation_stats.size() == 1) {
 			new_logical_plan->estimated_cardinality = relation_stats.at(0).cardinality;
@@ -81,10 +65,6 @@ unique_ptr<LogicalOperator> JoinOrderOptimizer::Optimize(unique_ptr<LogicalOpera
 	// still switch the children.
 	if (stats == nullptr && HasJoin(new_logical_plan.get())) {
 		new_logical_plan = query_graph_manager.LeftRightOptimizations(std::move(new_logical_plan));
-#if ENABLE_DEBUG_PRINT
-		Printer::Print("after LeftRightOptimizations");
-		new_logical_plan->Print();
-#endif
 	}
 
 	// Propagate up a stats object from the top of the new_logical_plan if stats exist.
