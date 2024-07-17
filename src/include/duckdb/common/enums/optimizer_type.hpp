@@ -33,7 +33,8 @@ enum class OptimizerType : uint32_t {
 	DUPLICATE_GROUPS,
 	REORDER_FILTER,
 	EXTENSION,
-	QUERY_SPLIT
+	QUERY_SPLIT,
+	REORDER_GET
 };
 
 string OptimizerTypeToString(OptimizerType type);

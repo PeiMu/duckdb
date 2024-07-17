@@ -25,6 +25,7 @@
 #include "duckdb/optimizer/unnest_rewriter.hpp"
 #include "duckdb/planner/binder.hpp"
 #include "duckdb/planner/planner.hpp"
+#include "duckdb/optimizer/reorder_get.h"
 
 namespace duckdb {
 
@@ -124,6 +125,11 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 	RunOptimizer(OptimizerType::DELIMINATOR, [&]() {
 		Deliminator deliminator;
 		plan = deliminator.Optimize(std::move(plan));
+	});
+
+	RunOptimizer(OptimizerType::REORDER_GET, [&]() {
+		ReorderGet reorder_get(context);
+		plan = reorder_get.Optimize(std::move(plan));
 	});
 
 #if !ENABLE_CROSS_PRODUCT_REWRITE
