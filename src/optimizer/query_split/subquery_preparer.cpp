@@ -177,10 +177,6 @@ void SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &
 			collection->Append(append_state, *chunk);
 		}
 	}
-#if TIME_BREAK_DOWN
-	chrono_toc(&timer, "generate collection time\n");
-	Printer::Print("chunk size = " + std::to_string(chunk_size));
-#endif
 
 	// generate an unused table index by the binder
 	new_table_idx = binder.GenerateTableIndex();
@@ -230,8 +226,6 @@ bool SubqueryPreparer::MergeSibling(std::vector<unique_ptr<LogicalOperator>> &cu
 	// check this is the last operator
 #ifdef DEBUG
 	D_ASSERT(merged && !subquery_pointer->children.empty());
-	subquery_pointer = subquery_pointer->children[0].get();
-	D_ASSERT(subquery_pointer->children.empty());
 #endif
 	return merge_to_left;
 }
