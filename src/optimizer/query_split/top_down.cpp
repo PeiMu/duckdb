@@ -432,12 +432,18 @@ bool TopDownSplit::Rewrite(unique_ptr<LogicalOperator> &plan) {
 	}
 	auto &last_block = last_cross_product->Cast<LogicalCrossProduct>().children[0];
 
-	// if the last block is unused in the last join, swap it with its sibling,
-	// aka the last element in the table_blocks_key_order
+	// if the last block is unused in the last join, find the used table from `table_blocks_key_order` as the
+	// `last_block`
 	bool used = BlockUsed(left_cond_table_index, last_block);
 	if (!used) {
-		auto last_sibling_index = table_blocks_key_order.back();
-		table_blocks_key_order.pop_back();
+		idx_t last_sibling_index = -1;
+		for (auto it = table_blocks_key_order.begin(); it != table_blocks_key_order.end(); it++) {
+			if (left_cond_table_index.count(*it)) {
+				last_sibling_index = *it;
+				table_blocks_key_order.erase(it);
+				break;
+			}
+		}
 #ifdef DEBUG
 		D_ASSERT(left_cond_table_index.count(last_sibling_index));
 #endif
