@@ -106,10 +106,11 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 	std::stack<vector<JoinCondition>> join_conditions_stack;
 	std::stack<idx_t> joined_table_index;
 
+	std::deque<std::pair<idx_t, idx_t>> unused_table_card_order;
 	while (!table_card_order.empty()) {
 		auto table_index = table_card_order.front().first;
-		table_card_order.pop_front();
 		vector<JoinCondition> join_conditions;
+		bool used = false;
 		for (auto it = join_conds.begin(); it != join_conds.end();) {
 			bool find_in_left = false;
 			if (it->first.first == table_index) {
@@ -124,26 +125,35 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 			}
 			if (find_in_left || it->first.second == table_index) {
 				join_conditions.emplace_back(std::move(it->second));
-				if (joined_table_index.empty() || (joined_table_index.top() != table_index))
+				if (joined_table_index.empty() || (joined_table_index.top() != table_index)) {
+					used = true;
 					joined_table_index.push(table_index);
+				}
 				it = join_conds.erase(it);
 			} else {
 				it++;
 			}
 		}
+		if (!used)
+			unused_table_card_order.push_back(table_card_order.front());
+		table_card_order.pop_front();
 		if (!join_conditions.empty())
 			join_conditions_stack.emplace(std::move(join_conditions));
 		if (join_conds.empty())
 			break;
 	}
 
-	// get the current_plan or the rest of tables
-	unique_ptr<LogicalOperator> current_plan = std::move(table_index_blocks[table_card_order.back().first]);
-	table_card_order.pop_back();
 	while (!table_card_order.empty()) {
+		unused_table_card_order.push_back(table_card_order.front());
+		table_card_order.pop_front();
+	}
+	// get the current_plan or the rest of tables, in a bottom up order
+	unique_ptr<LogicalOperator> current_plan = std::move(table_index_blocks[unused_table_card_order.back().first]);
+	unused_table_card_order.pop_back();
+	while (!unused_table_card_order.empty()) {
 		current_plan = LogicalCrossProduct::Create(std::move(current_plan),
-		                                           std::move(table_index_blocks[table_card_order.back().first]));
-		table_card_order.pop_back();
+		                                           std::move(table_index_blocks[unused_table_card_order.back().first]));
+		unused_table_card_order.pop_back();
 	}
 
 	unique_ptr<LogicalOperator> tmp_comp_join;
