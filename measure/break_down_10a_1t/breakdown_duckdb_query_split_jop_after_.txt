@@ -1,0 +1,216 @@
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+4 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+14 us
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+2 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+2 us
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+2 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+2 us
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+2 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+2 us
+Init plan
+┌───────────────────────────┐                                                                                                                                                                              
+│         PROJECTION        │                                                                                                                                                                              
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                                                                              
+│uncredited_voiced_character│                                                                                                                                                                              
+│       russian_movie       │                                                                                                                                                                              
+└─────────────┬─────────────┘                                                                                                                                                                                                           
+┌─────────────┴─────────────┐                                                                                                                                                                              
+│         AGGREGATE         │                                                                                                                                                                              
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                                                                              
+│         min(name)         │                                                                                                                                                                              
+│         min(title)        │                                                                                                                                                                              
+└─────────────┬─────────────┘                                                                                                                                                                                                           
+┌─────────────┴─────────────┐                                                                                                                                                                              
+│           FILTER          │                                                                                                                                                                              
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                                                                              
+│   (note ~~ '%(voice)%')   │                                                                                                                                                                              
+│ (note ~~ '%(uncredited)%')│                                                                                                                                                                              
+│(country_code = CAST('[ru]'│                                                                                                                                                                              
+│        AS VARCHAR))       │                                                                                                                                                                              
+│  (role = CAST('actor' AS  │                                                                                                                                                                              
+│          VARCHAR))        │                                                                                                                                                                              
+│  (production_year > CAST  │                                                                                                                                                                              
+│     (2005 AS INTEGER))    │                                                                                                                                                                              
+│      (id = movie_id)      │                                                                                                                                                                              
+│      (id = movie_id)      │                                                                                                                                                                              
+│   (movie_id = movie_id)   │                                                                                                                                                                              
+│   (id = person_role_id)   │                                                                                                                                                                              
+│       (id = role_id)      │                                                                                                                                                                              
+│     (id = company_id)     │                                                                                                                                                                              
+│   (id = company_type_id)  │                                                                                                                                                                              
+└─────────────┬─────────────┘                                                                                                                                                                                                           
+┌─────────────┴─────────────┐                                                                                                                                                                              
+│       CROSS_PRODUCT       ├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐              
+└─────────────┬─────────────┘                                                                                                                                                               │                                           
+┌─────────────┴─────────────┐                                                                                                                                                 ┌─────────────┴─────────────┐
+│       CROSS_PRODUCT       │                                                                                                                                                 │          SEQ_SCAN         │
+│                           ├──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│                           │                                                                                                                                  │              │           title           │
+└─────────────┬─────────────┘                                                                                                                                  │              └───────────────────────────┘                             
+┌─────────────┴─────────────┐                                                                                                                    ┌─────────────┴─────────────┐                             
+│       CROSS_PRODUCT       │                                                                                                                    │          SEQ_SCAN         │                             
+│                           ├─────────────────────────────────────────────────────────────────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                             
+│                           │                                                                                                     │              │         role_type         │                             
+└─────────────┬─────────────┘                                                                                                     │              └───────────────────────────┘                                                          
+┌─────────────┴─────────────┐                                                                                       ┌─────────────┴─────────────┐                                                          
+│       CROSS_PRODUCT       │                                                                                       │          SEQ_SCAN         │                                                          
+│                           ├────────────────────────────────────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                          
+│                           │                                                                        │              │      movie_companies      │                                                          
+└─────────────┬─────────────┘                                                                        │              └───────────────────────────┘                                                                                       
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐                                                                                       
+│       CROSS_PRODUCT       │                                                          │          SEQ_SCAN         │                                                                                       
+│                           ├───────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                       
+│                           │                                           │              │        company_type       │                                                                                       
+└─────────────┬─────────────┘                                           │              └───────────────────────────┘                                                                                                                    
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐                                                                                                                    
+│       CROSS_PRODUCT       │                             │          SEQ_SCAN         │                                                                                                                    
+│                           ├──────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│                           │              │              │        company_name       │                                                                                                                    
+└─────────────┬─────────────┘              │              └───────────────────────────┘                                                                                                                                                 
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐                                                                                                                                                 
+│          SEQ_SCAN         ││          SEQ_SCAN         │                                                                                                                                                 
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                                                 
+│         char_name         ││         cast_info         │                                                                                                                                                 
+└───────────────────────────┘└───────────────────────────┘                                                                                                                                                                              
+
+PreOptimize time is
+205 us
+Split time is
+19 us
+GenerateProjHead time is
+32 us
+PostOptimize time is
+144 us
+AdaptSelect time is
+8 us
+Create Physical Plan time is
+38 us
+adapt to selection time is
+2 us
+Execute time is
+798321 us
+MergeDataChunk time is
+493 us
+Update Index time is
+16 us
+MergeSubquery & UpdateProjHead time is
+12 us
+Rewrite time is
+1 us
+GenerateProjHead time is
+75 us
+PostOptimize time is
+108 us
+AdaptSelect time is
+24 us
+Create Physical Plan time is
+68 us
+adapt to selection time is
+3 us
+Execute time is
+143100 us
+MergeDataChunk time is
+1231 us
+Update Index time is
+15 us
+MergeSubquery & UpdateProjHead time is
+38 us
+Rewrite time is
+4 us
+GenerateProjHead time is
+49 us
+PostOptimize time is
+227 us
+AdaptSelect time is
+12 us
+Create Physical Plan time is
+29 us
+adapt to selection time is
+2 us
+Execute time is
+17381 us
+MergeDataChunk time is
+28 us
+Update Index time is
+10 us
+MergeSubquery & UpdateProjHead time is
+152 us
+Rewrite time is
+3 us
+GenerateProjHead time is
+31 us
+PostOptimize time is
+101 us
+AdaptSelect time is
+12 us
+Create Physical Plan time is
+10 us
+adapt to selection time is
+2 us
+Execute time is
+226 us
+MergeDataChunk time is
+20 us
+Update Index time is
+5 us
+Prepare last subquery time is
+16 us
+PostOptimize time is
+118 us
+Create Physical Plan time is
+20 us
+PreparedStatement::Execute time is
+119172 us
+┌─────────────────────────────┬───────────────┐
+│ uncredited_voiced_character │ russian_movie │
+│           varchar           │    varchar    │
+├─────────────────────────────┼───────────────┤
+│ Actor                       │ 12 Rounds     │
+└─────────────────────────────┴───────────────┘
+
+real	0m1.115s
+user	0m0.959s
+sys	0m0.156s

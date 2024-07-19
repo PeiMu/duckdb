@@ -1,0 +1,197 @@
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+3 us
+Split time is
+4 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+10 us
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+2 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+2 us
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+2 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+2 us
+Init plan
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘                             
+
+PreOptimize time is
+0 us
+Split time is
+2 us
+PostOptimize time is
+1 us
+Create Physical Plan time is
+2 us
+Init plan
+┌───────────────────────────┐                                                                                                                    
+│         PROJECTION        │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│   typical_european_movie  │                                                                                                                    
+└─────────────┬─────────────┘                                                                                                                                                 
+┌─────────────┴─────────────┐                                                                                                                    
+│         AGGREGATE         │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│         min(title)        │                                                                                                                    
+└─────────────┬─────────────┘                                                                                                                                                 
+┌─────────────┴─────────────┐                                                                                                                    
+│           FILTER          │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│  (kind = CAST('production │                                                                                                                    
+│   companies' AS VARCHAR)) │                                                                                                                    
+│ (note ~~ '%(theatrical)%')│                                                                                                                    
+│   (note ~~ '%(France)%')  │                                                                                                                    
+│ (info IN (CAST('Sweden' AS│                                                                                                                    
+│ VARCHAR), CAST('Norway' AS│                                                                                                                    
+│ VARCHAR), CAST('Germa...  │                                                                                                                    
+│  VARCHAR), CAST('Denmark' │                                                                                                                    
+│ AS VARCHAR), CAST('Sw...  │                                                                                                                    
+│ AS VARCHAR), CAST('Denish'│                                                                                                                    
+│     AS VARCHAR), CAST(    │                                                                                                                    
+│'Norwegian' AS VARCHAR...  │                                                                                                                    
+│   'German' AS VARCHAR)))  │                                                                                                                    
+│  (production_year > CAST  │                                                                                                                    
+│     (2005 AS INTEGER))    │                                                                                                                    
+│      (id = movie_id)      │                                                                                                                    
+│      (id = movie_id)      │                                                                                                                    
+│   (movie_id = movie_id)   │                                                                                                                    
+│   (id = company_type_id)  │                                                                                                                    
+│    (id = info_type_id)    │                                                                                                                    
+└─────────────┬─────────────┘                                                                                                                                                 
+┌─────────────┴─────────────┐                                                                                                                    
+│       CROSS_PRODUCT       ├─────────────────────────────────────────────────────────────────────────────────────────────────────┐              
+└─────────────┬─────────────┘                                                                                                     │                                           
+┌─────────────┴─────────────┐                                                                                       ┌─────────────┴─────────────┐
+│       CROSS_PRODUCT       │                                                                                       │          SEQ_SCAN         │
+│                           ├────────────────────────────────────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+│                           │                                                                        │              │           title           │
+└─────────────┬─────────────┘                                                                        │              └───────────────────────────┘                             
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐                             
+│       CROSS_PRODUCT       │                                                          │          SEQ_SCAN         │                             
+│                           ├───────────────────────────────────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                             
+│                           │                                           │              │         movie_info        │                             
+└─────────────┬─────────────┘                                           │              └───────────────────────────┘                                                          
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐                                                          
+│       CROSS_PRODUCT       │                             │          SEQ_SCAN         │                                                          
+│                           ├──────────────┐              │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                          
+│                           │              │              │      movie_companies      │                                                          
+└─────────────┬─────────────┘              │              └───────────────────────────┘                                                                                       
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐                                                                                       
+│          SEQ_SCAN         ││          SEQ_SCAN         │                                                                                       
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                       
+│        company_type       ││         info_type         │                                                                                       
+└───────────────────────────┘└───────────────────────────┘                                                                                                                    
+
+PreOptimize time is
+495 us
+Split time is
+12 us
+GenerateProjHead time is
+20 us
+PostOptimize time is
+38 us
+AdaptSelect time is
+8 us
+Create Physical Plan time is
+11 us
+adapt to selection time is
+1 us
+Execute time is
+81965 us
+MergeDataChunk time is
+282 us
+Update Index time is
+13 us
+GenerateProjHead time is
+37 us
+PostOptimize time is
+47 us
+AdaptSelect time is
+27 us
+Create Physical Plan time is
+36 us
+adapt to selection time is
+2 us
+Execute time is
+165505 us
+MergeDataChunk time is
+293 us
+Update Index time is
+13 us
+GenerateProjHead time is
+443 us
+PostOptimize time is
+47 us
+AdaptSelect time is
+11 us
+Create Physical Plan time is
+12 us
+adapt to selection time is
+2 us
+Execute time is
+676122 us
+MergeDataChunk time is
+1302 us
+Update Index time is
+26 us
+GenerateProjHead time is
+61 us
+PostOptimize time is
+43 us
+AdaptSelect time is
+10 us
+Create Physical Plan time is
+13 us
+adapt to selection time is
+2 us
+Execute time is
+426 us
+MergeDataChunk time is
+20 us
+Update Index time is
+4 us
+Prepare last subquery time is
+13 us
+PostOptimize time is
+45 us
+Create Physical Plan time is
+11 us
+PreparedStatement::Execute time is
+304 us
+┌────────────────────────┐
+│ typical_european_movie │
+│        varchar         │
+├────────────────────────┤
+│                        │
+└────────────────────────┘
+
+real	0m0.975s
+user	0m0.688s
+sys	0m0.288s
