@@ -492,6 +492,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "Create Physical Plan time is\n");
 #endif
+#if ENABLE_DEBUG_PRINT
+			Printer::Print("subquery physical plan");
+			physical_plan->Print();
+#endif
 
 #ifdef DEBUG
 			D_ASSERT(!physical_plan->ToString().empty());
@@ -585,6 +589,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	profiler.EndPhase();
 #if TIME_BREAK_DOWN
 	chrono_toc(&timer, "Create Physical Plan time is\n");
+#endif
+#if ENABLE_DEBUG_PRINT
+	Printer::Print("final physical plan");
+	physical_plan->Print();
 #endif
 
 #ifdef DEBUG
