@@ -61,11 +61,27 @@ std::chrono::high_resolution_clock::time_point chrono_tic() {
 	return std::chrono::high_resolution_clock::now();
 }
 
-void chrono_toc(std::chrono::high_resolution_clock::time_point* start_time, const char* prefix) {
+long chrono_toc(std::chrono::high_resolution_clock::time_point* start_time, const char* prefix, bool print) {
 	auto current_time = std::chrono::high_resolution_clock::now();
 	auto time_diff = duration_cast<std::chrono::microseconds>(current_time - *start_time).count();
 	std::string str = prefix + std::to_string(time_diff) + " us";
-	Printer::Print(str);
+	if (print)
+		Printer::Print(str);
 	*start_time = current_time;
+	return time_diff;
+}
+
+void appendLineToFile(string filepath, string line) {
+	std::ofstream file;
+	//can't enable exception now because of gcc bug that raises ios_base::failure with useless message
+	//file.exceptions(file.exceptions() | std::ios::failbit);
+	file.open(filepath, std::ios::out | std::ios::app);
+	if (file.fail())
+		throw std::ios_base::failure(std::strerror(errno));
+
+	//make sure write fails with exception if something is wrong
+	file.exceptions(file.exceptions() | std::ios::failbit | std::ifstream::badbit);
+
+	file << line << std::endl;
 }
 } // namespace duckdb
