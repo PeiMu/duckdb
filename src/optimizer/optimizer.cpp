@@ -127,10 +127,10 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 		plan = deliminator.Optimize(std::move(plan));
 	});
 
-	RunOptimizer(OptimizerType::REORDER_GET, [&]() {
-		ReorderGet reorder_get(context);
-		plan = reorder_get.Optimize(std::move(plan));
-	});
+//	RunOptimizer(OptimizerType::REORDER_GET, [&]() {
+//		ReorderGet reorder_get(context);
+//		plan = reorder_get.Optimize(std::move(plan));
+//	});
 
 #if !ENABLE_CROSS_PRODUCT_REWRITE
 	// then we perform the join ordering optimization
@@ -140,6 +140,12 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 		plan = optimizer.Optimize(std::move(plan));
 	});
 #endif
+
+	// removes unused columns
+	RunOptimizer(OptimizerType::UNUSED_COLUMNS, [&]() {
+		RemoveUnusedColumns unused(binder, context, true);
+		unused.VisitOperator(*plan);
+	});
 
 	Planner::VerifyPlan(context, plan);
 
@@ -171,12 +177,6 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 	RunOptimizer(OptimizerType::UNNEST_REWRITER, [&]() {
 		UnnestRewriter unnest_rewriter;
 		plan = unnest_rewriter.Optimize(std::move(plan));
-	});
-
-	// removes unused columns
-	RunOptimizer(OptimizerType::UNUSED_COLUMNS, [&]() {
-		RemoveUnusedColumns unused(binder, context, true);
-		unused.VisitOperator(*plan);
 	});
 
 	// Remove duplicate groups from aggregates
