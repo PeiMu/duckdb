@@ -19,6 +19,9 @@
 
 namespace duckdb {
 
+#define SPLIT_FILTER false
+#define FOLLOW_PIPELINE_BREAKER true
+
 //! Based on the DAG of the logical plan, we generate the subqueries bottom-up
 class TopDownSplit : public SplitAlgorithm {
 public:
@@ -88,6 +91,9 @@ private:
 
 private:
 	bool filter_parent = false;
+	// todo: hack code (in the old split strategy, each JOIN including the top-most JOIN is regarded as a subquery)
+	bool top_most = true;
+	std::set<TableExpr> last_level_table_exprs;
 
 	// the collection of necessary table/column information in a top-down order, e.g. the lowest level is the last
 	// element in the stack and will be got first. PS: we only modify it in `VisitOperator`

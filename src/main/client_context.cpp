@@ -545,13 +545,28 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				// add the original projection head
 				unique_ptr<LogicalOperator> last_subquery = plan->Copy(optimizer.context);
 				auto child = last_subquery.get();
-				while (child->children[0]) {
-					child = child->children[0].get();
-				}
+
+				auto &child_node = subqueries.front()[0];
 #ifdef DEBUG
-				D_ASSERT(subqueries.front().size() == 1);
+				D_ASSERT(nullptr != child_node);
 #endif
-				child->children[0] = std::move(subqueries.front()[0]);
+				auto merge_child = [&child_node](LogicalOperator *subquery_pointer) {
+					while (!subquery_pointer->children.empty()) {
+						if (subquery_pointer->children.size() > 1 && nullptr == subquery_pointer->children[1]) {
+							subquery_pointer->children[1] = std::move(child_node);
+							return true;
+						} else if (nullptr == subquery_pointer->children[0]) {
+							subquery_pointer->children[0] = std::move(child_node);
+							return true;
+						}
+						subquery_pointer = subquery_pointer->children[0].get();
+					}
+					return false;
+				};
+				bool merged = merge_child(child);
+#ifdef DEBUG
+				D_ASSERT(merged);
+#endif
 
 				// if it's the last subquery, break and continue the execution of the main stream
 				plan = subquery_preparer.UpdateProjHead(std::move(last_subquery), proj_expr);

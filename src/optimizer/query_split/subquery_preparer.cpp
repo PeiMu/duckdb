@@ -29,7 +29,11 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 #endif
 		temp_proj_exprs.insert(last_sibling_exprs.begin(), last_sibling_exprs.end());
 	}
-
+#if FOLLOW_PIPELINE_BREAKER
+	if (expr_idx_pair_vec.size() > 1) {
+		temp_proj_exprs.insert(expr_idx_pair_vec[1].begin(), expr_idx_pair_vec[1].end());
+	}
+#else
 	if (expr_idx_pair_vec.size() > 1) {
 		if (ENABLE_PARALLEL_EXECUTION) {
 			// todo: execute in parallel
@@ -39,6 +43,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 	} else {
 		last_sibling_exprs.clear();
 	}
+#endif
 
 	// collect all columns with the same table from the upper levels
 	std::set<TableExpr> used_expr_in_upper_levels;

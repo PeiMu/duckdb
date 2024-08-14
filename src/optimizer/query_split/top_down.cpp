@@ -31,42 +31,54 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 	// Basically, the split point is based on logical_comparison_join,
 	// but if it has a logical_filter parent, then we split at the
 	// logical_filter node.
-	for (auto &child : op.children) {
+	for (int idx = op.children.size()-1; idx > -1; idx--) {
+		auto &child = op.children[idx];
 		std::set<TableExpr> table_exprs;
 		if (cross_product_sibling || chunk_get_sibling)
 			break;
 		switch (child->type) {
 		// if the other child node is not CROSS_PRODUCT, JOIN nor FILTER
+#if SPLIT_FILTER
 		case LogicalOperatorType::LOGICAL_FILTER:
+		{
 			// add filter's column usage
 			table_exprs = GetFilterTableExpr(child->Cast<LogicalFilter>());
 			// check continuous filter nodes, only split the first one
-			if (!filter_parent) {
-				query_split_index++;
-				child->split_index = query_split_index;
-				// inherit from the children until it is not a filter
-				auto child_pointer = child.get();
-				while (LogicalOperatorType::LOGICAL_FILTER == child_pointer->type) {
-					auto child_exprs = GetFilterTableExpr(child_pointer->Cast<LogicalFilter>());
-					table_exprs.insert(child_exprs.begin(), child_exprs.end());
-					child_pointer = child_pointer->children[0].get();
-				}
-				if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child_pointer->type) {
-					auto child_exprs = GetJoinTableExpr(child_pointer->Cast<LogicalComparisonJoin>());
-					table_exprs.insert(child_exprs.begin(), child_exprs.end());
-				}
+//			if (!filter_parent) {
+			query_split_index++;
+			child->split_index = query_split_index;
+			// inherit from the children until it is not a filter
+			auto child_pointer = child.get();
+			while (LogicalOperatorType::LOGICAL_FILTER == child_pointer->type) {
+				auto child_exprs = GetFilterTableExpr(child_pointer->Cast<LogicalFilter>());
+				table_exprs.insert(child_exprs.begin(), child_exprs.end());
+				child_pointer = child_pointer->children[0].get();
 			}
-			filter_parent = true;
+			if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child_pointer->type) {
+				auto child_exprs = GetJoinTableExpr(child_pointer->Cast<LogicalComparisonJoin>());
+				table_exprs.insert(child_exprs.begin(), child_exprs.end());
+			}
+//			}
+//			filter_parent = true;
 			break;
+		}
+#endif
 		case LogicalOperatorType::LOGICAL_COMPARISON_JOIN:
 			// if comp_join is the child of filter, we split at the filter node,
 			// and inherit the table_exprs by the filter node
-			if (!filter_parent) {
+//			if (!filter_parent) {
+#if FOLLOW_PIPELINE_BREAKER
+			if (top_most || 1==idx) {
+				top_most = false;
+#endif
 				query_split_index++;
 				child->split_index = query_split_index;
-				table_exprs = GetJoinTableExpr(child->Cast<LogicalComparisonJoin>());
+#if FOLLOW_PIPELINE_BREAKER
 			}
-			filter_parent = false;
+#endif
+			table_exprs = GetJoinTableExpr(child->Cast<LogicalComparisonJoin>());
+//			}
+//			filter_parent = false;
 			break;
 		default:
 			if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == child->type)
@@ -78,7 +90,7 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 			else
 				chunk_get_sibling = false;
 			child->split_index = 0;
-			filter_parent = false;
+//			filter_parent = false;
 			break;
 		}
 		VisitOperator(*child);
@@ -86,8 +98,26 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 		if (child->split_index) {
 			same_level_subqueries.emplace_back(std::move(child));
 		}
+#if FOLLOW_PIPELINE_BREAKER
+		if (!last_level_table_exprs.empty() && !child) {
+			same_level_table_exprs.emplace_back(last_level_table_exprs);
+			last_level_table_exprs.clear();
+		}
+#endif
+
 		if (!table_exprs.empty()) {
-			same_level_table_exprs.emplace_back(table_exprs);
+#if FOLLOW_PIPELINE_BREAKER
+			if (child && LogicalOperatorType::LOGICAL_COMPARISON_JOIN==child->type && !child->split_index) {
+				std::merge(last_level_table_exprs.begin(), last_level_table_exprs.end(),
+				           table_exprs.begin(), table_exprs.end(),
+				           std::inserter(last_level_table_exprs, std::begin(last_level_table_exprs)));
+				table_exprs.clear();
+			} else {
+#endif
+				same_level_table_exprs.emplace_back(table_exprs);
+#if FOLLOW_PIPELINE_BREAKER
+			}
+#endif
 		}
 	}
 
