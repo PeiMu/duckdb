@@ -187,6 +187,8 @@ void SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &
 	new_table_idx = binder.GenerateTableIndex();
 
 	chunk_scan = make_uniq<LogicalColumnDataGet>(new_table_idx, types, std::move(collection));
+	chunk_scan->estimated_cardinality = chunk_size;
+	chunk_scan->has_estimated_cardinality = true;
 	bool merged = false;
 	MergeToSubquery(*current_level_subqueries[0], merged);
 	if (!merged) {
