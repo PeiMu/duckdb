@@ -275,6 +275,24 @@ void ClientContext::CleanupInternal(ClientContextLock &lock, BaseQueryResult *re
 	D_ASSERT(!active_query);
 }
 
+void ClientContext::CleanupInternal(ClientContextLock &lock, bool invalidate_transaction, bool continue_exec) {
+	if (!active_query) {
+		// no query currently active
+		return;
+	}
+	if (active_query->executor) {
+		active_query->executor->CancelTasks();
+	}
+	active_query->progress_bar.reset();
+
+	// Relaunch the threads if a SET THREADS command was issued
+	auto &scheduler = TaskScheduler::GetScheduler(*this);
+	scheduler.RelaunchThreads();
+
+	auto error = EndQueryInternal(lock, true, invalidate_transaction, continue_exec);
+	D_ASSERT(!active_query);
+}
+
 Executor &ClientContext::GetExecutor() {
 	D_ASSERT(active_query);
 	D_ASSERT(active_query->executor);
@@ -302,6 +320,28 @@ unique_ptr<QueryResult> ClientContext::FetchResultInternal(ClientContextLock &lo
 		CleanupInternal(lock, result.get(), false, continue_exec);
 	} else {
 		active_query->SetOpenResult(*result);
+	}
+	return result;
+}
+
+unique_ptr<ColumnDataCollection> ClientContext::FetchCollectionInternal(ClientContextLock &lock, PendingQueryResult &pending,
+                                                               bool continue_exec) {
+	D_ASSERT(active_query);
+	D_ASSERT(active_query->IsOpenResult(pending));
+	D_ASSERT(active_query->prepared);
+	auto &executor = GetExecutor();
+	auto &prepared = *active_query->prepared;
+	bool create_stream_result = prepared.properties.allow_stream_result && pending.allow_stream_result;
+	unique_ptr<ColumnDataCollection> result;
+	D_ASSERT(executor.HasResultCollector());
+	// we have a result collector - fetch the result directly from the result collector
+	result = executor.GetRowCollection();
+	if (!create_stream_result) {
+		// todo: check if Collection has error
+		CleanupInternal(lock, false, continue_exec);
+	} else {
+		throw InternalException("Do not support stream result in FetchCollectionInternal");
+//		active_query->SetOpenResult(*result);
 	}
 	return result;
 }
@@ -514,7 +554,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			if (is_real_query)
 				chrono_toc(&timer, "adapt to selection time is\n");
 #endif
-			unique_ptr<QueryResult> subquery_result = prepared_stmt->Execute(lock, bound_values, false);
+			unique_ptr<ColumnDataCollection> subquery_result = prepared_stmt->ExecuteRow(lock, bound_values, false);
 #if TIME_BREAK_DOWN
 			if (is_real_query)
 				chrono_toc(&timer, "Execute time is\n");

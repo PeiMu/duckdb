@@ -13,6 +13,7 @@
 
 namespace duckdb {
 class PreparedStatementData;
+class ColumnDataCollection;
 
 //! PhysicalResultCollector is an abstract class that is used to generate the final result of a query
 class PhysicalResultCollector : public PhysicalOperator {
@@ -33,6 +34,9 @@ public:
 public:
 	//! The final method used to fetch the query result from this operator
 	virtual unique_ptr<QueryResult> GetResult(GlobalSinkState &state) = 0;
+	virtual unique_ptr<ColumnDataCollection> GetRowCollection(GlobalSinkState &state) {
+		return make_uniq<ColumnDataCollection>(Allocator::DefaultAllocator(), types);
+	};
 
 	bool IsSink() const override {
 		return true;

@@ -153,40 +153,45 @@ shared_ptr<PreparedStatementData> SubqueryPreparer::AdaptSelect(shared_ptr<Prepa
 }
 
 void SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
-                                      unique_ptr<QueryResult> previous_result) {
-	vector<LogicalType> types = previous_result->types;
+                                      unique_ptr<ColumnDataCollection> previous_result) {
 
-	unique_ptr<MaterializedQueryResult> result_materialized;
-	auto collection = make_uniq<ColumnDataCollection>(Allocator::DefaultAllocator(), types);
-#if TIME_BREAK_DOWN
-	auto timer = chrono_tic();
-#endif
-	int chunk_size = 0;
-	if (previous_result->type == QueryResultType::STREAM_RESULT) {
-		auto &stream_query = previous_result->Cast<duckdb::StreamQueryResult>();
-		result_materialized = stream_query.Materialize();
-		collection = make_uniq<ColumnDataCollection>(result_materialized->Collection());
-	} else if (previous_result->type == QueryResultType::MATERIALIZED_RESULT) {
-		ColumnDataAppendState append_state;
-		collection->InitializeAppend(append_state);
-		unique_ptr<DataChunk> chunk;
-		ErrorData error;
-		while (true) {
-			previous_result->TryFetch(chunk, error);
-			if (!chunk || chunk->size() == 0) {
-				break;
-			}
-			chunk_size += chunk->size();
-			// set chunk cardinality
-			chunk->SetCardinality(chunk->size());
-			collection->Append(append_state, *chunk);
-		}
-	}
+//	unique_ptr<MaterializedQueryResult> result_materialized;
+//	auto collection = make_uniq<ColumnDataCollection>(Allocator::DefaultAllocator(), types);
+//#if TIME_BREAK_DOWN
+//	auto timer = chrono_tic();
+//#endif
+//	int64_t chunk_size = 0;
+//	if (previous_result->type == QueryResultType::STREAM_RESULT) {
+//		auto &stream_query = previous_result->Cast<duckdb::StreamQueryResult>();
+//		result_materialized = stream_query.Materialize();
+//		collection = make_uniq<ColumnDataCollection>(result_materialized->Collection());
+//	} else if (previous_result->type == QueryResultType::MATERIALIZED_RESULT) {
+//		ColumnDataAppendState append_state;
+//		collection->InitializeAppend(append_state);
+//		unique_ptr<DataChunk> chunk;
+//		ErrorData error;
+//		while (true) {
+//			previous_result->TryFetch(chunk, error);
+//			if (!chunk || chunk->size() == 0) {
+//				break;
+//			}
+//			chunk_size += chunk->size();
+//			// set chunk cardinality
+//			chunk->SetCardinality(chunk->size());
+//			collection->Append(append_state, *chunk);
+//		}
+//	}
+//#if TIME_BREAK_DOWN
+//	std::string str = "Fetch data with size=" + std::to_string(chunk_size) + ", ";
+//	chrono_toc(&timer, str.data());
+//#endif
+
+	int64_t chunk_size = previous_result->Count();
 
 	// generate an unused table index by the binder
 	new_table_idx = binder.GenerateTableIndex();
 
-	chunk_scan = make_uniq<LogicalColumnDataGet>(new_table_idx, types, std::move(collection));
+	chunk_scan = make_uniq<LogicalColumnDataGet>(new_table_idx, previous_result->Types(), std::move(previous_result));
 	chunk_scan->estimated_cardinality = chunk_size;
 	chunk_scan->has_estimated_cardinality = true;
 	bool merged = false;

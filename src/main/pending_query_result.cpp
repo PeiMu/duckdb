@@ -83,6 +83,26 @@ unique_ptr<QueryResult> PendingQueryResult::ExecuteInternal(ClientContextLock &l
 	return result;
 }
 
+unique_ptr<ColumnDataCollection> PendingQueryResult::ExecuteRowInternal(ClientContextLock &lock, bool continue_exec) {
+	CheckExecutableInternal(lock);
+	// Busy wait while execution is not finished
+	if (allow_stream_result) {
+		while (!IsFinishedOrBlocked(ExecuteTaskInternal(lock))) {
+		}
+	} else {
+		while (!IsFinished(ExecuteTaskInternal(lock))) {
+		}
+	}
+	if (HasError()) {
+		Printer::Print("has error!!!");
+		D_ASSERT(false);
+	}
+	auto result = context->FetchCollectionInternal(lock, *this, continue_exec);
+	if (!continue_exec)
+		Close();
+	return result;
+}
+
 unique_ptr<QueryResult> PendingQueryResult::Execute() {
 	auto lock = LockContext();
 	return ExecuteInternal(*lock);
@@ -90,6 +110,10 @@ unique_ptr<QueryResult> PendingQueryResult::Execute() {
 
 unique_ptr<QueryResult> PendingQueryResult::Execute(ClientContextLock &lock) {
 	return ExecuteInternal(lock, true);
+}
+
+unique_ptr<ColumnDataCollection> PendingQueryResult::ExecuteRow(ClientContextLock &lock) {
+	return ExecuteRowInternal(lock, true);
 }
 
 void PendingQueryResult::Close() {

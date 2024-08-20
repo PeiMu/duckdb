@@ -73,6 +73,16 @@ unique_ptr<QueryResult> PhysicalMaterializedCollector::GetResult(GlobalSinkState
 	return std::move(result);
 }
 
+unique_ptr<ColumnDataCollection> PhysicalMaterializedCollector::GetRowCollection(GlobalSinkState &state) {
+	auto &gstate = state.Cast<MaterializedCollectorGlobalState>();
+	if (!gstate.collection) {
+		Printer::Print("PhysicalMaterializedCollector::GetRowCollection no data!!!");
+		D_ASSERT(false);
+		return make_uniq<ColumnDataCollection>(Allocator::DefaultAllocator(), types);
+	}
+	return std::move(gstate.collection);
+}
+
 bool PhysicalMaterializedCollector::ParallelSink() const {
 	return parallel;
 }

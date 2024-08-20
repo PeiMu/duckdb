@@ -216,6 +216,7 @@ private:
 	//! Internal clean up, does not lock. Caller must hold the context_lock.
 	void CleanupInternal(ClientContextLock &lock, BaseQueryResult *result = nullptr,
 	                     bool invalidate_transaction = false, bool continue_exec = false);
+	void CleanupInternal(ClientContextLock &lock, bool invalidate_transaction, bool continue_exec);
 	unique_ptr<PendingQueryResult> PendingStatementOrPreparedStatement(ClientContextLock &lock, const string &query,
 	                                                                   unique_ptr<SQLStatement> statement,
 	                                                                   shared_ptr<PreparedStatementData> &prepared,
@@ -243,6 +244,9 @@ private:
 	void LogQueryInternal(ClientContextLock &lock, const string &query);
 
 	unique_ptr<QueryResult> FetchResultInternal(ClientContextLock &lock, PendingQueryResult &pending,
+	                                            bool continue_exec = false);
+
+	unique_ptr<ColumnDataCollection> FetchCollectionInternal(ClientContextLock &lock, PendingQueryResult &pending,
 	                                            bool continue_exec = false);
 
 	unique_ptr<ClientContextLock> LockContext();

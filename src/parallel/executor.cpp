@@ -383,6 +383,11 @@ void Executor::InitializeInternal(PhysicalOperator &plan) {
 		// collect all pipelines from the root pipelines (recursively) for the progress bar and verify them
 		root_pipeline->GetPipelines(pipelines, true);
 
+//		Printer::Print("pipelines:");
+//		for (const auto &pipe : pipelines) {
+//			pipe->Print();
+//		}
+
 		// finally, verify and schedule
 		VerifyPipelines();
 		ScheduleEvents(to_schedule);
@@ -655,6 +660,13 @@ unique_ptr<QueryResult> Executor::GetResult() {
 	auto &result_collector = physical_plan->Cast<PhysicalResultCollector>();
 	D_ASSERT(result_collector.sink_state);
 	return result_collector.GetResult(*result_collector.sink_state);
+}
+
+unique_ptr<ColumnDataCollection> Executor::GetRowCollection() {
+	D_ASSERT(HasResultCollector());
+	auto &result_collector = physical_plan->Cast<PhysicalResultCollector>();
+	D_ASSERT(result_collector.sink_state);
+	return result_collector.GetRowCollection(*result_collector.sink_state);
 }
 
 } // namespace duckdb
