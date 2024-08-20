@@ -166,6 +166,33 @@ SinkNextBatchType PipelineExecutor::NextBatch(duckdb::DataChunk &source_chunk) {
 
 PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 	D_ASSERT(pipeline.sink);
+#if BREAKDOWN_EXECUTE
+	Printer::Print("PipelineExecutor::pipeline");
+	pipeline.Print();
+
+	if (PhysicalOperatorType::TABLE_SCAN == pipeline.source->type) {
+		auto &get = pipeline.source->Cast<PhysicalTableScan>();
+		if (get.function.to_string(get.bind_data.get()) == "cast_info") {
+			probe_flag = true;
+		}
+		else
+			probe_flag = false;
+	} else {
+		probe_flag = false;
+	}
+
+	if (pipeline.sink->children.size() > 1 && PhysicalOperatorType::TABLE_SCAN == pipeline.sink->children[0]->type) {
+		auto &get = pipeline.sink->children[0]->Cast<PhysicalTableScan>();
+		if (get.function.to_string(get.bind_data.get()) == "cast_info") {
+			build_flag = true;
+		}
+		else
+			build_flag = false;
+	} else
+		build_flag = false;
+
+	auto timer = chrono_tic();
+#endif
 	auto &source_chunk = pipeline.operators.empty() ? final_chunk : *intermediate_chunks[0];
 	for (idx_t i = 0; i < max_chunks; i++) {
 		if (context.client.interrupted) {
@@ -226,6 +253,12 @@ PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 		} else {
 			throw InternalException("Unexpected state reached in pipeline executor");
 		}
+#if BREAKDOWN_EXECUTE
+		if (probe_flag) {
+			hot_spot_execute_time += chrono_toc(&timer, "PipelineExecutor::Execute time is\n", false);
+			Printer::Print("hot_spot_execute_time = " + std::to_string(hot_spot_execute_time));
+		}
+#endif
 
 		// SINK INTERRUPT
 		if (result == OperatorResultType::BLOCKED) {
@@ -277,10 +310,22 @@ OperatorResultType PipelineExecutor::ExecutePushInternal(DataChunk &input, idx_t
 	// - the Sink doesn't block
 	while (true) {
 		OperatorResultType result;
+#if BREAKDOWN_EXECUTE
+		bool extra_build = false;
+#endif
 		// Note: if input is the final_chunk, we don't do any executing, the chunk just needs to be sinked
 		if (&input != &final_chunk) {
 			final_chunk.Reset();
+#if BREAKDOWN_EXECUTE
+			auto timer = chrono_tic();
+#endif
 			result = Execute(input, final_chunk, initial_idx);
+#if BREAKDOWN_EXECUTE
+			if (probe_flag) {
+				extra_build = true;
+				chrono_toc(&timer, "PipelineExecutor::ExecutePushInternal - execute time is\n");
+			}
+#endif
 			if (result == OperatorResultType::FINISHED) {
 				return OperatorResultType::FINISHED;
 			}
@@ -294,7 +339,16 @@ OperatorResultType PipelineExecutor::ExecutePushInternal(DataChunk &input, idx_t
 			D_ASSERT(pipeline.sink->sink_state);
 			OperatorSinkInput sink_input {*pipeline.sink->sink_state, *local_sink_state, interrupt_state};
 
+#if BREAKDOWN_EXECUTE
+			auto timer = chrono_tic();
+#endif
 			auto sink_result = Sink(sink_chunk, sink_input);
+#if BREAKDOWN_EXECUTE
+			if (extra_build) {
+				extra_sink_time += chrono_toc(&timer, "PipelineExecutor::ExecutePushInternal - extra Sink time is\n", false);
+				Printer::Print("extra_sink_time = " + std::to_string(extra_sink_time));
+			}
+#endif
 
 			EndOperator(*pipeline.sink, nullptr);
 

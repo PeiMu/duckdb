@@ -19,6 +19,12 @@
 #include "duckdb/execution/physical_operator_states.hpp"
 #include "duckdb/common/enums/order_preservation_type.hpp"
 
+// todo: debug vars need to delete
+inline bool probe_flag = false;
+inline bool build_flag = false;
+inline long extra_sink_time = 0;
+inline long hot_spot_execute_time = 0;
+
 namespace duckdb {
 class Event;
 class Executor;
