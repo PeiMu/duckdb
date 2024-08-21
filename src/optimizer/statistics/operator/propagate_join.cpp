@@ -164,8 +164,10 @@ void StatisticsPropagator::PropagateStatistics(LogicalComparisonJoin &join, uniq
 
 			// Update join_stats when is already part of the join
 			if (join.join_stats.size() == 2) {
-				join.join_stats[0] = std::move(updated_stats_left);
-				join.join_stats[1] = std::move(updated_stats_right);
+				if (updated_stats_left)
+					join.join_stats[0] = std::move(updated_stats_left);
+				if (updated_stats_right)
+					join.join_stats[1] = std::move(updated_stats_right);
 			}
 			break;
 		}

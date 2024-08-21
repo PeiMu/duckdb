@@ -147,6 +147,13 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 		unused.VisitOperator(*plan);
 	});
 
+	// perform statistics propagation
+	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
+		StatisticsPropagator propagator(*this);
+		propagator.PropagateStatistics(plan);
+		statistics_map = propagator.GetStatisticsMap();
+	});
+
 	Planner::VerifyPlan(context, plan);
 
 	return std::move(plan);
@@ -197,13 +204,13 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 		column_lifetime.VisitOperator(*plan);
 	});
 
-	// perform statistics propagation
-	column_binding_map_t<unique_ptr<BaseStatistics>> statistics_map;
-	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
-		StatisticsPropagator propagator(*this);
-		propagator.PropagateStatistics(plan);
-		statistics_map = propagator.GetStatisticsMap();
-	});
+//	// perform statistics propagation
+//	column_binding_map_t<unique_ptr<BaseStatistics>> statistics_map;
+//	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
+//		StatisticsPropagator propagator(*this);
+//		propagator.PropagateStatistics(plan);
+//		statistics_map = propagator.GetStatisticsMap();
+//	});
 
 	// remove duplicate aggregates
 	RunOptimizer(OptimizerType::COMMON_AGGREGATE, [&]() {
