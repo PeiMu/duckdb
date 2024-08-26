@@ -50,6 +50,8 @@ public:
 	unique_ptr<LogicalOperator> UpdateProjHead(unique_ptr<LogicalOperator> plan,
 	                                           const std::vector<TableExpr> &original_proj_expr);
 
+	bool Rewrite(unique_ptr<LogicalOperator> &plan);
+
 	//! update the table_idx and column_idx
 	void UpdateSubqueriesIndex(subquery_queue &subqueries);
 
@@ -66,6 +68,12 @@ private:
 	//! Because the `chunk_scan` will create a new table index and contains the result of all tables (SEQ SCAN) of the
 	//! current level, it is necessary to replace the index of the related expressions
 	unique_ptr<Expression> VisitReplace(BoundColumnRefExpression &expr, unique_ptr<Expression> *expr_ptr) override;
+
+	void InsertTableBlocks(unique_ptr<LogicalOperator> &op,
+	                       unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks,
+	                       std::deque<idx_t> &table_blocks_key_order);
+
+	bool BlockUsed(const unordered_set<idx_t> &left_cond_table_index, const unique_ptr<LogicalOperator> &op);
 
 private:
 	Binder &binder;

@@ -28,10 +28,6 @@ public:
 	~QuerySplit() = default;
 	//! Perform Query Split
 	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan);
-	void MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries);
-	bool Rewrite(unique_ptr<LogicalOperator> &plan);
-
-	void UnMergeSubquery(unique_ptr<LogicalOperator> &plan);
 
 	void Clear() {
 		if (nullptr != query_splitter) {

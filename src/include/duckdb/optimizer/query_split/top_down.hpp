@@ -20,7 +20,7 @@
 namespace duckdb {
 
 #define SPLIT_FILTER false
-#define FOLLOW_PIPELINE_BREAKER true
+#define FOLLOW_PIPELINE_BREAKER !ENABLE_CROSS_PRODUCT_REWRITE
 
 //! Based on the DAG of the logical plan, we generate the subqueries bottom-up
 class TopDownSplit : public SplitAlgorithm {
@@ -29,11 +29,6 @@ public:
 	~TopDownSplit() override = default;
 	//! Perform Query Split
 	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) override;
-	// todo: extract to a stand-alone class?
-	void MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries) override;
-	void UnMergeSubquery(unique_ptr<LogicalOperator> &plan) override;
-	//! Rewrite the logical plan to make sure the last level JOIN can be optimized.
-	bool Rewrite(unique_ptr<LogicalOperator> &plan) override;
 	void Clear() {
 		filter_parent = false;
 		while (!table_expr_queue.empty()) {
@@ -83,12 +78,6 @@ private:
 	//! Collect all used tables into `target_tables`
 	void GetTargetTables(LogicalOperator &op);
 
-	void InsertTableBlocks(unique_ptr<LogicalOperator> &op,
-	                       unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks,
-	                       std::deque<idx_t> &table_blocks_key_order);
-
-	bool BlockUsed(const unordered_set<idx_t> &left_cond_table_index, const unique_ptr<LogicalOperator> &op);
-
 private:
 	bool filter_parent = false;
 	// todo: hack code (in the old split strategy, each JOIN including the top-most JOIN is regarded as a subquery)
@@ -107,6 +96,11 @@ private:
 	// expressions in the projection node
 	std::vector<TableExpr> proj_expr;
 	int query_split_index = 0;
+
+	// we need to further check if all the CROSS_PRODUCT can be simplified in the subqueries
+	// in a bottom-up order
+	std::unordered_set<idx_t> used_table_ids;
+	idx_t join_cond_number = 0;
 };
 
 } // namespace duckdb

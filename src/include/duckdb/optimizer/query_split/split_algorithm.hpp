@@ -55,16 +55,6 @@ public:
 		return plan;
 	};
 
-	virtual void MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries) {
-	}
-
-	virtual void UnMergeSubquery(unique_ptr<LogicalOperator> &plan) {
-	}
-
-	virtual bool Rewrite(unique_ptr<LogicalOperator> &plan) {
-		return false;
-	}
-
 public:
 	//! the collection of all levels of subqueries in a bottom-up order, e.g. the lowest level subquery is the first
 	//! element in the queue and will be executed first

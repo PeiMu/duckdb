@@ -127,10 +127,10 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 		plan = deliminator.Optimize(std::move(plan));
 	});
 
-//	RunOptimizer(OptimizerType::REORDER_GET, [&]() {
-//		ReorderGet reorder_get(context);
-//		plan = reorder_get.Optimize(std::move(plan));
-//	});
+	//	RunOptimizer(OptimizerType::REORDER_GET, [&]() {
+	//		ReorderGet reorder_get(context);
+	//		plan = reorder_get.Optimize(std::move(plan));
+	//	});
 
 #if !ENABLE_CROSS_PRODUCT_REWRITE
 	// then we perform the join ordering optimization
@@ -178,6 +178,20 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 		JoinOrderOptimizer optimizer(context);
 		plan = optimizer.Optimize(std::move(plan));
 	});
+//#ifdef DEBUG
+	// check if CORSS_PRODUCT are all simplified
+	std::function<void(unique_ptr<LogicalOperator> & op)> check_cross_product;
+	check_cross_product = [&check_cross_product](unique_ptr<LogicalOperator> &op) {
+		for (auto &child : op->children) {
+			if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == child->type) {
+				Printer::Print("We have un-simplified CROSS_PRODUCT!!!");
+				D_ASSERT(false);
+			}
+			check_cross_product(child);
+		}
+	};
+	check_cross_product(plan);
+//#endif
 #endif
 
 	// rewrites UNNESTs in DelimJoins by moving them to the projection
