@@ -127,10 +127,12 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 		plan = deliminator.Optimize(std::move(plan));
 	});
 
+#if ENABLE_CROSS_PRODUCT_REWRITE
 	//	RunOptimizer(OptimizerType::REORDER_GET, [&]() {
 	//		ReorderGet reorder_get(context);
 	//		plan = reorder_get.Optimize(std::move(plan));
 	//	});
+#endif
 
 #if !ENABLE_CROSS_PRODUCT_REWRITE
 	// then we perform the join ordering optimization
@@ -141,6 +143,7 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 	});
 #endif
 
+#if ENABLE_QUERY_SPLIT
 	// removes unused columns
 	RunOptimizer(OptimizerType::UNUSED_COLUMNS, [&]() {
 		RemoveUnusedColumns unused(binder, context, true);
@@ -153,6 +156,7 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 		propagator.PropagateStatistics(plan);
 		statistics_map = propagator.GetStatisticsMap();
 	});
+#endif
 
 	Planner::VerifyPlan(context, plan);
 
@@ -178,7 +182,7 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 		JoinOrderOptimizer optimizer(context);
 		plan = optimizer.Optimize(std::move(plan));
 	});
-//#ifdef DEBUG
+#ifdef DEBUG
 	// check if CORSS_PRODUCT are all simplified
 	std::function<void(unique_ptr<LogicalOperator> & op)> check_cross_product;
 	check_cross_product = [&check_cross_product](unique_ptr<LogicalOperator> &op) {
@@ -191,7 +195,7 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 		}
 	};
 	check_cross_product(plan);
-//#endif
+#endif
 #endif
 
 	// rewrites UNNESTs in DelimJoins by moving them to the projection
@@ -199,6 +203,14 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 		UnnestRewriter unnest_rewriter;
 		plan = unnest_rewriter.Optimize(std::move(plan));
 	});
+
+#if !ENABLE_QUERY_SPLIT
+	// removes unused columns
+	RunOptimizer(OptimizerType::UNUSED_COLUMNS, [&]() {
+		RemoveUnusedColumns unused(binder, context, true);
+		unused.VisitOperator(*plan);
+	});
+#endif
 
 	// Remove duplicate groups from aggregates
 	RunOptimizer(OptimizerType::DUPLICATE_GROUPS, [&]() {
@@ -218,13 +230,15 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 		column_lifetime.VisitOperator(*plan);
 	});
 
-//	// perform statistics propagation
-//	column_binding_map_t<unique_ptr<BaseStatistics>> statistics_map;
-//	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
-//		StatisticsPropagator propagator(*this);
-//		propagator.PropagateStatistics(plan);
-//		statistics_map = propagator.GetStatisticsMap();
-//	});
+#if !ENABLE_QUERY_SPLIT
+	// perform statistics propagation
+	column_binding_map_t<unique_ptr<BaseStatistics>> statistics_map;
+	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
+		StatisticsPropagator propagator(*this);
+		propagator.PropagateStatistics(plan);
+		statistics_map = propagator.GetStatisticsMap();
+	});
+#endif
 
 	// remove duplicate aggregates
 	RunOptimizer(OptimizerType::COMMON_AGGREGATE, [&]() {

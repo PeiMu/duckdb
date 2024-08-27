@@ -401,13 +401,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	Printer::Print("Init plan");
 	plan->Print();
 #endif
-	Optimizer optimizer(*planner.binder, *this);
 
 #if TIME_BREAK_DOWN
 	auto timer = chrono_tic();
 #endif
 	if (config.enable_optimizer && plan->RequireOptimizer()) {
 		profiler.StartPhase("optimizer");
+		Optimizer optimizer(*planner.binder, *this);
 		plan = optimizer.PreOptimize(std::move(plan));
 #if ENABLE_DEBUG_PRINT
 		D_ASSERT(plan);
@@ -418,26 +418,25 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if TIME_BREAK_DOWN
 		chrono_toc(&timer, "PreOptimize time is\n");
 #endif
-
-		subquery_queue subqueries;
-		table_expr_info table_expr_queue;
-		std::vector<TableExpr> proj_expr;
-		bool merge_sibling_expr = false;
-		QuerySplit query_splitter(*this);
-		SubqueryPreparer subquery_preparer(*planner.binder, *this);
+#if ENABLE_QUERY_SPLIT
+			subquery_queue subqueries;
+			table_expr_info table_expr_queue;
+			std::vector<TableExpr> proj_expr;
+			bool merge_sibling_expr = false;
+			QuerySplit query_splitter(*this);
+			SubqueryPreparer subquery_preparer(*planner.binder, *this);
 #if ENABLE_CROSS_PRODUCT_REWRITE
-		bool rewritten = subquery_preparer.Rewrite(plan);
+			bool rewritten = subquery_preparer.Rewrite(plan);
 #if TIME_BREAK_DOWN
-		chrono_toc(&timer, "Rewrite time is\n");
+			chrono_toc(&timer, "Rewrite time is\n");
 #endif
 #if ENABLE_DEBUG_PRINT
-		D_ASSERT(plan);
-		// debug: print subquery
-		Printer::Print("After subquery_preparer.Rewrite");
-		plan->Print();
+			D_ASSERT(plan);
+			// debug: print subquery
+			Printer::Print("After subquery_preparer.Rewrite");
+			plan->Print();
 #endif
 #endif
-		if (ENABLE_QUERY_SPLIT) {
 			query_splitter.Clear();
 			plan = query_splitter.Split(std::move(plan));
 			subqueries = query_splitter.GetSubqueries();
@@ -447,8 +446,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "Split time is\n");
 #endif
-		}
-		while (ENABLE_QUERY_SPLIT) {
+
+		while (true) {
 			if (subqueries.empty())
 				break;
 
@@ -580,6 +579,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				break;
 			}
 		}
+#endif
 
 		plan = optimizer.PostOptimize(std::move(plan));
 		profiler.EndPhase();
