@@ -15,18 +15,18 @@ do
   echo -ne "${command}" | duckdb ./imdb.db
 done
 
-## execute queries
-#dir="/home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries"
-#iteration=1
-#
-#rm -rf job_result/
-#mkdir -p job_result/
-#
-#for i in $(eval echo {1.."${iteration}"}); do
-#  for sql in "${dir}"/*; do
-#    echo "execute ${sql}" 2>&1|tee -a duckdb_query_split_imdb_${i}.txt;
-#    echo -ne ".read ${sql}" | duckdb ./imdb.db 2>&1|tee -a duckdb_query_split_imdb_${i}.txt;
-#  done
-#done
-#
-#mv duckdb_query_split_imdb_* job_result/.
+# execute queries
+dir="/home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries"
+iteration=1
+
+rm -rf job_result/
+mkdir -p job_result/
+
+for i in $(eval echo {1.."${iteration}"}); do
+  for sql in "${dir}"/*; do
+    echo "execute ${sql}" 2>&1|tee -a duckdb_query_split_imdb_${i}.txt;
+    echo -ne ".read ${sql}" | duckdb ./imdb.db 2>&1|tee -a duckdb_query_split_imdb_${i}.txt;
+  done
+done
+
+mv duckdb_query_split_imdb_* job_result/.
