@@ -42,7 +42,6 @@ private:
 
 private:
 	unique_ptr<LogicalOperator> plan;
-	column_binding_map_t<unique_ptr<BaseStatistics>> statistics_map;
 };
 
 } // namespace duckdb
