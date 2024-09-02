@@ -168,6 +168,13 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 
 #endif
 
+	// perform statistics propagation
+	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
+		StatisticsPropagator propagator(*this);
+		propagator.PropagateStatistics(plan);
+		statistics_map = propagator.GetStatisticsMap();
+	});
+
 	Planner::VerifyPlan(context, plan);
 
 	return std::move(plan);
@@ -239,11 +246,23 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 	});
 
 	// perform statistics propagation
-	column_binding_map_t<unique_ptr<BaseStatistics>> statistics_map;
 	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
 		StatisticsPropagator propagator(*this);
 		propagator.PropagateStatistics(plan);
-		statistics_map = propagator.GetStatisticsMap();
+		// todo: need to double check once finsh collecting statistics from ColumnGet
+		if (statistics_map.empty()) {
+			statistics_map = propagator.GetStatisticsMap();
+		} else {
+			auto new_statistics_map = propagator.GetStatisticsMap();
+			for (auto &ele : statistics_map) {
+				for (const auto & new_ele : new_statistics_map) {
+					if (ele.first.table_index == new_ele.first.table_index &&
+					    ele.first.column_index == new_ele.first.column_index) {
+						ele.second->Merge(*(new_ele.second));
+					}
+				}
+			}
+		}
 	});
 
 	// remove duplicate aggregates
