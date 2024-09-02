@@ -78,7 +78,6 @@ unique_ptr<ColumnDataCollection> PhysicalMaterializedCollector::GetRowCollection
 	if (!gstate.collection) {
 #if DEBUG
 		Printer::Print("PhysicalMaterializedCollector::GetRowCollection no data!!!");
-		D_ASSERT(false);
 #endif
 		return make_uniq<ColumnDataCollection>(Allocator::DefaultAllocator(), types);
 	}

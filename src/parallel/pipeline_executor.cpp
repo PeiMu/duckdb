@@ -1,6 +1,15 @@
 #include "duckdb/parallel/pipeline_executor.hpp"
-#include "duckdb/main/client_context.hpp"
+
 #include "duckdb/common/limits.hpp"
+#include "duckdb/execution/operator/scan/physical_column_data_scan.hpp"
+#include "duckdb/main/client_context.hpp"
+
+long extra_sink_time = 0;
+long total_execute_time = 0;
+long fetch_source_time = 0;
+long next_batch_time = 0;
+long detail_execute_time = 0; // probe
+long detail_sink_time = 0; // build
 
 #ifdef DUCKDB_DEBUG_ASYNC_SINK_SOURCE
 #include <thread>
@@ -169,27 +178,30 @@ PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 #if BREAKDOWN_EXECUTE
 	Printer::Print("PipelineExecutor::pipeline");
 	pipeline.Print();
+	Printer::Print("PipelineExecutor::pipeline.source");
+	pipeline.source->Print();
 
-	if (PhysicalOperatorType::TABLE_SCAN == pipeline.source->type) {
-		auto &get = pipeline.source->Cast<PhysicalTableScan>();
-		if (get.function.to_string(get.bind_data.get()) == "cast_info") {
-			probe_flag = true;
-		}
-		else
-			probe_flag = false;
-	} else {
-		probe_flag = false;
-	}
+//
+//	if (PhysicalOperatorType::TABLE_SCAN == pipeline.source->type) {
+//		auto &get = pipeline.source->Cast<PhysicalTableScan>();
+//		if (get.function.to_string(get.bind_data.get()) == "movie_companies") {
+//			probe_flag = true;
+//		}
+//		else
+//			probe_flag = false;
+//	} else {
+//		probe_flag = false;
+//	}
 
-	if (pipeline.sink->children.size() > 1 && PhysicalOperatorType::TABLE_SCAN == pipeline.sink->children[0]->type) {
-		auto &get = pipeline.sink->children[0]->Cast<PhysicalTableScan>();
-		if (get.function.to_string(get.bind_data.get()) == "cast_info") {
-			build_flag = true;
-		}
-		else
-			build_flag = false;
-	} else
-		build_flag = false;
+//	if (pipeline.sink->children.size() > 1 && PhysicalOperatorType::TABLE_SCAN == pipeline.sink->children[0]->type) {
+//		auto &get = pipeline.sink->children[0]->Cast<PhysicalTableScan>();
+//		if (get.function.to_string(get.bind_data.get()) == "movie_keyword") {
+//			build_flag = true;
+//		}
+//		else
+//			build_flag = false;
+//	} else
+//		build_flag = false;
 
 	auto timer = chrono_tic();
 #endif
@@ -220,6 +232,11 @@ PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 				done_flushing = true;
 				break;
 			} else {
+#if BREAKDOWN_EXECUTE
+				if (probe_flag) {
+					total_execute_time += chrono_toc(&timer, "return PipelineExecuteResult::INTERRUPTED\n", true);
+				}
+#endif
 				return PipelineExecuteResult::INTERRUPTED;
 			}
 		} else if (!exhausted_source || next_batch_blocked) {
@@ -227,8 +244,21 @@ PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 			if (!next_batch_blocked) {
 				// "Regular" path: fetch a chunk from the source and push it through the pipeline
 				source_chunk.Reset();
+#if BREAKDOWN_EXECUTE
+				auto fetch_timer = chrono_tic();
+#endif
 				source_result = FetchFromSource(source_chunk);
+#if BREAKDOWN_EXECUTE
+				if (probe_flag) {
+					fetch_source_time += chrono_toc(&fetch_timer, "FetchFromSource\n", false);
+				}
+#endif
 				if (source_result == SourceResultType::BLOCKED) {
+#if BREAKDOWN_EXECUTE
+					if (probe_flag) {
+						total_execute_time += chrono_toc(&timer, "return PipelineExecuteResult::INTERRUPTED 2\n", true);
+					}
+#endif
 					return PipelineExecuteResult::INTERRUPTED;
 				}
 				if (source_result == SourceResultType::FINISHED) {
@@ -237,9 +267,22 @@ PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 			}
 
 			if (requires_batch_index) {
+#if BREAKDOWN_EXECUTE
+				auto next_batch_timer = chrono_tic();
+#endif
 				auto next_batch_result = NextBatch(source_chunk);
+#if BREAKDOWN_EXECUTE
+				if (probe_flag) {
+					next_batch_time += chrono_toc(&next_batch_timer, "NextBatch\n", false);
+				}
+#endif
 				next_batch_blocked = next_batch_result == SinkNextBatchType::BLOCKED;
 				if (next_batch_blocked) {
+#if BREAKDOWN_EXECUTE
+					if (probe_flag) {
+						total_execute_time += chrono_toc(&timer, "return PipelineExecuteResult::INTERRUPTED 3\n", true);
+					}
+#endif
 					return PipelineExecuteResult::INTERRUPTED;
 				}
 			}
@@ -253,16 +296,15 @@ PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 		} else {
 			throw InternalException("Unexpected state reached in pipeline executor");
 		}
-#if BREAKDOWN_EXECUTE
-		if (probe_flag) {
-			hot_spot_execute_time += chrono_toc(&timer, "PipelineExecutor::Execute time is\n", false);
-			Printer::Print("hot_spot_execute_time = " + std::to_string(hot_spot_execute_time));
-		}
-#endif
 
 		// SINK INTERRUPT
 		if (result == OperatorResultType::BLOCKED) {
 			remaining_sink_chunk = true;
+#if BREAKDOWN_EXECUTE
+			if (probe_flag) {
+				total_execute_time += chrono_toc(&timer, "return PipelineExecuteResult::INTERRUPTED 4\n", true);
+			}
+#endif
 			return PipelineExecuteResult::INTERRUPTED;
 		}
 
@@ -272,9 +314,32 @@ PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 	}
 
 	if ((!exhausted_source || !done_flushing) && !IsFinished()) {
+#if BREAKDOWN_EXECUTE
+		if (probe_flag) {
+			total_execute_time += chrono_toc(&timer, "return PipelineExecuteResult::NOT_FINISHED\n", false);
+		}
+#endif
 		return PipelineExecuteResult::NOT_FINISHED;
 	}
 
+#if BREAKDOWN_EXECUTE
+	if (probe_flag) {
+		total_execute_time += chrono_toc(&timer, "return PushFinalize\n", false);
+		std::string op_name;
+		if (PhysicalOperatorType::TABLE_SCAN == pipeline.source->type) {
+			auto &get = pipeline.source->Cast<PhysicalTableScan>();
+			op_name = get.function.to_string(get.bind_data.get());
+		} else {
+			op_name = PhysicalOperatorToString(pipeline.source->type);
+		}
+		Printer::Print(op_name + ": hot_spot_execute_time = " + std::to_string(total_execute_time));
+//		Printer::Print("fetch source time = " + std::to_string(fetch_source_time));
+//		Printer::Print("next batch time = " + std::to_string(next_batch_time));
+		Printer::Print("detail execute time = " + std::to_string(detail_execute_time));
+		Printer::Print("detail sink time = " + std::to_string(detail_sink_time));
+		Printer::Print("return PushFinalize");
+	}
+#endif
 	return PushFinalize();
 }
 
@@ -310,20 +375,16 @@ OperatorResultType PipelineExecutor::ExecutePushInternal(DataChunk &input, idx_t
 	// - the Sink doesn't block
 	while (true) {
 		OperatorResultType result;
-#if BREAKDOWN_EXECUTE
-		bool extra_build = false;
-#endif
 		// Note: if input is the final_chunk, we don't do any executing, the chunk just needs to be sinked
 		if (&input != &final_chunk) {
 			final_chunk.Reset();
 #if BREAKDOWN_EXECUTE
-			auto timer = chrono_tic();
+			auto execute_timer = chrono_tic();
 #endif
 			result = Execute(input, final_chunk, initial_idx);
 #if BREAKDOWN_EXECUTE
 			if (probe_flag) {
-				extra_build = true;
-				chrono_toc(&timer, "PipelineExecutor::ExecutePushInternal - execute time is\n");
+				detail_execute_time += chrono_toc(&execute_timer, "PipelineExecutor::ExecutePushInternal - execute time is\n", false);
 			}
 #endif
 			if (result == OperatorResultType::FINISHED) {
@@ -340,13 +401,12 @@ OperatorResultType PipelineExecutor::ExecutePushInternal(DataChunk &input, idx_t
 			OperatorSinkInput sink_input {*pipeline.sink->sink_state, *local_sink_state, interrupt_state};
 
 #if BREAKDOWN_EXECUTE
-			auto timer = chrono_tic();
+			auto sink_timer = chrono_tic();
 #endif
 			auto sink_result = Sink(sink_chunk, sink_input);
 #if BREAKDOWN_EXECUTE
-			if (extra_build) {
-				extra_sink_time += chrono_toc(&timer, "PipelineExecutor::ExecutePushInternal - extra Sink time is\n", false);
-				Printer::Print("extra_sink_time = " + std::to_string(extra_sink_time));
+			if (probe_flag) {
+				detail_sink_time += chrono_toc(&sink_timer, "PipelineExecutor::ExecutePushInternal - sink time is\n", false);
 			}
 #endif
 

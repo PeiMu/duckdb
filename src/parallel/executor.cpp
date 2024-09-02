@@ -385,7 +385,12 @@ void Executor::InitializeInternal(PhysicalOperator &plan) {
 
 //		Printer::Print("pipelines:");
 //		for (const auto &pipe : pipelines) {
+//			Printer::Print("pipe:");
 //			pipe->Print();
+//			Printer::Print("operators");
+//			for (const auto &op : pipe->operators) {
+//				op.get().Print();
+//			}
 //		}
 
 		// finally, verify and schedule
