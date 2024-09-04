@@ -70,5 +70,13 @@ PGValue *makeString(const char *str) {
  *
  * Caller is responsible for passing a palloc'd string.
  */
+PGValue *makeBitString(const char *str)
+{
+	PGValue	   *v = makeNode(PGValue);
+
+	v->type = T_PGBitString;
+	v->val.str = (char *)str;
+	return v;
+}
 
 }

@@ -43,8 +43,8 @@ namespace duckdb_libpgquery {
  * NIL list is considered to be an empty list of any type.
  */
 #define IsPointerList(l)		((l) == NIL || IsA((l), PGList))
-#define IsIntegerList(l)		((l) == NIL || IsA((l), IntList))
-#define IsOidList(l)			((l) == NIL || IsA((l), OidList))
+#define IsIntegerList(l)		((l) == NIL || IsA((l), PGIntList))
+#define IsOidList(l)			((l) == NIL || IsA((l), PGOidList))
 
 #ifdef USE_ASSERT_CHECKING
 /*
@@ -162,12 +162,38 @@ lappend(PGList *list, void *datum)
 /*
  * PGAppend an integer to the specified list. See lappend()
  */
+PGList *
+lappend_int(PGList *list, int datum)
+{
+	Assert(IsIntegerList(list));
 
+	if (list == NIL)
+		list = new_list(T_PGIntList);
+	else
+		new_tail_cell(list);
+
+	lfirst_int(list->tail) = datum;
+	check_list_invariants(list);
+	return list;
+}
 
 /*
  * PGAppend an OID to the specified list. See lappend()
  */
+PGList *
+lappend_oid(PGList *list, PGOid datum)
+{
+	Assert(IsOidList(list));
 
+	if (list == NIL)
+		list = new_list(T_PGOidList);
+	else
+		new_tail_cell(list);
+
+	lfirst_oid(list->tail) = datum;
+	check_list_invariants(list);
+	return list;
+}
 
 /*
  * Add a new cell to the list, in the position after 'prev_cell'. The
@@ -175,7 +201,23 @@ lappend(PGList *list, void *datum)
  * caller. 'list' is assumed to be non-NIL, and 'prev_cell' is assumed
  * to be non-NULL and a member of 'list'.
  */
+static PGListCell *
+add_new_cell(PGList *list, PGListCell *prev_cell)
+{
+	PGListCell   *new_cell;
 
+	new_cell = (PGListCell *) palloc(sizeof(*new_cell));
+	/* new_cell->data is left undefined! */
+	new_cell->next = prev_cell->next;
+	prev_cell->next = new_cell;
+
+	if (list->tail == prev_cell)
+		list->tail = new_cell;
+
+	list->length++;
+
+	return new_cell;
+}
 
 /*
  * Add a new cell to the specified list (which must be non-NIL);
@@ -183,11 +225,44 @@ lappend(PGList *list, void *datum)
  * non-NULL and a member of 'list'). The data placed in the new cell
  * is 'datum'. The newly-constructed cell is returned.
  */
+PGListCell *
+lappend_cell(PGList *list, PGListCell *prev, void *datum)
+{
+	PGListCell   *new_cell;
 
+	Assert(IsPointerList(list));
 
+	new_cell = add_new_cell(list, prev);
+	lfirst(new_cell) = datum;
+	check_list_invariants(list);
+	return new_cell;
+}
 
+PGListCell *
+lappend_cell_int(PGList *list, PGListCell *prev, int datum)
+{
+	PGListCell   *new_cell;
 
+	Assert(IsIntegerList(list));
 
+	new_cell = add_new_cell(list, prev);
+	lfirst_int(new_cell) = datum;
+	check_list_invariants(list);
+	return new_cell;
+}
+
+PGListCell *
+lappend_cell_oid(PGList *list, PGListCell *prev, PGOid datum)
+{
+	PGListCell   *new_cell;
+
+	Assert(IsOidList(list));
+
+	new_cell = add_new_cell(list, prev);
+	lfirst_oid(new_cell) = datum;
+	check_list_invariants(list);
+	return new_cell;
+}
 
 /*
  * Prepend a new element to the list. A pointer to the modified list

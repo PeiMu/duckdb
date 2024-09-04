@@ -55,6 +55,6 @@ typedef struct PGValue {
 PGValue *makeInteger(long i);
 PGValue *makeFloat(char *numericStr);
 PGValue *makeString(const char *str);
-PGValue *makeBitString(char *str);
+PGValue *makeBitString(const char *str);
 
 }
