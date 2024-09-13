@@ -118,24 +118,25 @@ unique_ptr<SimplestStmt> PlanReadFuncs::ReadCommonPlan() {
 	// this should return a vector of vars
 	// use a member variable - target_list_vec
 	//     nodeRead(NULL, 0, is_a_list)
-	std::vector<unique_ptr<SimplestVar>> var_vec;
+	std::vector<unique_ptr<SimplestNode>> node_vec;
 	std::vector<unique_ptr<SimplestAttr>> attr_vec;
-	PlanReader::nodeRead(NULL, 0, true, &var_vec);
-	for (auto &var : var_vec) {
-		attr_vec.emplace_back(unique_ptr_cast<SimplestVar, SimplestAttr>(std::move(var)));
+	PlanReader::nodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node)
+			attr_vec.emplace_back(unique_ptr_cast<SimplestNode, SimplestAttr>(std::move(node)));
 	}
 	// qual
-	// todo: need to check if more than one `qual`
 	// e.g. `qual` should be an expr, if we have more than one `qual`,
 	// we need to change the `nodeRead()` to `std::vector<unique_ptr<SimplestNode>>`
 	token = PlanReader::pg_strtok(&length);
 	(void)token;
-	auto qual_node = PlanReader::nodeRead(NULL, 0);
-	unique_ptr<SimplestVarConstComparison> qual_expr =
-	    unique_ptr_cast<SimplestNode, SimplestVarConstComparison>(std::move(qual_node));
+	node_vec.clear();
 	std::vector<unique_ptr<SimplestVarConstComparison>> qual_vec;
-	if (qual_expr)
-		qual_vec.emplace_back(std::move(qual_expr));
+	auto qual_node = PlanReader::nodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node)
+			qual_vec.emplace_back(unique_ptr_cast<SimplestNode, SimplestVarConstComparison>(std::move(node)));
+	}
 	// lefttree
 	token = PlanReader::pg_strtok(&length);
 	(void)token;
@@ -298,6 +299,7 @@ unique_ptr<SimplestNode> PlanReadFuncs::ReadTargetEntry(void) {
 	unique_ptr<SimplestNode> node;
 
 	// expr
+	// check if TARGETENTRY has only one expr
 	token = PlanReader::pg_strtok(&length);
 	(void)token;
 	node = PlanReader::nodeRead(NULL, 0);
@@ -505,11 +507,12 @@ unique_ptr<SimplestHash> PlanReadFuncs::ReadHash() {
 	// hashkeys
 	token = PlanReader::pg_strtok(&length);
 	(void)token;
-	std::vector<unique_ptr<SimplestVar>> var_vec;
+	std::vector<unique_ptr<SimplestNode>> node_vec;
 	std::vector<unique_ptr<SimplestAttr>> attr_vec;
-	PlanReader::nodeRead(NULL, 0, true, &var_vec);
-	for (auto &var : var_vec) {
-		attr_vec.emplace_back(unique_ptr_cast<SimplestVar, SimplestAttr>(std::move(var)));
+	PlanReader::nodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node)
+			attr_vec.emplace_back(unique_ptr_cast<SimplestNode, SimplestAttr>(std::move(node)));
 	}
 	// skewTable
 	token = PlanReader::pg_strtok(&length);
@@ -539,11 +542,16 @@ unique_ptr<SimplestJoin> PlanReadFuncs::ReadHashJoin() {
 	// get join condition
 	token = PlanReader::pg_strtok(&length);
 	(void)token;
-	// todo: this should get a vector of exprs
-	auto hash_clauses_node = PlanReader::nodeRead(NULL, 0);
+	// this should get a vector of exprs
+	std::vector<unique_ptr<SimplestNode>> node_vec;
 	// todo: need to check if it's always SimplestVarComparison
-	unique_ptr<SimplestVarComparison> hash_clauses_expr =
-	    unique_ptr_cast<SimplestNode, SimplestVarComparison>(std::move(hash_clauses_node));
+	std::vector<unique_ptr<SimplestVarComparison>> join_conditions;
+	auto hash_clauses_node = PlanReader::nodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node)
+			join_conditions.emplace_back(unique_ptr_cast<SimplestNode, SimplestVarComparison>(std::move(node)));
+	}
+	common_join->AddJoinCondition(std::move(join_conditions));
 	// hashoperators
 	token = PlanReader::pg_strtok(&length);
 	(void)token;
@@ -556,10 +564,6 @@ unique_ptr<SimplestJoin> PlanReadFuncs::ReadHashJoin() {
 	token = PlanReader::pg_strtok(&length);
 	(void)token;
 	PlanReader::nodeRead(NULL, 0);
-
-	std::vector<unique_ptr<SimplestVarComparison>> join_conditions;
-	join_conditions.emplace_back(std::move(hash_clauses_expr));
-	common_join->AddJoinCondition(std::move(join_conditions));
 
 	return common_join;
 }
@@ -613,9 +617,14 @@ unique_ptr<SimplestComparisonExpr> PlanReadFuncs::ReadOpExpr() {
 	// args
 	token = PlanReader::pg_strtok(&length);
 	(void)token;
+	std::vector<unique_ptr<SimplestNode>> node_vec;
 	std::vector<unique_ptr<SimplestVar>> var_vec;
-	PlanReader::nodeRead(NULL, 0, true, &var_vec);
-	D_ASSERT(var_vec.size() == 2);
+	PlanReader::nodeRead(NULL, 0, true, &node_vec);
+	D_ASSERT(node_vec.size() == 2);
+	for (auto &node : node_vec) {
+		if (node)
+			var_vec.emplace_back(unique_ptr_cast<SimplestNode, SimplestVar>(std::move(node)));
+	}
 	// todo: need to confirm if the var_vec[0] is always a variable
 	D_ASSERT(!var_vec[0]->IsConst());
 	// location
@@ -741,6 +750,7 @@ unique_ptr<SimplestConstVar> PlanReadFuncs::ReadConst() {
 		default:
 			Printer::Print("Doesn't support type " + std::to_string(const_type) + " yet!");
 			D_ASSERT(false);
+			return nullptr;
 		}
 	}
 }

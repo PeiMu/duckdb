@@ -277,7 +277,7 @@ duckdb_libpgquery::PGNodeTag PlanReader::nodeTokenType(const char *token, int le
 /// there might be more than one attrs in `targetlist`
 // todo: `return_vector` is not elegant, need to refactor
 unique_ptr<SimplestNode> PlanReader::nodeRead(const char *token, int tok_len, bool return_vector,
-                                              std::vector<unique_ptr<SimplestVar>> *var_vec) {
+                                              std::vector<unique_ptr<SimplestNode>> *node_vec) {
 	duckdb_libpgquery::PGNodeTag type;
 
 	unique_ptr<SimplestNode> node;
@@ -354,10 +354,10 @@ unique_ptr<SimplestNode> PlanReader::nodeRead(const char *token, int tok_len, bo
 				/* We have already scanned next token... */
 				if (token[0] == ')')
 					break;
-				node = nodeRead(token, tok_len, return_vector, var_vec);
+				node = nodeRead(token, tok_len, return_vector, node_vec);
 				//				l = lappend(l, nodeRead(token, tok_len));
 				if (return_vector) {
-					var_vec->emplace_back(unique_ptr_cast<SimplestNode, SimplestVar>(std::move(node)));
+					node_vec->emplace_back(std::move(node));
 				}
 				token = pg_strtok(&tok_len);
 				if (token == NULL)

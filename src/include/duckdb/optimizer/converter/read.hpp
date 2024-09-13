@@ -26,7 +26,7 @@ public:
 	static const char *pg_strtok(int *length);
 
 	static unique_ptr<SimplestNode> nodeRead(const char *token, int tok_len, bool return_vector = false,
-	                                         std::vector<unique_ptr<SimplestVar>> *var_vec = nullptr);
+	                                         std::vector<unique_ptr<SimplestNode>> *node_vec = nullptr);
 
 	unique_ptr<SimplestNode> stringToNode(const char *str);
 
