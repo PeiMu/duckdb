@@ -4,8 +4,6 @@
 
 namespace duckdb {
 
-using namespace duckdb_libpgquery;
-
 /* Static state for pg_strtok */
 static const char *pg_strtok_ptr = NULL;
 
@@ -22,9 +20,10 @@ bool restore_location_fields = false;
  * fields rather than set them to -1.  This is currently only supported
  * in builds with the WRITE_READ_PARSE_PLAN_TREES debugging flag set.
  */
-void *PlanReader::stringToNodeInternal(const char *str, bool restore_loc_fields) {
-	void *retval;
+unique_ptr<SimplestNode> PlanReader::stringToNodeInternal(const char *str, bool restore_loc_fields) {
 	const char *save_strtok;
+	unique_ptr<SimplestNode> node;
+
 #ifdef WRITE_READ_PARSE_PLAN_TREES
 	bool save_restore_location_fields;
 #endif
@@ -47,7 +46,7 @@ void *PlanReader::stringToNodeInternal(const char *str, bool restore_loc_fields)
 	restore_location_fields = restore_loc_fields;
 #endif
 
-	retval = nodeRead(NULL, 0); /* do the reading */
+	node = nodeRead(NULL, 0); /* do the reading */
 
 	pg_strtok_ptr = save_strtok;
 
@@ -55,13 +54,13 @@ void *PlanReader::stringToNodeInternal(const char *str, bool restore_loc_fields)
 	restore_location_fields = save_restore_location_fields;
 #endif
 
-	return retval;
+	return node;
 }
 
 /*
  * Externally visible entry points
  */
-void *PlanReader::stringToNode(const char *str) {
+unique_ptr<SimplestNode> PlanReader::stringToNode(const char *str) {
 	return stringToNodeInternal(str, false);
 }
 
@@ -189,12 +188,12 @@ char *PlanReader::debackslash(const char *token, int length) {
 #define OTHER_TOKEN (1000000 + 4)
 
 int PlanReader::strtoint(const char *str, char **endptr, int base) {
-	long		val;
+	long val;
 
 	val = strtol(str, endptr, base);
-	if (val != (int) val)
+	if (val != (int)val)
 		errno = ERANGE;
-	return (int) val;
+	return (int)val;
 }
 
 /*
@@ -275,9 +274,13 @@ duckdb_libpgquery::PGNodeTag PlanReader::nodeTokenType(const char *token, int le
  * We assume pg_strtok is already initialized with a string to read (hence
  * this should only be invoked from within a stringToNode operation).
  */
-void *PlanReader::nodeRead(const char *token, int tok_len) {
-	PGNode *result;
-	PGNodeTag type;
+/// there might be more than one attrs in `targetlist`
+// todo: `return_vector` is not elegant, need to refactor
+unique_ptr<SimplestNode> PlanReader::nodeRead(const char *token, int tok_len, bool return_vector,
+                                              std::vector<unique_ptr<SimplestVar>> *var_vec) {
+	duckdb_libpgquery::PGNodeTag type;
+
+	unique_ptr<SimplestNode> node;
 
 	if (token == NULL) /* need to read a token? */
 	{
@@ -291,19 +294,19 @@ void *PlanReader::nodeRead(const char *token, int tok_len) {
 
 	switch ((int)type) {
 	case LEFT_BRACE:
-		result = PlanReadFuncs::parseNodeString();
+		node = PlanReadFuncs::parseNodeString();
 		token = pg_strtok(&tok_len);
 		if (token == NULL || token[0] != '}')
 			Printer::Print("Error! did not find '}' at end of input node");
 		break;
 	case LEFT_PAREN: {
-		PGList *l = NULL;
+		//		duckdb_libpgquery::PGList *l = NULL;
 
 		/*----------
-				 * Could be an integer list:	(i int int ...)
-				 * or an OID list:				(o int int ...)
-				 * or a list of nodes/values:	(node node ...)
-				 *----------
+		 * Could be an integer list:	(i int int ...)
+		 * or an OID list:				(o int int ...)
+		 * or a list of nodes/values:	(node node ...)
+		 *----------
 		 */
 		token = pg_strtok(&tok_len);
 		if (token == NULL)
@@ -322,9 +325,9 @@ void *PlanReader::nodeRead(const char *token, int tok_len) {
 				val = (int)strtol(token, &endptr, 10);
 				if (endptr != token + tok_len) {
 					auto str = std::to_string(tok_len) + "." + token;
-					Printer::Print("Error! unrecognized integer: "+str);
+					Printer::Print("Error! unrecognized integer: " + str);
 				}
-				l = lappend_int(l, val);
+				//				l = lappend_int(l, val);
 			}
 		} else if (tok_len == 1 && token[0] == 'o') {
 			/* List of OIDs */
@@ -343,7 +346,7 @@ void *PlanReader::nodeRead(const char *token, int tok_len) {
 					Printer::Print("unrecognized OID:" + str);
 				}
 
-//				l = lappend_oid(l, val);
+				//				l = lappend_oid(l, val);
 			}
 		} else {
 			/* List of other node types */
@@ -351,47 +354,52 @@ void *PlanReader::nodeRead(const char *token, int tok_len) {
 				/* We have already scanned next token... */
 				if (token[0] == ')')
 					break;
-				nodeRead(token, tok_len);
-//				l = lappend(l, nodeRead(token, tok_len));
+				node = nodeRead(token, tok_len, return_vector, var_vec);
+				//				l = lappend(l, nodeRead(token, tok_len));
+				if (return_vector) {
+					var_vec->emplace_back(unique_ptr_cast<SimplestNode, SimplestVar>(std::move(node)));
+				}
 				token = pg_strtok(&tok_len);
 				if (token == NULL)
 					Printer::Print("Error! unterminated List structure");
 			}
 		}
-		result = (duckdb_libpgquery::PGNode *)l;
+		//		result = (duckdb_libpgquery::PGNode *)l;
 		break;
 	}
 	case RIGHT_PAREN:
 		Printer::Print("Error! unexpected right parenthesis");
-		result = NULL; /* keep compiler happy */
+		node = NULL; /* keep compiler happy */
 		break;
 	case OTHER_TOKEN:
 		if (tok_len == 0) {
 			/* must be "<>" --- represents a null pointer */
-			result = NULL;
+			node = NULL;
 		} else {
 			auto str = std::to_string(tok_len) + "." + token;
 			Printer::Print("Error! unrecognized token: " + str);
-			result = NULL; /* keep compiler happy */
+			node = NULL; /* keep compiler happy */
 		}
 		break;
 	case duckdb_libpgquery::T_PGInteger:
 
 		/*
-			 * we know that the token terminates on a char atoi will stop at
+		 * we know that the token terminates on a char atoi will stop at
 		 */
-//		result = (duckdb_libpgquery::PGNode *)duckdb_libpgquery::makeInteger(atoi(token));
+		//		result = (duckdb_libpgquery::PGNode *)duckdb_libpgquery::makeInteger(atoi(token));
 		break;
 	case duckdb_libpgquery::T_PGFloat: {
 		char *fval = (char *)malloc(tok_len + 1);
 
 		memcpy(fval, token, tok_len);
 		fval[tok_len] = '\0';
-//		result = (duckdb_libpgquery::PGNode *)duckdb_libpgquery::makeFloat(fval);
-	} break;
+		//		result = (duckdb_libpgquery::PGNode *)duckdb_libpgquery::makeFloat(fval);
+		break;
+	}
 	case duckdb_libpgquery::T_PGString:
 		/* need to remove leading and trailing quotes, and backslashes */
-//		result = (duckdb_libpgquery::PGNode *)duckdb_libpgquery::makeString(debackslash(token + 1, tok_len - 2));
+		//		result = (duckdb_libpgquery::PGNode *)duckdb_libpgquery::makeString(debackslash(token + 1, tok_len -
+		// 2));
 		break;
 	case duckdb_libpgquery::T_PGBitString: {
 		char *val = (char *)malloc(tok_len);
@@ -399,15 +407,15 @@ void *PlanReader::nodeRead(const char *token, int tok_len) {
 		/* skip leading 'b' */
 		memcpy(val, token + 1, tok_len - 1);
 		val[tok_len - 1] = '\0';
-//		result = (duckdb_libpgquery::PGNode *)duckdb_libpgquery::makeBitString(val);
+		//		result = (duckdb_libpgquery::PGNode *)duckdb_libpgquery::makeBitString(val);
 		break;
 	}
 	default:
 		Printer::Print("Error! unrecognized node type: " + std::to_string(type));
-		result = NULL; /* keep compiler happy */
+		node = NULL; /* keep compiler happy */
 		break;
 	}
 
-	return (void *)result;
+	return node;
 }
-}
+} // namespace duckdb

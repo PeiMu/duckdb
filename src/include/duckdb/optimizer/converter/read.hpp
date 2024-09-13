@@ -15,6 +15,7 @@
 #include "pg_functions.hpp"
 
 #include "readfuncs.hpp"
+#include "simplest_ir.h"
 
 namespace duckdb {
 class PlanReader {
@@ -24,19 +25,18 @@ public:
 
 	static const char *pg_strtok(int *length);
 
-	static void *nodeRead(const char *token, int tok_len);
+	static unique_ptr<SimplestNode> nodeRead(const char *token, int tok_len, bool return_vector = false,
+	                                         std::vector<unique_ptr<SimplestVar>> *var_vec = nullptr);
 
-	void *stringToNode(const char *str);
+	unique_ptr<SimplestNode> stringToNode(const char *str);
 
 	static char *debackslash(const char *token, int length);
 
 private:
-	void *stringToNodeInternal(const char *str, bool restore_loc_fields);
+	unique_ptr<SimplestNode> stringToNodeInternal(const char *str, bool restore_loc_fields);
 	static int strtoint(const char *str, char **endptr, int base);
 	static duckdb_libpgquery::PGNodeTag nodeTokenType(const char *token, int length);
 
 	typedef unsigned int Oid;
-
-	friend class PlanReadFuncs;
 };
 } // namespace duckdb
