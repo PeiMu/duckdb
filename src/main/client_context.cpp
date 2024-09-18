@@ -47,6 +47,7 @@
 #include "duckdb/storage/data_table.hpp"
 #include "duckdb/transaction/meta_transaction.hpp"
 #include "duckdb/transaction/transaction_manager.hpp"
+#include "duckdb/optimizer/converter/ir_to_duckdb.h"
 
 namespace duckdb {
 
@@ -596,6 +597,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		plan->Verify(*this);
 #endif
 	}
+
+	IRConverter ir_converter;
+	plan = ir_converter.InjectPlan(std::move(plan));
 
 	profiler.StartPhase("physical_planner");
 	// now convert logical query plan into a physical query plan

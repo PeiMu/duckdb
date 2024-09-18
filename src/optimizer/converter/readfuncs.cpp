@@ -142,13 +142,15 @@ unique_ptr<SimplestStmt> PlanReadFuncs::ReadCommonPlan() {
 	(void)token;
 	unique_ptr<SimplestStmt> left_tree_stmt =
 	    unique_ptr_cast<SimplestNode, SimplestStmt>(PlanReader::nodeRead(NULL, 0));
-	children.emplace_back(std::move(left_tree_stmt));
+	if (left_tree_stmt)
+		children.emplace_back(std::move(left_tree_stmt));
 	// righttree
 	token = PlanReader::pg_strtok(&length);
 	(void)token;
 	unique_ptr<SimplestStmt> right_tree_stmt =
 	    unique_ptr_cast<SimplestNode, SimplestStmt>(PlanReader::nodeRead(NULL, 0));
-	children.emplace_back(std::move(right_tree_stmt));
+	if (right_tree_stmt)
+		children.emplace_back(std::move(right_tree_stmt));
 	// initPlan
 	token = PlanReader::pg_strtok(&length);
 	(void)token;
@@ -163,9 +165,9 @@ unique_ptr<SimplestStmt> PlanReadFuncs::ReadCommonPlan() {
 	ReadBitmapset();
 
 	if (children.empty())
-		return make_uniq<SimplestStmt>(std::move(attr_vec), std::move(qual_vec));
+		return make_uniq<SimplestStmt>(std::move(attr_vec), std::move(qual_vec), StmtNode);
 	else
-		return make_uniq<SimplestStmt>(std::move(children), std::move(attr_vec), std::move(qual_vec));
+		return make_uniq<SimplestStmt>(std::move(children), std::move(attr_vec), std::move(qual_vec), StmtNode);
 }
 
 unique_ptr<SimplestAggregate> PlanReadFuncs::ReadAgg() {

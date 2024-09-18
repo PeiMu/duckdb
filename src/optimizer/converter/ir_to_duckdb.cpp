@@ -1,3 +1,235 @@
-#include "duckdb/optimizer/converter/ir_converter.h"
+#include "duckdb/optimizer/converter/ir_to_duckdb.h"
 
-namespace duckdb {}
+namespace duckdb {
+unique_ptr<LogicalOperator> IRConverter::InjectPlan(unique_ptr<LogicalOperator> duckdb_plan) {
+	if (LogicalOperatorType::LOGICAL_PROJECTION != duckdb_plan->type &&
+	    LogicalOperatorType::LOGICAL_ORDER_BY != duckdb_plan->type &&
+	    LogicalOperatorType::LOGICAL_EXPLAIN != duckdb_plan->type) {
+		return std::move(duckdb_plan);
+	}
+
+#ifdef DEBUG
+	Printer::Print("original duckdb plan");
+	duckdb_plan->Print();
+#endif
+
+	// get the postgres node string
+	char *node_str =
+	    "{AGG :startup_cost 230869.88 :total_cost 230869.89 :plan_rows 1 :plan_width 36 :parallel_aware false "
+	    ":parallel_safe false :plan_node_id 0 :targetlist ({TARGETENTRY :expr {AGGREF :aggfnoid 2145 :aggtype 25 "
+	    ":aggcollid 100 :inputcollid 100 :aggtranstype 25 :aggargtypes (o 25) :aggdirectargs <> :args ({TARGETENTRY "
+	    ":expr {VAR :varno 65001 :varattno 1 :vartype 25 :vartypmod -1 :varcollid 100 :varlevelsup 0 :varnoold 2 "
+	    ":varoattno 2 :location 11} :resno 1 :resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk "
+	    "false}) :aggorder <> :aggdistinct <> :aggfilter <> :aggstar false :aggvariadic false :aggkind n :agglevelsup "
+	    "0 :aggsplit 0 :location 7} :resno 1 :resname hero_movie :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 "
+	    ":resjunk false} {TARGETENTRY :expr {AGGREF :aggfnoid 2132 :aggtype 23 :aggcollid 0 :inputcollid 0 "
+	    ":aggtranstype 23 :aggargtypes (o 23) :aggdirectargs <> :args ({TARGETENTRY :expr {VAR :varno 65001 :varattno "
+	    "2 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 46} :resno 1 "
+	    ":resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false}) :aggorder <> :aggdistinct <> "
+	    ":aggfilter <> :aggstar false :aggvariadic false :aggkind n :agglevelsup 0 :aggsplit 0 :location 42} :resno 2 "
+	    ":resname min :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false}) :qual <> :lefttree {HASHJOIN "
+	    ":startup_cost 93262.86 :total_cost 218365.50 :plan_rows 2500875 :plan_width 21 :parallel_aware false "
+	    ":parallel_safe false :plan_node_id 1 :targetlist ({TARGETENTRY :expr {VAR :varno 65000 :varattno 1 :vartype "
+	    "25 :vartypmod -1 :varcollid 100 :varlevelsup 0 :varnoold 2 :varoattno 2 :location 11} :resno 1 :resname <> "
+	    ":ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false} {TARGETENTRY :expr {VAR :varno 65001 :varattno "
+	    "1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 46} :resno 2 "
+	    ":resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false}) :qual <> :lefttree {SEQSCAN "
+	    ":startup_cost 0.00 :total_cost 69693.30 :plan_rows 4523930 :plan_width 4 :parallel_aware false :parallel_safe "
+	    "false :plan_node_id 2 :targetlist ({TARGETENTRY :expr {VAR :varno 1 :varattno 2 :vartype 23 :vartypmod -1 "
+	    ":varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 46} :resno 1 :resname <> :ressortgroupref 0 "
+	    ":resorigtbl 0 :resorigcol 0 :resjunk false}) :qual <> :lefttree <> :righttree <> :initPlan <> :extParam (b) "
+	    ":allParam (b) :scanrelid 1} :righttree {HASH :startup_cost 67601.90 :total_cost 67601.90 :plan_rows 1397677 "
+	    ":plan_width 21 :parallel_aware false :parallel_safe false :plan_node_id 3 :targetlist ({TARGETENTRY :expr "
+	    "{VAR :varno 65001 :varattno 1 :vartype 25 :vartypmod -1 :varcollid 100 :varlevelsup 0 :varnoold 2 :varoattno "
+	    "2 :location -1} :resno 1 :resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false} "
+	    "{TARGETENTRY :expr {VAR :varno 65001 :varattno 2 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 "
+	    ":varnoold 2 :varoattno 1 :location -1} :resno 2 :resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 "
+	    ":resjunk false}) :qual <> :lefttree {SEQSCAN :startup_cost 0.00 :total_cost 67601.90 :plan_rows 1397677 "
+	    ":plan_width 21 :parallel_aware false :parallel_safe false :plan_node_id 4 :targetlist ({TARGETENTRY :expr "
+	    "{VAR :varno 2 :varattno 2 :vartype 25 :vartypmod -1 :varcollid 100 :varlevelsup 0 :varnoold 2 :varoattno 2 "
+	    ":location 11} :resno 1 :resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false} "
+	    "{TARGETENTRY :expr {VAR :varno 2 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold "
+	    "2 :varoattno 1 :location 138} :resno 2 :resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk "
+	    "false}) :qual ({OPEXPR :opno 521 :opfuncid 147 :opresulttype 16 :opretset false :opcollid 0 :inputcollid 0 "
+	    ":args ({VAR :varno 2 :varattno 5 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 2 :varoattno "
+	    "5 :location 107} {CONST :consttype 23 :consttypmod -1 :constcollid 0 :constlen 4 :constbyval true "
+	    ":constisnull false :location 127 :constvalue 4 [ -48 7 0 0 0 0 0 0 ]}) :location 125}) :lefttree <> "
+	    ":righttree <> :initPlan <> :extParam (b) :allParam (b) :scanrelid 2} :righttree <> :initPlan <> :extParam (b) "
+	    ":allParam (b) :hashkeys ({VAR :varno 65001 :varattno 2 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 "
+	    ":varnoold 2 :varoattno 1 :location 138}) :skewTable 121282 :skewColumn 2 :skewInherit false :rows_total 0} "
+	    ":initPlan <> :extParam (b) :allParam (b) :jointype 0 :inner_unique true :joinqual <> :hashclauses ({OPEXPR "
+	    ":opno 96 :opfuncid 65 :opresulttype 16 :opretset false :opcollid 0 :inputcollid 0 :args ({VAR :varno 65001 "
+	    ":varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 145} "
+	    "{VAR :varno 65000 :varattno 2 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 2 :varoattno 1 "
+	    ":location 138}) :location -1}) :hashoperators (o 96) :hashcollations (o 0) :hashkeys ({VAR :varno 65001 "
+	    ":varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 145})} "
+	    ":righttree <> :initPlan <> :extParam (b) :allParam (b) :aggstrategy 0 :aggsplit 0 :numCols 0 :grpColIdx  "
+	    ":grpOperators  :grpCollations  :numGroups 1 :aggParams (b) :groupingSets <> :chain <>}";
+	PlanReader plan_reader;
+	unique_ptr<SimplestNode> postgres_plan = plan_reader.stringToNode(node_str);
+#ifdef DEBUG
+	postgres_plan->Print();
+#endif
+
+	D_ASSERT(AggregateNode == postgres_plan->GetNodeType());
+	unique_ptr<SimplestStmt> postgres_stmt = unique_ptr_cast<SimplestNode, SimplestStmt>(std::move(postgres_plan));
+	auto postgres_plan_pointer = postgres_stmt.get();
+
+	// get the table map
+	unordered_map<std::string, unique_ptr<LogicalGet>> table_map = GetTableMap(duckdb_plan);
+
+	// get the parent node of JOIN/CROSS_PRODUCT
+	auto new_plan = duckdb_plan.get();
+	do {
+#ifdef DEBUG
+		D_ASSERT(new_plan->children.size() >= 1);
+		if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == new_plan->type) {
+			// todo: check we have the same information in postgres and duckdb
+		}
+#endif
+		new_plan = new_plan->children[0].get();
+	} while (LogicalOperatorType::LOGICAL_COMPARISON_JOIN != new_plan->children[0]->type &&
+	         LogicalOperatorType::LOGICAL_CROSS_PRODUCT != new_plan->children[0]->type);
+
+	// get the JOIN from postgres
+	while (JoinNode != postgres_plan_pointer->GetNodeType()) {
+#ifdef DEBUG
+		D_ASSERT(postgres_plan_pointer->children.size() >= 1);
+#endif
+		postgres_plan_pointer = postgres_plan_pointer->children[0].get();
+	};
+
+	new_plan->children.clear();
+	// construct plan from postgres
+	auto new_duckdb_plan = ConstructPlan(new_plan, postgres_plan_pointer, table_map);
+	new_plan->AddChild(std::move(new_duckdb_plan));
+
+#ifdef DEBUG
+	Printer::Print("new duckdb plan");
+	duckdb_plan->Print();
+#endif
+
+	return duckdb_plan;
+}
+
+unordered_map<std::string, unique_ptr<LogicalGet>> IRConverter::GetTableMap(unique_ptr<LogicalOperator> &duckdb_plan) {
+	unordered_map<std::string, unique_ptr<LogicalGet>> table_map;
+
+	std::function<void(unique_ptr<LogicalOperator> & duckdb_plan)> iterate_plan;
+	iterate_plan = [&table_map, &iterate_plan](unique_ptr<LogicalOperator> &duckdb_plan) {
+		for (auto &child : duckdb_plan->children) {
+			if (LogicalOperatorType::LOGICAL_GET == child->type) {
+				auto get = unique_ptr_cast<LogicalOperator, LogicalGet>(std::move(child));
+				//				auto &get = child->Cast<LogicalGet>();
+				std::string table_name = get->function.to_string(get->bind_data.get());
+				table_map.emplace(table_name, std::move(get));
+			} else {
+				iterate_plan(child);
+			}
+		}
+	};
+
+	iterate_plan(duckdb_plan);
+
+	return table_map;
+}
+
+unique_ptr<LogicalOperator> IRConverter::ConstructPlan(LogicalOperator *new_plan, SimplestStmt *postgres_plan_pointer,
+                                                       unordered_map<std::string, unique_ptr<LogicalGet>> &table_map) {
+	// test
+	std::vector<std::string> test_table_name_vec = {"movie_keyword", "title"};
+	int test_table_name_idx = 0;
+
+	std::function<unique_ptr<LogicalOperator>(LogicalOperator * new_plan, SimplestStmt * postgres_plan_pointer)>
+	    iterate_plan;
+	iterate_plan = [&iterate_plan, &table_map, test_table_name_vec, &test_table_name_idx, this](
+	                   LogicalOperator *new_plan, SimplestStmt *postgres_plan_pointer) -> unique_ptr<LogicalOperator> {
+		unique_ptr<LogicalOperator> left_child, right_child;
+		if (postgres_plan_pointer->children.size() > 0) {
+			left_child = iterate_plan(new_plan, postgres_plan_pointer->children[0].get());
+			if (postgres_plan_pointer->children.size() == 2)
+				right_child = iterate_plan(new_plan, postgres_plan_pointer->children[1].get());
+		}
+		switch (postgres_plan_pointer->GetNodeType()) {
+		case JoinNode: {
+			// get info from postgres_join and construct duckdb_join
+			auto postgres_join = dynamic_cast<SimplestJoin *>(postgres_plan_pointer);
+			auto duckdb_join = make_uniq<LogicalComparisonJoin>(JoinType::INNER);
+			duckdb_join->children.push_back(std::move(left_child));
+			duckdb_join->children.push_back(std::move(right_child));
+			JoinCondition cond;
+			for (const auto &postgres_cond : postgres_join->join_conditions) {
+				auto comp_op = postgres_cond->GetSimplestComparisonType();
+				cond.comparison = ConvertCompType(comp_op);
+				auto &left_pg_cond = postgres_cond->left_attr;
+				LogicalType left_type = ConvertVarType(left_pg_cond->GetType());
+				cond.left = make_uniq<BoundColumnRefExpression>(
+				    left_pg_cond->GetColumnName(), left_type,
+				    ColumnBinding(left_pg_cond->GetTableIndex(), left_pg_cond->GetColumnIndex()));
+				auto &right_pg_cond = postgres_cond->right_attr;
+				LogicalType right_type = ConvertVarType(right_pg_cond->GetType());
+				cond.right = make_uniq<BoundColumnRefExpression>(
+				    right_pg_cond->GetColumnName(), right_type,
+				    ColumnBinding(right_pg_cond->GetTableIndex(), right_pg_cond->GetColumnIndex()));
+				duckdb_join->conditions.push_back(std::move(cond));
+			}
+			return unique_ptr_cast<LogicalComparisonJoin, LogicalOperator>(std::move(duckdb_join));
+		}
+		case FilterNode:
+			Printer::Print("Doesn't support yet!");
+			return unique_ptr<LogicalOperator>(static_cast<LogicalOperator *>(new_plan));
+			break;
+		case HashNode:
+			// todo: check if HashNode really doesn't have extra info
+			return left_child;
+			//			return unique_ptr<LogicalOperator>(static_cast<LogicalOperator *>(left_child.get()));
+		case ScanNode: {
+			// get scan node from table_map
+			auto duckdb_scan = std::move(table_map[test_table_name_vec[test_table_name_idx]]);
+			test_table_name_idx++;
+			return unique_ptr_cast<LogicalGet, LogicalOperator>(std::move(duckdb_scan));
+		}
+		default:
+			return unique_ptr<LogicalOperator>();
+		}
+	};
+
+	auto new_duckdb_plan = iterate_plan(new_plan, postgres_plan_pointer);
+#ifdef DEBUG
+	Printer::Print("new_duckdb_plan:");
+	new_duckdb_plan->Print();
+#endif
+
+	return new_duckdb_plan;
+}
+ExpressionType IRConverter::ConvertCompType(SimplestComparisonType type) {
+	switch (type) {
+	case Equal:
+		return ExpressionType::COMPARE_EQUAL;
+	case LessThan:
+	case GreaterThan:
+	case LessEqual:
+	case GreaterEqual:
+	case Not:
+		Printer::Print("Not supported yet!");
+		return ExpressionType::INVALID;
+	default:
+		Printer::Print("Invalid postgres comparison type!");
+		return ExpressionType::INVALID;
+	}
+}
+LogicalType IRConverter::ConvertVarType(SimplestVarType type) {
+	switch (type) {
+	case Int:
+		return LogicalType(LogicalTypeId::INTEGER);
+	case Float:
+	case String:
+		Printer::Print("Not supported yet!");
+		return LogicalType(LogicalTypeId::INVALID);
+		break;
+	default:
+		Printer::Print("Invalid postgres var type!");
+		return LogicalType(LogicalTypeId::INVALID);
+	}
+}
+} // namespace duckdb
