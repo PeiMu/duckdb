@@ -16,11 +16,12 @@
 
 namespace duckdb {
 
-enum SimplestVarType { InvalidVarType = 0, Int, Float, String };
+enum SimplestVarType { InvalidVarType = 0, IntVar, FloatVar, StringVar };
 enum SimplestJoinType { InvalidJoinType = 0, Inner, Left, Full, Right, Semi, Anti, UniqueOuter, UniqueInner };
 enum SimplestComparisonType { InvalidComparisonType = 0, Equal, LessThan, GreaterThan, LessEqual, GreaterEqual, Not };
 enum SimplestNodeType {
 	InvalidNodeType = 0,
+	LiteralNode,
 	VarNode,
 	ConstVarNode,
 	AttrVarNode,
@@ -60,6 +61,24 @@ private:
 	SimplestNodeType node_type;
 };
 
+class SimplestLiteral : public SimplestNode {
+public:
+	SimplestLiteral(std::string literal_value) : SimplestNode(LiteralNode), literal_value(literal_value) {};
+	SimplestLiteral(const SimplestLiteral &other)
+	    : SimplestNode(other.GetNodeType()), literal_value(other.literal_value) {};
+	~SimplestLiteral() = default;
+
+	std::string Print(bool print = true) {
+		std::string str = " \"" + literal_value + "\" ";
+		if (print)
+			Printer::Print(str);
+		return str;
+	};
+
+private:
+	std::string literal_value;
+};
+
 class SimplestVar : public SimplestNode {
 public:
 	SimplestVar(SimplestVarType type, bool is_const, SimplestNodeType node_type)
@@ -85,17 +104,17 @@ private:
 
 class SimplestConstVar : public SimplestVar {
 public:
-	SimplestConstVar(int int_value) : SimplestVar(SimplestVarType::Int, true, ConstVarNode), int_value(int_value) {};
+	SimplestConstVar(int int_value) : SimplestVar(SimplestVarType::IntVar, true, ConstVarNode), int_value(int_value) {};
 	SimplestConstVar(float float_value)
-	    : SimplestVar(SimplestVarType::Float, true, ConstVarNode), float_value(float_value) {};
+	    : SimplestVar(SimplestVarType::FloatVar, true, ConstVarNode), float_value(float_value) {};
 	SimplestConstVar(std::string str_value)
-	    : SimplestVar(SimplestVarType::String, true, ConstVarNode), str_value(str_value) {};
+	    : SimplestVar(SimplestVarType::StringVar, true, ConstVarNode), str_value(str_value) {};
 	SimplestConstVar(const SimplestConstVar &other)
 	    : SimplestVar(other.GetType(), true, ConstVarNode), int_value(other.int_value), float_value(other.float_value),
 	      str_value(other.str_value) {};
 	SimplestConstVar(unique_ptr<SimplestConstVar> other)
-	    : SimplestVar(other->GetType(), true, ConstVarNode), int_value(other->int_value), float_value(other->float_value),
-	      str_value(other->str_value) {};
+	    : SimplestVar(other->GetType(), true, ConstVarNode), int_value(other->int_value),
+	      float_value(other->float_value), str_value(other->str_value) {};
 	~SimplestConstVar() = default;
 
 	int GetIntValue() const {
@@ -114,13 +133,13 @@ public:
 		case InvalidVarType:
 			Printer::Print("\ninvalid Vary Type!!!");
 			return str;
-		case Int:
+		case IntVar:
 			str = "Integer const value: " + std::to_string(int_value);
 			break;
-		case Float:
+		case FloatVar:
 			str = "Float const value: " + std::to_string(float_value);
 			break;
-		case String:
+		case StringVar:
 			str = "String const value: " + str_value;
 			break;
 		}
@@ -165,13 +184,13 @@ public:
 		case InvalidVarType:
 			Printer::Print("\ninvalid Vary Type!!!");
 			return str;
-		case Int:
+		case IntVar:
 			str = "Integer variable ";
 			break;
-		case Float:
+		case FloatVar:
 			str = "Float variable ";
 			break;
-		case String:
+		case StringVar:
 			str = "String variable ";
 			break;
 		}
@@ -409,7 +428,8 @@ class SimplestJoin : public SimplestStmt {
 public:
 	SimplestJoin(std::vector<unique_ptr<SimplestStmt>> children,
 	             std::vector<unique_ptr<SimplestVarComparison>> join_conditions, SimplestJoinType join_type)
-	    : SimplestStmt(std::move(children), JoinNode), join_conditions(std::move(join_conditions)), join_type(join_type) {};
+	    : SimplestStmt(std::move(children), JoinNode), join_conditions(std::move(join_conditions)),
+	      join_type(join_type) {};
 	SimplestJoin(std::vector<unique_ptr<SimplestStmt>> children, SimplestJoinType join_type)
 	    : SimplestStmt(std::move(children), JoinNode), join_type(join_type) {};
 	SimplestJoin(std::vector<unique_ptr<SimplestVarComparison>> join_conditions, SimplestJoinType join_type)

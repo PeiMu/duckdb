@@ -15,58 +15,71 @@ unique_ptr<LogicalOperator> IRConverter::InjectPlan(unique_ptr<LogicalOperator> 
 
 	// get the postgres node string
 	char *node_str =
-	    "{AGG :startup_cost 230869.88 :total_cost 230869.89 :plan_rows 1 :plan_width 36 :parallel_aware false "
-	    ":parallel_safe false :plan_node_id 0 :targetlist ({TARGETENTRY :expr {AGGREF :aggfnoid 2145 :aggtype 25 "
-	    ":aggcollid 100 :inputcollid 100 :aggtranstype 25 :aggargtypes (o 25) :aggdirectargs <> :args ({TARGETENTRY "
-	    ":expr {VAR :varno 65001 :varattno 1 :vartype 25 :vartypmod -1 :varcollid 100 :varlevelsup 0 :varnoold 2 "
-	    ":varoattno 2 :location 11} :resno 1 :resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk "
-	    "false}) :aggorder <> :aggdistinct <> :aggfilter <> :aggstar false :aggvariadic false :aggkind n :agglevelsup "
-	    "0 :aggsplit 0 :location 7} :resno 1 :resname hero_movie :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 "
-	    ":resjunk false} {TARGETENTRY :expr {AGGREF :aggfnoid 2132 :aggtype 23 :aggcollid 0 :inputcollid 0 "
-	    ":aggtranstype 23 :aggargtypes (o 23) :aggdirectargs <> :args ({TARGETENTRY :expr {VAR :varno 65001 :varattno "
-	    "2 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 46} :resno 1 "
-	    ":resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false}) :aggorder <> :aggdistinct <> "
-	    ":aggfilter <> :aggstar false :aggvariadic false :aggkind n :agglevelsup 0 :aggsplit 0 :location 42} :resno 2 "
-	    ":resname min :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false}) :qual <> :lefttree {HASHJOIN "
-	    ":startup_cost 93262.86 :total_cost 218365.50 :plan_rows 2500875 :plan_width 21 :parallel_aware false "
-	    ":parallel_safe false :plan_node_id 1 :targetlist ({TARGETENTRY :expr {VAR :varno 65000 :varattno 1 :vartype "
-	    "25 :vartypmod -1 :varcollid 100 :varlevelsup 0 :varnoold 2 :varoattno 2 :location 11} :resno 1 :resname <> "
-	    ":ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false} {TARGETENTRY :expr {VAR :varno 65001 :varattno "
-	    "1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 46} :resno 2 "
-	    ":resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false}) :qual <> :lefttree {SEQSCAN "
-	    ":startup_cost 0.00 :total_cost 69693.30 :plan_rows 4523930 :plan_width 4 :parallel_aware false :parallel_safe "
-	    "false :plan_node_id 2 :targetlist ({TARGETENTRY :expr {VAR :varno 1 :varattno 2 :vartype 23 :vartypmod -1 "
-	    ":varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 46} :resno 1 :resname <> :ressortgroupref 0 "
+	    "{PLANNEDSTMT :commandType 1 :queryId 0 :hasReturning false :hasModifyingCTE false :canSetTag true "
+	    ":transientPlan false :dependsOnRole false :parallelModeNeeded false :jitFlags 25 :planTree {AGG :startup_cost "
+	    "230537.55 :total_cost 230537.56 :plan_rows 1 :plan_width 36 :parallel_aware false :parallel_safe false "
+	    ":plan_node_id 0 :targetlist ({TARGETENTRY :expr {AGGREF :aggfnoid 2145 :aggtype 25 :aggcollid 100 "
+	    ":inputcollid 100 :aggtranstype 25 :aggargtypes (o 25) :aggdirectargs <> :args ({TARGETENTRY :expr {VAR :varno "
+	    "65001 :varattno 1 :vartype 25 :vartypmod -1 :varcollid 100 :varlevelsup 0 :varnoold 2 :varoattno 2 :location "
+	    "11} :resno 1 :resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false}) :aggorder <> "
+	    ":aggdistinct <> :aggfilter <> :aggstar false :aggvariadic false :aggkind n :agglevelsup 0 :aggsplit 0 "
+	    ":location 7} :resno 1 :resname hero_movie :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false} "
+	    "{TARGETENTRY :expr {AGGREF :aggfnoid 2132 :aggtype 23 :aggcollid 0 :inputcollid 0 :aggtranstype 23 "
+	    ":aggargtypes (o 23) :aggdirectargs <> :args ({TARGETENTRY :expr {VAR :varno 65001 :varattno 2 :vartype 23 "
+	    ":vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 50} :resno 1 :resname <> "
+	    ":ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false}) :aggorder <> :aggdistinct <> :aggfilter <> "
+	    ":aggstar false :aggvariadic false :aggkind n :agglevelsup 0 :aggsplit 0 :location 46} :resno 2 :resname min "
+	    ":ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false}) :qual <> :lefttree {HASHJOIN :startup_cost "
+	    "93079.94 :total_cost 218123.58 :plan_rows 2482795 :plan_width 21 :parallel_aware false :parallel_safe false "
+	    ":plan_node_id 1 :targetlist ({TARGETENTRY :expr {VAR :varno 65000 :varattno 1 :vartype 25 :vartypmod -1 "
+	    ":varcollid 100 :varlevelsup 0 :varnoold 2 :varoattno 2 :location 11} :resno 1 :resname <> :ressortgroupref 0 "
+	    ":resorigtbl 0 :resorigcol 0 :resjunk false} {TARGETENTRY :expr {VAR :varno 65001 :varattno 1 :vartype 23 "
+	    ":vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 50} :resno 2 :resname <> "
+	    ":ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false}) :qual <> :lefttree {SEQSCAN :startup_cost "
+	    "0.00 :total_cost 69693.30 :plan_rows 4523930 :plan_width 4 :parallel_aware false :parallel_safe false "
+	    ":plan_node_id 2 :targetlist ({TARGETENTRY :expr {VAR :varno 1 :varattno 2 :vartype 23 :vartypmod -1 "
+	    ":varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 50} :resno 1 :resname <> :ressortgroupref 0 "
 	    ":resorigtbl 0 :resorigcol 0 :resjunk false}) :qual <> :lefttree <> :righttree <> :initPlan <> :extParam (b) "
-	    ":allParam (b) :scanrelid 1} :righttree {HASH :startup_cost 67601.90 :total_cost 67601.90 :plan_rows 1397677 "
+	    ":allParam (b) :scanrelid 1} :righttree {HASH :startup_cost 67603.44 :total_cost 67603.44 :plan_rows 1387640 "
 	    ":plan_width 21 :parallel_aware false :parallel_safe false :plan_node_id 3 :targetlist ({TARGETENTRY :expr "
 	    "{VAR :varno 65001 :varattno 1 :vartype 25 :vartypmod -1 :varcollid 100 :varlevelsup 0 :varnoold 2 :varoattno "
 	    "2 :location -1} :resno 1 :resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false} "
 	    "{TARGETENTRY :expr {VAR :varno 65001 :varattno 2 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 "
 	    ":varnoold 2 :varoattno 1 :location -1} :resno 2 :resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 "
-	    ":resjunk false}) :qual <> :lefttree {SEQSCAN :startup_cost 0.00 :total_cost 67601.90 :plan_rows 1397677 "
+	    ":resjunk false}) :qual <> :lefttree {SEQSCAN :startup_cost 0.00 :total_cost 67603.44 :plan_rows 1387640 "
 	    ":plan_width 21 :parallel_aware false :parallel_safe false :plan_node_id 4 :targetlist ({TARGETENTRY :expr "
 	    "{VAR :varno 2 :varattno 2 :vartype 25 :vartypmod -1 :varcollid 100 :varlevelsup 0 :varnoold 2 :varoattno 2 "
 	    ":location 11} :resno 1 :resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk false} "
 	    "{TARGETENTRY :expr {VAR :varno 2 :varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold "
-	    "2 :varoattno 1 :location 138} :resno 2 :resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk "
+	    "2 :varoattno 1 :location 147} :resno 2 :resname <> :ressortgroupref 0 :resorigtbl 0 :resorigcol 0 :resjunk "
 	    "false}) :qual ({OPEXPR :opno 521 :opfuncid 147 :opresulttype 16 :opretset false :opcollid 0 :inputcollid 0 "
 	    ":args ({VAR :varno 2 :varattno 5 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 2 :varoattno "
-	    "5 :location 107} {CONST :consttype 23 :consttypmod -1 :constcollid 0 :constlen 4 :constbyval true "
-	    ":constisnull false :location 127 :constvalue 4 [ -48 7 0 0 0 0 0 0 ]}) :location 125}) :lefttree <> "
+	    "5 :location 112} {CONST :consttype 23 :consttypmod -1 :constcollid 0 :constlen 4 :constbyval true "
+	    ":constisnull false :location 136 :constvalue 4 [ -48 7 0 0 0 0 0 0 ]}) :location 134}) :lefttree <> "
 	    ":righttree <> :initPlan <> :extParam (b) :allParam (b) :scanrelid 2} :righttree <> :initPlan <> :extParam (b) "
 	    ":allParam (b) :hashkeys ({VAR :varno 65001 :varattno 2 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 "
-	    ":varnoold 2 :varoattno 1 :location 138}) :skewTable 121282 :skewColumn 2 :skewInherit false :rows_total 0} "
+	    ":varnoold 2 :varoattno 1 :location 147}) :skewTable 136690 :skewColumn 2 :skewInherit false :rows_total 0} "
 	    ":initPlan <> :extParam (b) :allParam (b) :jointype 0 :inner_unique true :joinqual <> :hashclauses ({OPEXPR "
 	    ":opno 96 :opfuncid 65 :opresulttype 16 :opretset false :opcollid 0 :inputcollid 0 :args ({VAR :varno 65001 "
-	    ":varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 145} "
+	    ":varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 158} "
 	    "{VAR :varno 65000 :varattno 2 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 2 :varoattno 1 "
-	    ":location 138}) :location -1}) :hashoperators (o 96) :hashcollations (o 0) :hashkeys ({VAR :varno 65001 "
-	    ":varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 145})} "
+	    ":location 147}) :location -1}) :hashoperators (o 96) :hashcollations (o 0) :hashkeys ({VAR :varno 65001 "
+	    ":varattno 1 :vartype 23 :vartypmod -1 :varcollid 0 :varlevelsup 0 :varnoold 1 :varoattno 2 :location 158})} "
 	    ":righttree <> :initPlan <> :extParam (b) :allParam (b) :aggstrategy 0 :aggsplit 0 :numCols 0 :grpColIdx  "
-	    ":grpOperators  :grpCollations  :numGroups 1 :aggParams (b) :groupingSets <> :chain <>}";
+	    ":grpOperators  :grpCollations  :numGroups 1 :aggParams (b) :groupingSets <> :chain <>} "
+	    ":rtable ({RTE :alias "
+	    "<> :eref {ALIAS :aliasname movie_keyword :colnames (\"id\" \"movie_id\" \"keyword_id\")} :rtekind 0 :relid "
+	    "136690 :relkind r :rellockmode 1 :tablesample <> :lateral false :inh false :inFromCl true :requiredPerms 2 "
+	    ":checkAsUser 0 :selectedCols (b 9) :insertedCols (b) :updatedCols (b) :extraUpdatedCols (b) :securityQuals "
+	    "<>} {RTE :alias <> :eref {ALIAS :aliasname title :colnames (\"id\" \"title\" \"imdb_index\" \"kind_id\" "
+	    "\"production_year\" \"imdb_id\" \"phonetic_code\" \"episode_of_id\" \"season_nr\" \"episode_nr\" "
+	    "\"series_years\" \"md5sum\")} :rtekind 0 :relid 136721 :relkind r :rellockmode 1 :tablesample <> :lateral "
+	    "false :inh false :inFromCl true :requiredPerms 2 :checkAsUser 0 :selectedCols (b 8 9 12) :insertedCols (b) "
+	    ":updatedCols (b) :extraUpdatedCols (b) :securityQuals <>}) :resultRelations <> :rootResultRelations <> "
+	    ":subplans <> :rewindPlanIDs (b) :rowMarks <> :relationOids (o 136690 136721) :invalItems <> :paramExecTypes "
+	    "<> :utilityStmt <> :stmt_location 0 :stmt_len 180}";
 	PlanReader plan_reader;
-	unique_ptr<SimplestNode> postgres_plan = plan_reader.stringToNode(node_str);
+	unique_ptr<SimplestNode> postgres_plan = plan_reader.StringToNode(node_str);
 #ifdef DEBUG
 	postgres_plan->Print();
 #endif
@@ -99,6 +112,9 @@ unique_ptr<LogicalOperator> IRConverter::InjectPlan(unique_ptr<LogicalOperator> 
 		postgres_plan_pointer = postgres_plan_pointer->children[0].get();
 	};
 
+//	unordered_map<int, int> pg_duckdb_table_idx =
+//	    MatchTableIndex(postgres_plan_pointer, table_map, plan_reader.table_col_names);
+
 	new_plan->children.clear();
 	// construct plan from postgres
 	auto new_duckdb_plan = ConstructPlan(new_plan, postgres_plan_pointer, table_map);
@@ -120,7 +136,6 @@ unordered_map<std::string, unique_ptr<LogicalGet>> IRConverter::GetTableMap(uniq
 		for (auto &child : duckdb_plan->children) {
 			if (LogicalOperatorType::LOGICAL_GET == child->type) {
 				auto get = unique_ptr_cast<LogicalOperator, LogicalGet>(std::move(child));
-				//				auto &get = child->Cast<LogicalGet>();
 				std::string table_name = get->function.to_string(get->bind_data.get());
 				table_map.emplace(table_name, std::move(get));
 			} else {
@@ -178,11 +193,9 @@ unique_ptr<LogicalOperator> IRConverter::ConstructPlan(LogicalOperator *new_plan
 		case FilterNode:
 			Printer::Print("Doesn't support yet!");
 			return unique_ptr<LogicalOperator>(static_cast<LogicalOperator *>(new_plan));
-			break;
 		case HashNode:
 			// todo: check if HashNode really doesn't have extra info
 			return left_child;
-			//			return unique_ptr<LogicalOperator>(static_cast<LogicalOperator *>(left_child.get()));
 		case ScanNode: {
 			// get scan node from table_map
 			auto duckdb_scan = std::move(table_map[test_table_name_vec[test_table_name_idx]]);
@@ -202,6 +215,7 @@ unique_ptr<LogicalOperator> IRConverter::ConstructPlan(LogicalOperator *new_plan
 
 	return new_duckdb_plan;
 }
+
 ExpressionType IRConverter::ConvertCompType(SimplestComparisonType type) {
 	switch (type) {
 	case Equal:
@@ -218,18 +232,24 @@ ExpressionType IRConverter::ConvertCompType(SimplestComparisonType type) {
 		return ExpressionType::INVALID;
 	}
 }
+
 LogicalType IRConverter::ConvertVarType(SimplestVarType type) {
 	switch (type) {
-	case Int:
+	case IntVar:
 		return LogicalType(LogicalTypeId::INTEGER);
-	case Float:
-	case String:
+	case FloatVar:
+	case StringVar:
 		Printer::Print("Not supported yet!");
 		return LogicalType(LogicalTypeId::INVALID);
-		break;
 	default:
 		Printer::Print("Invalid postgres var type!");
 		return LogicalType(LogicalTypeId::INVALID);
 	}
 }
+
+//unordered_map<int, int> IRConverter::MatchTableIndex(SimplestStmt *postgres_plan_pointer,
+//                                                     unordered_map<std::string, unique_ptr<LogicalGet>> table_map,
+//                                                     std::queue<table_str> table_col_names) {
+//	return unordered_map<int, int>();
+//}
 } // namespace duckdb

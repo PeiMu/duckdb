@@ -8,12 +8,11 @@
 
 #pragma once
 
-#include "duckdb/common/printer.hpp"
-#include "duckdb/planner/operator/logical_get.hpp"
 #include "duckdb/common/enums/join_type.hpp"
-#include "duckdb/planner/operator/logical_comparison_join.hpp"
+#include "duckdb/common/printer.hpp"
 #include "duckdb/planner/expression/bound_columnref_expression.hpp"
-
+#include "duckdb/planner/operator/logical_comparison_join.hpp"
+#include "duckdb/planner/operator/logical_get.hpp"
 #include "read.hpp"
 #include "simplest_ir.h"
 
@@ -28,9 +27,13 @@ public:
 private:
 	std::unordered_map<std::string, unique_ptr<LogicalGet>> GetTableMap(unique_ptr<LogicalOperator> &duckdb_plan);
 	unique_ptr<LogicalOperator> ConstructPlan(LogicalOperator *new_plan, SimplestStmt *postgres_plan_pointer,
-	                   unordered_map<std::string, unique_ptr<LogicalGet>> &table_map);
+	                                          unordered_map<std::string, unique_ptr<LogicalGet>> &table_map);
 	ExpressionType ConvertCompType(SimplestComparisonType type);
 	LogicalType ConvertVarType(SimplestVarType type);
+
+//	unordered_map<int, int> MatchTableIndex(SimplestStmt *postgres_plan_pointer,
+//	                                        unordered_map<std::string, unique_ptr<LogicalGet>> table_map,
+//	                                        std::queue<table_str> table_col_names);
 };
 
-}
+} // namespace duckdb

@@ -4,7 +4,7 @@
 
 namespace duckdb {
 
-/* Static state for pg_strtok */
+/* Static state for PG_strtok */
 static const char *pg_strtok_ptr = NULL;
 
 /* State flag that determines how readfuncs.c should treat location fields */
@@ -13,14 +13,14 @@ bool restore_location_fields = false;
 #endif
 
 /*
- * stringToNode -
+ * StringToNode -
  *	  builds a Node tree from its string representation (assumed valid)
  *
  * restore_loc_fields instructs readfuncs.c whether to restore location
  * fields rather than set them to -1.  This is currently only supported
  * in builds with the WRITE_READ_PARSE_PLAN_TREES debugging flag set.
  */
-unique_ptr<SimplestNode> PlanReader::stringToNodeInternal(const char *str, bool restore_loc_fields) {
+unique_ptr<SimplestNode> PlanReader::StringToNodeInternal(const char *str, bool restore_loc_fields) {
 	const char *save_strtok;
 	unique_ptr<SimplestNode> node;
 
@@ -29,14 +29,14 @@ unique_ptr<SimplestNode> PlanReader::stringToNodeInternal(const char *str, bool 
 #endif
 
 	/*
-	 * We save and restore the pre-existing state of pg_strtok. This makes the
-	 * world safe for re-entrant invocation of stringToNode, without incurring
+	 * We save and restore the pre-existing state of PG_strtok. This makes the
+	 * world safe for re-entrant invocation of StringToNode, without incurring
 	 * a lot of notational overhead by having to pass the next-character
 	 * pointer around through all the readfuncs.c code.
 	 */
 	save_strtok = pg_strtok_ptr;
 
-	pg_strtok_ptr = str; /* point pg_strtok at the string to read */
+	pg_strtok_ptr = str; /* point PG_strtok at the string to read */
 
 	/*
 	 * If enabled, likewise save/restore the location field handling flag.
@@ -46,7 +46,7 @@ unique_ptr<SimplestNode> PlanReader::stringToNodeInternal(const char *str, bool 
 	restore_location_fields = restore_loc_fields;
 #endif
 
-	node = nodeRead(NULL, 0); /* do the reading */
+	node = NodeRead(NULL, 0); /* do the reading */
 
 	pg_strtok_ptr = save_strtok;
 
@@ -60,8 +60,8 @@ unique_ptr<SimplestNode> PlanReader::stringToNodeInternal(const char *str, bool 
 /*
  * Externally visible entry points
  */
-unique_ptr<SimplestNode> PlanReader::stringToNode(const char *str) {
-	return stringToNodeInternal(str, false);
+unique_ptr<SimplestNode> PlanReader::StringToNode(const char *str) {
+	return StringToNodeInternal(str, false);
 }
 
 #ifdef WRITE_READ_PARSE_PLAN_TREES
@@ -79,7 +79,7 @@ void *stringToNodeWithLocations(const char *str) {
  *****************************************************************************/
 
 /*
- * pg_strtok --- retrieve next "token" from a string.
+ * PG_strtok --- retrieve next "token" from a string.
  *
  * Works kinda like strtok, except it never modifies the source string.
  * (Instead of storing nulls into the string, the length of the token
@@ -87,7 +87,7 @@ void *stringToNodeWithLocations(const char *str) {
  * Also, the rules about what is a token are hard-wired rather than being
  * configured by passing a set of terminating characters.
  *
- * The string is assumed to have been initialized already by stringToNode.
+ * The string is assumed to have been initialized already by StringToNode.
  *
  * The rules for tokens are:
  *	* Whitespace (space, tab, newline) always separates tokens.
@@ -108,7 +108,7 @@ void *stringToNodeWithLocations(const char *str) {
  * no more tokens, NULL and 0 are returned.
  *
  * NOTE: this routine doesn't remove backslashes; the caller must do so
- * if necessary (see "debackslash").
+ * if necessary (see "DeBackslash").
  *
  * NOTE: prior to release 7.0, this routine also had a special case to treat
  * a token starting with '"' as extending to the next '"'.  This code was
@@ -118,7 +118,7 @@ void *stringToNodeWithLocations(const char *str) {
  * code should add backslashes to a string constant to ensure it is treated
  * as a single token.
  */
-const char *PlanReader::pg_strtok(int *length) {
+const char *PlanReader::PG_strtok(int *length) {
 	const char *local_str; /* working pointer to string */
 	const char *ret_str;   /* start of token to return */
 
@@ -164,11 +164,11 @@ const char *PlanReader::pg_strtok(int *length) {
 }
 
 /*
- * debackslash -
+ * DeBackslash -
  *	  create a palloc'd string holding the given token.
  *	  any protective backslashes in the token are removed.
  */
-char *PlanReader::debackslash(const char *token, int length) {
+char *PlanReader::DeBackslash(const char *token, int length) {
 	char *result = (char *)malloc(length + 1);
 	char *ptr = result;
 
@@ -187,7 +187,7 @@ char *PlanReader::debackslash(const char *token, int length) {
 #define LEFT_BRACE  (1000000 + 3)
 #define OTHER_TOKEN (1000000 + 4)
 
-int PlanReader::strtoint(const char *str, char **endptr, int base) {
+int PlanReader::StrToInt(const char *str, char **endptr, int base) {
 	long val;
 
 	val = strtol(str, endptr, base);
@@ -197,7 +197,7 @@ int PlanReader::strtoint(const char *str, char **endptr, int base) {
 }
 
 /*
- * nodeTokenType -
+ * NodeTokenType -
  *	  returns the type of the node token contained in token.
  *	  It returns one of the following valid NodeTags:
  *		T_Integer, T_Float, T_String, T_BitString
@@ -206,7 +206,7 @@ int PlanReader::strtoint(const char *str, char **endptr, int base) {
  *
  *	  Assumption: the ascii representation is legal
  */
-duckdb_libpgquery::PGNodeTag PlanReader::nodeTokenType(const char *token, int length) {
+duckdb_libpgquery::PGNodeTag PlanReader::NodeTokenType(const char *token, int length) {
 	duckdb_libpgquery::PGNodeTag retval;
 	const char *numptr;
 	int numlen;
@@ -223,20 +223,20 @@ duckdb_libpgquery::PGNodeTag PlanReader::nodeTokenType(const char *token, int le
 		/*
 		 * Yes.  Figure out whether it is integral or float; this requires
 		 * both a syntax check and a range check. strtoint() can do both for
-		 * us. We know the token will end at a character that strtoint will
+		 * us. We know the token will end at a character that StrToInt will
 		 * stop at, so we do not need to modify the string.
 		 */
 		char *endptr;
 
 		errno = 0;
-		(void)strtoint(token, &endptr, 10);
+		(void)StrToInt(token, &endptr, 10);
 		if (endptr != token + length || errno == ERANGE)
 			return duckdb_libpgquery::PGNodeTag::T_PGFloat;
 		return duckdb_libpgquery::PGNodeTag::T_PGInteger;
 	}
 
 	/*
-	 * these three cases do not need length checks, since pg_strtok() will
+	 * these three cases do not need length checks, since PG_strtok() will
 	 * always treat them as single-byte tokens
 	 */
 	else if (*token == '(')
@@ -255,13 +255,13 @@ duckdb_libpgquery::PGNodeTag PlanReader::nodeTokenType(const char *token, int le
 }
 
 /*
- * nodeRead -
+ * NodeRead -
  *	  Slightly higher-level reader.
  *
  * This routine applies some semantic knowledge on top of the purely
  * lexical tokenizer pg_strtok().   It can read
  *	* Value token nodes (integers, floats, or strings);
- *	* General nodes (via parseNodeString() from readfuncs.c);
+ *	* General nodes (via ParseNodeString() from readfuncs.c);
  *	* Lists of the above;
  *	* Lists of integers or OIDs.
  * The return value is declared void *, not Node *, to avoid having to
@@ -271,12 +271,12 @@ duckdb_libpgquery::PGNodeTag PlanReader::nodeTokenType(const char *token, int le
  * a non-NULL token may be passed when the upper recursion level has already
  * scanned the first token of a node's representation.
  *
- * We assume pg_strtok is already initialized with a string to read (hence
- * this should only be invoked from within a stringToNode operation).
+ * We assume PG_strtok is already initialized with a string to read (hence
+ * this should only be invoked from within a StringToNode operation).
  */
 /// there might be more than one attrs in `targetlist`
 // todo: `return_vector` is not elegant, need to refactor
-unique_ptr<SimplestNode> PlanReader::nodeRead(const char *token, int tok_len, bool return_vector,
+unique_ptr<SimplestNode> PlanReader::NodeRead(const char *token, int tok_len, bool return_vector,
                                               std::vector<unique_ptr<SimplestNode>> *node_vec) {
 	duckdb_libpgquery::PGNodeTag type;
 
@@ -284,20 +284,20 @@ unique_ptr<SimplestNode> PlanReader::nodeRead(const char *token, int tok_len, bo
 
 	if (token == NULL) /* need to read a token? */
 	{
-		token = pg_strtok(&tok_len);
+		token = PG_strtok(&tok_len);
 
 		if (token == NULL) /* end of input */
 			return NULL;
 	}
 
-	type = nodeTokenType(token, tok_len);
+	type = NodeTokenType(token, tok_len);
 
 	switch ((int)type) {
 	case LEFT_BRACE:
-		node = PlanReadFuncs::parseNodeString();
-		token = pg_strtok(&tok_len);
+		node = ParseNodeString();
+		token = PG_strtok(&tok_len);
 		if (token == NULL || token[0] != '}')
-			Printer::Print("Error! did not find '}' at end of input node");
+			Printer::Print("Error! did not find '}' at end of input node in NodeRead");
 		break;
 	case LEFT_PAREN: {
 		//		duckdb_libpgquery::PGList *l = NULL;
@@ -308,24 +308,24 @@ unique_ptr<SimplestNode> PlanReader::nodeRead(const char *token, int tok_len, bo
 		 * or a list of nodes/values:	(node node ...)
 		 *----------
 		 */
-		token = pg_strtok(&tok_len);
+		token = PG_strtok(&tok_len);
 		if (token == NULL)
-			Printer::Print("Error! unterminated List structure");
+			Printer::Print("Error! unterminated List structure in NodeRead");
 		if (tok_len == 1 && token[0] == 'i') {
 			/* List of integers */
 			for (;;) {
 				int val;
 				char *endptr;
 
-				token = pg_strtok(&tok_len);
+				token = PG_strtok(&tok_len);
 				if (token == NULL)
-					Printer::Print("Error! unterminated List structure");
+					Printer::Print("Error! unterminated List structure in NodeRead");
 				if (token[0] == ')')
 					break;
 				val = (int)strtol(token, &endptr, 10);
 				if (endptr != token + tok_len) {
-					auto str = std::to_string(tok_len) + "." + token;
-					Printer::Print("Error! unrecognized integer: " + str);
+					auto str = std::to_string(tok_len) + "-" + token;
+					Printer::Print("Error! unrecognized integer: \"" + str + "\" in NodeRead");
 				}
 				//				l = lappend_int(l, val);
 			}
@@ -335,9 +335,9 @@ unique_ptr<SimplestNode> PlanReader::nodeRead(const char *token, int tok_len, bo
 				Oid val;
 				char *endptr;
 
-				token = pg_strtok(&tok_len);
+				token = PG_strtok(&tok_len);
 				if (token == NULL)
-					Printer::Print("Error! unterminated List structure");
+					Printer::Print("Error! unterminated List structure in NodeRead");
 				if (token[0] == ')')
 					break;
 				val = (Oid)strtoul(token, &endptr, 10);
@@ -354,21 +354,21 @@ unique_ptr<SimplestNode> PlanReader::nodeRead(const char *token, int tok_len, bo
 				/* We have already scanned next token... */
 				if (token[0] == ')')
 					break;
-				node = nodeRead(token, tok_len, return_vector, node_vec);
-				//				l = lappend(l, nodeRead(token, tok_len));
+				node = NodeRead(token, tok_len, return_vector, node_vec);
+				//				l = lappend(l, NodeRead(token, tok_len));
 				if (return_vector) {
 					node_vec->emplace_back(std::move(node));
 				}
-				token = pg_strtok(&tok_len);
+				token = PG_strtok(&tok_len);
 				if (token == NULL)
-					Printer::Print("Error! unterminated List structure");
+					Printer::Print("Error! unterminated List structure in NodeRead");
 			}
 		}
 		//		result = (duckdb_libpgquery::PGNode *)l;
 		break;
 	}
 	case RIGHT_PAREN:
-		Printer::Print("Error! unexpected right parenthesis");
+		Printer::Print("Error! unexpected right parenthesis in NodeRead");
 		node = NULL; /* keep compiler happy */
 		break;
 	case OTHER_TOKEN:
@@ -376,31 +376,28 @@ unique_ptr<SimplestNode> PlanReader::nodeRead(const char *token, int tok_len, bo
 			/* must be "<>" --- represents a null pointer */
 			node = NULL;
 		} else {
-			auto str = std::to_string(tok_len) + "." + token;
-			Printer::Print("Error! unrecognized token: " + str);
+			auto str = std::to_string(tok_len) + "-" + token;
+			Printer::Print("Error! unrecognized token: \"" + str + "\" in NodeRead");
 			node = NULL; /* keep compiler happy */
 		}
 		break;
 	case duckdb_libpgquery::T_PGInteger:
-
 		/*
 		 * we know that the token terminates on a char atoi will stop at
 		 */
 		//		result = (duckdb_libpgquery::PGNode *)duckdb_libpgquery::makeInteger(atoi(token));
 		break;
 	case duckdb_libpgquery::T_PGFloat: {
-		char *fval = (char *)malloc(tok_len + 1);
-
-		memcpy(fval, token, tok_len);
-		fval[tok_len] = '\0';
+		//		char *fval = (char *)malloc(tok_len + 1);
+		//
+		//		memcpy(fval, token, tok_len);
+		//		fval[tok_len] = '\0';
 		//		result = (duckdb_libpgquery::PGNode *)duckdb_libpgquery::makeFloat(fval);
 		break;
 	}
 	case duckdb_libpgquery::T_PGString:
 		/* need to remove leading and trailing quotes, and backslashes */
-		//		result = (duckdb_libpgquery::PGNode *)duckdb_libpgquery::makeString(debackslash(token + 1, tok_len -
-		// 2));
-		break;
+		return make_uniq<SimplestLiteral>(std::string(token + 1, tok_len - 2));
 	case duckdb_libpgquery::T_PGBitString: {
 		char *val = (char *)malloc(tok_len);
 
@@ -411,10 +408,1053 @@ unique_ptr<SimplestNode> PlanReader::nodeRead(const char *token, int tok_len, bo
 		break;
 	}
 	default:
-		Printer::Print("Error! unrecognized node type: " + std::to_string(type));
+		Printer::Print("Error! unrecognized node type: " + std::to_string(type) + " in NodeRead");
 		node = NULL; /* keep compiler happy */
 		break;
 	}
+
+	return node;
+}
+
+void *PlanReader::ReadBitmapset() {
+	READ_TEMP_LOCALS();
+
+	token = PG_strtok(&length);
+	if (token == NULL)
+		Printer::Print("Error! incomplete Bitmapset structure");
+	if (length != 1 || token[0] != '(')
+		Printer::Print("Error! unrecognized token: (" + std::to_string(length) + ")\"" + token + "\" in ReadBitmapset");
+
+	token = PG_strtok(&length);
+	if (token == NULL)
+		Printer::Print("Error! incomplete Bitmapset structure");
+	if (length != 1 || token[0] != 'b')
+		Printer::Print("Error! unrecognized token: (" + std::to_string(length) + ")\"" + token + "\" in ReadBitmapset");
+
+	for (;;) {
+		int val;
+		char *endptr;
+
+		token = PG_strtok(&length);
+		if (token == NULL)
+			Printer::Print("Error! unterminated Bitmapset structure");
+		if (length == 1 && token[0] == ')')
+			break;
+		val = (int)strtol(token, &endptr, 10);
+		if (endptr != token + length)
+			Printer::Print("Error! unrecognized integer: (" + std::to_string(length) + ")\"" + token +
+			               "\" in ReadBitmapset");
+		//		result = bms_add_member(result, val);
+	}
+
+	return nullptr;
+}
+
+void *PlanReader::ReadAttrNumberCols(int numCols) {
+	int tokenLength, i;
+	const char *token;
+
+	if (numCols <= 0)
+		return NULL;
+
+	//	attr_vals = (PGAttrNumber *) malloc(numCols * sizeof(PGAttrNumber));
+	for (i = 0; i < numCols; i++) {
+		token = PG_strtok(&tokenLength);
+		//		attr_vals[i] = atoi(token);
+	}
+
+	return nullptr;
+}
+
+void *PlanReader::ReadOidCols(int numCols) {
+	int tokenLength, i;
+	const char *token;
+
+	if (numCols <= 0)
+		return NULL;
+
+	//	oid_vals = (PGOid *) malloc(numCols * sizeof(PGOid));
+	for (i = 0; i < numCols; i++) {
+		token = PG_strtok(&tokenLength);
+		//		oid_vals[i] = atooid(token);
+	}
+
+	return nullptr;
+}
+
+unique_ptr<SimplestStmt> PlanReader::ReadCommonPlan() {
+	READ_TEMP_LOCALS();
+
+	std::vector<unique_ptr<SimplestStmt>> children;
+
+	// startup_cost
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// total_cost
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// plan_rows
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// plan_width
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// parallel_awre
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// parallel_safe
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// plan_node_id
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// targetlist
+	token = PG_strtok(&length);
+	(void)token;
+	// this should return a vector of vars
+	// use a member variable - target_list_vec
+	//     NodeRead(NULL, 0, is_a_list)
+	std::vector<unique_ptr<SimplestNode>> node_vec;
+	std::vector<unique_ptr<SimplestAttr>> attr_vec;
+	NodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node)
+			attr_vec.emplace_back(unique_ptr_cast<SimplestNode, SimplestAttr>(std::move(node)));
+	}
+	// qual
+	// e.g. `qual` should be an expr, if we have more than one `qual`,
+	// we need to change the `NodeRead()` to `std::vector<unique_ptr<SimplestNode>>`
+	token = PG_strtok(&length);
+	(void)token;
+	node_vec.clear();
+	std::vector<unique_ptr<SimplestVarConstComparison>> qual_vec;
+	auto qual_node = NodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node)
+			qual_vec.emplace_back(unique_ptr_cast<SimplestNode, SimplestVarConstComparison>(std::move(node)));
+	}
+	// lefttree
+	token = PG_strtok(&length);
+	(void)token;
+	unique_ptr<SimplestStmt> left_tree_stmt = unique_ptr_cast<SimplestNode, SimplestStmt>(NodeRead(NULL, 0));
+	if (left_tree_stmt)
+		children.emplace_back(std::move(left_tree_stmt));
+	// righttree
+	token = PG_strtok(&length);
+	(void)token;
+	unique_ptr<SimplestStmt> right_tree_stmt = unique_ptr_cast<SimplestNode, SimplestStmt>(NodeRead(NULL, 0));
+	if (right_tree_stmt)
+		children.emplace_back(std::move(right_tree_stmt));
+	// initPlan
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// extParam
+	token = PG_strtok(&length);
+	(void)token;
+	ReadBitmapset();
+	// allParam
+	token = PG_strtok(&length);
+	(void)token;
+	ReadBitmapset();
+
+	if (children.empty())
+		return make_uniq<SimplestStmt>(std::move(attr_vec), std::move(qual_vec), StmtNode);
+	else
+		return make_uniq<SimplestStmt>(std::move(children), std::move(attr_vec), std::move(qual_vec), StmtNode);
+}
+
+unique_ptr<SimplestAggregate> PlanReader::ReadAgg() {
+	READ_TEMP_LOCALS();
+
+	unique_ptr<SimplestStmt> common_stmt = ReadCommonPlan();
+	std::vector<SimplestVarType> agg_type_vec;
+	for (const auto &target : common_stmt->target_list) {
+		// todo: need to check the order
+		agg_type_vec.emplace_back(target->GetType());
+	}
+	unique_ptr<SimplestAggregate> agg_stmt = make_uniq<SimplestAggregate>(
+	    std::move(common_stmt->children), std::move(common_stmt->target_list), agg_type_vec);
+
+	// AggStrategy
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// AggSplit
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// numCols
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	int numCols = atoi(token);
+	// grpColIdx
+	token = PG_strtok(&length);
+	ReadAttrNumberCols(numCols);
+	// grpOperators
+	token = PG_strtok(&length);
+	ReadOidCols(numCols);
+	// grpCollations
+	token = PG_strtok(&length);
+	ReadOidCols(numCols);
+	// numGroups
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// aggParams
+	token = PG_strtok(&length);
+	(void)token;
+	ReadBitmapset();
+	// groupingSets
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// chain
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+
+	return agg_stmt;
+}
+
+unique_ptr<SimplestAttr> PlanReader::ReadAggref() {
+	READ_TEMP_LOCALS();
+
+	// aggfnoid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// aggtype
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	unsigned int agg_type_id = atoi(token);
+	SimplestVarType agg_type = GetSimplestVarType(agg_type_id);
+	// aggcollid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// inputcollid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// aggtranstype
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// aggargtypes
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// aggdirectargs
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// args
+	token = PG_strtok(&length);
+	(void)token;
+	auto args_node = NodeRead(NULL, 0);
+	unique_ptr<SimplestAttr> aggr_attr = unique_ptr_cast<SimplestNode, SimplestAttr>(std::move(args_node));
+	// aggorder
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// aggdistinct
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// aggfilter
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// aggstar
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// aggvariadic
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// aggkind
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	auto agg_kind = (length == 0) ? '\0' : (token[0] == '\\' ? token[1] : token[0]);
+	// agglevelsup
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// aggsplit
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// location
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	(void)token;
+
+	return aggr_attr;
+}
+
+unique_ptr<SimplestNode> PlanReader::ReadTargetEntry() {
+	READ_TEMP_LOCALS();
+
+	unique_ptr<SimplestNode> node;
+
+	// expr
+	// check if TARGETENTRY has only one expr
+	token = PG_strtok(&length);
+	(void)token;
+	node = NodeRead(NULL, 0);
+	// resno
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// resname
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	nullable_string(token, length);
+	// ressortgroupref
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// resorigtbl
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// resorigcol
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// resjunk
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+
+	return node;
+}
+
+unique_ptr<SimplestAttr> PlanReader::ReadVar() {
+	READ_TEMP_LOCALS();
+
+	// varno
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// varattno
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// vartype
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	unsigned int var_type_id = atoi(token);
+	SimplestVarType var_type = GetSimplestVarType(var_type_id);
+	// vartypmod
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// varcollid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// varlevelsup
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// varnoold
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	unsigned int table_index = atoi(token);
+	// varoattno
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	unsigned int column_index = atoi(token);
+	// location
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	return make_uniq<SimplestAttr>(var_type, table_index, column_index, "");
+}
+
+void PlanReader::ReadGather() {
+	READ_TEMP_LOCALS();
+
+	ReadCommonPlan();
+
+	// num_workers
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// rescan_param
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// single_copy
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// invisible
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// initParam
+	token = PG_strtok(&length);
+	(void)token;
+	ReadBitmapset();
+}
+
+unique_ptr<SimplestJoin> PlanReader::ReadCommonJoin() {
+	READ_TEMP_LOCALS();
+
+	unique_ptr<SimplestStmt> common_stmt = ReadCommonPlan();
+
+	// jointype
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	SimplestJoinType join_type = GetSimplestJoinType(atoi(token));
+	// inner_unique
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// joinqual
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+
+	unique_ptr<SimplestJoin> common_join = make_uniq<SimplestJoin>(std::move(common_stmt->children), join_type);
+
+	return common_join;
+}
+
+unique_ptr<SimplestHash> PlanReader::ReadHash() {
+	READ_TEMP_LOCALS();
+
+	unique_ptr<SimplestStmt> common_plan = ReadCommonPlan();
+
+	// hashkeys
+	token = PG_strtok(&length);
+	(void)token;
+	std::vector<unique_ptr<SimplestNode>> node_vec;
+	std::vector<unique_ptr<SimplestAttr>> attr_vec;
+	NodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node)
+			attr_vec.emplace_back(unique_ptr_cast<SimplestNode, SimplestAttr>(std::move(node)));
+	}
+	// skewTable
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// skewColumn
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// skewInherit
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// rows_total
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+
+	unique_ptr<SimplestHash> hash_stmt = make_uniq<SimplestHash>(
+	    std::move(common_plan->children), std::move(common_plan->target_list), std::move(attr_vec));
+
+	return hash_stmt;
+}
+
+unique_ptr<SimplestJoin> PlanReader::ReadHashJoin() {
+	READ_TEMP_LOCALS();
+
+	unique_ptr<SimplestJoin> common_join = ReadCommonJoin();
+
+	// hashclauses
+	// get join condition
+	token = PG_strtok(&length);
+	(void)token;
+	// this should get a vector of exprs
+	std::vector<unique_ptr<SimplestNode>> node_vec;
+	// todo: need to check if it's always SimplestVarComparison
+	std::vector<unique_ptr<SimplestVarComparison>> join_conditions;
+	auto hash_clauses_node = NodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node)
+			join_conditions.emplace_back(unique_ptr_cast<SimplestNode, SimplestVarComparison>(std::move(node)));
+	}
+	common_join->AddJoinCondition(std::move(join_conditions));
+	// hashoperators
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// hashcollations
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// hashkeys
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+
+	return common_join;
+}
+
+unique_ptr<SimplestScan> PlanReader::ReadCommonScan() {
+	READ_TEMP_LOCALS();
+
+	unique_ptr<SimplestStmt> common_plan = ReadCommonPlan();
+	// todo: add table name
+	unique_ptr<SimplestScan> common_scan;
+	if (common_plan->qual_vec.empty())
+		common_scan = make_uniq<SimplestScan>("", std::move(common_plan->target_list));
+	else
+		common_scan =
+		    make_uniq<SimplestScan>("", std::move(common_plan->target_list), std::move(common_plan->qual_vec));
+
+	// scanrelid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+
+	return common_scan;
+}
+
+unique_ptr<SimplestScan> PlanReader::ReadSeqScan() {
+	return ReadCommonScan();
+}
+
+unique_ptr<SimplestComparisonExpr> PlanReader::ReadOpExpr() {
+	READ_TEMP_LOCALS();
+
+	// opno
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	SimplestComparisonType op_type = GetSimplestComparisonType(atoi(token));
+
+	// opfuncid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// opresulttype
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// opretset
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// opcollid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// inputcollid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// args
+	token = PG_strtok(&length);
+	(void)token;
+	std::vector<unique_ptr<SimplestNode>> node_vec;
+	std::vector<unique_ptr<SimplestVar>> var_vec;
+	NodeRead(NULL, 0, true, &node_vec);
+	D_ASSERT(node_vec.size() == 2);
+	for (auto &node : node_vec) {
+		if (node)
+			var_vec.emplace_back(unique_ptr_cast<SimplestNode, SimplestVar>(std::move(node)));
+	}
+	// todo: need to confirm if the var_vec[0] is always a variable
+	D_ASSERT(!var_vec[0]->IsConst());
+	// location
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+
+	if (var_vec[1]->IsConst()) {
+		return make_uniq<SimplestVarConstComparison>(
+		    op_type, unique_ptr_cast<SimplestVar, SimplestAttr>(std::move(var_vec[0])),
+		    unique_ptr_cast<SimplestVar, SimplestConstVar>(std::move(var_vec[1])));
+	} else {
+		return make_uniq<SimplestVarComparison>(op_type,
+		                                        unique_ptr_cast<SimplestVar, SimplestAttr>(std::move(var_vec[0])),
+		                                        unique_ptr_cast<SimplestVar, SimplestAttr>(std::move(var_vec[1])));
+	}
+}
+
+unique_ptr<SimplestConstVar> PlanReader::ReadConst() {
+	READ_TEMP_LOCALS();
+
+	// consttype
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	unsigned int const_type_id = atoi(token);
+	SimplestVarType const_type = GetSimplestVarType(const_type_id);
+	// consttypmod
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// constcollid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// constlen
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	unsigned int const_len = atoi(token);
+	// constbyval
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	auto const_by_val = strtobool(token);
+	// constisnull
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	auto const_is_null = strtobool(token);
+	// location
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+
+	token = PG_strtok(&length);
+	if (const_is_null) {
+		token = PG_strtok(&length); /* skip "<>" */
+		return nullptr;
+	} else {
+		PGDatum datum = ReadDatum(const_by_val);
+		switch (const_type) {
+		case IntVar: {
+			return make_uniq<SimplestConstVar>((int)datum);
+		}
+		case FloatVar: {
+			// todo: check
+			return make_uniq<SimplestConstVar>((float)datum);
+		}
+		case StringVar: {
+			// todo: check
+			return make_uniq<SimplestConstVar>(std::to_string(datum));
+		}
+		default:
+			Printer::Print("Doesn't support type " + std::to_string(const_type) + " yet!");
+			D_ASSERT(false);
+			return nullptr;
+		}
+	}
+}
+
+unique_ptr<SimplestStmt> PlanReader::ReadPlannedStmt() {
+	READ_TEMP_LOCALS();
+
+	// commandType
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// queryId
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// hasReturning
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// hasModifyingCTE
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// canSetTag
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// transientPlan
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// dependsOnRole
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// parallelModeNeeded
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// jitFlags
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// planTree
+	token = PG_strtok(&length);
+	(void)token;
+	unique_ptr<SimplestStmt> plan_tree = unique_ptr_cast<SimplestNode, SimplestStmt>(NodeRead(NULL, 0));
+	// rtable
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// resultRelations
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// rootResultRelations
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// subplans
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// rewindPlanIDs
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// rowMarks
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// relationOids
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// invalItems
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// paramExecTypes
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// utilityStmt
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// stmt_location
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	(void)token;
+	// stmt_len
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	(void)token;
+
+	return plan_tree;
+}
+
+void PlanReader::ReadRangeTblEntry() {
+	READ_TEMP_LOCALS();
+
+	/* put alias + eref first to make dump more legible */
+	// alias
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// eref
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// rtekind
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	duckdb_libpgquery::PGRTEKind rte_kind = (duckdb_libpgquery::PGRTEKind)atoi(token);
+	switch (rte_kind) {
+	case duckdb_libpgquery::PG_RTE_RELATION:
+		// relid
+		token = PG_strtok(&length);
+		token = PG_strtok(&length);
+		// relkind
+		token = PG_strtok(&length);
+		token = PG_strtok(&length);
+		// rellockmode
+		token = PG_strtok(&length);
+		token = PG_strtok(&length);
+		// tablesample
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		break;
+	case duckdb_libpgquery::PG_RTE_SUBQUERY:
+		// subquery
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		// security_barrier
+		token = PG_strtok(&length);
+		token = PG_strtok(&length);
+		break;
+	case duckdb_libpgquery::PG_RTE_JOIN:
+		// jointype
+		token = PG_strtok(&length);
+		token = PG_strtok(&length);
+		// joinaliasvars
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		break;
+	case duckdb_libpgquery::PG_RTE_FUNCTION:
+		// functions
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		// funcordinality
+		token = PG_strtok(&length);
+		token = PG_strtok(&length);
+		break;
+	case duckdb_libpgquery::PG_RTE_TABLEFUNC:
+		// tablefunc
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		break;
+	case duckdb_libpgquery::PG_RTE_VALUES:
+		// values_lists
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		// coltypes
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		// coltypmods
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		// colcollations
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		break;
+	case duckdb_libpgquery::PG_RTE_CTE:
+		// ctename
+		token = PG_strtok(&length);
+		token = PG_strtok(&length);
+		// ctelevelsup
+		token = PG_strtok(&length);
+		token = PG_strtok(&length);
+		// self_reference
+		token = PG_strtok(&length);
+		token = PG_strtok(&length);
+		// coltypes
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		// coltypmods
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		// colcollations
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		break;
+	case duckdb_libpgquery::RTE_NAMEDTUPLESTORE:
+		// enrname
+		token = PG_strtok(&length);
+		token = PG_strtok(&length);
+		// enrtuples
+		token = PG_strtok(&length);
+		token = PG_strtok(&length);
+		// relid
+		token = PG_strtok(&length);
+		token = PG_strtok(&length);
+		// coltypes
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		// coltypmods
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		// colcollations
+		token = PG_strtok(&length);
+		(void)token;
+		NodeRead(NULL, 0);
+		break;
+	default:
+		Printer::Print("Error! unrecognized RTE kind: " + std::to_string(rte_kind));
+		break;
+	}
+	// lateral
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// inh
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// inFromCl
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// requiredPerms
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// checkAsUser
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// selectedCols
+	token = PG_strtok(&length);
+	(void)token;
+	ReadBitmapset();
+	// insertedCols
+	token = PG_strtok(&length);
+	(void)token;
+	ReadBitmapset();
+	// updatedCols
+	token = PG_strtok(&length);
+	(void)token;
+	ReadBitmapset();
+	// extraUpdatedCols
+	token = PG_strtok(&length);
+	(void)token;
+	ReadBitmapset();
+	// securityQuals
+	token = PG_strtok(&length);
+	(void)token;
+	ReadBitmapset();
+}
+
+void PlanReader::ReadAlias() {
+	READ_TEMP_LOCALS();
+
+	// aliasname
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	std::string alias_name(token, length);
+	// colnames
+	token = PG_strtok(&length);
+	(void)token;
+	std::vector<unique_ptr<SimplestNode>> node_vec;
+	std::vector<unique_ptr<SimplestLiteral>> col_name_vec;
+	NodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node)
+			col_name_vec.emplace_back(unique_ptr_cast<SimplestNode, SimplestLiteral>(std::move(node)));
+	}
+	table_str table_col_pair;
+	table_col_pair[alias_name] = std::move(col_name_vec);
+	table_col_names.push(std::move(table_col_pair));
+}
+
+PGDatum PlanReader::ReadDatum(bool typbyval) {
+	size_t length, i;
+	int tokenLength;
+	const char *token;
+	PGDatum res;
+	char *s;
+
+	/*
+	 * read the actual length of the value
+	 */
+	token = PG_strtok(&tokenLength);
+	length = atoi(token);
+
+	token = PG_strtok(&tokenLength); /* read the '[' */
+	if (token == NULL || token[0] != '[') {
+		std::string token_str = token ? token : "[NULL]";
+		Printer::Print("Error! expected \"[\" to start datum, but got " + token_str +
+		               "; length = " + std::to_string(length));
+	}
+
+	if (typbyval) {
+		if (length > (size_t)sizeof(PGDatum))
+			Printer::Print("Error! byval datum but length = " + std::to_string(length));
+		res = (PGDatum)0;
+		s = (char *)(&res);
+		for (i = 0; i < (size_t)sizeof(PGDatum); i++) {
+			token = PG_strtok(&tokenLength);
+			s[i] = (char)atoi(token);
+		}
+	} else if (length <= 0)
+		res = (PGDatum)NULL;
+	else {
+		s = (char *)malloc(length);
+		for (i = 0; i < length; i++) {
+			token = PG_strtok(&tokenLength);
+			s[i] = (char)atoi(token);
+		}
+		res = (PGDatum)(s);
+	}
+
+	token = PG_strtok(&tokenLength); /* read the ']' */
+	if (token == NULL || token[0] != ']') {
+		std::string token_str = token ? token : "[NULL]";
+		Printer::Print("Error! expected \"]\" to end datum, but got " + token_str +
+		               "; length = " + std::to_string(length));
+	}
+
+	return res;
+}
+SimplestVarType PlanReader::GetSimplestVarType(unsigned int type_id) {
+	SimplestVarType simplest_var_type = InvalidVarType;
+	switch (type_id) {
+	case 20:
+	case 21:
+	case 23:
+		simplest_var_type = IntVar;
+		break;
+	case 25:
+		simplest_var_type = StringVar;
+		break;
+	case 700:
+	case 701:
+		simplest_var_type = FloatVar;
+		break;
+	default:
+		Printer::Print("Doesn't support such type yet");
+		D_ASSERT(false);
+	}
+
+	return simplest_var_type;
+}
+
+SimplestJoinType PlanReader::GetSimplestJoinType(unsigned int type_id) {
+	SimplestJoinType simplest_join_type = InvalidJoinType;
+	switch (type_id) {
+	case 0:
+		simplest_join_type = Inner;
+		break;
+	case 1:
+		simplest_join_type = Left;
+		break;
+	case 2:
+		simplest_join_type = Full;
+		break;
+	case 3:
+		simplest_join_type = Right;
+		break;
+	case 4:
+		simplest_join_type = Semi;
+		break;
+	case 5:
+		simplest_join_type = Anti;
+		break;
+	case 6:
+		simplest_join_type = UniqueOuter;
+		break;
+	case 7:
+		simplest_join_type = UniqueInner;
+		break;
+	default:
+		Printer::Print("Doesn't support such type yet");
+		D_ASSERT(false);
+	}
+
+	return simplest_join_type;
+}
+
+SimplestComparisonType PlanReader::GetSimplestComparisonType(unsigned int type_id) {
+	SimplestComparisonType simplest_comprison_type = InvalidComparisonType;
+	// from postgres - src/include/catalog/pg_operator.dat
+	switch (type_id) {
+	case 15:
+	case 91:
+	case 92:
+	case 93:
+	case 94:
+	case 96:
+	case 98:
+		simplest_comprison_type = Equal;
+		break;
+	case 85:
+		simplest_comprison_type = Not;
+		break;
+	case 97:
+	case 412:
+	case 2799:
+	case 672:
+		simplest_comprison_type = LessThan;
+		break;
+	case 521:
+		simplest_comprison_type = GreaterThan;
+		break;
+	default:
+		Printer::Print("Doesn't support such type yet");
+		D_ASSERT(false);
+	}
+
+	return simplest_comprison_type;
+}
+
+unique_ptr<SimplestNode> PlanReader::ParseNodeString() {
+	READ_TEMP_LOCALS();
+
+	/* Guard against stack overflow due to overly complex expressions */
+	// check_stack_depth();
+
+	token = PG_strtok(&length);
+
+#define MATCH(tokname, namelen) (length == namelen && memcmp(token, tokname, namelen) == 0)
+
+	unique_ptr<SimplestNode> node;
+	// debug
+	if (MATCH("AGG", 3))
+		node = ReadAgg();
+	else if (MATCH("AGGREF", 6))
+		node = ReadAggref();
+	else if (MATCH("TARGETENTRY", 11))
+		node = ReadTargetEntry();
+	else if (MATCH("VAR", 3))
+		node = ReadVar();
+	else if (MATCH("GATHER", 6))
+		ReadGather();
+	else if (MATCH("HASH", 4))
+		node = ReadHash();
+	else if (MATCH("HASHJOIN", 8))
+		node = ReadHashJoin();
+	else if (MATCH("SEQSCAN", 7))
+		node = ReadSeqScan();
+	else if (MATCH("OPEXPR", 6))
+		node = ReadOpExpr();
+	else if (MATCH("CONST", 5))
+		node = ReadConst();
+	else if (MATCH("PLANNEDSTMT", 11))
+		node = ReadPlannedStmt();
+	else if (MATCH("RTE", 3))
+		ReadRangeTblEntry();
+	else if (MATCH("ALIAS", 5))
+		ReadAlias();
+	else
+		Printer::Print("Unsupport node type: " + std::string(token));
 
 	return node;
 }
