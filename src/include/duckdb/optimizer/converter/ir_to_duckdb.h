@@ -42,6 +42,10 @@ private:
 	                                        const std::deque<table_str> &table_col_names);
 	// todo: Refactor as SimplestVisitor (like `LogicalOperatorVisitor`)
 	void AddTableColumnName(unique_ptr<SimplestStmt> &postgres_plan, const std::deque<table_str> &table_col_names);
+
+	// <duckdb_table_index, duckdb's column_ids>
+	// in duckdb's column_ids, it convert table entry's id to binding id
+	std::unordered_map<uint64_t, vector<column_t>> column_idx_mapping;
 };
 
 } // namespace duckdb

@@ -152,13 +152,9 @@ unordered_map<std::string, unique_ptr<LogicalGet>> IRConverter::GetTableMap(uniq
 unique_ptr<LogicalOperator> IRConverter::ConstructPlan(LogicalOperator *new_plan, SimplestStmt *postgres_plan_pointer,
                                                        unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
                                                        const unordered_map<int, int> &pg_duckdb_table_idx) {
-	// test
-	std::vector<std::string> test_table_name_vec = {"movie_keyword", "title"};
-	int test_table_name_idx = 0;
-
 	std::function<unique_ptr<LogicalOperator>(LogicalOperator * new_plan, SimplestStmt * postgres_plan_pointer)>
 	    iterate_plan;
-	iterate_plan = [&iterate_plan, &table_map, test_table_name_vec, &test_table_name_idx, pg_duckdb_table_idx, this](
+	iterate_plan = [&iterate_plan, &table_map, pg_duckdb_table_idx, this](
 	                   LogicalOperator *new_plan, SimplestStmt *postgres_plan_pointer) -> unique_ptr<LogicalOperator> {
 		unique_ptr<LogicalOperator> left_child, right_child;
 		if (postgres_plan_pointer->children.size() > 0) {
@@ -183,18 +179,36 @@ unique_ptr<LogicalOperator> IRConverter::ConstructPlan(LogicalOperator *new_plan
 #ifdef DEBUG
 				D_ASSERT(left_index_find != pg_duckdb_table_idx.end());
 #endif
-				cond.left = make_uniq<BoundColumnRefExpression>(
-				    left_pg_cond->GetColumnName(), left_type,
-				    ColumnBinding(left_index_find->second, left_pg_cond->GetColumnIndex()));
+				auto left_table_index = left_index_find->second;
+				auto find_col_idx =
+				    std::find(column_idx_mapping[left_table_index].begin(), column_idx_mapping[left_table_index].end(),
+				              left_pg_cond->GetColumnIndex() - 1);
+#ifdef DEBUG
+				D_ASSERT(find_col_idx != column_idx_mapping[left_table_index].end());
+#endif
+				auto left_column_index = find_col_idx - column_idx_mapping[left_table_index].begin();
+				//				auto left_column_index =
+				//				    column_idx_mapping[left_table_index][left_pg_cond->GetColumnIndex() - 1];
+				cond.left = make_uniq<BoundColumnRefExpression>(left_pg_cond->GetColumnName(), left_type,
+				                                                ColumnBinding(left_table_index, left_column_index));
 				auto &right_pg_cond = postgres_cond->right_attr;
 				LogicalType right_type = ConvertVarType(right_pg_cond->GetType());
 				auto right_index_find = pg_duckdb_table_idx.find(right_pg_cond->GetTableIndex());
 #ifdef DEBUG
 				D_ASSERT(right_index_find != pg_duckdb_table_idx.end());
 #endif
-				cond.right = make_uniq<BoundColumnRefExpression>(
-				    right_pg_cond->GetColumnName(), right_type,
-				    ColumnBinding(right_index_find->second, right_pg_cond->GetColumnIndex()));
+				auto right_table_index = right_index_find->second;
+				find_col_idx =
+				    std::find(column_idx_mapping[right_table_index].begin(),
+				              column_idx_mapping[right_table_index].end(), right_pg_cond->GetColumnIndex() - 1);
+#ifdef DEBUG
+				D_ASSERT(find_col_idx != column_idx_mapping[right_table_index].end());
+#endif
+				auto right_column_index = find_col_idx - column_idx_mapping[right_table_index].begin();
+				//				auto right_column_index =
+				//				    column_idx_mapping[right_table_index][right_pg_cond->GetColumnIndex() - 1];
+				cond.right = make_uniq<BoundColumnRefExpression>(right_pg_cond->GetColumnName(), right_type,
+				                                                 ColumnBinding(right_table_index, right_column_index));
 				duckdb_join->conditions.push_back(std::move(cond));
 			}
 			return unique_ptr_cast<LogicalComparisonJoin, LogicalOperator>(std::move(duckdb_join));
@@ -207,8 +221,12 @@ unique_ptr<LogicalOperator> IRConverter::ConstructPlan(LogicalOperator *new_plan
 			return left_child;
 		case ScanNode: {
 			// get scan node from table_map
-			auto duckdb_scan = std::move(table_map[test_table_name_vec[test_table_name_idx]]);
-			test_table_name_idx++;
+			auto postgres_scan = dynamic_cast<SimplestScan *>(postgres_plan_pointer);
+			auto duckdb_scan = std::move(table_map[postgres_scan->GetTableName()]);
+#ifdef DEBUG
+			D_ASSERT(0 == column_idx_mapping.count(duckdb_scan->table_index));
+#endif
+			column_idx_mapping[duckdb_scan->table_index] = duckdb_scan->column_ids;
 			return unique_ptr_cast<LogicalGet, LogicalOperator>(std::move(duckdb_scan));
 		}
 		default:
