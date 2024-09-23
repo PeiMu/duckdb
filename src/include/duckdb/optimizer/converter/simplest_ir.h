@@ -75,6 +75,10 @@ public:
 		return str;
 	};
 
+	std::string GetLiteralValue() {
+		return literal_value;
+	}
+
 private:
 	std::string literal_value;
 };
@@ -176,6 +180,9 @@ public:
 	}
 	std::string GetColumnName() const {
 		return column_name;
+	}
+	void SetColumnName(std::string col_name) {
+		column_name = col_name;
 	}
 
 	std::string Print(bool print = true) override {
@@ -539,15 +546,22 @@ public:
 
 class SimplestScan : public SimplestStmt {
 public:
-	SimplestScan(std::string table_name, std::vector<unique_ptr<SimplestAttr>> scan_columns)
-	    : SimplestStmt(std::move(scan_columns), ScanNode), table_name(table_name) {};
-	SimplestScan(std::string table_name, std::vector<unique_ptr<SimplestAttr>> scan_columns,
+	SimplestScan(unsigned int table_index, std::string table_name, std::vector<unique_ptr<SimplestAttr>> scan_columns)
+	    : SimplestStmt(std::move(scan_columns), ScanNode), table_index(table_index), table_name(table_name) {};
+	SimplestScan(unsigned int table_index, std::string table_name, std::vector<unique_ptr<SimplestAttr>> scan_columns,
 	             std::vector<unique_ptr<SimplestVarConstComparison>> qual_vec)
-	    : SimplestStmt(std::move(scan_columns), std::move(qual_vec), ScanNode), table_name(table_name) {};
+	    : SimplestStmt(std::move(scan_columns), std::move(qual_vec), ScanNode), table_index(table_index),
+	      table_name(table_name) {};
 	~SimplestScan() = default;
 
+	unsigned int GetTableIndex() {
+		return table_index;
+	}
 	std::string GetTableName() {
 		return table_name;
+	}
+	void SetTableName(std::string tbl_name) {
+		table_name = tbl_name;
 	}
 
 	std::string Print(bool print = true) override {
@@ -566,6 +580,7 @@ public:
 	}
 
 private:
+	unsigned int table_index;
 	std::string table_name;
 };
 
@@ -596,7 +611,6 @@ public:
 		return str;
 	}
 
-private:
 	std::vector<unique_ptr<SimplestAttr>> hash_keys;
 };
 } // namespace duckdb

@@ -871,13 +871,19 @@ unique_ptr<SimplestScan> PlanReader::ReadCommonScan() {
 	READ_TEMP_LOCALS();
 
 	unique_ptr<SimplestStmt> common_plan = ReadCommonPlan();
-	// todo: add table name
+	// get table index from common_plan->target_list
+	unsigned int table_index = common_plan->target_list[0]->GetTableIndex();
+#ifdef DEBUG
+	for (const auto &attr : common_plan->target_list) {
+		D_ASSERT(attr->GetTableIndex() == table_index);
+	}
+#endif
 	unique_ptr<SimplestScan> common_scan;
 	if (common_plan->qual_vec.empty())
-		common_scan = make_uniq<SimplestScan>("", std::move(common_plan->target_list));
+		common_scan = make_uniq<SimplestScan>(table_index, "", std::move(common_plan->target_list));
 	else
-		common_scan =
-		    make_uniq<SimplestScan>("", std::move(common_plan->target_list), std::move(common_plan->qual_vec));
+		common_scan = make_uniq<SimplestScan>(table_index, "", std::move(common_plan->target_list),
+		                                      std::move(common_plan->qual_vec));
 
 	// scanrelid
 	token = PG_strtok(&length);
@@ -1250,7 +1256,7 @@ void PlanReader::ReadRangeTblEntry() {
 	// securityQuals
 	token = PG_strtok(&length);
 	(void)token;
-	ReadBitmapset();
+	NodeRead(NULL, 0);
 }
 
 void PlanReader::ReadAlias() {
@@ -1272,7 +1278,7 @@ void PlanReader::ReadAlias() {
 	}
 	table_str table_col_pair;
 	table_col_pair[alias_name] = std::move(col_name_vec);
-	table_col_names.push(std::move(table_col_pair));
+	table_col_names.push_back(std::move(table_col_pair));
 }
 
 PGDatum PlanReader::ReadDatum(bool typbyval) {

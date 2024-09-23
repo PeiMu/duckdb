@@ -9,20 +9,19 @@
 
 #pragma once
 
-#include <queue>
 #include "duckdb/common/printer.hpp"
 #include "nodes/pg_list.hpp"
 #include "nodes/value.hpp"
 #include "pg_functions.hpp"
-
 #include "simplest_ir.h"
 
+#include <queue>
 
 namespace duckdb {
 /* And a few guys need only the PG_strtok support fields */
-#define READ_TEMP_LOCALS()	\
-	const char *token;		\
-	int			length
+#define READ_TEMP_LOCALS()                                                                                             \
+	const char *token;                                                                                                 \
+	int length
 
 #define nullable_string(token, length) ((length) == 0 ? NULL : DeBackslash(token, length))
 
@@ -39,13 +38,13 @@ public:
 	const char *PG_strtok(int *length);
 
 	unique_ptr<SimplestNode> NodeRead(const char *token, int tok_len, bool return_vector = false,
-	                                         std::vector<unique_ptr<SimplestNode>> *node_vec = nullptr);
+	                                  std::vector<unique_ptr<SimplestNode>> *node_vec = nullptr);
 
 	unique_ptr<SimplestNode> StringToNode(const char *str);
 
 	char *DeBackslash(const char *token, int length);
 
-	std::queue<table_str> table_col_names;
+	std::deque<table_str> table_col_names;
 
 private:
 	unique_ptr<SimplestNode> StringToNodeInternal(const char *str, bool restore_loc_fields);
