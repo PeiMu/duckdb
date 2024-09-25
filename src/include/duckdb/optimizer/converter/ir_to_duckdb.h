@@ -28,11 +28,16 @@ public:
 	unique_ptr<LogicalOperator> InjectPlan(unique_ptr<LogicalOperator> duckdb_plan);
 
 private:
+	std::vector<unique_ptr<Expression>> CollectFilterExpressions(unique_ptr<LogicalOperator> &duckdb_plan);
 	std::unordered_map<std::string, unique_ptr<LogicalGet>> GetTableMap(unique_ptr<LogicalOperator> &duckdb_plan);
-	unique_ptr<LogicalOperator> ConstructPlan(LogicalOperator *new_plan, SimplestStmt *postgres_plan_pointer,
-	                                          unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
-	                                          const unordered_map<int, int> &pg_duckdb_table_idx,
-	                                          std::vector<unique_ptr<Expression>> &expr_vec);
+	unique_ptr<LogicalComparisonJoin> ConstructDuckdbJoin(SimplestJoin *pJoin, unique_ptr<LogicalOperator> left_child,
+	                                                      unique_ptr<LogicalOperator> right_child,
+	                                                      const unordered_map<int, int> &pg_duckdb_table_idx);
+	bool CheckCondIndex(const unique_ptr<Expression> &expr, const unique_ptr<LogicalOperator> &child);
+	unique_ptr<LogicalOperator> ConstructDuckdbPlan(LogicalOperator *new_plan, SimplestStmt *postgres_plan_pointer,
+	                                                unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
+	                                                const unordered_map<int, int> &pg_duckdb_table_idx,
+	                                                std::vector<unique_ptr<Expression>> &expr_vec);
 	ExpressionType ConvertCompType(SimplestComparisonType type);
 	LogicalType ConvertVarType(SimplestVarType type);
 	void SetAttrVecName(std::vector<unique_ptr<SimplestAttr>> &attr_vec, const std::deque<table_str> &table_col_names);
@@ -46,7 +51,6 @@ private:
 	                                        const std::deque<table_str> &table_col_names);
 	// todo: Refactor as SimplestVisitor (like `LogicalOperatorVisitor`)
 	void AddTableColumnName(unique_ptr<SimplestStmt> &postgres_plan, const std::deque<table_str> &table_col_names);
-	std::vector<unique_ptr<Expression>> CollectFilterExpressions(unique_ptr<LogicalOperator> &duckdb_plan);
 
 	// <duckdb_table_index, duckdb's column_ids>
 	// in duckdb's column_ids, it convert table entry's id to binding id

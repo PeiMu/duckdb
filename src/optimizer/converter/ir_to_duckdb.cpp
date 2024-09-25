@@ -264,7 +264,8 @@ unique_ptr<LogicalOperator> IRConverter::InjectPlan(unique_ptr<LogicalOperator> 
 
 	new_plan->children.clear();
 	// construct plan from postgres
-	auto new_duckdb_plan = ConstructPlan(new_plan, postgres_plan_pointer, table_map, pg_duckdb_table_idx, expr_vec);
+	auto new_duckdb_plan =
+	    ConstructDuckdbPlan(new_plan, postgres_plan_pointer, table_map, pg_duckdb_table_idx, expr_vec);
 #ifdef DEBUG
 	D_ASSERT(expr_vec.empty());
 #endif
@@ -320,10 +321,101 @@ std::vector<unique_ptr<Expression>> IRConverter::CollectFilterExpressions(unique
 	return expr_vec;
 }
 
-unique_ptr<LogicalOperator> IRConverter::ConstructPlan(LogicalOperator *new_plan, SimplestStmt *postgres_plan_pointer,
-                                                       unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
-                                                       const unordered_map<int, int> &pg_duckdb_table_idx,
-                                                       std::vector<unique_ptr<Expression>> &expr_vec) {
+unique_ptr<LogicalComparisonJoin> IRConverter::ConstructDuckdbJoin(SimplestJoin *postgres_join,
+                                                                   unique_ptr<LogicalOperator> left_child,
+                                                                   unique_ptr<LogicalOperator> right_child,
+                                                                   const unordered_map<int, int> &pg_duckdb_table_idx) {
+	auto duckdb_join = make_uniq<LogicalComparisonJoin>(JoinType::INNER);
+	duckdb_join->children.push_back(std::move(left_child));
+	duckdb_join->children.push_back(std::move(right_child));
+	JoinCondition cond;
+	for (const auto &postgres_cond : postgres_join->join_conditions) {
+		auto comp_op = postgres_cond->GetSimplestComparisonType();
+		cond.comparison = ConvertCompType(comp_op);
+		auto &left_pg_cond = postgres_cond->left_attr;
+		LogicalType left_type = ConvertVarType(left_pg_cond->GetType());
+		auto left_index_find = pg_duckdb_table_idx.find(left_pg_cond->GetTableIndex());
+#ifdef DEBUG
+		D_ASSERT(left_index_find != pg_duckdb_table_idx.end());
+#endif
+		auto left_table_index = left_index_find->second;
+		auto find_col_idx = std::find(column_idx_mapping[left_table_index].begin(),
+		                              column_idx_mapping[left_table_index].end(), left_pg_cond->GetColumnIndex() - 1);
+#ifdef DEBUG
+		D_ASSERT(find_col_idx != column_idx_mapping[left_table_index].end());
+#endif
+		auto left_column_index = find_col_idx - column_idx_mapping[left_table_index].begin();
+		cond.left = make_uniq<BoundColumnRefExpression>(left_pg_cond->GetColumnName(), left_type,
+		                                                ColumnBinding(left_table_index, left_column_index));
+
+		auto &right_pg_cond = postgres_cond->right_attr;
+		LogicalType right_type = ConvertVarType(right_pg_cond->GetType());
+		auto right_index_find = pg_duckdb_table_idx.find(right_pg_cond->GetTableIndex());
+#ifdef DEBUG
+		D_ASSERT(right_index_find != pg_duckdb_table_idx.end());
+#endif
+		auto right_table_index = right_index_find->second;
+		find_col_idx = std::find(column_idx_mapping[right_table_index].begin(),
+		                         column_idx_mapping[right_table_index].end(), right_pg_cond->GetColumnIndex() - 1);
+#ifdef DEBUG
+		D_ASSERT(find_col_idx != column_idx_mapping[right_table_index].end());
+#endif
+		auto right_column_index = find_col_idx - column_idx_mapping[right_table_index].begin();
+		cond.right = make_uniq<BoundColumnRefExpression>(right_pg_cond->GetColumnName(), right_type,
+		                                                 ColumnBinding(right_table_index, right_column_index));
+
+		// check if the cond match the children
+		bool match_cond = CheckCondIndex(cond.left, duckdb_join->children[0]);
+		// if not match, we need to swap the condition
+		if (!match_cond) {
+#ifdef DEBUG
+			D_ASSERT(!CheckCondIndex(cond.right, duckdb_join->children[1]));
+#endif
+			unique_ptr<Expression> tmp = std::move(cond.left);
+			cond.left = std::move(cond.right);
+			cond.right = std::move(tmp);
+		}
+
+		duckdb_join->conditions.push_back(std::move(cond));
+	}
+	return duckdb_join;
+}
+
+bool IRConverter::CheckCondIndex(const unique_ptr<Expression> &expr, const unique_ptr<LogicalOperator> &child) {
+#ifdef DEBUG
+	// todo: check if all of the expr are bound_column_ref
+	D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->GetExpressionType());
+#endif
+	auto &bound_col_ref = expr->Cast<BoundColumnRefExpression>();
+	auto expr_table_idx = bound_col_ref.binding.table_index;
+	bool match_index = false;
+
+	std::function<void(const unique_ptr<LogicalOperator> &duckdb_plan)> iterate_plan;
+	iterate_plan = [expr_table_idx, &match_index, &iterate_plan](const unique_ptr<LogicalOperator> &duckdb_plan) {
+		if (match_index)
+			return;
+
+		for (auto &child : duckdb_plan->children) {
+			iterate_plan(child);
+		}
+
+		if (LogicalOperatorType::LOGICAL_GET == duckdb_plan->type) {
+			auto &get_node = duckdb_plan->Cast<LogicalGet>();
+			match_index = get_node.table_index == expr_table_idx;
+			if (match_index)
+				return;
+		}
+	};
+
+	iterate_plan(child);
+	return match_index;
+}
+
+unique_ptr<LogicalOperator>
+IRConverter::ConstructDuckdbPlan(LogicalOperator *new_plan, SimplestStmt *postgres_plan_pointer,
+                                 unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
+                                 const unordered_map<int, int> &pg_duckdb_table_idx,
+                                 std::vector<unique_ptr<Expression>> &expr_vec) {
 	std::function<unique_ptr<LogicalOperator>(LogicalOperator * new_plan, SimplestStmt * postgres_plan_pointer)>
 	    iterate_plan;
 	iterate_plan = [&iterate_plan, &table_map, pg_duckdb_table_idx, &expr_vec, this](
@@ -338,47 +430,8 @@ unique_ptr<LogicalOperator> IRConverter::ConstructPlan(LogicalOperator *new_plan
 		case JoinNode: {
 			// get info from postgres_join and construct duckdb_join
 			auto postgres_join = dynamic_cast<SimplestJoin *>(postgres_plan_pointer);
-			auto duckdb_join = make_uniq<LogicalComparisonJoin>(JoinType::INNER);
-			duckdb_join->children.push_back(std::move(left_child));
-			duckdb_join->children.push_back(std::move(right_child));
-			JoinCondition cond;
-			for (const auto &postgres_cond : postgres_join->join_conditions) {
-				auto comp_op = postgres_cond->GetSimplestComparisonType();
-				cond.comparison = ConvertCompType(comp_op);
-				auto &left_pg_cond = postgres_cond->left_attr;
-				LogicalType left_type = ConvertVarType(left_pg_cond->GetType());
-				auto left_index_find = pg_duckdb_table_idx.find(left_pg_cond->GetTableIndex());
-#ifdef DEBUG
-				D_ASSERT(left_index_find != pg_duckdb_table_idx.end());
-#endif
-				auto left_table_index = left_index_find->second;
-				auto find_col_idx =
-				    std::find(column_idx_mapping[left_table_index].begin(), column_idx_mapping[left_table_index].end(),
-				              left_pg_cond->GetColumnIndex() - 1);
-#ifdef DEBUG
-				D_ASSERT(find_col_idx != column_idx_mapping[left_table_index].end());
-#endif
-				auto left_column_index = find_col_idx - column_idx_mapping[left_table_index].begin();
-				cond.left = make_uniq<BoundColumnRefExpression>(left_pg_cond->GetColumnName(), left_type,
-				                                                ColumnBinding(left_table_index, left_column_index));
-				auto &right_pg_cond = postgres_cond->right_attr;
-				LogicalType right_type = ConvertVarType(right_pg_cond->GetType());
-				auto right_index_find = pg_duckdb_table_idx.find(right_pg_cond->GetTableIndex());
-#ifdef DEBUG
-				D_ASSERT(right_index_find != pg_duckdb_table_idx.end());
-#endif
-				auto right_table_index = right_index_find->second;
-				find_col_idx =
-				    std::find(column_idx_mapping[right_table_index].begin(),
-				              column_idx_mapping[right_table_index].end(), right_pg_cond->GetColumnIndex() - 1);
-#ifdef DEBUG
-				D_ASSERT(find_col_idx != column_idx_mapping[right_table_index].end());
-#endif
-				auto right_column_index = find_col_idx - column_idx_mapping[right_table_index].begin();
-				cond.right = make_uniq<BoundColumnRefExpression>(right_pg_cond->GetColumnName(), right_type,
-				                                                 ColumnBinding(right_table_index, right_column_index));
-				duckdb_join->conditions.push_back(std::move(cond));
-			}
+			auto duckdb_join =
+			    ConstructDuckdbJoin(postgres_join, std::move(left_child), std::move(right_child), pg_duckdb_table_idx);
 			return unique_ptr_cast<LogicalComparisonJoin, LogicalOperator>(std::move(duckdb_join));
 		}
 		case FilterNode:
