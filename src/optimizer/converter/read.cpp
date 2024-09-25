@@ -399,11 +399,11 @@ unique_ptr<SimplestNode> PlanReader::NodeRead(const char *token, int tok_len, bo
 		/* need to remove leading and trailing quotes, and backslashes */
 		return make_uniq<SimplestLiteral>(std::string(token + 1, tok_len - 2));
 	case duckdb_libpgquery::T_PGBitString: {
-		char *val = (char *)malloc(tok_len);
-
-		/* skip leading 'b' */
-		memcpy(val, token + 1, tok_len - 1);
-		val[tok_len - 1] = '\0';
+		//		char *val = (char *)malloc(tok_len);
+		//
+		//		/* skip leading 'b' */
+		//		memcpy(val, token + 1, tok_len - 1);
+		//		val[tok_len - 1] = '\0';
 		//		result = (duckdb_libpgquery::PGNode *)duckdb_libpgquery::makeBitString(val);
 		break;
 	}
@@ -753,6 +753,34 @@ unique_ptr<SimplestAttr> PlanReader::ReadVar() {
 	return make_uniq<SimplestAttr>(var_type, table_index, column_index, "");
 }
 
+unique_ptr<SimplestParam> PlanReader::ReadParam() {
+	READ_TEMP_LOCALS();
+
+	// paramkind
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// paramid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	unsigned int param_id = atoi(token);
+	// paramtype
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	unsigned int var_type_id = atoi(token);
+	SimplestVarType var_type = GetSimplestVarType(var_type_id);
+	// paramtypmod
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// paramcollid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// location
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+
+	return make_uniq<SimplestParam>(var_type, param_id);
+}
+
 void PlanReader::ReadGather() {
 	READ_TEMP_LOCALS();
 
@@ -845,7 +873,7 @@ unique_ptr<SimplestJoin> PlanReader::ReadHashJoin() {
 	std::vector<unique_ptr<SimplestNode>> node_vec;
 	// todo: need to check if it's always SimplestVarComparison
 	std::vector<unique_ptr<SimplestVarComparison>> join_conditions;
-	auto hash_clauses_node = NodeRead(NULL, 0, true, &node_vec);
+	NodeRead(NULL, 0, true, &node_vec);
 	for (auto &node : node_vec) {
 		if (node)
 			join_conditions.emplace_back(unique_ptr_cast<SimplestNode, SimplestVarComparison>(std::move(node)));
@@ -867,10 +895,66 @@ unique_ptr<SimplestJoin> PlanReader::ReadHashJoin() {
 	return common_join;
 }
 
+unique_ptr<SimplestJoin> PlanReader::ReadNestLoop() {
+	READ_TEMP_LOCALS();
+
+	unique_ptr<SimplestJoin> nest_loop_join = ReadCommonJoin();
+
+	// nestParams
+	token = PG_strtok(&length);
+	(void)token;
+	unique_ptr<SimplestNode> nest_params_node = NodeRead(NULL, 0);
+	unique_ptr<SimplestVarComparison> nest_loop_cond =
+	    unique_ptr_cast<SimplestNode, SimplestVarComparison>(std::move(nest_params_node));
+
+	// construct the nest loop join
+	std::vector<unique_ptr<SimplestVarComparison>> nest_loop_cond_vec;
+	nest_loop_cond_vec.emplace_back(std::move(nest_loop_cond));
+	nest_loop_join->AddJoinCondition(std::move(nest_loop_cond_vec));
+
+	return nest_loop_join;
+}
+
+// todo: check if it only has one condition
+unique_ptr<SimplestVarComparison> PlanReader::ReadNestLoopParam() {
+	READ_TEMP_LOCALS();
+
+	// paramno
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	unsigned int param_no = atoi(token);
+	// paramval
+	token = PG_strtok(&length);
+	(void)token;
+	unique_ptr<SimplestNode> node = NodeRead(NULL, 0);
+	unique_ptr<SimplestAttr> param_val = unique_ptr_cast<SimplestNode, SimplestAttr>(std::move(node));
+	// update the param_val's table/column index in the nest-loop join condition
+	// <paramno, <paramval.varnoold, paramval.varoattno>>
+	auto find = std::find_if(bitmap_index_conditions.begin(), bitmap_index_conditions.end(),
+	                         [param_no](const unique_ptr<SimplestVarParamComparison> &cond) {
+		                         return cond->param_var->GetParamId() == param_no;
+	                         });
+#ifdef DEBUG
+	D_ASSERT(find != bitmap_index_conditions.end());
+#endif
+
+	unique_ptr<SimplestVarComparison> nest_loop_cond = make_uniq<SimplestVarComparison>(
+	    find->get()->GetSimplestComparisonType(), std::move(find->get()->attr), std::move(param_val));
+	return nest_loop_cond;
+}
+
 unique_ptr<SimplestScan> PlanReader::ReadCommonScan() {
 	READ_TEMP_LOCALS();
 
+	// common_plan
 	unique_ptr<SimplestStmt> common_plan = ReadCommonPlan();
+	// scanrelid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+
+	if (common_plan->target_list.empty())
+		return nullptr;
+
 	// get table index from common_plan->target_list
 	unsigned int table_index = common_plan->target_list[0]->GetTableIndex();
 #ifdef DEBUG
@@ -885,15 +969,112 @@ unique_ptr<SimplestScan> PlanReader::ReadCommonScan() {
 		common_scan = make_uniq<SimplestScan>(table_index, "", std::move(common_plan->target_list),
 		                                      std::move(common_plan->qual_vec));
 
-	// scanrelid
+	return common_scan;
+}
+
+unique_ptr<SimplestScan> PlanReader::ReadSeqScan() {
+	return ReadCommonScan();
+}
+
+unique_ptr<SimplestScan> PlanReader::ReadIndexScan() {
+	READ_TEMP_LOCALS();
+
+	// common_scan
+	unique_ptr<SimplestScan> common_scan = ReadCommonScan();
+	// indexid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// indexqual
+	token = PG_strtok(&length);
+	(void)token;
+	std::vector<unique_ptr<SimplestNode>> node_vec;
+	std::vector<unique_ptr<SimplestVarComparison>> join_conditions;
+	NodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node) {
+			// todo: check if it has the same condition as `indexqualorig`?
+		}
+	}
+	// indexqualorig
+	// we should rely on this as the nest loop join condition
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node)
+			bitmap_index_conditions.emplace_back(
+			    unique_ptr_cast<SimplestNode, SimplestVarParamComparison>(std::move(node)));
+	}
+	// indexorderby
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// indexorderbyorig
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// indexorderbyops
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0);
+	// indexorderdir
 	token = PG_strtok(&length);
 	token = PG_strtok(&length);
 
 	return common_scan;
 }
 
-unique_ptr<SimplestScan> PlanReader::ReadSeqScan() {
-	return ReadCommonScan();
+unique_ptr<SimplestScan> PlanReader::ReadBitmapHeapScan() {
+	READ_TEMP_LOCALS();
+
+	// common scan
+	unique_ptr<SimplestScan> common_scan = ReadCommonScan();
+	// bitmapqualorig
+	token = PG_strtok(&length);
+	(void)token;
+	std::vector<unique_ptr<SimplestNode>> node_vec;
+	NodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node) {
+			// todo: check if it has the same condition as `indexqualorig`
+		}
+	}
+
+	return common_scan;
+}
+
+unique_ptr<SimplestNode> PlanReader::ReadBitmapIndexScan() {
+	READ_TEMP_LOCALS();
+
+	// common scan
+	ReadCommonScan();
+	// indexid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// isshared
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// indexqual
+	token = PG_strtok(&length);
+	(void)token;
+	std::vector<unique_ptr<SimplestNode>> node_vec;
+	NodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node) {
+			// todo: check if it has the same condition as `indexqualorig`?
+		}
+	}
+	// indexqualorig
+	// we should rely on this as the nest loop join condition
+	token = PG_strtok(&length);
+	(void)token;
+	NodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node)
+			bitmap_index_conditions.emplace_back(
+			    unique_ptr_cast<SimplestNode, SimplestVarParamComparison>(std::move(node)));
+	}
+	return unique_ptr<SimplestNode>();
 }
 
 unique_ptr<SimplestComparisonExpr> PlanReader::ReadOpExpr() {
@@ -903,7 +1084,6 @@ unique_ptr<SimplestComparisonExpr> PlanReader::ReadOpExpr() {
 	token = PG_strtok(&length);
 	token = PG_strtok(&length);
 	SimplestComparisonType op_type = GetSimplestComparisonType(atoi(token));
-
 	// opfuncid
 	token = PG_strtok(&length);
 	token = PG_strtok(&length);
@@ -940,11 +1120,94 @@ unique_ptr<SimplestComparisonExpr> PlanReader::ReadOpExpr() {
 		return make_uniq<SimplestVarConstComparison>(
 		    op_type, unique_ptr_cast<SimplestVar, SimplestAttr>(std::move(var_vec[0])),
 		    unique_ptr_cast<SimplestVar, SimplestConstVar>(std::move(var_vec[1])));
+	} else if (ParamVarNode == var_vec[1]->GetNodeType()) {
+		// todo: check if ParamVar only exist at the right part
+		return make_uniq<SimplestVarParamComparison>(
+		    op_type, unique_ptr_cast<SimplestVar, SimplestAttr>(std::move(var_vec[0])),
+		    unique_ptr_cast<SimplestVar, SimplestParam>(std::move(var_vec[1])));
 	} else {
 		return make_uniq<SimplestVarComparison>(op_type,
 		                                        unique_ptr_cast<SimplestVar, SimplestAttr>(std::move(var_vec[0])),
 		                                        unique_ptr_cast<SimplestVar, SimplestAttr>(std::move(var_vec[1])));
 	}
+}
+
+unique_ptr<SimplestComparisonExpr> PlanReader::ReadScalarArrayOpExpr() {
+	READ_TEMP_LOCALS();
+
+	// opno
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	SimplestComparisonType op_type = GetSimplestComparisonType(atoi(token));
+	// opfuncid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// useOr
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// inputcollid
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// args
+	token = PG_strtok(&length);
+	(void)token;
+	std::vector<unique_ptr<SimplestNode>> node_vec;
+	std::vector<unique_ptr<SimplestVar>> var_vec;
+	NodeRead(NULL, 0, true, &node_vec);
+	D_ASSERT(node_vec.size() == 2);
+	for (auto &node : node_vec) {
+		if (node)
+			var_vec.emplace_back(unique_ptr_cast<SimplestNode, SimplestVar>(std::move(node)));
+	}
+	// todo: need to confirm if the var_vec[0] is always a variable
+	D_ASSERT(!var_vec[0]->IsConst());
+	// location
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+
+	if (var_vec[1]->IsConst()) {
+		return make_uniq<SimplestVarConstComparison>(
+		    op_type, unique_ptr_cast<SimplestVar, SimplestAttr>(std::move(var_vec[0])),
+		    unique_ptr_cast<SimplestVar, SimplestConstVar>(std::move(var_vec[1])));
+	} else {
+		return make_uniq<SimplestVarComparison>(op_type,
+		                                        unique_ptr_cast<SimplestVar, SimplestAttr>(std::move(var_vec[0])),
+		                                        unique_ptr_cast<SimplestVar, SimplestAttr>(std::move(var_vec[1])));
+	}
+}
+
+std::string ParseText(PGDatum datum, unsigned int datum_len) {
+	const char *ptr = reinterpret_cast<const char *>(datum);
+
+	// todo: check what does the first 4 bytes mean
+	ptr += sizeof(int);
+	datum_len -= sizeof(int);
+	std::string str;
+	str.assign(ptr, datum_len);
+
+	return str;
+}
+
+std::vector<std::string> ParseTextArray(PGDatum datum, unsigned int datum_len) {
+	const char *ptr = reinterpret_cast<const char *>(datum);
+
+	std::vector<std::string> result;
+	// todo: check the first 24 bytes
+	size_t unused_bytes = 24;
+	ptr += unused_bytes;
+	while (ptr) {
+		int element_len = *((int *)ptr);
+		ptr += sizeof(int);
+		// Add the string to the result vector
+		result.emplace_back(ptr);
+		ptr += sizeof(result.back());
+		if (!ptr)
+			ptr += 1;
+		// debug
+		int a = 0;
+	}
+
+	return result;
 }
 
 unique_ptr<SimplestConstVar> PlanReader::ReadConst() {
@@ -982,17 +1245,22 @@ unique_ptr<SimplestConstVar> PlanReader::ReadConst() {
 		token = PG_strtok(&length); /* skip "<>" */
 		return nullptr;
 	} else {
-		PGDatum datum = ReadDatum(const_by_val);
+		unsigned int datum_len;
+		PGDatum datum = ReadDatum(const_by_val, datum_len);
 		switch (const_type) {
 		case IntVar: {
 			return make_uniq<SimplestConstVar>((int)datum);
 		}
 		case FloatVar: {
-			// todo: check
 			return make_uniq<SimplestConstVar>((float)datum);
 		}
 		case StringVar: {
-			// todo: check
+			return make_uniq<SimplestConstVar>(ParseText(datum, datum_len));
+		}
+		case StringVarArr: {
+			// Decode the array from the Datum
+			// todo
+			// std::vector<std::string> textArray = ParseTextArray(datum, datum_len);
 			return make_uniq<SimplestConstVar>(std::to_string(datum));
 		}
 		default:
@@ -1281,8 +1549,8 @@ void PlanReader::ReadAlias() {
 	table_col_names.push_back(std::move(table_col_pair));
 }
 
-PGDatum PlanReader::ReadDatum(bool typbyval) {
-	size_t length, i;
+PGDatum PlanReader::ReadDatum(bool typbyval, unsigned int &datum_len) {
+	size_t i;
 	int tokenLength;
 	const char *token;
 	PGDatum res;
@@ -1292,29 +1560,30 @@ PGDatum PlanReader::ReadDatum(bool typbyval) {
 	 * read the actual length of the value
 	 */
 	token = PG_strtok(&tokenLength);
-	length = atoi(token);
+	datum_len = atoi(token);
 
 	token = PG_strtok(&tokenLength); /* read the '[' */
 	if (token == NULL || token[0] != '[') {
 		std::string token_str = token ? token : "[NULL]";
 		Printer::Print("Error! expected \"[\" to start datum, but got " + token_str +
-		               "; length = " + std::to_string(length));
+		               "; length = " + std::to_string(datum_len));
 	}
 
 	if (typbyval) {
-		if (length > (size_t)sizeof(PGDatum))
-			Printer::Print("Error! byval datum but length = " + std::to_string(length));
+		if (datum_len > (size_t)sizeof(PGDatum))
+			Printer::Print("Error! byval datum but length = " + std::to_string(datum_len));
 		res = (PGDatum)0;
 		s = (char *)(&res);
 		for (i = 0; i < (size_t)sizeof(PGDatum); i++) {
 			token = PG_strtok(&tokenLength);
 			s[i] = (char)atoi(token);
 		}
-	} else if (length <= 0)
+	} else if (datum_len <= 0)
 		res = (PGDatum)NULL;
 	else {
-		s = (char *)malloc(length);
-		for (i = 0; i < length; i++) {
+		// todo: risk of memory leak
+		s = (char *)malloc(datum_len);
+		for (i = 0; i < datum_len; i++) {
 			token = PG_strtok(&tokenLength);
 			s[i] = (char)atoi(token);
 		}
@@ -1325,7 +1594,7 @@ PGDatum PlanReader::ReadDatum(bool typbyval) {
 	if (token == NULL || token[0] != ']') {
 		std::string token_str = token ? token : "[NULL]";
 		Printer::Print("Error! expected \"]\" to end datum, but got " + token_str +
-		               "; length = " + std::to_string(length));
+		               "; length = " + std::to_string(datum_len));
 	}
 
 	return res;
@@ -1339,11 +1608,15 @@ SimplestVarType PlanReader::GetSimplestVarType(unsigned int type_id) {
 		simplest_var_type = IntVar;
 		break;
 	case 25:
+	case 1043:
 		simplest_var_type = StringVar;
 		break;
 	case 700:
 	case 701:
 		simplest_var_type = FloatVar;
+		break;
+	case 1009:
+		simplest_var_type = StringVarArr;
 		break;
 	default:
 		Printer::Print("Doesn't support such type yet");
@@ -1401,6 +1674,9 @@ SimplestComparisonType PlanReader::GetSimplestComparisonType(unsigned int type_i
 	case 98:
 		simplest_comprison_type = Equal;
 		break;
+	case 1209:
+		simplest_comprison_type = TEXT_LIKE;
+		break;
 	case 85:
 		simplest_comprison_type = Not;
 		break;
@@ -1439,20 +1715,34 @@ unique_ptr<SimplestNode> PlanReader::ParseNodeString() {
 		node = ReadAggref();
 	else if (MATCH("TARGETENTRY", 11))
 		node = ReadTargetEntry();
+	else if (MATCH("CONST", 5))
+		node = ReadConst();
 	else if (MATCH("VAR", 3))
 		node = ReadVar();
+	else if (MATCH("PARAM", 5))
+		node = ReadParam();
 	else if (MATCH("GATHER", 6))
 		ReadGather();
 	else if (MATCH("HASH", 4))
 		node = ReadHash();
 	else if (MATCH("HASHJOIN", 8))
 		node = ReadHashJoin();
+	else if (MATCH("NESTLOOP", 8))
+		node = ReadNestLoop();
+	else if (MATCH("NESTLOOPPARAM", 13))
+		node = ReadNestLoopParam();
 	else if (MATCH("SEQSCAN", 7))
 		node = ReadSeqScan();
+	else if (MATCH("INDEXSCAN", 9))
+		node = ReadIndexScan();
+	else if (MATCH("BITMAPHEAPSCAN", 14))
+		node = ReadBitmapHeapScan();
+	else if (MATCH("BITMAPINDEXSCAN", 15))
+		node = ReadBitmapIndexScan();
 	else if (MATCH("OPEXPR", 6))
 		node = ReadOpExpr();
-	else if (MATCH("CONST", 5))
-		node = ReadConst();
+	else if (MATCH("SCALARARRAYOPEXPR", 17))
+		node = ReadScalarArrayOpExpr();
 	else if (MATCH("PLANNEDSTMT", 11))
 		node = ReadPlannedStmt();
 	else if (MATCH("RTE", 3))

@@ -16,15 +16,25 @@
 
 namespace duckdb {
 
-enum SimplestVarType { InvalidVarType = 0, IntVar, FloatVar, StringVar };
+enum SimplestVarType { InvalidVarType = 0, IntVar, FloatVar, StringVar, StringVarArr };
 enum SimplestJoinType { InvalidJoinType = 0, Inner, Left, Full, Right, Semi, Anti, UniqueOuter, UniqueInner };
-enum SimplestComparisonType { InvalidComparisonType = 0, Equal, LessThan, GreaterThan, LessEqual, GreaterEqual, Not };
+enum SimplestComparisonType {
+	InvalidComparisonType = 0,
+	Equal,
+	LessThan,
+	GreaterThan,
+	LessEqual,
+	GreaterEqual,
+	Not,
+	TEXT_LIKE
+};
 enum SimplestNodeType {
 	InvalidNodeType = 0,
 	LiteralNode,
 	VarNode,
 	ConstVarNode,
 	AttrVarNode,
+	ParamVarNode,
 	ComparisonExprNode,
 	VarComparisonNode,
 	VarConstComparisonNode,
@@ -113,6 +123,8 @@ public:
 	    : SimplestVar(SimplestVarType::FloatVar, true, ConstVarNode), float_value(float_value) {};
 	SimplestConstVar(std::string str_value)
 	    : SimplestVar(SimplestVarType::StringVar, true, ConstVarNode), str_value(str_value) {};
+	SimplestConstVar(std::vector<std::string> str_vec_value)
+	    : SimplestVar(SimplestVarType::StringVarArr, true, ConstVarNode), str_vec_value(str_vec_value) {};
 	SimplestConstVar(const SimplestConstVar &other)
 	    : SimplestVar(other.GetType(), true, ConstVarNode), int_value(other.int_value), float_value(other.float_value),
 	      str_value(other.str_value) {};
@@ -130,6 +142,9 @@ public:
 	std::string GetStringValue() const {
 		return str_value;
 	}
+	std::vector<std::string> GetStringVecValue() const {
+		return str_vec_value;
+	}
 
 	std::string Print(bool print = true) override {
 		std::string str;
@@ -144,7 +159,14 @@ public:
 			str = "Float const value: " + std::to_string(float_value);
 			break;
 		case StringVar:
-			str = "String const value: " + str_value;
+			str = "String const value: \"" + str_value + "\"";
+			break;
+		case StringVarArr:
+			str = "String const value: [";
+			for (const auto &str_val : str_vec_value) {
+				str += "\"" + str_val + "\", ";
+			}
+			str += "]";
 			break;
 		}
 		if (print)
@@ -157,6 +179,7 @@ private:
 	int int_value;
 	float float_value;
 	std::string str_value;
+	std::vector<std::string> str_vec_value;
 };
 
 class SimplestAttr : public SimplestVar {
@@ -200,6 +223,9 @@ public:
 		case StringVar:
 			str = "String variable ";
 			break;
+		case StringVarArr:
+			str = "String variable Array ";
+			break;
 		}
 
 		std::string info =
@@ -216,6 +242,49 @@ private:
 	unsigned int table_index;
 	unsigned int column_index;
 	std::string column_name;
+};
+
+class SimplestParam : public SimplestVar {
+public:
+	SimplestParam(SimplestVarType var_type, unsigned int param_id)
+	    : SimplestVar(var_type, false, ParamVarNode), param_id(param_id) {};
+	~SimplestParam() = default;
+
+	unsigned int GetParamId() {
+		return param_id;
+	}
+
+	std::string Print(bool print = true) override {
+		std::string str;
+		switch (GetType()) {
+		case InvalidVarType:
+			Printer::Print("\ninvalid Vary Type!!!");
+			return str;
+		case IntVar:
+			str = "Integer variable ";
+			break;
+		case FloatVar:
+			str = "Float variable ";
+			break;
+		case StringVar:
+			str = "String variable ";
+			break;
+		case StringVarArr:
+			str = "String variable Array ";
+			break;
+		}
+
+		std::string info = "#param(" + std::to_string(param_id) + ")";
+		str += info;
+
+		if (print)
+			Printer::Print(str);
+
+		return str;
+	}
+
+private:
+	unsigned int param_id;
 };
 
 class SimplestComparisonExpr : public SimplestNode {
@@ -254,6 +323,9 @@ public:
 		case Equal:
 			comparison_op = " = ";
 			break;
+		case TEXT_LIKE:
+			comparison_op = " ~~ ";
+			break;
 		case LessThan:
 			comparison_op = " < ";
 			break;
@@ -286,6 +358,59 @@ public:
 	unique_ptr<SimplestAttr> right_attr;
 };
 
+class SimplestVarParamComparison : public SimplestComparisonExpr {
+public:
+	SimplestVarParamComparison(SimplestComparisonType comparison_type, unique_ptr<SimplestAttr> attr,
+	                           unique_ptr<SimplestParam> param_var)
+	    : SimplestComparisonExpr(comparison_type, VarConstComparisonNode), attr(std::move(attr)),
+	      param_var(std::move(param_var)) {};
+	~SimplestVarParamComparison() = default;
+
+	std::string Print(bool print = true) override {
+		std::string str;
+		std::string comparison_op;
+		switch (GetSimplestComparisonType()) {
+		case InvalidComparisonType:
+			Printer::Print("Invalid Comparison Type!!!");
+			return str;
+		case Equal:
+			comparison_op = " = ";
+			break;
+		case TEXT_LIKE:
+			comparison_op = " ~~ ";
+			break;
+		case LessThan:
+			comparison_op = " < ";
+			break;
+		case GreaterThan:
+			comparison_op = " > ";
+			break;
+		case LessEqual:
+			comparison_op = " <= ";
+			break;
+		case GreaterEqual:
+			comparison_op = " >= ";
+			break;
+		case Not:
+			comparison_op = " != ";
+			break;
+		}
+
+		str = attr->Print(false);
+		str += comparison_op;
+		str += param_var->Print(false);
+		str += "\n";
+
+		if (print)
+			Printer::Print(str);
+
+		return str;
+	}
+
+	unique_ptr<SimplestAttr> attr;
+	unique_ptr<SimplestParam> param_var;
+};
+
 class SimplestVarConstComparison : public SimplestComparisonExpr {
 public:
 	SimplestVarConstComparison(SimplestComparisonType comparison_type, unique_ptr<SimplestAttr> attr,
@@ -303,6 +428,9 @@ public:
 			return str;
 		case Equal:
 			comparison_op = " = ";
+			break;
+		case TEXT_LIKE:
+			comparison_op = " ~~ ";
 			break;
 		case LessThan:
 			comparison_op = " < ";
