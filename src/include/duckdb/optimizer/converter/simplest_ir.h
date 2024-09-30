@@ -104,6 +104,9 @@ public:
 	SimplestVarType GetType() const {
 		return type;
 	}
+	void ChangeVarType(SimplestVarType new_type) {
+		type = new_type;
+	}
 
 	bool IsConst() {
 		return is_const;

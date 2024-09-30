@@ -232,6 +232,21 @@ unique_ptr<LogicalOperator> IRConverter::ConstructDuckdbPlan(
 								}
 							}
 						}
+					} else if (ExpressionClass::BOUND_COMPARISON == expr->GetExpressionClass()) {
+						auto &bound_comp_expr = expr->Cast<BoundComparisonExpression>();
+						auto &left_expr = bound_comp_expr.left;
+						if (ExpressionType::BOUND_COLUMN_REF == left_expr->GetExpressionType()) {
+							auto &left_ref = left_expr->Cast<BoundColumnRefExpression>();
+							if (left_ref.binding.table_index == attr_table_idx) {
+								filter_expressions.emplace_back(std::move(expr));
+								it = expr_vec.erase(it);
+								find_filter_expr = true;
+							}
+						}
+						D_ASSERT(ExpressionType::VALUE_CONSTANT == bound_comp_expr.right->GetExpressionType());
+					} else {
+						Printer::Print("Doesn't support" + std::to_string((int)expr->GetExpressionClass()) + "yet!");
+						exit(-1);
 					}
 					if (!find_filter_expr)
 						it++;

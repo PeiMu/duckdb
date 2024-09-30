@@ -645,10 +645,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			new_plan->AddChild(std::move(inject_plan));
 		}
 
-#ifdef DEBUG
+//#ifdef DEBUG
 		Printer::Print("new duckdb plan");
 		plan->Print();
-#endif
+//#endif
 
 #ifdef DEBUG
 		D_ASSERT(expr_vec.empty());

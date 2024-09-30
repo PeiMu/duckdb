@@ -63,6 +63,7 @@ private:
 	unique_ptr<SimplestNode> ReadTargetEntry();
 	unique_ptr<SimplestParam> ReadParam();
 	unique_ptr<SimplestAttr> ReadVar();
+	unique_ptr<SimplestAttr> ReadRelabelType();
 	unique_ptr<SimplestConstVar> ReadConst();
 	void ReadGather();
 	unique_ptr<SimplestJoin> ReadCommonJoin();
@@ -75,17 +76,20 @@ private:
 	unique_ptr<SimplestScan> ReadBitmapHeapScan();
 	unique_ptr<SimplestNode> ReadBitmapIndexScan();
 	unique_ptr<SimplestScan> ReadIndexScan();
+	unique_ptr<SimplestScan> ReadIndexOnlyScan();
 	unique_ptr<SimplestComparisonExpr> ReadOpExpr();
+	void ReadBoolExpr();
 	unique_ptr<SimplestComparisonExpr> ReadScalarArrayOpExpr();
 	unique_ptr<SimplestStmt> ReadPlannedStmt();
 	void ReadRangeTblEntry();
 	void ReadAlias();
+	void ReadNullTest();
 
 	PGDatum ReadDatum(bool typbyval, unsigned int &datum_len);
 	SimplestVarType GetSimplestVarType(unsigned int type_id);
 	SimplestJoinType GetSimplestJoinType(unsigned int type_id);
 	SimplestComparisonType GetSimplestComparisonType(unsigned int type_id);
 
-	std::vector<unique_ptr<SimplestVarParamComparison>> bitmap_index_conditions;
+	std::vector<unique_ptr<SimplestVarParamComparison>> index_conditions;
 };
 } // namespace duckdb
