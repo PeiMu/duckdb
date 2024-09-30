@@ -19,22 +19,28 @@
 #include "read.hpp"
 #include "simplest_ir.h"
 
+#define INJECT_PLAN true
+
 namespace duckdb {
 class IRConverter {
 public:
 	IRConverter() = default;
 	~IRConverter() = default;
 
-	unique_ptr<LogicalOperator> InjectPlan(unique_ptr<LogicalOperator> duckdb_plan);
+	unique_ptr<LogicalOperator> InjectPlan(const char *postgres_plan_str,
+	                                       unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
+	                                       std::vector<unique_ptr<Expression>> &expr_vec);
+
+	std::vector<unique_ptr<Expression>> CollectFilterExpressions(unique_ptr<LogicalOperator> &duckdb_plan);
+
+	std::unordered_map<std::string, unique_ptr<LogicalGet>> GetTableMap(unique_ptr<LogicalOperator> &duckdb_plan);
 
 private:
-	std::vector<unique_ptr<Expression>> CollectFilterExpressions(unique_ptr<LogicalOperator> &duckdb_plan);
-	std::unordered_map<std::string, unique_ptr<LogicalGet>> GetTableMap(unique_ptr<LogicalOperator> &duckdb_plan);
 	unique_ptr<LogicalComparisonJoin> ConstructDuckdbJoin(SimplestJoin *pJoin, unique_ptr<LogicalOperator> left_child,
 	                                                      unique_ptr<LogicalOperator> right_child,
 	                                                      const unordered_map<int, int> &pg_duckdb_table_idx);
 	bool CheckCondIndex(const unique_ptr<Expression> &expr, const unique_ptr<LogicalOperator> &child);
-	unique_ptr<LogicalOperator> ConstructDuckdbPlan(LogicalOperator *new_plan, SimplestStmt *postgres_plan_pointer,
+	unique_ptr<LogicalOperator> ConstructDuckdbPlan(SimplestStmt *postgres_plan_pointer,
 	                                                unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
 	                                                const unordered_map<int, int> &pg_duckdb_table_idx,
 	                                                std::vector<unique_ptr<Expression>> &expr_vec);

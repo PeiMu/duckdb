@@ -28,6 +28,7 @@
 #include "duckdb/main/query_result.hpp"
 #include "duckdb/main/relation.hpp"
 #include "duckdb/main/stream_query_result.hpp"
+#include "duckdb/optimizer/converter/ir_to_duckdb.h"
 #include "duckdb/optimizer/optimizer.hpp"
 #include "duckdb/optimizer/query_split/subquery_preparer.hpp"
 #include "duckdb/parser/expression/constant_expression.hpp"
@@ -47,7 +48,6 @@
 #include "duckdb/storage/data_table.hpp"
 #include "duckdb/transaction/meta_transaction.hpp"
 #include "duckdb/transaction/transaction_manager.hpp"
-#include "duckdb/optimizer/converter/ir_to_duckdb.h"
 
 namespace duckdb {
 
@@ -420,32 +420,32 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		chrono_toc(&timer, "PreOptimize time is\n");
 #endif
 #if ENABLE_QUERY_SPLIT
-			subquery_queue subqueries;
-			table_expr_info table_expr_queue;
-			std::vector<TableExpr> proj_expr;
-			bool merge_sibling_expr = false;
-			QuerySplit query_splitter(*this);
-			SubqueryPreparer subquery_preparer(*planner.binder, *this);
+		subquery_queue subqueries;
+		table_expr_info table_expr_queue;
+		std::vector<TableExpr> proj_expr;
+		bool merge_sibling_expr = false;
+		QuerySplit query_splitter(*this);
+		SubqueryPreparer subquery_preparer(*planner.binder, *this);
 #if ENABLE_CROSS_PRODUCT_REWRITE
-			bool rewritten = subquery_preparer.Rewrite(plan);
+		bool rewritten = subquery_preparer.Rewrite(plan);
 #if TIME_BREAK_DOWN
-			chrono_toc(&timer, "Rewrite time is\n");
+		chrono_toc(&timer, "Rewrite time is\n");
 #endif
 #if ENABLE_DEBUG_PRINT
-			D_ASSERT(plan);
-			// debug: print subquery
-			Printer::Print("After subquery_preparer.Rewrite");
-			plan->Print();
+		D_ASSERT(plan);
+		// debug: print subquery
+		Printer::Print("After subquery_preparer.Rewrite");
+		plan->Print();
 #endif
 #endif
-			query_splitter.Clear();
-			plan = query_splitter.Split(std::move(plan));
-			subqueries = query_splitter.GetSubqueries();
-			table_expr_queue = query_splitter.GetTableExprQueue();
-			proj_expr = query_splitter.GetProjExpr();
-			subquery_preparer.SetMergeIndex(query_splitter.GetSplitNumber());
+		query_splitter.Clear();
+		plan = query_splitter.Split(std::move(plan));
+		subqueries = query_splitter.GetSubqueries();
+		table_expr_queue = query_splitter.GetTableExprQueue();
+		proj_expr = query_splitter.GetProjExpr();
+		subquery_preparer.SetMergeIndex(query_splitter.GetSplitNumber());
 #if TIME_BREAK_DOWN
-			chrono_toc(&timer, "Split time is\n");
+		chrono_toc(&timer, "Split time is\n");
 #endif
 
 		while (true) {
@@ -598,8 +598,62 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 	}
 
-	IRConverter ir_converter;
-	plan = ir_converter.InjectPlan(std::move(plan));
+	if (INJECT_PLAN && LogicalOperatorType::LOGICAL_PROJECTION == plan->type) {
+#ifdef DEBUG
+		Printer::Print("original duckdb plan");
+		plan->Print();
+#endif
+
+		IRConverter ir_converter;
+		// todo: It's better to generate the Filter Expression from postgres, but needs a lot of engineering work.
+		//  Currently, we reuse the Filter Expression from duckdb
+		std::vector<unique_ptr<Expression>> expr_vec = ir_converter.CollectFilterExpressions(plan);
+
+		// get the table map
+		unordered_map<std::string, unique_ptr<LogicalGet>> table_map = ir_converter.GetTableMap(plan);
+
+		// get the parent node of JOIN/CROSS_PRODUCT
+		auto new_plan = plan.get();
+		do {
+#ifdef DEBUG
+			D_ASSERT(new_plan->children.size() >= 1);
+			if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == new_plan->type) {
+				// todo: check we have the same information in postgres and duckdb
+			}
+#endif
+			new_plan = new_plan->children[0].get();
+		} while (LogicalOperatorType::LOGICAL_COMPARISON_JOIN != new_plan->children[0]->type &&
+		         LogicalOperatorType::LOGICAL_CROSS_PRODUCT != new_plan->children[0]->type);
+		new_plan->children.clear();
+
+		// get the postgres node string
+		const std::ifstream input_stream("/home/pei/Project/duckdb/measure/postgres_plan/postgres_plan", std::ios_base::binary);
+		if (input_stream.fail()) {
+			Printer::Print("Error! Failed to open file!!!");
+			exit(-1);
+		}
+		std::stringstream buffer;
+		buffer << input_stream.rdbuf();
+		std::vector<std::string> query_string_vec;
+		query_string_vec.emplace_back(buffer.str());
+
+		for (const auto &str : query_string_vec) {
+			auto inject_plan = ir_converter.InjectPlan(str.c_str(), table_map, expr_vec);
+			// todo: we should find the correct position to add child
+			//  e.g. for the first query/subquery, just add to `new_plan`
+			//       for the other subqueries, replace the `temp%d` table
+			new_plan->AddChild(std::move(inject_plan));
+		}
+
+#ifdef DEBUG
+		Printer::Print("new duckdb plan");
+		plan->Print();
+#endif
+
+#ifdef DEBUG
+		D_ASSERT(expr_vec.empty());
+#endif
+	}
 
 	profiler.StartPhase("physical_planner");
 	// now convert logical query plan into a physical query plan
