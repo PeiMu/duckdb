@@ -74,6 +74,10 @@ public:
 		return node_type;
 	}
 
+	void ChangeNodeType(SimplestNodeType new_type) {
+		node_type = new_type;
+	}
+
 private:
 	SimplestNodeType node_type;
 };

@@ -81,6 +81,7 @@ private:
 	unique_ptr<SimplestLogicalExpr> ReadBoolExpr();
 	unique_ptr<SimplestIsNullExpr> ReadNullTest();
 	unique_ptr<SimplestExpr> ReadScalarArrayOpExpr();
+	unique_ptr<SimplestStmt> ReadMaterial();
 	unique_ptr<SimplestStmt> ReadPlannedStmt();
 	void ReadRangeTblEntry();
 	void ReadAlias();

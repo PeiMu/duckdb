@@ -1321,6 +1321,14 @@ unique_ptr<SimplestExpr> PlanReader::ReadScalarArrayOpExpr() {
 	}
 }
 
+unique_ptr<SimplestStmt> PlanReader::ReadMaterial() {
+	auto material_node = ReadCommonPlan();
+
+	D_ASSERT(1 == material_node->children.size());
+
+	return std::move(material_node->children[0]);
+}
+
 std::string ParseText(PGDatum datum, unsigned int datum_len) {
 	const char *ptr = reinterpret_cast<const char *>(datum);
 
@@ -1750,6 +1758,7 @@ SimplestVarType PlanReader::GetSimplestVarType(unsigned int type_id) {
 	case 20:
 	case 21:
 	case 23:
+	case 26:
 		simplest_var_type = IntVar;
 		break;
 	case 25:
@@ -1835,6 +1844,12 @@ SimplestExprType PlanReader::GetSimplestComparisonType(unsigned int type_id) {
 	case 521:
 		simplest_comprison_type = GreaterThan;
 		break;
+	case 523:
+		simplest_comprison_type = LessEqual;
+		break;
+	case 525:
+		simplest_comprison_type = GreaterEqual;
+		break;
 	default:
 		Printer::Print("Doesn't support type " + std::to_string(type_id) + " yet!");
 		exit(-1);
@@ -1897,6 +1912,8 @@ unique_ptr<SimplestNode> PlanReader::ParseNodeString() {
 		node = ReadNullTest();
 	else if (MATCH("SCALARARRAYOPEXPR", 17))
 		node = ReadScalarArrayOpExpr();
+	else if (MATCH("MATERIAL", 8))
+		node = ReadMaterial();
 	else if (MATCH("PLANNEDSTMT", 11))
 		node = ReadPlannedStmt();
 	else if (MATCH("RTE", 3))
