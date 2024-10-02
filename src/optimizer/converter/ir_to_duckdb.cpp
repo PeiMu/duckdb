@@ -82,7 +82,7 @@ unique_ptr<LogicalComparisonJoin> IRConverter::ConstructDuckdbJoin(SimplestJoin 
 	duckdb_join->children.push_back(std::move(right_child));
 	JoinCondition cond;
 	for (const auto &postgres_cond : postgres_join->join_conditions) {
-		auto comp_op = postgres_cond->GetSimplestComparisonType();
+		auto comp_op = postgres_cond->GetSimplestExprType();
 		cond.comparison = ConvertCompType(comp_op);
 		auto &left_pg_cond = postgres_cond->left_attr;
 		LogicalType left_type = ConvertVarType(left_pg_cond->GetType());
@@ -184,7 +184,7 @@ unique_ptr<LogicalOperator> IRConverter::ConstructDuckdbPlan(
 			return unique_ptr_cast<LogicalComparisonJoin, LogicalOperator>(std::move(duckdb_join));
 		}
 		case FilterNode:
-			Printer::Print("Doesn't support yet!");
+			Printer::Print("Doesn't support FilterNode yet!");
 			return left_child;
 		case HashNode:
 			// todo: check if HashNode really doesn't have extra info
@@ -206,50 +206,16 @@ unique_ptr<LogicalOperator> IRConverter::ConstructDuckdbPlan(
 			for (const auto &qual : postgres_scan->qual_vec) {
 				// currently we get filter expressions from duckdb plan
 				// todo: construct filter expressions from postgres info
+				// refactor to a standalone function
 				for (auto it = expr_vec.begin(); it != expr_vec.end();) {
 					auto &expr = *it;
-					bool find_filter_expr = false;
-					if (ExpressionClass::BOUND_BETWEEN == expr->GetExpressionClass()) {
-						auto &bound_between_expr = expr->Cast<BoundBetweenExpression>();
-						auto &expr_input = bound_between_expr.input;
-						if (ExpressionType::BOUND_COLUMN_REF == expr_input->GetExpressionType()) {
-							auto &input_ref = expr_input->Cast<BoundColumnRefExpression>();
-							if (input_ref.binding.table_index == attr_table_idx) {
-								filter_expressions.emplace_back(std::move(expr));
-								it = expr_vec.erase(it);
-								find_filter_expr = true;
-							}
-						}
-					} else if (ExpressionClass::BOUND_FUNCTION == expr->GetExpressionClass()) {
-						auto &bound_func_expr = expr->Cast<BoundFunctionExpression>();
-						for (const auto &child : bound_func_expr.children) {
-							if (ExpressionType::BOUND_COLUMN_REF == child->GetExpressionType()) {
-								auto &child_ref = child->Cast<BoundColumnRefExpression>();
-								if (child_ref.binding.table_index == attr_table_idx) {
-									filter_expressions.emplace_back(std::move(expr));
-									it = expr_vec.erase(it);
-									find_filter_expr = true;
-								}
-							}
-						}
-					} else if (ExpressionClass::BOUND_COMPARISON == expr->GetExpressionClass()) {
-						auto &bound_comp_expr = expr->Cast<BoundComparisonExpression>();
-						auto &left_expr = bound_comp_expr.left;
-						if (ExpressionType::BOUND_COLUMN_REF == left_expr->GetExpressionType()) {
-							auto &left_ref = left_expr->Cast<BoundColumnRefExpression>();
-							if (left_ref.binding.table_index == attr_table_idx) {
-								filter_expressions.emplace_back(std::move(expr));
-								it = expr_vec.erase(it);
-								find_filter_expr = true;
-							}
-						}
-						D_ASSERT(ExpressionType::VALUE_CONSTANT == bound_comp_expr.right->GetExpressionType());
+					bool find_filter_expr = CheckExprExist(expr, attr_table_idx);
+					if (find_filter_expr) {
+						filter_expressions.emplace_back(std::move(expr));
+						it = expr_vec.erase(it);
 					} else {
-						Printer::Print("Doesn't support" + std::to_string((int)expr->GetExpressionClass()) + "yet!");
-						exit(-1);
-					}
-					if (!find_filter_expr)
 						it++;
+					}
 				}
 			}
 			if (!filter_expressions.empty()) {
@@ -271,7 +237,7 @@ unique_ptr<LogicalOperator> IRConverter::ConstructDuckdbPlan(
 	return new_duckdb_plan;
 }
 
-ExpressionType IRConverter::ConvertCompType(SimplestComparisonType type) {
+ExpressionType IRConverter::ConvertCompType(SimplestExprType type) {
 	switch (type) {
 	case Equal:
 		return ExpressionType::COMPARE_EQUAL;
@@ -283,7 +249,7 @@ ExpressionType IRConverter::ConvertCompType(SimplestComparisonType type) {
 		return ExpressionType::COMPARE_LESSTHANOREQUALTO;
 	case GreaterEqual:
 		return ExpressionType::COMPARE_GREATERTHANOREQUALTO;
-	case Not:
+	case NotEqual:
 		return ExpressionType::COMPARE_NOTEQUAL;
 	default:
 		Printer::Print("Invalid postgres comparison type!");
@@ -305,53 +271,59 @@ LogicalType IRConverter::ConvertVarType(SimplestVarType type) {
 	}
 }
 
+void IRConverter::SetAttrName(unique_ptr<SimplestAttr> &attr, const std::deque<table_str> &table_col_names) {
+	auto col_index = attr->GetColumnIndex();
+#ifdef DEBUG
+	D_ASSERT(table_col_names[attr->GetTableIndex() - 1].size() == 1);
+#endif
+	auto col_name = table_col_names[attr->GetTableIndex() - 1].begin()->second[col_index - 1]->GetLiteralValue();
+	attr->SetColumnName(col_name);
+}
+
 void IRConverter::SetAttrVecName(std::vector<unique_ptr<SimplestAttr>> &attr_vec,
                                  const std::deque<table_str> &table_col_names) {
 	for (auto &attr_var_node : attr_vec) {
-		auto col_index = attr_var_node->GetColumnIndex();
-#ifdef DEBUG
-		D_ASSERT(table_col_names[attr_var_node->GetTableIndex() - 1].size() == 1);
-#endif
-		auto col_name =
-		    table_col_names[attr_var_node->GetTableIndex() - 1].begin()->second[col_index - 1]->GetLiteralValue();
-		attr_var_node->SetColumnName(col_name);
+		SetAttrName(attr_var_node, table_col_names);
 	}
 }
 
-void IRConverter::SetCompExprName(std::vector<unique_ptr<SimplestVarConstComparison>> &comp_vec,
-                                  const std::deque<table_str> &table_col_names) {
-	for (auto &comp : comp_vec) {
-		auto &comp_attr = comp->attr;
-		auto col_index = comp_attr->GetColumnIndex();
-#ifdef DEBUG
-		D_ASSERT(table_col_names[comp_attr->GetTableIndex() - 1].size() == 1);
-#endif
-		auto col_name =
-		    table_col_names[comp_attr->GetTableIndex() - 1].begin()->second[col_index - 1]->GetLiteralValue();
-		comp_attr->SetColumnName(col_name);
+void IRConverter::SetExprName(unique_ptr<SimplestExpr> &expr, const std::deque<table_str> &table_col_names) {
+	if (VarConstComparisonNode == expr->GetNodeType()) {
+		auto &var_const_comp = expr->Cast<SimplestVarConstComparison>();
+		auto &expr_attr = var_const_comp.attr;
+		SetAttrName(expr_attr, table_col_names);
+	} else if (IsNullExprNode == expr->GetNodeType()) {
+		auto &is_null_expr = expr->Cast<SimplestIsNullExpr>();
+		auto &expr_attr = is_null_expr.attr;
+		SetAttrName(expr_attr, table_col_names);
+	} else if (LogicalExprNode == expr->GetNodeType()) {
+		auto &logical_expr = expr->Cast<SimplestLogicalExpr>();
+		auto &left_expr = logical_expr.left_expr;
+		SetExprName(left_expr, table_col_names);
+		auto &right_expr = logical_expr.right_expr;
+		SetExprName(right_expr, table_col_names);
+	} else {
+		Printer::Print("Doesn't support " + std::to_string((int)expr->GetNodeType()) + " yet!");
+		exit(-1);
 	}
 }
 
-void IRConverter::SetCompExprName(std::vector<unique_ptr<SimplestVarComparison>> &comp_vec,
-                                  const std::deque<table_str> &table_col_names) {
+void IRConverter::SetExprVecName(std::vector<unique_ptr<SimplestExpr>> &expr_vec,
+                                 const std::deque<table_str> &table_col_names) {
+
+	for (auto &expr : expr_vec) {
+		SetExprName(expr, table_col_names);
+	}
+}
+
+void IRConverter::SetExprVecName(std::vector<unique_ptr<SimplestVarComparison>> &comp_vec,
+                                 const std::deque<table_str> &table_col_names) {
 	for (auto &comp : comp_vec) {
 		auto &left_attr = comp->left_attr;
-		auto left_col_index = left_attr->GetColumnIndex();
-#ifdef DEBUG
-		D_ASSERT(table_col_names[left_attr->GetTableIndex() - 1].size() == 1);
-#endif
-		auto left_col_name =
-		    table_col_names[left_attr->GetTableIndex() - 1].begin()->second[left_col_index - 1]->GetLiteralValue();
-		left_attr->SetColumnName(left_col_name);
+		SetAttrName(left_attr, table_col_names);
 
 		auto &right_attr = comp->right_attr;
-		auto right_col_index = right_attr->GetColumnIndex();
-#ifdef DEBUG
-		D_ASSERT(table_col_names[right_attr->GetTableIndex() - 1].size() == 1);
-#endif
-		auto right_col_name =
-		    table_col_names[right_attr->GetTableIndex() - 1].begin()->second[right_col_index - 1]->GetLiteralValue();
-		right_attr->SetColumnName(right_col_name);
+		SetAttrName(right_attr, table_col_names);
 	}
 }
 
@@ -381,7 +353,7 @@ void IRConverter::AddTableColumnName(unique_ptr<SimplestStmt> &postgres_plan,
 	iterate_plan = [&table_col_names, &iterate_plan, this](unique_ptr<SimplestStmt> &postgres_plan) {
 		// set col attr names in `target_list`
 		SetAttrVecName(postgres_plan->target_list, table_col_names);
-		SetCompExprName(postgres_plan->qual_vec, table_col_names);
+		SetExprVecName(postgres_plan->qual_vec, table_col_names);
 
 		if (ScanNode == postgres_plan->GetNodeType()) {
 			// set scan_node's table_name
@@ -398,11 +370,11 @@ void IRConverter::AddTableColumnName(unique_ptr<SimplestStmt> &postgres_plan,
 		} else if (JoinNode == postgres_plan->GetNodeType()) {
 			// join condition has attr
 			auto &join_node = postgres_plan->Cast<SimplestJoin>();
-			SetCompExprName(join_node.join_conditions, table_col_names);
+			SetExprVecName(join_node.join_conditions, table_col_names);
 		} else if (FilterNode == postgres_plan->GetNodeType()) {
 			// filter condition has attr
 			auto &filter_node = postgres_plan->Cast<SimplestFilter>();
-			SetCompExprName(filter_node.filter_conditions, table_col_names);
+			SetExprVecName(filter_node.filter_conditions, table_col_names);
 		}
 
 		for (auto &child : postgres_plan->children) {
@@ -411,5 +383,65 @@ void IRConverter::AddTableColumnName(unique_ptr<SimplestStmt> &postgres_plan,
 	};
 
 	iterate_plan(postgres_plan);
+}
+bool IRConverter::CheckExprExist(const unique_ptr<Expression> &expr, idx_t attr_table_idx) {
+	bool find_filter_expr = false;
+	switch (expr->GetExpressionClass()) {
+	case ExpressionClass::CONSTANT:
+	case ExpressionClass::BOUND_CONSTANT:
+		break;
+	case ExpressionClass::BOUND_COLUMN_REF: {
+		auto &input_ref = expr->Cast<BoundColumnRefExpression>();
+		if (input_ref.binding.table_index == attr_table_idx) {
+			find_filter_expr = true;
+		}
+		break;
+	}
+	case ExpressionClass::BOUND_BETWEEN: {
+		auto &bound_between_expr = expr->Cast<BoundBetweenExpression>();
+		auto &expr_input = bound_between_expr.input;
+		find_filter_expr = CheckExprExist(expr_input, attr_table_idx);
+		break;
+	}
+	case ExpressionClass::BOUND_FUNCTION: {
+		auto &bound_func_expr = expr->Cast<BoundFunctionExpression>();
+		for (const auto &child : bound_func_expr.children) {
+			find_filter_expr = CheckExprExist(child, attr_table_idx);
+			if (find_filter_expr)
+				break;
+		}
+		break;
+	}
+	case ExpressionClass::BOUND_COMPARISON: {
+		auto &bound_comp_expr = expr->Cast<BoundComparisonExpression>();
+		auto &left_expr = bound_comp_expr.left;
+		find_filter_expr = CheckExprExist(left_expr, attr_table_idx);
+		D_ASSERT(ExpressionType::VALUE_CONSTANT == bound_comp_expr.right->GetExpressionType());
+		break;
+	}
+	case ExpressionClass::BOUND_CONJUNCTION: {
+		auto &bound_conjection_expr = expr->Cast<BoundConjunctionExpression>();
+		for (const auto &child : bound_conjection_expr.children) {
+			find_filter_expr = CheckExprExist(child, attr_table_idx);
+			if (find_filter_expr)
+				break;
+		}
+		break;
+	}
+	case ExpressionClass::BOUND_OPERATOR: {
+		auto &bound_op_expr = expr->Cast<BoundOperatorExpression>();
+		for (const auto &child : bound_op_expr.children) {
+			find_filter_expr = CheckExprExist(child, attr_table_idx);
+			if (find_filter_expr)
+				break;
+		}
+		break;
+	}
+	default:
+		Printer::Print("Doesn't support " + std::to_string((int)expr->GetExpressionClass()) + " yet!");
+		exit(-1);
+	}
+
+	return find_filter_expr;
 }
 } // namespace duckdb

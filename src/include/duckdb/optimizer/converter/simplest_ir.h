@@ -18,15 +18,19 @@ namespace duckdb {
 
 enum SimplestVarType { InvalidVarType = 0, IntVar, FloatVar, StringVar, StringVarArr };
 enum SimplestJoinType { InvalidJoinType = 0, Inner, Left, Full, Right, Semi, Anti, UniqueOuter, UniqueInner };
-enum SimplestComparisonType {
-	InvalidComparisonType = 0,
+enum SimplestLogicalOp { InvalidLogicalOp = 0, LogicalAnd, LogicalOr, LogicalNot };
+enum SimplestExprType {
+	InvalidExprType = 0,
 	Equal,
+	NotEqual,
 	LessThan,
 	GreaterThan,
 	LessEqual,
 	GreaterEqual,
-	Not,
-	TEXT_LIKE
+	NullType,
+	NonNullType,
+	TEXT_LIKE,
+	LogicalOp
 };
 enum SimplestNodeType {
 	InvalidNodeType = 0,
@@ -35,9 +39,12 @@ enum SimplestNodeType {
 	ConstVarNode,
 	AttrVarNode,
 	ParamVarNode,
-	ComparisonExprNode,
+	ExprNode,
+	IsNullExprNode,
 	VarComparisonNode,
 	VarConstComparisonNode,
+	VarParamComparisonNode,
+	LogicalExprNode,
 	StmtNode,
 	AggregateNode,
 	JoinNode,
@@ -290,37 +297,36 @@ private:
 	unsigned int param_id;
 };
 
-class SimplestComparisonExpr : public SimplestNode {
+class SimplestExpr : public SimplestNode {
 public:
-	SimplestComparisonExpr(SimplestComparisonType comparison_type, SimplestNodeType node_type)
-	    : SimplestNode(node_type), comparison_type(comparison_type) {};
-	SimplestComparisonExpr(const SimplestComparisonExpr &other)
-	    : SimplestComparisonExpr(other.comparison_type, other.GetNodeType()) {};
-	~SimplestComparisonExpr() = default;
+	SimplestExpr(SimplestExprType expr_type, SimplestNodeType node_type)
+	    : SimplestNode(node_type), expr_type(expr_type) {};
+	SimplestExpr(const SimplestExpr &other) : SimplestExpr(other.expr_type, other.GetNodeType()) {};
+	~SimplestExpr() = default;
 
-	SimplestComparisonType GetSimplestComparisonType() const {
-		return comparison_type;
+	SimplestExprType GetSimplestExprType() const {
+		return expr_type;
 	}
 
 	virtual std::string Print(bool print = true) = 0;
 
 private:
-	SimplestComparisonType comparison_type;
+	SimplestExprType expr_type;
 };
 
-class SimplestVarComparison : public SimplestComparisonExpr {
+class SimplestVarComparison : public SimplestExpr {
 public:
-	SimplestVarComparison(SimplestComparisonType comparison_type, unique_ptr<SimplestAttr> left_attr,
+	SimplestVarComparison(SimplestExprType comparison_type, unique_ptr<SimplestAttr> left_attr,
 	                      unique_ptr<SimplestAttr> right_attr)
-	    : SimplestComparisonExpr(comparison_type, VarComparisonNode), left_attr(std::move(left_attr)),
+	    : SimplestExpr(comparison_type, VarComparisonNode), left_attr(std::move(left_attr)),
 	      right_attr(std::move(right_attr)) {};
 	~SimplestVarComparison() = default;
 
 	std::string Print(bool print = true) override {
 		std::string str;
 		std::string comparison_op;
-		switch (GetSimplestComparisonType()) {
-		case InvalidComparisonType:
+		switch (GetSimplestExprType()) {
+		case InvalidExprType:
 			Printer::Print("Invalid Comparison Type!!!");
 			return str;
 		case Equal:
@@ -341,9 +347,14 @@ public:
 		case GreaterEqual:
 			comparison_op = " >= ";
 			break;
-		case Not:
+		case NotEqual:
 			comparison_op = " != ";
 			break;
+		case NullType:
+		case NonNullType:
+		case LogicalOp:
+			Printer::Print("This should be a `SimplestIsNullExpr`!!!");
+			return str;
 		}
 
 		str = left_attr->Print(false);
@@ -361,19 +372,19 @@ public:
 	unique_ptr<SimplestAttr> right_attr;
 };
 
-class SimplestVarParamComparison : public SimplestComparisonExpr {
+class SimplestVarParamComparison : public SimplestExpr {
 public:
-	SimplestVarParamComparison(SimplestComparisonType comparison_type, unique_ptr<SimplestAttr> attr,
+	SimplestVarParamComparison(SimplestExprType comparison_type, unique_ptr<SimplestAttr> attr,
 	                           unique_ptr<SimplestParam> param_var)
-	    : SimplestComparisonExpr(comparison_type, VarConstComparisonNode), attr(std::move(attr)),
+	    : SimplestExpr(comparison_type, VarParamComparisonNode), attr(std::move(attr)),
 	      param_var(std::move(param_var)) {};
 	~SimplestVarParamComparison() = default;
 
 	std::string Print(bool print = true) override {
 		std::string str;
 		std::string comparison_op;
-		switch (GetSimplestComparisonType()) {
-		case InvalidComparisonType:
+		switch (GetSimplestExprType()) {
+		case InvalidExprType:
 			Printer::Print("Invalid Comparison Type!!!");
 			return str;
 		case Equal:
@@ -394,9 +405,14 @@ public:
 		case GreaterEqual:
 			comparison_op = " >= ";
 			break;
-		case Not:
+		case NotEqual:
 			comparison_op = " != ";
 			break;
+		case NullType:
+		case NonNullType:
+		case LogicalOp:
+			Printer::Print("This should be a `SimplestIsNullExpr`!!!");
+			return str;
 		}
 
 		str = attr->Print(false);
@@ -414,19 +430,19 @@ public:
 	unique_ptr<SimplestParam> param_var;
 };
 
-class SimplestVarConstComparison : public SimplestComparisonExpr {
+class SimplestVarConstComparison : public SimplestExpr {
 public:
-	SimplestVarConstComparison(SimplestComparisonType comparison_type, unique_ptr<SimplestAttr> attr,
+	SimplestVarConstComparison(SimplestExprType comparison_type, unique_ptr<SimplestAttr> attr,
 	                           unique_ptr<SimplestConstVar> const_var)
-	    : SimplestComparisonExpr(comparison_type, VarConstComparisonNode), attr(std::move(attr)),
+	    : SimplestExpr(comparison_type, VarConstComparisonNode), attr(std::move(attr)),
 	      const_var(std::move(const_var)) {};
 	~SimplestVarConstComparison() = default;
 
 	std::string Print(bool print = true) override {
 		std::string str;
 		std::string comparison_op;
-		switch (GetSimplestComparisonType()) {
-		case InvalidComparisonType:
+		switch (GetSimplestExprType()) {
+		case InvalidExprType:
 			Printer::Print("Invalid Comparison Type!!!");
 			return str;
 		case Equal:
@@ -447,9 +463,14 @@ public:
 		case GreaterEqual:
 			comparison_op = " >= ";
 			break;
-		case Not:
+		case NotEqual:
 			comparison_op = " != ";
 			break;
+		case NullType:
+		case NonNullType:
+		case LogicalOp:
+			Printer::Print("This should be a `SimplestIsNullExpr`!!!");
+			return str;
 		}
 
 		str = attr->Print(false);
@@ -467,6 +488,101 @@ public:
 	unique_ptr<SimplestConstVar> const_var;
 };
 
+class SimplestIsNullExpr : public SimplestExpr {
+public:
+	SimplestIsNullExpr(SimplestExprType is_null_type, unique_ptr<SimplestAttr> attr)
+	    : SimplestExpr(is_null_type, IsNullExprNode), attr(std::move(attr)) {};
+	~SimplestIsNullExpr() = default;
+
+	std::string Print(bool print = true) override {
+		std::string str;
+		std::string is_null_op;
+		switch (GetSimplestExprType()) {
+		case InvalidExprType:
+			Printer::Print("Invalid expr Type!!!");
+			return str;
+		case Equal:
+		case TEXT_LIKE:
+		case LessThan:
+		case GreaterThan:
+		case LessEqual:
+		case GreaterEqual:
+		case NotEqual:
+		case LogicalOp:
+			Printer::Print("This should not be a `SimplestIsNullExpr`!!!");
+			return str;
+		case NullType:
+			is_null_op = " is null";
+			break;
+		case NonNullType:
+			is_null_op = " is not null";
+			break;
+		}
+
+		str = attr->Print(false);
+		str += is_null_op;
+		str += "\n";
+
+		if (print)
+			Printer::Print(str);
+
+		return str;
+	}
+
+	unique_ptr<SimplestAttr> attr;
+};
+
+// if it's a logical not, let `left_expr` be nullptr
+class SimplestLogicalExpr : public SimplestExpr {
+public:
+	SimplestLogicalExpr(SimplestLogicalOp logical_op, unique_ptr<SimplestExpr> left_expr,
+	                    unique_ptr<SimplestExpr> right_expr)
+	    : SimplestExpr(LogicalOp, LogicalExprNode), left_expr(std::move(left_expr)), right_expr(std::move(right_expr)),
+	      logical_op(logical_op) {};
+	~SimplestLogicalExpr() = default;
+
+	SimplestLogicalOp GetLogicalOp() const {
+		return logical_op;
+	}
+	std::string Print(bool print = true) override {
+		std::string str;
+		std::string logical_op_str;
+		switch (GetLogicalOp()) {
+		case InvalidLogicalOp:
+			Printer::Print("Invalid expr Type!!!");
+			return str;
+		case LogicalAnd:
+			logical_op_str = " && ";
+			break;
+		case LogicalOr:
+			logical_op_str = " || ";
+			break;
+		case LogicalNot:
+			logical_op_str = "!";
+			D_ASSERT(nullptr == left_expr);
+			break;
+		}
+
+		if (LogicalNot != GetLogicalOp()) {
+			str += left_expr->Print(false);
+		}
+		str += logical_op_str;
+		str += right_expr->Print(false);
+		str += "\n";
+
+		if (print)
+			Printer::Print(str);
+
+		return str;
+	}
+
+	unique_ptr<SimplestExpr> left_expr;
+	unique_ptr<SimplestExpr> right_expr;
+
+private:
+	SimplestLogicalOp logical_op;
+};
+
 class SimplestStmt : public SimplestNode {
 public:
 	SimplestStmt(SimplestNodeType node_type) : SimplestNode(node_type) {};
@@ -478,11 +594,11 @@ public:
 	SimplestStmt(std::vector<unique_ptr<SimplestAttr>> target_list, SimplestNodeType node_type)
 	    : SimplestNode(node_type), target_list(std::move(target_list)) {};
 	SimplestStmt(std::vector<unique_ptr<SimplestStmt>> children, std::vector<unique_ptr<SimplestAttr>> target_list,
-	             std::vector<unique_ptr<SimplestVarConstComparison>> qual_vec, SimplestNodeType node_type)
+	             std::vector<unique_ptr<SimplestExpr>> qual_vec, SimplestNodeType node_type)
 	    : SimplestNode(node_type), target_list(std::move(target_list)), children(std::move(children)),
 	      qual_vec(std::move(qual_vec)) {};
-	SimplestStmt(std::vector<unique_ptr<SimplestAttr>> target_list,
-	             std::vector<unique_ptr<SimplestVarConstComparison>> qual_vec, SimplestNodeType node_type)
+	SimplestStmt(std::vector<unique_ptr<SimplestAttr>> target_list, std::vector<unique_ptr<SimplestExpr>> qual_vec,
+	             SimplestNodeType node_type)
 	    : SimplestNode(node_type), target_list(std::move(target_list)), qual_vec(std::move(qual_vec)) {};
 	~SimplestStmt() = default;
 
@@ -524,7 +640,7 @@ public:
 
 	// implicitly condition - from postgres
 	// todo: need to check if only var-const comparison exists
-	std::vector<unique_ptr<SimplestVarConstComparison>> qual_vec;
+	std::vector<unique_ptr<SimplestExpr>> qual_vec;
 };
 
 class SimplestAggregate : public SimplestStmt {
@@ -545,7 +661,6 @@ public:
 		std::string str = "\n";
 		str += "╔══════════════════╗\n";
 		D_ASSERT(agg_types.size() == target_list.size());
-		size_t attr_num = agg_types.size();
 		str += "Aggregate:";
 
 		str += SimplestStmt::Print(false);
@@ -578,11 +693,13 @@ public:
 		return join_type;
 	}
 
-	void AddJoinCondition(std::vector<unique_ptr<SimplestVarComparison>> cond) {
-		join_conditions = std::move(cond);
+	void AddJoinCondition(std::vector<unique_ptr<SimplestVarComparison>> conds) {
+		for (auto &cond : conds) {
+			join_conditions.emplace_back(std::move(cond));
+		}
 	}
 
-	void AddJoinType(SimplestJoinType type) {
+	void SetJoinType(SimplestJoinType type) {
 		join_type = type;
 	}
 
@@ -590,7 +707,6 @@ public:
 		std::string str = "\n";
 		str += "╔══════════════════╗\n";
 
-		size_t attr_num = target_list.size();
 		switch (join_type) {
 		case InvalidJoinType:
 			Printer::Print("Invalid Join Type!!!");
@@ -646,9 +762,9 @@ private:
 class SimplestFilter : public SimplestStmt {
 public:
 	SimplestFilter(std::vector<unique_ptr<SimplestStmt>> children,
-	               std::vector<unique_ptr<SimplestVarConstComparison>> filter_conditions)
+	               std::vector<unique_ptr<SimplestExpr>> filter_conditions)
 	    : SimplestStmt(std::move(children), FilterNode), filter_conditions(std::move(filter_conditions)) {};
-	SimplestFilter(std::vector<unique_ptr<SimplestVarConstComparison>> filter_conditions)
+	SimplestFilter(std::vector<unique_ptr<SimplestExpr>> filter_conditions)
 	    : SimplestStmt(FilterNode), filter_conditions(std::move(filter_conditions)) {};
 	~SimplestFilter() = default;
 
@@ -672,7 +788,7 @@ public:
 		return str;
 	}
 
-	std::vector<unique_ptr<SimplestVarConstComparison>> filter_conditions;
+	std::vector<unique_ptr<SimplestExpr>> filter_conditions;
 };
 
 class SimplestScan : public SimplestStmt {
@@ -680,7 +796,7 @@ public:
 	SimplestScan(unsigned int table_index, std::string table_name, std::vector<unique_ptr<SimplestAttr>> scan_columns)
 	    : SimplestStmt(std::move(scan_columns), ScanNode), table_index(table_index), table_name(table_name) {};
 	SimplestScan(unsigned int table_index, std::string table_name, std::vector<unique_ptr<SimplestAttr>> scan_columns,
-	             std::vector<unique_ptr<SimplestVarConstComparison>> qual_vec)
+	             std::vector<unique_ptr<SimplestExpr>> qual_vec)
 	    : SimplestStmt(std::move(scan_columns), std::move(qual_vec), ScanNode), table_index(table_index),
 	      table_name(table_name) {};
 	~SimplestScan() = default;

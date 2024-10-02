@@ -13,7 +13,9 @@
 #include "duckdb/planner/expression/bound_between_expression.hpp"
 #include "duckdb/planner/expression/bound_columnref_expression.hpp"
 #include "duckdb/planner/expression/bound_comparison_expression.hpp"
+#include "duckdb/planner/expression/bound_conjunction_expression.hpp"
 #include "duckdb/planner/expression/bound_function_expression.hpp"
+#include "duckdb/planner/expression/bound_operator_expression.hpp"
 #include "duckdb/planner/operator/logical_comparison_join.hpp"
 #include "duckdb/planner/operator/logical_filter.hpp"
 #include "duckdb/planner/operator/logical_get.hpp"
@@ -41,17 +43,19 @@ private:
 	                                                      unique_ptr<LogicalOperator> right_child,
 	                                                      const unordered_map<int, int> &pg_duckdb_table_idx);
 	bool CheckCondIndex(const unique_ptr<Expression> &expr, const unique_ptr<LogicalOperator> &child);
+	bool CheckExprExist(const unique_ptr<Expression> &expr, idx_t attr_table_idx);
 	unique_ptr<LogicalOperator> ConstructDuckdbPlan(SimplestStmt *postgres_plan_pointer,
 	                                                unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
 	                                                const unordered_map<int, int> &pg_duckdb_table_idx,
 	                                                std::vector<unique_ptr<Expression>> &expr_vec);
-	ExpressionType ConvertCompType(SimplestComparisonType type);
+	ExpressionType ConvertCompType(SimplestExprType type);
 	LogicalType ConvertVarType(SimplestVarType type);
+	void SetAttrName(unique_ptr<SimplestAttr> &attr, const std::deque<table_str> &table_col_names);
 	void SetAttrVecName(std::vector<unique_ptr<SimplestAttr>> &attr_vec, const std::deque<table_str> &table_col_names);
-	void SetCompExprName(std::vector<unique_ptr<SimplestVarConstComparison>> &comp_vec,
-	                     const std::deque<table_str> &table_col_names);
-	void SetCompExprName(std::vector<unique_ptr<SimplestVarComparison>> &comp_vec,
-	                     const std::deque<table_str> &table_col_names);
+	void SetExprName(unique_ptr<SimplestExpr> &expr, const std::deque<table_str> &table_col_names);
+	void SetExprVecName(std::vector<unique_ptr<SimplestExpr>> &expr_vec, const std::deque<table_str> &table_col_names);
+	void SetExprVecName(std::vector<unique_ptr<SimplestVarComparison>> &comp_vec,
+	                    const std::deque<table_str> &table_col_names);
 
 	//! table index mapping from postgres to duckdb
 	unordered_map<int, int> MatchTableIndex(const unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,

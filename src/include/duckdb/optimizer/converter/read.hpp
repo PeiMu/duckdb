@@ -77,18 +77,18 @@ private:
 	unique_ptr<SimplestNode> ReadBitmapIndexScan();
 	unique_ptr<SimplestScan> ReadIndexScan();
 	unique_ptr<SimplestScan> ReadIndexOnlyScan();
-	unique_ptr<SimplestComparisonExpr> ReadOpExpr();
-	void ReadBoolExpr();
-	unique_ptr<SimplestComparisonExpr> ReadScalarArrayOpExpr();
+	unique_ptr<SimplestExpr> ReadOpExpr();
+	unique_ptr<SimplestLogicalExpr> ReadBoolExpr();
+	unique_ptr<SimplestIsNullExpr> ReadNullTest();
+	unique_ptr<SimplestExpr> ReadScalarArrayOpExpr();
 	unique_ptr<SimplestStmt> ReadPlannedStmt();
 	void ReadRangeTblEntry();
 	void ReadAlias();
-	void ReadNullTest();
 
 	PGDatum ReadDatum(bool typbyval, unsigned int &datum_len);
 	SimplestVarType GetSimplestVarType(unsigned int type_id);
 	SimplestJoinType GetSimplestJoinType(unsigned int type_id);
-	SimplestComparisonType GetSimplestComparisonType(unsigned int type_id);
+	SimplestExprType GetSimplestComparisonType(unsigned int type_id);
 
 	std::vector<unique_ptr<SimplestVarParamComparison>> index_conditions;
 };
