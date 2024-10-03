@@ -55,8 +55,9 @@ private:
 
 	// read postgres nodes
 	void *ReadBitmapset();
-	void *ReadAttrNumberCols(int numCols);
-	void *ReadOidCols(int numCols);
+	std::vector<int> ReadAttrNumberCols(int numCols);
+	std::vector<int> ReadIntCols(int numCols);
+	std::vector<bool> ReadBoolCols(int numCols);
 	unique_ptr<SimplestStmt> ReadCommonPlan();
 	unique_ptr<SimplestAggregate> ReadAgg();
 	unique_ptr<SimplestAttr> ReadAggref();
@@ -69,6 +70,7 @@ private:
 	unique_ptr<SimplestJoin> ReadCommonJoin();
 	unique_ptr<SimplestHash> ReadHash();
 	unique_ptr<SimplestJoin> ReadHashJoin();
+	unique_ptr<SimplestJoin> ReadMergeJoin();
 	unique_ptr<SimplestJoin> ReadNestLoop();
 	unique_ptr<SimplestVarComparison> ReadNestLoopParam();
 	unique_ptr<SimplestScan> ReadCommonScan();
@@ -77,6 +79,7 @@ private:
 	unique_ptr<SimplestNode> ReadBitmapIndexScan();
 	unique_ptr<SimplestScan> ReadIndexScan();
 	unique_ptr<SimplestScan> ReadIndexOnlyScan();
+	unique_ptr<SimplestSort> ReadSort();
 	unique_ptr<SimplestExpr> ReadOpExpr();
 	unique_ptr<SimplestLogicalExpr> ReadBoolExpr();
 	unique_ptr<SimplestIsNullExpr> ReadNullTest();
@@ -92,5 +95,6 @@ private:
 	SimplestExprType GetSimplestComparisonType(unsigned int type_id);
 
 	std::vector<unique_ptr<SimplestVarParamComparison>> index_conditions;
+	SimplestTextOrder GetSimplestTextOrderType(int type_id);
 };
 } // namespace duckdb

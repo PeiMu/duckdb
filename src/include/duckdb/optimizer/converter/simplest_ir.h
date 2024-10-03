@@ -19,6 +19,7 @@ namespace duckdb {
 enum SimplestVarType { InvalidVarType = 0, IntVar, FloatVar, StringVar, StringVarArr };
 enum SimplestJoinType { InvalidJoinType = 0, Inner, Left, Full, Right, Semi, Anti, UniqueOuter, UniqueInner };
 enum SimplestLogicalOp { InvalidLogicalOp = 0, LogicalAnd, LogicalOr, LogicalNot };
+enum SimplestTextOrder { InvalidTextOrder = 0, DefaultTextOrder, UTF8, C };
 enum SimplestExprType {
 	InvalidExprType = 0,
 	Equal,
@@ -50,7 +51,8 @@ enum SimplestNodeType {
 	JoinNode,
 	FilterNode,
 	ScanNode,
-	HashNode
+	HashNode,
+	SortNode
 };
 
 class SimplestNode {
@@ -589,14 +591,6 @@ private:
 
 class SimplestStmt : public SimplestNode {
 public:
-	SimplestStmt(SimplestNodeType node_type) : SimplestNode(node_type) {};
-	SimplestStmt(std::vector<unique_ptr<SimplestStmt>> children, SimplestNodeType node_type)
-	    : SimplestNode(node_type), children(std::move(children)) {};
-	SimplestStmt(std::vector<unique_ptr<SimplestStmt>> children, std::vector<unique_ptr<SimplestAttr>> target_list,
-	             SimplestNodeType node_type)
-	    : SimplestNode(node_type), target_list(std::move(target_list)), children(std::move(children)) {};
-	SimplestStmt(std::vector<unique_ptr<SimplestAttr>> target_list, SimplestNodeType node_type)
-	    : SimplestNode(node_type), target_list(std::move(target_list)) {};
 	SimplestStmt(std::vector<unique_ptr<SimplestStmt>> children, std::vector<unique_ptr<SimplestAttr>> target_list,
 	             std::vector<unique_ptr<SimplestExpr>> qual_vec, SimplestNodeType node_type)
 	    : SimplestNode(node_type), target_list(std::move(target_list)), children(std::move(children)),
@@ -604,6 +598,9 @@ public:
 	SimplestStmt(std::vector<unique_ptr<SimplestAttr>> target_list, std::vector<unique_ptr<SimplestExpr>> qual_vec,
 	             SimplestNodeType node_type)
 	    : SimplestNode(node_type), target_list(std::move(target_list)), qual_vec(std::move(qual_vec)) {};
+	SimplestStmt(unique_ptr<SimplestStmt> stmt, SimplestNodeType node_type)
+	    : SimplestNode(node_type), target_list(std::move(stmt->target_list)), children(std::move(stmt->children)),
+	      qual_vec(std::move(stmt->qual_vec)) {};
 	~SimplestStmt() = default;
 
 	void SimplestAddChild(unique_ptr<SimplestStmt> child) {
@@ -649,12 +646,8 @@ public:
 
 class SimplestAggregate : public SimplestStmt {
 public:
-	SimplestAggregate(std::vector<unique_ptr<SimplestStmt>> children,
-	                  std::vector<unique_ptr<SimplestAttr>> aggregate_columns, std::vector<SimplestVarType> agg_types)
-	    : SimplestStmt(std::move(children), std::move(aggregate_columns), AggregateNode), agg_types(agg_types) {};
-	SimplestAggregate(std::vector<unique_ptr<SimplestAttr>> aggregate_columns, std::vector<SimplestVarType> agg_types)
-	    : SimplestStmt(std::move(aggregate_columns), AggregateNode), agg_types(agg_types) {};
-	SimplestAggregate(std::vector<SimplestVarType> agg_types) : SimplestStmt(AggregateNode), agg_types(agg_types) {};
+	SimplestAggregate(unique_ptr<SimplestStmt> base_stmt, std::vector<SimplestVarType> agg_types)
+	    : SimplestStmt(std::move(base_stmt), AggregateNode), agg_types(agg_types) {};
 	~SimplestAggregate() = default;
 
 	std::vector<SimplestVarType> GetAggTypes() {
@@ -683,14 +676,12 @@ private:
 
 class SimplestJoin : public SimplestStmt {
 public:
-	SimplestJoin(std::vector<unique_ptr<SimplestStmt>> children,
-	             std::vector<unique_ptr<SimplestVarComparison>> join_conditions, SimplestJoinType join_type)
-	    : SimplestStmt(std::move(children), JoinNode), join_conditions(std::move(join_conditions)),
+	SimplestJoin(unique_ptr<SimplestStmt> base_stmt, std::vector<unique_ptr<SimplestVarComparison>> join_conditions,
+	             SimplestJoinType join_type)
+	    : SimplestStmt(std::move(base_stmt), JoinNode), join_conditions(std::move(join_conditions)),
 	      join_type(join_type) {};
-	SimplestJoin(std::vector<unique_ptr<SimplestStmt>> children, SimplestJoinType join_type)
-	    : SimplestStmt(std::move(children), JoinNode), join_type(join_type) {};
-	SimplestJoin(std::vector<unique_ptr<SimplestVarComparison>> join_conditions, SimplestJoinType join_type)
-	    : SimplestStmt(JoinNode), join_conditions(std::move(join_conditions)), join_type(join_type) {};
+	SimplestJoin(unique_ptr<SimplestStmt> base_stmt, SimplestJoinType join_type)
+	    : SimplestStmt(std::move(base_stmt), JoinNode), join_type(join_type) {};
 	~SimplestJoin() = default;
 
 	SimplestJoinType GetSimplestJoinType() const {
@@ -765,11 +756,8 @@ private:
 
 class SimplestFilter : public SimplestStmt {
 public:
-	SimplestFilter(std::vector<unique_ptr<SimplestStmt>> children,
-	               std::vector<unique_ptr<SimplestExpr>> filter_conditions)
-	    : SimplestStmt(std::move(children), FilterNode), filter_conditions(std::move(filter_conditions)) {};
-	SimplestFilter(std::vector<unique_ptr<SimplestExpr>> filter_conditions)
-	    : SimplestStmt(FilterNode), filter_conditions(std::move(filter_conditions)) {};
+	SimplestFilter(unique_ptr<SimplestStmt> base_stmt, std::vector<unique_ptr<SimplestExpr>> filter_conditions)
+	    : SimplestStmt(std::move(base_stmt), FilterNode), filter_conditions(std::move(filter_conditions)) {};
 	~SimplestFilter() = default;
 
 	std::string Print(bool print = true) override {
@@ -797,12 +785,8 @@ public:
 
 class SimplestScan : public SimplestStmt {
 public:
-	SimplestScan(unsigned int table_index, std::string table_name, std::vector<unique_ptr<SimplestAttr>> scan_columns)
-	    : SimplestStmt(std::move(scan_columns), ScanNode), table_index(table_index), table_name(table_name) {};
-	SimplestScan(unsigned int table_index, std::string table_name, std::vector<unique_ptr<SimplestAttr>> scan_columns,
-	             std::vector<unique_ptr<SimplestExpr>> qual_vec)
-	    : SimplestStmt(std::move(scan_columns), std::move(qual_vec), ScanNode), table_index(table_index),
-	      table_name(table_name) {};
+	SimplestScan(unique_ptr<SimplestStmt> base_stmt, unsigned int table_index, std::string table_name)
+	    : SimplestStmt(std::move(base_stmt), ScanNode), table_index(table_index), table_name(table_name) {};
 	~SimplestScan() = default;
 
 	unsigned int GetTableIndex() {
@@ -837,11 +821,8 @@ private:
 
 class SimplestHash : public SimplestStmt {
 public:
-	SimplestHash(std::vector<unique_ptr<SimplestAttr>> target_lists, std::vector<unique_ptr<SimplestAttr>> hash_keys)
-	    : SimplestStmt(std::move(target_lists), HashNode), hash_keys(std::move(hash_keys)) {};
-	SimplestHash(std::vector<unique_ptr<SimplestStmt>> children, std::vector<unique_ptr<SimplestAttr>> target_lists,
-	             std::vector<unique_ptr<SimplestAttr>> hash_keys)
-	    : SimplestStmt(std::move(children), std::move(target_lists), HashNode), hash_keys(std::move(hash_keys)) {};
+	SimplestHash(unique_ptr<SimplestStmt> base_stmt, std::vector<unique_ptr<SimplestAttr>> hash_keys)
+	    : SimplestStmt(std::move(base_stmt), HashNode), hash_keys(std::move(hash_keys)) {};
 	~SimplestHash() = default;
 
 	std::string Print(bool print = true) override {
@@ -863,5 +844,81 @@ public:
 	}
 
 	std::vector<unique_ptr<SimplestAttr>> hash_keys;
+};
+
+struct SimplestOrderStruct {
+	SimplestExprType order_type;
+	bool nulls_first;
+	SimplestTextOrder text_order;
+	// start from 1
+	int sort_col_idx;
+};
+
+class SimplestSort : public SimplestStmt {
+public:
+	SimplestSort(unique_ptr<SimplestStmt> base_stmt, std::vector<SimplestOrderStruct> order_struct_vec)
+	    : SimplestStmt(std::move(base_stmt), SortNode), order_struct_vec(order_struct_vec) {};
+	~SimplestSort() = default;
+
+	std::vector<SimplestOrderStruct> GetOrderStructVec() const {
+		return order_struct_vec;
+	};
+
+	std::string Print(bool print = true) override {
+		std::string str = "\n";
+		str += "╔══════════════════╗\n";
+
+		str += "Sort:\n";
+		for (auto order_struct : order_struct_vec) {
+			switch (order_struct.order_type) {
+			case InvalidExprType:
+				Printer::Print("Invalid Order Type!!!");
+				return str;
+			case LessThan:
+				str += "Ascending Order, ";
+				break;
+			case GreaterThan:
+				str += "Descending Order, ";
+				break;
+			default:
+				Printer::Print("Doesn't support order type " + std::to_string(order_struct.order_type) + " yet!");
+				return str;
+			}
+
+			if (order_struct.nulls_first)
+				str += "Null First, ";
+			else
+				str += "Null Last, ";
+
+			switch (order_struct.text_order) {
+			case InvalidTextOrder:
+				Printer::Print("Invalid TextOrder!!!");
+				return str;
+			case DefaultTextOrder:
+				str += "Default Text Order, ";
+				break;
+			case UTF8:
+				str += "UTF8, ";
+				break;
+			case C:
+				str += "C, ";
+				break;
+			}
+
+			str += "with column " + std::to_string(order_struct.sort_col_idx);
+			str += "\n";
+		}
+
+		str += SimplestStmt::Print(false);
+		str += "╚══════════════════╝\n";
+
+		if (print)
+			Printer::Print(str);
+
+		return str;
+	}
+
+private:
+	std::vector<SimplestOrderStruct> order_struct_vec;
 };
 } // namespace duckdb

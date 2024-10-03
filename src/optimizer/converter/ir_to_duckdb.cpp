@@ -227,6 +227,23 @@ unique_ptr<LogicalOperator> IRConverter::ConstructDuckdbPlan(
 				return logical_get;
 			}
 		}
+		case SortNode: {
+			auto postgres_sort = dynamic_cast<SimplestSort *>(postgres_plan_pointer);
+			vector<BoundOrderByNode> orders;
+			auto &target_list = postgres_sort->target_list;
+			D_ASSERT(!target_list.empty());
+			for (const auto &order_struct : postgres_sort->GetOrderStructVec()) {
+				auto duckdb_logical_type = ConvertVarType(target_list[order_struct.sort_col_idx - 1]->GetType());
+				auto expr = make_uniq<BoundConstantExpression>(Value(duckdb_logical_type));
+				auto order_type = ConvertOrderType(order_struct.order_type);
+				auto is_nulls_first =
+				    order_struct.nulls_first ? OrderByNullType::NULLS_FIRST : OrderByNullType::NULLS_LAST;
+				orders.emplace_back(BoundOrderByNode(order_type, is_nulls_first, std::move(expr)));
+			}
+			unique_ptr<LogicalOrder> duckdb_order = make_uniq<LogicalOrder>(std::move(orders));
+			duckdb_order->children.push_back(std::move(left_child));
+			return unique_ptr_cast<LogicalOrder, LogicalOperator>(std::move(duckdb_order));
+		}
 		default:
 			return unique_ptr<LogicalOperator>();
 		}
@@ -268,6 +285,21 @@ LogicalType IRConverter::ConvertVarType(SimplestVarType type) {
 	default:
 		Printer::Print("Invalid postgres var type!");
 		return LogicalType(LogicalTypeId::INVALID);
+	}
+}
+
+OrderType IRConverter::ConvertOrderType(SimplestExprType type) {
+	switch (type) {
+	case InvalidExprType:
+		Printer::Print("Invalid Order Type!!!");
+		return OrderType::INVALID;
+	case LessThan:
+		return OrderType::ASCENDING;
+	case GreaterThan:
+		return OrderType::DESCENDING;
+	default:
+		Printer::Print("Doesn't support order type " + std::to_string(type) + " yet!");
+		exit(-1);
 	}
 }
 

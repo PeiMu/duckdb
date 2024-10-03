@@ -10,15 +10,18 @@
 
 #include "duckdb/common/enums/join_type.hpp"
 #include "duckdb/common/printer.hpp"
+#include "duckdb/planner/bound_result_modifier.hpp"
 #include "duckdb/planner/expression/bound_between_expression.hpp"
 #include "duckdb/planner/expression/bound_columnref_expression.hpp"
 #include "duckdb/planner/expression/bound_comparison_expression.hpp"
 #include "duckdb/planner/expression/bound_conjunction_expression.hpp"
+#include "duckdb/planner/expression/bound_constant_expression.hpp"
 #include "duckdb/planner/expression/bound_function_expression.hpp"
 #include "duckdb/planner/expression/bound_operator_expression.hpp"
 #include "duckdb/planner/operator/logical_comparison_join.hpp"
 #include "duckdb/planner/operator/logical_filter.hpp"
 #include "duckdb/planner/operator/logical_get.hpp"
+#include "duckdb/planner/operator/logical_order.hpp"
 #include "read.hpp"
 #include "simplest_ir.h"
 
@@ -50,6 +53,7 @@ private:
 	                                                std::vector<unique_ptr<Expression>> &expr_vec);
 	ExpressionType ConvertCompType(SimplestExprType type);
 	LogicalType ConvertVarType(SimplestVarType type);
+	OrderType ConvertOrderType(SimplestExprType type);
 	void SetAttrName(unique_ptr<SimplestAttr> &attr, const std::deque<table_str> &table_col_names);
 	void SetAttrVecName(std::vector<unique_ptr<SimplestAttr>> &attr_vec, const std::deque<table_str> &table_col_names);
 	void SetExprName(unique_ptr<SimplestExpr> &expr, const std::deque<table_str> &table_col_names);

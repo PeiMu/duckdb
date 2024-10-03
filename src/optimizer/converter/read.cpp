@@ -450,36 +450,45 @@ void *PlanReader::ReadBitmapset() {
 	return nullptr;
 }
 
-void *PlanReader::ReadAttrNumberCols(int numCols) {
+std::vector<int> PlanReader::ReadAttrNumberCols(int numCols) {
 	int tokenLength, i;
 	const char *token;
+	std::vector<int> attr_cols;
 
-	if (numCols <= 0)
-		return NULL;
-
-	//	attr_vals = (PGAttrNumber *) malloc(numCols * sizeof(PGAttrNumber));
 	for (i = 0; i < numCols; i++) {
 		token = PG_strtok(&tokenLength);
-		//		attr_vals[i] = atoi(token);
+		attr_cols.emplace_back(atoi(token));
 	}
 
-	return nullptr;
+	return attr_cols;
 }
 
-void *PlanReader::ReadOidCols(int numCols) {
+std::vector<int> PlanReader::ReadIntCols(int numCols) {
 	int tokenLength, i;
 	const char *token;
-
-	if (numCols <= 0)
-		return NULL;
+	std::vector<int> oid_cols;
 
 	//	oid_vals = (PGOid *) malloc(numCols * sizeof(PGOid));
 	for (i = 0; i < numCols; i++) {
 		token = PG_strtok(&tokenLength);
-		//		oid_vals[i] = atooid(token);
+		oid_cols.emplace_back(atoi(token));
 	}
 
-	return nullptr;
+	return oid_cols;
+}
+
+std::vector<bool> PlanReader::ReadBoolCols(int numCols) {
+	int tokenLength, i;
+	const char *token;
+	std::vector<bool> bool_cols;
+
+	//	oid_vals = (PGOid *) malloc(numCols * sizeof(PGOid));
+	for (i = 0; i < numCols; i++) {
+		token = PG_strtok(&tokenLength);
+		bool_cols.emplace_back(strtobool(token));
+	}
+
+	return bool_cols;
 }
 
 unique_ptr<SimplestStmt> PlanReader::ReadCommonPlan() {
@@ -573,8 +582,7 @@ unique_ptr<SimplestAggregate> PlanReader::ReadAgg() {
 		// todo: need to check the order
 		agg_type_vec.emplace_back(target->GetType());
 	}
-	unique_ptr<SimplestAggregate> agg_stmt = make_uniq<SimplestAggregate>(
-	    std::move(common_stmt->children), std::move(common_stmt->target_list), agg_type_vec);
+	unique_ptr<SimplestAggregate> agg_stmt = make_uniq<SimplestAggregate>(std::move(common_stmt), agg_type_vec);
 
 	// AggStrategy
 	token = PG_strtok(&length);
@@ -591,10 +599,10 @@ unique_ptr<SimplestAggregate> PlanReader::ReadAgg() {
 	ReadAttrNumberCols(numCols);
 	// grpOperators
 	token = PG_strtok(&length);
-	ReadOidCols(numCols);
+	ReadIntCols(numCols);
 	// grpCollations
 	token = PG_strtok(&length);
-	ReadOidCols(numCols);
+	ReadIntCols(numCols);
 	// numGroups
 	token = PG_strtok(&length);
 	token = PG_strtok(&length);
@@ -853,17 +861,17 @@ unique_ptr<SimplestJoin> PlanReader::ReadCommonJoin() {
 	token = PG_strtok(&length);
 	(void)token;
 	std::vector<unique_ptr<SimplestNode>> node_vec;
-	std::vector<unique_ptr<SimplestVarComparison>> qual_vec;
+	std::vector<unique_ptr<SimplestVarComparison>> join_conditions;
 	auto qual_node = NodeRead(NULL, 0, true, &node_vec);
 	for (auto &node : node_vec) {
 		if (node)
-			qual_vec.emplace_back(unique_ptr_cast<SimplestNode, SimplestVarComparison>(std::move(node)));
+			join_conditions.emplace_back(unique_ptr_cast<SimplestNode, SimplestVarComparison>(std::move(node)));
 	}
 
-	if (qual_vec.empty()) {
-		return make_uniq<SimplestJoin>(std::move(common_stmt->children), join_type);
+	if (join_conditions.empty()) {
+		return make_uniq<SimplestJoin>(std::move(common_stmt), join_type);
 	} else {
-		return make_uniq<SimplestJoin>(std::move(common_stmt->children), std::move(qual_vec), join_type);
+		return make_uniq<SimplestJoin>(std::move(common_stmt), std::move(join_conditions), join_type);
 	}
 }
 
@@ -876,11 +884,11 @@ unique_ptr<SimplestHash> PlanReader::ReadHash() {
 	token = PG_strtok(&length);
 	(void)token;
 	std::vector<unique_ptr<SimplestNode>> node_vec;
-	std::vector<unique_ptr<SimplestAttr>> attr_vec;
+	std::vector<unique_ptr<SimplestAttr>> hash_keys;
 	NodeRead(NULL, 0, true, &node_vec);
 	for (auto &node : node_vec) {
 		if (node)
-			attr_vec.emplace_back(unique_ptr_cast<SimplestNode, SimplestAttr>(std::move(node)));
+			hash_keys.emplace_back(unique_ptr_cast<SimplestNode, SimplestAttr>(std::move(node)));
 	}
 	// skewTable
 	token = PG_strtok(&length);
@@ -895,8 +903,7 @@ unique_ptr<SimplestHash> PlanReader::ReadHash() {
 	token = PG_strtok(&length);
 	token = PG_strtok(&length);
 
-	unique_ptr<SimplestHash> hash_stmt = make_uniq<SimplestHash>(
-	    std::move(common_plan->children), std::move(common_plan->target_list), std::move(attr_vec));
+	unique_ptr<SimplestHash> hash_stmt = make_uniq<SimplestHash>(std::move(common_plan), std::move(hash_keys));
 
 	return hash_stmt;
 }
@@ -932,6 +939,44 @@ unique_ptr<SimplestJoin> PlanReader::ReadHashJoin() {
 	token = PG_strtok(&length);
 	(void)token;
 	NodeRead(NULL, 0);
+
+	return common_join;
+}
+
+unique_ptr<SimplestJoin> PlanReader::ReadMergeJoin() {
+	READ_TEMP_LOCALS();
+
+	unique_ptr<SimplestJoin> common_join = ReadCommonJoin();
+	// skip_mark_restore
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	// mergeclauses
+	// get join condition
+	token = PG_strtok(&length);
+	(void)token;
+	// this should get a vector of exprs
+	std::vector<unique_ptr<SimplestNode>> node_vec;
+	// todo: need to check if it's always SimplestVarComparison
+	std::vector<unique_ptr<SimplestVarComparison>> join_conditions;
+	NodeRead(NULL, 0, true, &node_vec);
+	for (auto &node : node_vec) {
+		if (node)
+			join_conditions.emplace_back(unique_ptr_cast<SimplestNode, SimplestVarComparison>(std::move(node)));
+	}
+	int cond_num = join_conditions.size();
+	common_join->AddJoinCondition(std::move(join_conditions));
+	// mergeFamilies
+	token = PG_strtok(&length);
+	ReadIntCols(cond_num);
+	// mergeCollations
+	token = PG_strtok(&length);
+	ReadIntCols(cond_num);
+	// mergeStrategies
+	token = PG_strtok(&length);
+	ReadIntCols(cond_num);
+	// mergeNullsFirst
+	token = PG_strtok(&length);
+	ReadBoolCols(cond_num);
 
 	return common_join;
 }
@@ -1005,12 +1050,7 @@ unique_ptr<SimplestScan> PlanReader::ReadCommonScan() {
 		D_ASSERT(attr->GetTableIndex() == table_index);
 	}
 #endif
-	unique_ptr<SimplestScan> common_scan;
-	if (common_plan->qual_vec.empty())
-		common_scan = make_uniq<SimplestScan>(table_index, "", std::move(common_plan->target_list));
-	else
-		common_scan = make_uniq<SimplestScan>(table_index, "", std::move(common_plan->target_list),
-		                                      std::move(common_plan->qual_vec));
+	auto common_scan = make_uniq<SimplestScan>(std::move(common_plan), table_index, "");
 
 	return common_scan;
 }
@@ -1148,6 +1188,40 @@ unique_ptr<SimplestNode> PlanReader::ReadBitmapIndexScan() {
 			index_conditions.emplace_back(unique_ptr_cast<SimplestNode, SimplestVarParamComparison>(std::move(node)));
 	}
 	return unique_ptr<SimplestNode>();
+}
+
+unique_ptr<SimplestSort> PlanReader::ReadSort() {
+	READ_TEMP_LOCALS();
+
+	unique_ptr<SimplestStmt> common_stmt = ReadCommonPlan();
+	// numCols
+	token = PG_strtok(&length);
+	token = PG_strtok(&length);
+	int num_col = atoi(token);
+	std::vector<SimplestOrderStruct> order_vec;
+	// sortColIdx
+	token = PG_strtok(&length);
+	std::vector<int> sort_col_idx = ReadAttrNumberCols(num_col);
+	// sortOperators
+	token = PG_strtok(&length);
+	std::vector<int> sort_ops = ReadIntCols(num_col);
+	// collations
+	token = PG_strtok(&length);
+	std::vector<int> collations = ReadIntCols(num_col);
+	// nullsFirst
+	token = PG_strtok(&length);
+	std::vector<bool> nulls_first = ReadBoolCols(num_col);
+
+	SimplestOrderStruct current_order_struct;
+	for (int i = 0; i < num_col; i++) {
+		current_order_struct.sort_col_idx = sort_col_idx[i];
+		current_order_struct.order_type = GetSimplestComparisonType(sort_ops[i]);
+		current_order_struct.text_order = GetSimplestTextOrderType(collations[i]);
+		current_order_struct.nulls_first = nulls_first[i];
+		order_vec.emplace_back(current_order_struct);
+	}
+
+	return make_uniq<SimplestSort>(std::move(common_stmt), order_vec);
 }
 
 unique_ptr<SimplestExpr> PlanReader::ReadOpExpr() {
@@ -1324,6 +1398,7 @@ unique_ptr<SimplestExpr> PlanReader::ReadScalarArrayOpExpr() {
 unique_ptr<SimplestStmt> PlanReader::ReadMaterial() {
 	auto material_node = ReadCommonPlan();
 
+	// todo: support MaterialNode
 	D_ASSERT(1 == material_node->children.size());
 
 	return std::move(material_node->children[0]);
@@ -1858,6 +1933,21 @@ SimplestExprType PlanReader::GetSimplestComparisonType(unsigned int type_id) {
 	return simplest_comprison_type;
 }
 
+SimplestTextOrder PlanReader::GetSimplestTextOrderType(int type_id) {
+	SimplestTextOrder simplest_text_order = InvalidTextOrder;
+
+	switch (type_id) {
+	case 0:
+		simplest_text_order = DefaultTextOrder;
+		break;
+	default:
+		Printer::Print("Doesn't support text order type " + std::to_string(type_id) + " yet!");
+		exit(-1);
+	}
+
+	return simplest_text_order;
+}
+
 unique_ptr<SimplestNode> PlanReader::ParseNodeString() {
 	READ_TEMP_LOCALS();
 
@@ -1890,6 +1980,8 @@ unique_ptr<SimplestNode> PlanReader::ParseNodeString() {
 		node = ReadHash();
 	else if (MATCH("HASHJOIN", 8))
 		node = ReadHashJoin();
+	else if (MATCH("MERGEJOIN", 9))
+		node = ReadMergeJoin();
 	else if (MATCH("NESTLOOP", 8))
 		node = ReadNestLoop();
 	else if (MATCH("NESTLOOPPARAM", 13))
@@ -1904,6 +1996,8 @@ unique_ptr<SimplestNode> PlanReader::ParseNodeString() {
 		node = ReadBitmapHeapScan();
 	else if (MATCH("BITMAPINDEXSCAN", 15))
 		node = ReadBitmapIndexScan();
+	else if (MATCH("SORT", 4))
+		node = ReadSort();
 	else if (MATCH("OPEXPR", 6))
 		node = ReadOpExpr();
 	else if (MATCH("BOOLEXPR", 8))
