@@ -35,22 +35,18 @@ public:
 	PlanReader() = default;
 	~PlanReader() = default;
 
-	const char *PG_strtok(int *length);
-
-	unique_ptr<SimplestNode> NodeRead(const char *token, int tok_len, bool return_vector = false,
-	                                  std::vector<unique_ptr<SimplestNode>> *node_vec = nullptr);
-
 	unique_ptr<SimplestNode> StringToNode(const char *str);
-
-	char *DeBackslash(const char *token, int length);
 
 	std::deque<table_str> table_col_names;
 
 private:
+	const char *PG_strtok(int *length);
+	unique_ptr<SimplestNode> NodeRead(const char *token, int tok_len, bool return_vector = false,
+	                                  std::vector<unique_ptr<SimplestNode>> *node_vec = nullptr);
+	char *DeBackslash(const char *token, int length);
 	unique_ptr<SimplestNode> StringToNodeInternal(const char *str, bool restore_loc_fields);
 	int StrToInt(const char *str, char **endptr, int base);
 	duckdb_libpgquery::PGNodeTag NodeTokenType(const char *token, int length);
-
 	unique_ptr<SimplestNode> ParseNodeString();
 
 	// read postgres nodes
@@ -90,6 +86,8 @@ private:
 	void ReadAlias();
 
 	PGDatum ReadDatum(bool typbyval, unsigned int &datum_len);
+	std::string ParseText(PGDatum datum, unsigned int datum_len);
+	std::vector<std::string> ParseTextArray(PGDatum datum, unsigned int datum_len);
 	SimplestVarType GetSimplestVarType(unsigned int type_id);
 	SimplestJoinType GetSimplestJoinType(unsigned int type_id);
 	SimplestExprType GetSimplestComparisonType(unsigned int type_id);

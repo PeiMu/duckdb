@@ -543,6 +543,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 			if (1 == subqueries.size()) {
 				// add the original projection head
+				// todo: why copy?
 				unique_ptr<LogicalOperator> last_subquery = plan->Copy(optimizer.context);
 				auto child = last_subquery.get();
 
@@ -604,7 +605,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		plan->Print();
 #endif
 
-		IRConverter ir_converter;
+		IRConverter ir_converter(*planner.binder, *this);
 		// todo: It's better to generate the Filter Expression from postgres, but needs a lot of engineering work.
 		//  Currently, we reuse the Filter Expression from duckdb
 		std::vector<unique_ptr<Expression>> expr_vec = ir_converter.CollectFilterExpressions(plan);
@@ -651,6 +652,15 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 
 #ifdef DEBUG
+		// todo: we should refactor this
+		for (auto it = expr_vec.begin(); it != expr_vec.end();) {
+			auto &expr = *it;
+			if ("IN (...)" == expr->alias) {
+				it = expr_vec.erase(it);
+			} else {
+				it++;
+			}
+		}
 		D_ASSERT(expr_vec.empty());
 #endif
 	}

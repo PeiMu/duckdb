@@ -1404,7 +1404,7 @@ unique_ptr<SimplestStmt> PlanReader::ReadMaterial() {
 	return std::move(material_node->children[0]);
 }
 
-std::string ParseText(PGDatum datum, unsigned int datum_len) {
+std::string PlanReader::ParseText(PGDatum datum, unsigned int datum_len) {
 	const char *ptr = reinterpret_cast<const char *>(datum);
 
 	// todo: check what does the first 4 bytes mean
@@ -1416,23 +1416,35 @@ std::string ParseText(PGDatum datum, unsigned int datum_len) {
 	return str;
 }
 
-std::vector<std::string> ParseTextArray(PGDatum datum, unsigned int datum_len) {
+std::vector<std::string> PlanReader::ParseTextArray(PGDatum datum, unsigned int datum_len) {
 	const char *ptr = reinterpret_cast<const char *>(datum);
 
 	std::vector<std::string> result;
 	// todo: check the first 24 bytes
 	size_t unused_bytes = 24;
 	ptr += unused_bytes;
-	while (ptr) {
-		int element_len = *((int *)ptr);
+	datum_len -= unused_bytes;
+
+	std::string str;
+	while (datum_len) {
 		ptr += sizeof(int);
-		// Add the string to the result vector
-		result.emplace_back(ptr);
-		ptr += sizeof(result.back());
-		if (!ptr)
-			ptr += 1;
-		// debug
-		int a = 0;
+		datum_len -= sizeof(int);
+		auto check_nullptr = ptr;
+		size_t str_len = 0;
+		while ((datum_len != str_len) && strcmp(check_nullptr, "")) {
+			check_nullptr++;
+			str_len++;
+		}
+
+		str.assign(ptr, str_len);
+		result.emplace_back(str);
+		ptr += str_len;
+		datum_len -= str_len;
+
+		while ((0 != datum_len) && !strcmp(ptr, "")) {
+			ptr++;
+			datum_len--;
+		}
 	}
 
 	return result;
@@ -1484,13 +1496,13 @@ unique_ptr<SimplestConstVar> PlanReader::ReadConst() {
 			return make_uniq<SimplestConstVar>((float)datum);
 		}
 		case StringVar: {
-			return make_uniq<SimplestConstVar>(ParseText(datum, datum_len));
+			std::string datum_text = ParseText(datum, datum_len);
+			return make_uniq<SimplestConstVar>(datum_text);
 		}
 		case StringVarArr: {
 			// Decode the array from the Datum
-			// todo
-			// std::vector<std::string> textArray = ParseTextArray(datum, datum_len);
-			return make_uniq<SimplestConstVar>(std::to_string(datum));
+			std::vector<std::string> datum_text_arr = ParseTextArray(datum, datum_len);
+			return make_uniq<SimplestConstVar>(datum_text_arr);
 		}
 		default:
 			Printer::Print("Doesn't support type " + std::to_string(const_type) + " yet!");
