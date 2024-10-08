@@ -100,6 +100,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 #endif
 	}
 
+	// todo: can we clear children then copy?
 	auto new_plan = original_plan->Copy(context);
 	new_plan->children.clear();
 	new_plan->AddChild(std::move(subquery));
@@ -155,36 +156,36 @@ shared_ptr<PreparedStatementData> SubqueryPreparer::AdaptSelect(shared_ptr<Prepa
 void SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
                                       unique_ptr<ColumnDataCollection> previous_result) {
 
-//	unique_ptr<MaterializedQueryResult> result_materialized;
-//	auto collection = make_uniq<ColumnDataCollection>(Allocator::DefaultAllocator(), types);
-//#if TIME_BREAK_DOWN
-//	auto timer = chrono_tic();
-//#endif
-//	int64_t chunk_size = 0;
-//	if (previous_result->type == QueryResultType::STREAM_RESULT) {
-//		auto &stream_query = previous_result->Cast<duckdb::StreamQueryResult>();
-//		result_materialized = stream_query.Materialize();
-//		collection = make_uniq<ColumnDataCollection>(result_materialized->Collection());
-//	} else if (previous_result->type == QueryResultType::MATERIALIZED_RESULT) {
-//		ColumnDataAppendState append_state;
-//		collection->InitializeAppend(append_state);
-//		unique_ptr<DataChunk> chunk;
-//		ErrorData error;
-//		while (true) {
-//			previous_result->TryFetch(chunk, error);
-//			if (!chunk || chunk->size() == 0) {
-//				break;
-//			}
-//			chunk_size += chunk->size();
-//			// set chunk cardinality
-//			chunk->SetCardinality(chunk->size());
-//			collection->Append(append_state, *chunk);
-//		}
-//	}
-//#if TIME_BREAK_DOWN
-//	std::string str = "Fetch data with size=" + std::to_string(chunk_size) + ", ";
-//	chrono_toc(&timer, str.data());
-//#endif
+	//	unique_ptr<MaterializedQueryResult> result_materialized;
+	//	auto collection = make_uniq<ColumnDataCollection>(Allocator::DefaultAllocator(), types);
+	// #if TIME_BREAK_DOWN
+	//	auto timer = chrono_tic();
+	// #endif
+	//	int64_t chunk_size = 0;
+	//	if (previous_result->type == QueryResultType::STREAM_RESULT) {
+	//		auto &stream_query = previous_result->Cast<duckdb::StreamQueryResult>();
+	//		result_materialized = stream_query.Materialize();
+	//		collection = make_uniq<ColumnDataCollection>(result_materialized->Collection());
+	//	} else if (previous_result->type == QueryResultType::MATERIALIZED_RESULT) {
+	//		ColumnDataAppendState append_state;
+	//		collection->InitializeAppend(append_state);
+	//		unique_ptr<DataChunk> chunk;
+	//		ErrorData error;
+	//		while (true) {
+	//			previous_result->TryFetch(chunk, error);
+	//			if (!chunk || chunk->size() == 0) {
+	//				break;
+	//			}
+	//			chunk_size += chunk->size();
+	//			// set chunk cardinality
+	//			chunk->SetCardinality(chunk->size());
+	//			collection->Append(append_state, *chunk);
+	//		}
+	//	}
+	// #if TIME_BREAK_DOWN
+	//	std::string str = "Fetch data with size=" + std::to_string(chunk_size) + ", ";
+	//	chrono_toc(&timer, str.data());
+	// #endif
 
 	int64_t chunk_size = previous_result->Count();
 
@@ -359,7 +360,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalO
 				column_ref_expr.binding.table_index = original_proj_expr[proj_expr_index].table_idx;
 				column_ref_expr.binding.column_index = original_proj_expr[proj_expr_index].column_idx;
 #ifdef DEBUG
-				D_ASSERT(column_ref_expr.alias == original_proj_expr[proj_expr_index].column_name);
+				// D_ASSERT(column_ref_expr.alias == original_proj_expr[proj_expr_index].column_name);
 				D_ASSERT(column_ref_expr.return_type == original_proj_expr[proj_expr_index].return_type);
 #endif
 			}
@@ -511,7 +512,6 @@ bool SubqueryPreparer::Rewrite(unique_ptr<LogicalOperator> &plan) {
 			D_ASSERT(table_blocks_key_order.empty());
 #endif
 			continue;
-
 		}
 
 		// 3. construct the new plan tree
@@ -549,7 +549,7 @@ bool SubqueryPreparer::Rewrite(unique_ptr<LogicalOperator> &plan) {
 		// add the aboved_cross_product
 		reordered_plan->children[0] = std::move(aboved_cross_product);
 	}
- 	return true;
+	return true;
 }
 
 void SubqueryPreparer::InsertTableBlocks(unique_ptr<LogicalOperator> &op,

@@ -91,8 +91,8 @@ private:
 	SimplestVarType GetSimplestVarType(unsigned int type_id);
 	SimplestJoinType GetSimplestJoinType(unsigned int type_id);
 	SimplestExprType GetSimplestComparisonType(unsigned int type_id);
+	SimplestTextOrder GetSimplestTextOrderType(int type_id);
 
 	std::vector<unique_ptr<SimplestVarParamComparison>> index_conditions;
-	SimplestTextOrder GetSimplestTextOrderType(int type_id);
 };
 } // namespace duckdb

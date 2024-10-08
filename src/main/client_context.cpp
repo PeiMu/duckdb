@@ -325,8 +325,8 @@ unique_ptr<QueryResult> ClientContext::FetchResultInternal(ClientContextLock &lo
 	return result;
 }
 
-unique_ptr<ColumnDataCollection> ClientContext::FetchCollectionInternal(ClientContextLock &lock, PendingQueryResult &pending,
-                                                               bool continue_exec) {
+unique_ptr<ColumnDataCollection>
+ClientContext::FetchCollectionInternal(ClientContextLock &lock, PendingQueryResult &pending, bool continue_exec) {
 	D_ASSERT(active_query);
 	D_ASSERT(active_query->IsOpenResult(pending));
 	D_ASSERT(active_query->prepared);
@@ -342,7 +342,7 @@ unique_ptr<ColumnDataCollection> ClientContext::FetchCollectionInternal(ClientCo
 		CleanupInternal(lock, false, continue_exec);
 	} else {
 		throw InternalException("Do not support stream result in FetchCollectionInternal");
-//		active_query->SetOpenResult(*result);
+		// active_query->SetOpenResult(*result);
 	}
 	return result;
 }
@@ -420,6 +420,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		chrono_toc(&timer, "PreOptimize time is\n");
 #endif
 #if ENABLE_QUERY_SPLIT
+		// todo: refactor - move these to a standalone function
 		subquery_queue subqueries;
 		table_expr_info table_expr_queue;
 		std::vector<TableExpr> proj_expr;
@@ -543,7 +544,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 			if (1 == subqueries.size()) {
 				// add the original projection head
-				// todo: why copy?
 				unique_ptr<LogicalOperator> last_subquery = plan->Copy(optimizer.context);
 				auto child = last_subquery.get();
 
@@ -628,28 +628,87 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		new_plan->children.clear();
 
 		// get the postgres node string
-		const std::ifstream input_stream("/home/pei/Project/duckdb/measure/postgres_plan/postgres_plan", std::ios_base::binary);
+		std::ifstream input_stream("/home/pei/Project/duckdb/measure/postgres_plan/postgres_plan",
+		                           std::ios_base::binary);
 		if (input_stream.fail()) {
 			Printer::Print("Error! Failed to open file!!!");
 			exit(-1);
 		}
-		std::stringstream buffer;
-		buffer << input_stream.rdbuf();
+		std::string str_line;
 		std::vector<std::string> query_string_vec;
-		query_string_vec.emplace_back(buffer.str());
-
-		for (const auto &str : query_string_vec) {
-			auto inject_plan = ir_converter.InjectPlan(str.c_str(), table_map, expr_vec);
-			// todo: we should find the correct position to add child
-			//  e.g. for the first query/subquery, just add to `new_plan`
-			//       for the other subqueries, replace the `temp%d` table
-			new_plan->AddChild(std::move(inject_plan));
+		while (std::getline(input_stream, str_line)) {
+			query_string_vec.emplace_back(str_line);
 		}
+		size_t subqueries_num = query_string_vec.size();
+
+		unique_ptr<ColumnDataCollection> subquery_result;
+		for (size_t i = 0; i < subqueries_num; i++) {
+			PlanReader plan_reader;
+			unique_ptr<SimplestNode> postgres_plan = plan_reader.StringToNode(query_string_vec[i].c_str());
+			//	D_ASSERT(AggregateNode == postgres_plan->GetNodeType());
+			unique_ptr<SimplestStmt> postgres_stmt =
+			    unique_ptr_cast<SimplestNode, SimplestStmt>(std::move(postgres_plan));
+			// add table/column name from plan_reader.table_col_names
+			ir_converter.AddTableColumnName(postgres_stmt, plan_reader.table_col_names);
+#ifdef DEBUG
+			postgres_stmt->Print();
+#endif
+			auto postgres_plan_pointer = postgres_stmt.get();
+
+			// start from JoinNode
+			while (JoinNode != postgres_plan_pointer->GetNodeType()) {
+#ifdef DEBUG
+				D_ASSERT(postgres_plan_pointer->children.size() >= 1);
+#endif
+				postgres_plan_pointer = postgres_plan_pointer->children[0].get();
+			};
+
+			auto result_chunk_idx = planner.binder->GenerateTableIndex();
+			std::unordered_map<int, int> pg_duckdb_table_idx =
+			    ir_converter.MatchTableIndex(table_map, plan_reader.table_col_names, result_chunk_idx);
+
+			// construct plan from postgres
+			auto new_duckdb_plan =
+			    ir_converter.ConstructDuckdbPlan(postgres_plan_pointer, table_map, pg_duckdb_table_idx, expr_vec,
+			                                     std::move(subquery_result), result_chunk_idx);
+
+			SubqueryPreparer subquery_preparer(*planner.binder, *this);
+			if (i != subqueries_num - 1) {
+				// 1. generate proj head based on the `target_list`
+				unique_ptr<LogicalOperator> new_sub_plan =
+				    ir_converter.GenerateProjHead(plan, std::move(new_duckdb_plan), postgres_stmt, pg_duckdb_table_idx);
+				// 2. adapt select node
+				auto subquery_stmt = subquery_preparer.AdaptSelect(result, new_sub_plan);
+				// 3. create physical plan
+#ifdef DEBUG
+				new_sub_plan->Verify(*this);
+#endif
+				PhysicalPlanGenerator physical_planner(*this);
+				auto physical_plan = physical_planner.CreatePlan(std::move(new_sub_plan));
 
 #ifdef DEBUG
-		Printer::Print("new duckdb plan");
-		plan->Print();
+				D_ASSERT(!physical_plan->ToString().empty());
 #endif
+				// 4. execute row
+				subquery_stmt->plan = std::move(physical_plan);
+
+				auto n_param = subquery_stmt->unbound_statement->n_param;
+				auto statement_query = subquery_stmt->unbound_statement->query;
+				auto named_param_map = std::move(subquery_stmt->unbound_statement->named_param_map);
+				auto prepared_stmt =
+				    make_uniq<PreparedStatement>(shared_from_this(), std::move(subquery_stmt),
+				                                 std::move(statement_query), n_param, std::move(named_param_map));
+				duckdb::vector<Value> bound_values;
+				subquery_result = prepared_stmt->ExecuteRow(lock, bound_values, false);
+			} else {
+				// 5. merge to the last subquery
+				new_plan->AddChild(std::move(new_duckdb_plan));
+				// 6. UpdateProjHead
+				std::vector<TableExpr> new_proj_table_expr =
+				    ir_converter.GetTableExprFromTargetList(postgres_stmt->target_list, pg_duckdb_table_idx);
+				plan = subquery_preparer.UpdateProjHead(std::move(plan), new_proj_table_expr);
+			}
+		}
 
 #ifdef DEBUG
 		// todo: we should refactor this
@@ -662,6 +721,11 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			}
 		}
 		D_ASSERT(expr_vec.empty());
+#endif
+
+#ifdef DEBUG
+		Printer::Print("new duckdb plan");
+		plan->Print();
 #endif
 	}
 
