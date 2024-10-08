@@ -179,7 +179,7 @@ unique_ptr<LogicalOperator> IRConverter::DealWithQual(unique_ptr<LogicalGet> log
 	}
 
 	for (const auto &qual : qual_vec) {
-		// first check if it's a `IN` clause
+		// check if it's a `IN` clause
 		if (VarConstComparisonNode == qual->GetNodeType()) {
 			auto &comp_node = qual->Cast<SimplestVarConstComparison>();
 			if (StringVarArr == comp_node.const_var->GetType()) {
@@ -190,6 +190,9 @@ unique_ptr<LogicalOperator> IRConverter::DealWithQual(unique_ptr<LogicalGet> log
 				collection->InitializeAppend(append_state);
 				DataChunk chunk;
 				chunk.Initialize(context, return_types);
+				// from in_clause_rewriter.cpp, we only generate data chunk for more than 6 strings
+				if (str_vec.size() < 6)
+					continue;
 				for (idx_t column_idx = 0; column_idx < str_vec.size(); column_idx++) {
 					Value value = Value(str_vec[column_idx]);
 					idx_t index = chunk.size();
