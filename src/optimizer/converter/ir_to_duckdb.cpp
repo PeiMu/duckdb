@@ -271,8 +271,10 @@ unique_ptr<LogicalOperator> IRConverter::ConstructDuckdbPlan(
 				                                                  std::move(subquery_result));
 				chunk_scan->estimated_cardinality = chunk_size;
 				chunk_scan->has_estimated_cardinality = true;
-				// todo: update column_ids
-				column_idx_mapping[result_chunk_idx] = {0, 0, 1};
+				// update column_ids
+				for (size_t idx = 0; idx < postgres_scan->target_list.size(); idx++) {
+					column_idx_mapping[result_chunk_idx].emplace_back(idx);
+				}
 				return unique_ptr_cast<LogicalColumnDataGet, LogicalOperator>(std::move(chunk_scan));
 			}
 
