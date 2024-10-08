@@ -16,7 +16,7 @@
 
 namespace duckdb {
 
-enum SimplestVarType { InvalidVarType = 0, IntVar, FloatVar, StringVar, StringVarArr };
+enum SimplestVarType { InvalidVarType = 0, BoolVar, IntVar, FloatVar, StringVar, StringVarArr };
 enum SimplestJoinType { InvalidJoinType = 0, Inner, Left, Full, Right, Semi, Anti, UniqueOuter, UniqueInner };
 enum SimplestLogicalOp { InvalidLogicalOp = 0, LogicalAnd, LogicalOr, LogicalNot };
 enum SimplestTextOrder { InvalidTextOrder = 0, DefaultTextOrder, UTF8, C };
@@ -30,7 +30,8 @@ enum SimplestExprType {
 	GreaterEqual,
 	NullType,
 	NonNullType,
-	TEXT_LIKE,
+	TextLike,
+	TEXT_Not_LIKE,
 	LogicalOp
 };
 enum SimplestNodeType {
@@ -134,6 +135,8 @@ private:
 
 class SimplestConstVar : public SimplestVar {
 public:
+	SimplestConstVar(bool bool_value)
+	    : SimplestVar(SimplestVarType::BoolVar, true, ConstVarNode), bool_value(bool_value) {};
 	SimplestConstVar(int int_value) : SimplestVar(SimplestVarType::IntVar, true, ConstVarNode), int_value(int_value) {};
 	SimplestConstVar(float float_value)
 	    : SimplestVar(SimplestVarType::FloatVar, true, ConstVarNode), float_value(float_value) {};
@@ -168,6 +171,9 @@ public:
 		case InvalidVarType:
 			Printer::Print("\ninvalid Vary Type!!!");
 			return str;
+		case BoolVar:
+			str = "Bool const value: " + std::to_string(bool_value);
+			break;
 		case IntVar:
 			str = "Integer const value: " + std::to_string(int_value);
 			break;
@@ -192,6 +198,7 @@ public:
 	}
 
 private:
+	bool bool_value;
 	int int_value;
 	float float_value;
 	std::string str_value;
@@ -230,6 +237,9 @@ public:
 		case InvalidVarType:
 			Printer::Print("\ninvalid Vary Type!!!");
 			return str;
+		case BoolVar:
+			str = "Bool variable ";
+			break;
 		case IntVar:
 			str = "Integer variable ";
 			break;
@@ -276,6 +286,9 @@ public:
 		case InvalidVarType:
 			Printer::Print("\ninvalid Vary Type!!!");
 			return str;
+		case BoolVar:
+			str = "Bool variable ";
+			break;
 		case IntVar:
 			str = "Integer variable ";
 			break;
@@ -338,8 +351,11 @@ public:
 		case Equal:
 			comparison_op = " = ";
 			break;
-		case TEXT_LIKE:
+		case TextLike:
 			comparison_op = " ~~ ";
+			break;
+		case TEXT_Not_LIKE:
+			comparison_op = " !~~ ";
 			break;
 		case LessThan:
 			comparison_op = " < ";
@@ -396,8 +412,11 @@ public:
 		case Equal:
 			comparison_op = " = ";
 			break;
-		case TEXT_LIKE:
+		case TextLike:
 			comparison_op = " ~~ ";
+			break;
+		case TEXT_Not_LIKE:
+			comparison_op = " !~~ ";
 			break;
 		case LessThan:
 			comparison_op = " < ";
@@ -454,8 +473,11 @@ public:
 		case Equal:
 			comparison_op = " = ";
 			break;
-		case TEXT_LIKE:
+		case TextLike:
 			comparison_op = " ~~ ";
+			break;
+		case TEXT_Not_LIKE:
+			comparison_op = " !~~ ";
 			break;
 		case LessThan:
 			comparison_op = " < ";
@@ -508,7 +530,8 @@ public:
 			Printer::Print("Invalid expr Type!!!");
 			return str;
 		case Equal:
-		case TEXT_LIKE:
+		case TextLike:
+		case TEXT_Not_LIKE:
 		case LessThan:
 		case GreaterThan:
 		case LessEqual:

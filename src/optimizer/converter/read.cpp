@@ -1489,6 +1489,9 @@ unique_ptr<SimplestConstVar> PlanReader::ReadConst() {
 		unsigned int datum_len;
 		PGDatum datum = ReadDatum(const_by_val, datum_len);
 		switch (const_type) {
+		case BoolVar: {
+			return make_uniq<SimplestConstVar>((bool)datum);
+		}
 		case IntVar: {
 			return make_uniq<SimplestConstVar>((int)datum);
 		}
@@ -1842,12 +1845,17 @@ PGDatum PlanReader::ReadDatum(bool typbyval, unsigned int &datum_len) {
 SimplestVarType PlanReader::GetSimplestVarType(unsigned int type_id) {
 	SimplestVarType simplest_var_type = InvalidVarType;
 	switch (type_id) {
+	case 16:
+		simplest_var_type = BoolVar;
+		break;
 	case 20:
 	case 21:
 	case 23:
 	case 26:
 		simplest_var_type = IntVar;
 		break;
+	case 18:
+	case 19:
 	case 25:
 	case 1043:
 		simplest_var_type = StringVar;
@@ -1916,7 +1924,10 @@ SimplestExprType PlanReader::GetSimplestComparisonType(unsigned int type_id) {
 		simplest_comprison_type = Equal;
 		break;
 	case 1209:
-		simplest_comprison_type = TEXT_LIKE;
+		simplest_comprison_type = TextLike;
+		break;
+	case 1210:
+		simplest_comprison_type = TEXT_Not_LIKE;
 		break;
 	case 85:
 	case 531:
@@ -1926,15 +1937,19 @@ SimplestExprType PlanReader::GetSimplestComparisonType(unsigned int type_id) {
 	case 412:
 	case 2799:
 	case 672:
+	case 664:
 		simplest_comprison_type = LessThan;
 		break;
 	case 521:
+	case 666:
 		simplest_comprison_type = GreaterThan;
 		break;
 	case 523:
+	case 665:
 		simplest_comprison_type = LessEqual;
 		break;
 	case 525:
+	case 667:
 		simplest_comprison_type = GreaterEqual;
 		break;
 	default:
