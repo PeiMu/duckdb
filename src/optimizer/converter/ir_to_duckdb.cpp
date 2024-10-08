@@ -45,7 +45,6 @@ std::vector<unique_ptr<Expression>> IRConverter::CollectFilterExpressions(unique
 
 bool IRConverter::CheckCondIndex(const unique_ptr<Expression> &expr, const unique_ptr<LogicalOperator> &child) {
 #ifdef DEBUG
-	// todo: check if all of the expr are bound_column_ref
 	D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->GetExpressionType());
 #endif
 	auto &bound_col_ref = expr->Cast<BoundColumnRefExpression>();
@@ -164,7 +163,10 @@ unique_ptr<LogicalOperator> IRConverter::DealWithQual(unique_ptr<LogicalGet> log
 	for (const auto &qual : qual_vec) {
 		// currently we get filter expressions from duckdb plan
 		// todo: construct filter expressions from postgres info, aka generate unique_ptr<Expression>
-		filter_expressions = GetFilter_exprs(expr_vec, attr_table_idx);
+		auto temp_filter_expressions = GetFilter_exprs(expr_vec, attr_table_idx);
+		for (auto &temp_expr : temp_filter_expressions) {
+			filter_expressions.emplace_back(std::move(temp_expr));
+		}
 	}
 	if (!filter_expressions.empty()) {
 		auto scan_filter = make_uniq<LogicalFilter>();
