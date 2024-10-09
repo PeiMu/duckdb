@@ -611,7 +611,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		std::vector<unique_ptr<Expression>> expr_vec = ir_converter.CollectFilterExpressions(plan);
 
 		// get the table map
-		unordered_map<std::string, unique_ptr<LogicalGet>> table_map = ir_converter.GetTableMap(plan);
+		unordered_map<std::string, unique_ptr<LogicalGet>> table_map = ir_converter.GetDuckdbTableMap(plan);
 
 		// get the parent node of JOIN/CROSS_PRODUCT
 		auto new_plan = plan.get();
@@ -641,7 +641,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		}
 		size_t subqueries_num = query_string_vec.size();
 
-		unique_ptr<ColumnDataCollection> subquery_result;
+		std::unordered_map<std::string, unique_ptr<ColumnDataCollection>> subquery_results;
+		unsigned int subquery_index = 0;
+		// <temp%, subquery_dd_index>
+		std::unordered_map<std::string, unsigned int> temp_table_map;
 		for (size_t i = 0; i < subqueries_num; i++) {
 			PlanReader plan_reader;
 			unique_ptr<SimplestNode> postgres_plan = plan_reader.StringToNode(query_string_vec[i].c_str());
@@ -663,14 +666,12 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				postgres_plan_pointer = postgres_plan_pointer->children[0].get();
 			};
 
-			auto result_chunk_idx = planner.binder->GenerateTableIndex();
 			std::unordered_map<int, int> pg_duckdb_table_idx =
-			    ir_converter.MatchTableIndex(table_map, plan_reader.table_col_names, result_chunk_idx);
+			    ir_converter.MatchTableIndex(table_map, plan_reader.table_col_names, temp_table_map);
 
 			// construct plan from postgres
-			auto new_duckdb_plan =
-			    ir_converter.ConstructDuckdbPlan(postgres_plan_pointer, table_map, pg_duckdb_table_idx, expr_vec,
-			                                     std::move(subquery_result), result_chunk_idx);
+			auto new_duckdb_plan = ir_converter.ConstructDuckdbPlan(
+			    postgres_plan_pointer, table_map, pg_duckdb_table_idx, expr_vec, subquery_results, temp_table_map);
 
 			SubqueryPreparer subquery_preparer(*planner.binder, *this);
 			if (i != subqueries_num - 1) {
@@ -703,7 +704,12 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				    make_uniq<PreparedStatement>(shared_from_this(), std::move(subquery_stmt),
 				                                 std::move(statement_query), n_param, std::move(named_param_map));
 				duckdb::vector<Value> bound_values;
-				subquery_result = prepared_stmt->ExecuteRow(lock, bound_values, false);
+				auto subquery_result = prepared_stmt->ExecuteRow(lock, bound_values, false);
+				// from QuerySplit of Postgres
+				subquery_index++;
+				std::string new_temp_table_name = "temp" + std::to_string(subquery_index);
+				temp_table_map[new_temp_table_name] = planner.binder->GenerateTableIndex();
+				subquery_results[new_temp_table_name] = std::move(subquery_result);
 			} else {
 				// 5. merge to the last subquery
 				new_plan->AddChild(std::move(new_duckdb_plan));

@@ -39,21 +39,21 @@ public:
 
 	std::vector<unique_ptr<Expression>> CollectFilterExpressions(unique_ptr<LogicalOperator> &duckdb_plan);
 
-	std::unordered_map<std::string, unique_ptr<LogicalGet>> GetTableMap(unique_ptr<LogicalOperator> &duckdb_plan);
+	std::unordered_map<std::string, unique_ptr<LogicalGet>> GetDuckdbTableMap(unique_ptr<LogicalOperator> &duckdb_plan);
 
-	unique_ptr<LogicalOperator> ConstructDuckdbPlan(SimplestStmt *postgres_plan_pointer,
-	                                                unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
-	                                                const unordered_map<int, int> &pg_duckdb_table_idx,
-	                                                std::vector<unique_ptr<Expression>> &expr_vec,
-	                                                unique_ptr<ColumnDataCollection> subquery_result,
-	                                                idx_t result_chunk_idx);
+	unique_ptr<LogicalOperator> ConstructDuckdbPlan(
+	    SimplestStmt *postgres_plan_pointer, unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
+	    const unordered_map<int, int> &pg_duckdb_table_idx, std::vector<unique_ptr<Expression>> &expr_vec,
+	    std::unordered_map<std::string, unique_ptr<ColumnDataCollection>> &subquery_results,
+	    const std::unordered_map<std::string, unsigned int> &temp_table_map);
 
 	// todo: Refactor as SimplestVisitor (like `LogicalOperatorVisitor`)
 	void AddTableColumnName(unique_ptr<SimplestStmt> &postgres_plan, const std::deque<table_str> &table_col_names);
 
 	//! table index mapping from postgres to duckdb, <pg_idx, dd_idx>
 	unordered_map<int, int> MatchTableIndex(const unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
-	                                        const std::deque<table_str> &table_col_names, idx_t result_chunk_idx);
+	                                        const std::deque<table_str> &table_col_names,
+	                                        const std::unordered_map<std::string, unsigned int> &temp_table_map);
 
 	unique_ptr<LogicalOperator> GenerateProjHead(const unique_ptr<LogicalOperator> &origin_dd_plan,
 	                                             unique_ptr<LogicalOperator> new_dd_plan,
