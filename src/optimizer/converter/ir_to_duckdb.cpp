@@ -65,6 +65,11 @@ bool IRConverter::CheckCondIndex(const unique_ptr<Expression> &expr, const uniqu
 			match_index = get_node.table_index == expr_table_idx;
 			if (match_index)
 				return;
+		} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == duckdb_plan->type) {
+			auto &column_get_node = duckdb_plan->Cast<LogicalColumnDataGet>();
+			match_index = column_get_node.table_index == expr_table_idx;
+			if (match_index)
+				return;
 		}
 	};
 

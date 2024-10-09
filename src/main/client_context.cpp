@@ -677,6 +677,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				// 1. generate proj head based on the `target_list`
 				unique_ptr<LogicalOperator> new_sub_plan =
 				    ir_converter.GenerateProjHead(plan, std::move(new_duckdb_plan), postgres_stmt, pg_duckdb_table_idx);
+#ifdef DEBUG
+				Printer::Print("new duckdb subquery plan");
+				new_sub_plan->Print();
+#endif
 				// 2. adapt select node
 				auto subquery_stmt = subquery_preparer.AdaptSelect(result, new_sub_plan);
 				// 3. create physical plan
