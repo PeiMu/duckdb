@@ -39,7 +39,9 @@ public:
 
 	std::vector<unique_ptr<Expression>> CollectFilterExpressions(unique_ptr<LogicalOperator> &duckdb_plan);
 
-	std::unordered_map<std::string, unique_ptr<LogicalGet>> GetDuckdbTableMap(unique_ptr<LogicalOperator> &duckdb_plan);
+	unordered_map<std::string, unique_ptr<LogicalGet>>
+	GetDuckdbTableMap(unique_ptr<LogicalOperator> &duckdb_plan,
+	                  const std::unordered_map<idx_t, std::string> &table_alias_name);
 
 	unique_ptr<LogicalOperator> ConstructDuckdbPlan(
 	    SimplestStmt *postgres_plan_pointer, unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,

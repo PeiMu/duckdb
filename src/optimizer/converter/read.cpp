@@ -1436,6 +1436,29 @@ std::vector<std::string> PlanReader::ParseTextArray(PGDatum datum, unsigned int 
 			str_len++;
 		}
 
+		// if the current text ends with non-zero, we need to revert 4 bytes
+		// e.g.
+		// 48 0 0 0
+		// 40 119 114 105 116 101 114 41
+		// 68 0 0 0
+		// 40 104 101 97 100 32 119 114 105 116 101 114 41 0 0 0
+
+		// first skip all 0
+		auto check_nullptr_len = datum_len;
+		while ((check_nullptr_len != str_len) && !strcmp(check_nullptr, "")) {
+			check_nullptr++;
+			check_nullptr_len--;
+		}
+		if (check_nullptr_len != str_len) {
+			// check if the next 4 bytes has the `x 0 0 0` format
+			// if not, we should revert 4 bytes
+			bool correct_format = (check_nullptr[0] != 0x00) && (check_nullptr[1] == 0x00) &&
+			                      (check_nullptr[2] == 0x00) && (check_nullptr[3] == 0x00);
+			if (!correct_format) {
+				str_len -= 1;
+			}
+		}
+
 		str.assign(ptr, str_len);
 		result.emplace_back(str);
 		ptr += str_len;
@@ -1787,9 +1810,11 @@ void PlanReader::ReadAlias() {
 		if (node)
 			col_name_vec.emplace_back(unique_ptr_cast<SimplestNode, SimplestLiteral>(std::move(node)));
 	}
-	table_str table_col_pair;
-	table_col_pair[alias_name] = std::move(col_name_vec);
-	table_col_names.push_back(std::move(table_col_pair));
+	if (!col_name_vec.empty()) {
+		table_str table_col_pair;
+		table_col_pair[alias_name] = std::move(col_name_vec);
+		table_col_names.push_back(std::move(table_col_pair));
+	}
 }
 
 PGDatum PlanReader::ReadDatum(bool typbyval, unsigned int &datum_len) {
@@ -1851,6 +1876,7 @@ SimplestVarType PlanReader::GetSimplestVarType(unsigned int type_id) {
 	case 20:
 	case 21:
 	case 23:
+	case 24:
 	case 26:
 		simplest_var_type = IntVar;
 		break;
@@ -1862,6 +1888,7 @@ SimplestVarType PlanReader::GetSimplestVarType(unsigned int type_id) {
 		break;
 	case 700:
 	case 701:
+	case 1021:
 		simplest_var_type = FloatVar;
 		break;
 	case 1009:

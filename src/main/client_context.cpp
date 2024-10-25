@@ -42,6 +42,8 @@
 #include "duckdb/parser/statement/prepare_statement.hpp"
 #include "duckdb/parser/statement/relation_statement.hpp"
 #include "duckdb/parser/statement/select_statement.hpp"
+#include "duckdb/parser/tableref/basetableref.hpp"
+#include "duckdb/parser/tableref/joinref.hpp"
 #include "duckdb/planner/operator/logical_execute.hpp"
 #include "duckdb/planner/planner.hpp"
 #include "duckdb/planner/pragma_handler.hpp"
@@ -390,6 +392,36 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	result->value_map = std::move(planner.value_map);
 	result->catalog_version = MetaTransaction::Get(*this).catalog_version;
 	result->unbound_statement = std::move(tmp_statement);
+	// todo: move this to a standalone function
+	std::unordered_map<idx_t, std::string> table_alias_name;
+	idx_t table_index = 0;
+	if (result->unbound_statement->type == StatementType::SELECT_STATEMENT) {
+		auto &select_statemet = result->unbound_statement->Cast<SelectStatement>();
+		auto &select_node = select_statemet.node->Cast<SelectNode>();
+		auto &node_from_table = select_node.from_table;
+		std::function<void(const unique_ptr<TableRef> &node_from_table)> iterate_plan;
+		iterate_plan = [&table_alias_name, &table_index, &iterate_plan](const unique_ptr<TableRef> &node_from_table) {
+			switch (node_from_table->type) {
+			case TableReferenceType::BASE_TABLE: {
+				auto &base_table_ref = node_from_table->Cast<BaseTableRef>();
+				table_alias_name.insert({table_index, base_table_ref.alias});
+				table_index++;
+				break;
+			}
+			case TableReferenceType::JOIN: {
+				auto &join_ref = node_from_table->Cast<JoinRef>();
+				iterate_plan(join_ref.left);
+				iterate_plan(join_ref.right);
+				break;
+			}
+			default:
+				Printer::Print("Doesn't support type " + std::to_string((uint8_t)node_from_table->type) + " yet!");
+				break;
+			}
+		};
+		iterate_plan(node_from_table);
+	}
+
 	if (!planner.properties.bound_all_parameters) {
 		return result;
 	}
@@ -611,7 +643,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		std::vector<unique_ptr<Expression>> expr_vec = ir_converter.CollectFilterExpressions(plan);
 
 		// get the table map
-		unordered_map<std::string, unique_ptr<LogicalGet>> table_map = ir_converter.GetDuckdbTableMap(plan);
+		unordered_map<std::string, unique_ptr<LogicalGet>> table_map =
+		    ir_converter.GetDuckdbTableMap(plan, table_alias_name);
 
 		// get the parent node of JOIN/CROSS_PRODUCT
 		auto new_plan = plan.get();
@@ -635,6 +668,18 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			exit(-1);
 		}
 		std::string str_line;
+
+		//		std::unordered_map<std::string, std::string> table_alias_name;
+		//		while (std::getline(input_stream, str_line) && "---end---" != str_line) {
+		//			std::stringstream ss(str_line);
+		//			while (ss.good()) {
+		//				std::string alias_name, full_name;
+		//				std::getline(ss, alias_name, ':');
+		//				getline(ss, full_name);
+		//				table_alias_name.insert({alias_name, full_name});
+		//			}
+		//		}
+
 		std::vector<std::string> query_string_vec;
 		while (std::getline(input_stream, str_line)) {
 			query_string_vec.emplace_back(str_line);

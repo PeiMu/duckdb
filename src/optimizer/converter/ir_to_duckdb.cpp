@@ -2,15 +2,18 @@
 
 namespace duckdb {
 unordered_map<std::string, unique_ptr<LogicalGet>>
-IRConverter::GetDuckdbTableMap(unique_ptr<LogicalOperator> &duckdb_plan) {
+IRConverter::GetDuckdbTableMap(unique_ptr<LogicalOperator> &duckdb_plan,
+                               const std::unordered_map<idx_t, std::string> &table_alias_name) {
 	unordered_map<std::string, unique_ptr<LogicalGet>> table_map;
 
 	std::function<void(unique_ptr<LogicalOperator> & duckdb_plan)> iterate_plan;
-	iterate_plan = [&table_map, &iterate_plan](unique_ptr<LogicalOperator> &duckdb_plan) {
+	iterate_plan = [&table_map, &iterate_plan, table_alias_name](unique_ptr<LogicalOperator> &duckdb_plan) {
 		for (auto &child : duckdb_plan->children) {
 			if (LogicalOperatorType::LOGICAL_GET == child->type) {
 				auto get = unique_ptr_cast<LogicalOperator, LogicalGet>(std::move(child));
-				std::string table_name = get->function.to_string(get->bind_data.get());
+				//				std::string table_name = get->function.to_string(get->bind_data.get());
+				auto table_index = get->table_index;
+				std::string table_name = table_alias_name.at(table_index);
 				table_map.emplace(table_name, std::move(get));
 			} else {
 				iterate_plan(child);
@@ -197,7 +200,7 @@ unique_ptr<LogicalOperator> IRConverter::DealWithQual(unique_ptr<LogicalGet> log
 				DataChunk chunk;
 				chunk.Initialize(context, return_types);
 				// from in_clause_rewriter.cpp, we only generate data chunk for more than 6 strings
-				if (str_vec.size() < 6)
+				if (str_vec.size() < 5)
 					continue;
 				for (idx_t column_idx = 0; column_idx < str_vec.size(); column_idx++) {
 					Value value = Value(str_vec[column_idx]);
