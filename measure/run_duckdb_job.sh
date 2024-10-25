@@ -16,7 +16,7 @@ do
 done
 
 # execute queries
-dir="/home/pei/Project/benchmarks/imdb_job-postgres/skinnerdb_queries"
+dir="/home/pei/Project/benchmarks/imdb_job-postgres/queries"
 iteration=1
 
 rm -rf job_result/
