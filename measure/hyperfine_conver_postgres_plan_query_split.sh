@@ -8,7 +8,7 @@ rm -rf job_result/${log_name}
 clear && cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=0 VERBOSE=1 make 2>&1|tee -a compile.log && cd measure && clear
 
 #dir="/home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS_QuerySplit"
-dir="/home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS_new_QS_settings"
+dir="/home/pei/Project/benchmarks/imdb_job-postgres/QuerySplit/queries_new_settings_QuerySplit"
 iteration=10
 
 for sql in "${dir}"/*.sql; do
