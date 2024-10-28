@@ -15,6 +15,11 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 	std::vector<unique_ptr<LogicalOperator>> same_level_subqueries;
 	std::vector<std::set<TableExpr>> same_level_table_exprs;
 
+	// if ENABLE_CROSS_PRODUCT_REWRITE
+	// todo: fix this when supporting parallel execution
+	// Since we don't split at CROSS_PRODUCT, we don't split its sibling
+	bool cross_product_sibling = false;
+
 	// todo: fix this when supporting parallel execution
 	// Since we currently don't support parallel execution, we have the issue
 	// e.g. comp_join --------
@@ -35,7 +40,7 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 #endif
 		auto &child = op.children[idx];
 		std::set<TableExpr> table_exprs;
-		if (chunk_get_sibling)
+		if (cross_product_sibling || chunk_get_sibling)
 			break;
 		switch (child->type) {
 		// if the other child node is not CROSS_PRODUCT, JOIN nor FILTER
@@ -82,6 +87,10 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 //			filter_parent = false;
 			break;
 		default:
+			if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == child->type)
+				cross_product_sibling = true;
+			else
+				cross_product_sibling = false;
 			if (LogicalOperatorType::LOGICAL_CHUNK_GET == child->type)
 				chunk_get_sibling = true;
 			else
