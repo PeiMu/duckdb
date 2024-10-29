@@ -461,7 +461,11 @@ bool SubqueryPreparer::Rewrite(unique_ptr<LogicalOperator> &plan) {
 		while (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == last_cross_product->type) {
 			auto &cross_product_op = last_cross_product->Cast<LogicalCrossProduct>();
 			if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == cross_product_op.children[1]->type) {
-				break;
+				// skip the right hand JOINs, except SEMI JOIN
+				auto &join_op = cross_product_op.children[1]->Cast<LogicalJoin>();
+				if (JoinType::SEMI != join_op.join_type) {
+					break;
+				}
 			}
 			InsertTableBlocks(cross_product_op.children[1], table_blocks, table_blocks_key_order);
 			last_cross_product = last_cross_product->children[0].get();
@@ -552,6 +556,47 @@ bool SubqueryPreparer::Rewrite(unique_ptr<LogicalOperator> &plan) {
 	return true;
 }
 
+bool SubqueryPreparer::NeedRewrite(const std::vector<unique_ptr<LogicalOperator>> &subqueries_vec) {
+	if (subqueries_vec.empty()) {
+		return true;
+	}
+
+	bool has_cross_product = false;
+	std::function<void(const unique_ptr<LogicalOperator> &op)> check_cross_product;
+	check_cross_product = [&check_cross_product, &has_cross_product](const unique_ptr<LogicalOperator> &op) {
+		for (auto &child : op->children) {
+			if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == child->type) {
+				has_cross_product = true;
+			}
+			check_cross_product(child);
+		}
+	};
+	// TODO: need to fix when supporting parallel execution
+	check_cross_product(subqueries_vec[0]);
+	return has_cross_product;
+}
+
+void SubqueryPreparer::MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries) {
+	// get the position to reorder
+	auto new_plan = plan.get();
+	while (true) {
+		if (nullptr == new_plan->children[0]) {
+			auto old_subquery_pair = std::move(old_subqueries.back());
+			new_plan->children[0] = std::move(old_subquery_pair[0]);
+			if (2 == old_subquery_pair.size()) {
+#ifdef DEBUG
+				D_ASSERT(nullptr == new_plan->children[1]);
+#endif
+				new_plan->children[1] = std::move(old_subquery_pair[1]);
+			}
+			old_subqueries.pop_back();
+		}
+		new_plan = new_plan->children[0].get();
+		if (old_subqueries.empty())
+			break;
+	}
+}
+
 void SubqueryPreparer::InsertTableBlocks(unique_ptr<LogicalOperator> &op,
                                          unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks,
                                          std::deque<idx_t> &table_blocks_key_order) {
@@ -577,6 +622,22 @@ void SubqueryPreparer::InsertTableBlocks(unique_ptr<LogicalOperator> &op,
 			}
 		};
 		find_get(op);
+		table_blocks.emplace(table_index, std::move(op));
+		table_blocks_key_order.emplace_back(table_index);
+	} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->type) {
+		// insert the SEMI JOIN to `table_blocks`, e.g.
+		// SEMI JION (table.index = CHUNK_GET.0)
+		auto &join_op = op->Cast<LogicalJoin>();
+#ifdef DEBUG
+		D_ASSERT(JoinType::SEMI == join_op.join_type);
+#endif
+		auto &left_child = join_op.children[0];
+#ifdef DEBUG
+		auto &right_child = join_op.children[1];
+		D_ASSERT(LogicalOperatorType::LOGICAL_GET == left_child->type);
+		D_ASSERT(LogicalOperatorType::LOGICAL_CHUNK_GET == right_child->type);
+#endif
+		idx_t table_index = left_child->Cast<LogicalGet>().table_index;
 		table_blocks.emplace(table_index, std::move(op));
 		table_blocks_key_order.emplace_back(table_index);
 	} else {
@@ -612,10 +673,7 @@ bool SubqueryPreparer::BlockUsed(const unordered_set<idx_t> &left_cond_table_ind
 		// if it is a JOIN, all blocks should be used
 		return true;
 	} else if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == op->type) {
-#if DEBUG
 		// no need to check the right JOIN
-		D_ASSERT(LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->children[1]->type);
-#endif
 		return BlockUsed(left_cond_table_index, op->children[0]);
 	} else {
 		Printer::Print(

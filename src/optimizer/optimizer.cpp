@@ -17,6 +17,7 @@
 #include "duckdb/optimizer/regex_range_filter.hpp"
 #include "duckdb/optimizer/remove_duplicate_groups.hpp"
 #include "duckdb/optimizer/remove_unused_columns.hpp"
+#include "duckdb/optimizer/reorder_get.h"
 #include "duckdb/optimizer/rule/equal_or_null_simplification.hpp"
 #include "duckdb/optimizer/rule/in_clause_simplification.hpp"
 #include "duckdb/optimizer/rule/list.hpp"
@@ -25,7 +26,6 @@
 #include "duckdb/optimizer/unnest_rewriter.hpp"
 #include "duckdb/planner/binder.hpp"
 #include "duckdb/planner/planner.hpp"
-#include "duckdb/optimizer/reorder_get.h"
 
 namespace duckdb {
 
@@ -128,10 +128,10 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 	});
 
 #if ENABLE_CROSS_PRODUCT_REWRITE
-	//	RunOptimizer(OptimizerType::REORDER_GET, [&]() {
-	//		ReorderGet reorder_get(context);
-	//		plan = reorder_get.Optimize(std::move(plan));
-	//	});
+	RunOptimizer(OptimizerType::REORDER_GET, [&]() {
+		ReorderGet reorder_get(context);
+		plan = reorder_get.Optimize(std::move(plan));
+	});
 #endif
 
 #if !ENABLE_CROSS_PRODUCT_REWRITE
@@ -255,7 +255,7 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 		} else {
 			auto new_statistics_map = propagator.GetStatisticsMap();
 			for (auto &ele : statistics_map) {
-				for (const auto & new_ele : new_statistics_map) {
+				for (const auto &new_ele : new_statistics_map) {
 					if (ele.first.table_index == new_ele.first.table_index &&
 					    ele.first.column_index == new_ele.first.column_index) {
 						ele.second->Merge(*(new_ele.second));

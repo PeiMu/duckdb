@@ -10,10 +10,9 @@
 
 #include "duckdb/main/prepared_statement_data.hpp"
 #include "duckdb/optimizer/query_split/top_down.hpp"
+#include "duckdb/optimizer/timer_util.h"
 #include "duckdb/parser/query_node/select_node.hpp"
 #include "duckdb/planner/binder.hpp"
-
-#include "duckdb/optimizer/timer_util.h"
 
 namespace duckdb {
 
@@ -51,6 +50,9 @@ public:
 	                                           const std::vector<TableExpr> &original_proj_expr);
 
 	bool Rewrite(unique_ptr<LogicalOperator> &plan);
+	//! Check if current `subqueries_vec` has CROSS_PRODUCT
+	bool NeedRewrite(const std::vector<unique_ptr<LogicalOperator>> &subqueries_vec);
+	void MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries);
 
 	//! update the table_idx and column_idx
 	void UpdateSubqueriesIndex(subquery_queue &subqueries);

@@ -452,6 +452,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		chrono_toc(&timer, "PreOptimize time is\n");
 #endif
 #if ENABLE_QUERY_SPLIT
+		bool needToSplit = ENABLE_QUERY_SPLIT;
 		// todo: refactor - move these to a standalone function
 		subquery_queue subqueries;
 		table_expr_info table_expr_queue;
@@ -459,29 +460,48 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		bool merge_sibling_expr = false;
 		QuerySplit query_splitter(*this);
 		SubqueryPreparer subquery_preparer(*planner.binder, *this);
+
+		while (ENABLE_QUERY_SPLIT) {
 #if ENABLE_CROSS_PRODUCT_REWRITE
-		bool rewritten = subquery_preparer.Rewrite(plan);
+			if (needToSplit || subquery_preparer.NeedRewrite(subqueries.front())) {
+				if (!subqueries.empty()) {
+					subquery_preparer.MergeSubquery(plan, std::move(subqueries));
+#if ENABLE_DEBUG_PRINT
+					Printer::Print("after MergeSubquery");
+					plan->Print();
+#endif
+					plan = subquery_preparer.UpdateProjHead(std::move(plan), proj_expr);
+#if ENABLE_DEBUG_PRINT
+					Printer::Print("after UpdateProjHead");
+					plan->Print();
+#endif
 #if TIME_BREAK_DOWN
-		chrono_toc(&timer, "Rewrite time is\n");
+					chrono_toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
+#endif
+				}
+				needToSplit = subquery_preparer.Rewrite(plan);
+#if TIME_BREAK_DOWN
+				chrono_toc(&timer, "Rewrite time is\n");
 #endif
 #if ENABLE_DEBUG_PRINT
-		D_ASSERT(plan);
-		// debug: print subquery
-		Printer::Print("After subquery_preparer.Rewrite");
-		plan->Print();
+				D_ASSERT(plan);
+				// debug: print subquery
+				Printer::Print("After subquery_preparer.Rewrite");
+				plan->Print();
 #endif
+			}
 #endif
-		query_splitter.Clear();
-		plan = query_splitter.Split(std::move(plan));
-		subqueries = query_splitter.GetSubqueries();
-		table_expr_queue = query_splitter.GetTableExprQueue();
-		proj_expr = query_splitter.GetProjExpr();
-		subquery_preparer.SetMergeIndex(query_splitter.GetSplitNumber());
+			if (needToSplit) {
+				query_splitter.Clear();
+				plan = query_splitter.Split(std::move(plan));
+				subqueries = query_splitter.GetSubqueries();
+				table_expr_queue = query_splitter.GetTableExprQueue();
+				proj_expr = query_splitter.GetProjExpr();
+				subquery_preparer.SetMergeIndex(query_splitter.GetSplitNumber());
 #if TIME_BREAK_DOWN
-		chrono_toc(&timer, "Split time is\n");
+				chrono_toc(&timer, "Split time is\n");
 #endif
-
-		while (true) {
+			}
 			if (subqueries.empty())
 				break;
 
@@ -612,6 +632,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 				break;
 			}
+			needToSplit = false;
 		}
 #endif
 
