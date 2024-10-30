@@ -683,4 +683,38 @@ bool SubqueryPreparer::BlockUsed(const unordered_set<idx_t> &left_cond_table_ind
 
 	return left_cond_table_index.count(table_index);
 }
+
+void SubqueryPreparer::ExplainAnalyzeSubQuery(ClientContextLock &lock,
+                                              shared_ptr<PreparedStatementData> original_stmt_data,
+                                              unique_ptr<LogicalOperator> explain_sub_plan, idx_t catalog_version,
+                                              string statement_query, idx_t n_param,
+                                              case_insensitive_map_t<idx_t> named_param_map) {
+	switch (explain_sub_plan->children[0]->type) {
+	case LogicalOperatorType::LOGICAL_PROJECTION:
+		break;
+	default:
+		return;
+	}
+
+	auto explain_subquery_stmt = AdaptSelect(original_stmt_data, explain_sub_plan);
+	auto explain_stmt_data = make_shared<PreparedStatementData>(StatementType::EXPLAIN_STATEMENT);
+	auto explain_stmt =
+	    make_uniq<ExplainStatement>(std::move(explain_subquery_stmt->unbound_statement), ExplainType::EXPLAIN_ANALYZE);
+	explain_stmt_data->names = {"explain_key", "explain_value"};
+	explain_stmt_data->types = {LogicalType::VARCHAR, LogicalType::VARCHAR};
+	explain_stmt_data->properties.return_type = StatementReturnType::QUERY_RESULT;
+	//			explain_stmt_data->value_map
+	explain_stmt_data->catalog_version = catalog_version;
+	explain_stmt_data->unbound_statement = std::move(explain_stmt);
+
+	PhysicalPlanGenerator explain_physical_planner(context);
+	auto explain_physical_plan = explain_physical_planner.CreatePlan(std::move(explain_sub_plan));
+	explain_stmt_data->plan = std::move(explain_physical_plan);
+	auto explain_prepared_stmt = make_uniq<PreparedStatement>(context.shared_from_this(), std::move(explain_stmt_data),
+	                                                          statement_query, n_param, named_param_map);
+	duckdb::vector<Value> explain_bound_values;
+	auto explain_result = explain_prepared_stmt->ExecuteRow(lock, explain_bound_values, false);
+	Printer::Print("EXPLAIN ANALYZE:");
+	explain_result->Print();
+}
 } // namespace duckdb

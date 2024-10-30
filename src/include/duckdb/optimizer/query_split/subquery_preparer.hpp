@@ -8,10 +8,14 @@
 
 #pragma once
 
+#include "duckdb/execution/physical_plan_generator.hpp"
+#include "duckdb/main/client_context.hpp"
+#include "duckdb/main/prepared_statement.hpp"
 #include "duckdb/main/prepared_statement_data.hpp"
 #include "duckdb/optimizer/query_split/top_down.hpp"
 #include "duckdb/optimizer/timer_util.h"
 #include "duckdb/parser/query_node/select_node.hpp"
+#include "duckdb/parser/statement/explain_statement.hpp"
 #include "duckdb/planner/binder.hpp"
 
 namespace duckdb {
@@ -62,6 +66,10 @@ public:
 	}
 
 	void AddOldTableIndex(const unique_ptr<LogicalOperator> &op);
+
+	void ExplainAnalyzeSubQuery(ClientContextLock &lock, shared_ptr<PreparedStatementData> original_stmt_data,
+	                            unique_ptr<LogicalOperator> explain_sub_plan, idx_t catalog_version,
+	                            string statement_query, idx_t n_param, case_insensitive_map_t<idx_t> named_param_map);
 
 private:
 	//! 1. find the insert point and insert the `ColumnDataGet` node to the logical plan;

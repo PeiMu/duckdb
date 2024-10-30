@@ -45,6 +45,7 @@
 #include "duckdb/parser/tableref/basetableref.hpp"
 #include "duckdb/parser/tableref/joinref.hpp"
 #include "duckdb/planner/operator/logical_execute.hpp"
+#include "duckdb/planner/operator/logical_explain.hpp"
 #include "duckdb/planner/planner.hpp"
 #include "duckdb/planner/pragma_handler.hpp"
 #include "duckdb/storage/data_table.hpp"
@@ -353,6 +354,9 @@ static bool IsExplainAnalyze(SQLStatement *statement) {
 	if (!statement) {
 		return false;
 	}
+#if MANUAL_EXPLAIN_ANALYZE
+	return true;
+#endif
 	if (statement->type != StatementType::EXPLAIN_STATEMENT) {
 		return false;
 	}
@@ -523,6 +527,14 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			subqueries.pop_front();
 			table_expr_queue.pop();
 
+#if MANUAL_EXPLAIN_ANALYZE
+			auto explain_sub_plan = sub_plan->Copy(*this);
+			explain_sub_plan = make_uniq<LogicalExplain>(std::move(explain_sub_plan), ExplainType::EXPLAIN_ANALYZE);
+			explain_sub_plan = optimizer.PostOptimize(std::move(explain_sub_plan));
+			subquery_preparer.ExplainAnalyzeSubQuery(
+			    lock, result, std::move(explain_sub_plan), result->catalog_version, result->unbound_statement->query,
+			    result->unbound_statement->n_param, result->unbound_statement->named_param_map);
+#endif
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "PostOptimize time is\n");
@@ -559,12 +571,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			subquery_stmt->plan = std::move(physical_plan);
 
 			// Execute subquery
-			auto n_param = subquery_stmt->unbound_statement->n_param;
-			auto statement_query = subquery_stmt->unbound_statement->query;
-			auto named_param_map = std::move(subquery_stmt->unbound_statement->named_param_map);
-			auto prepared_stmt =
-			    make_uniq<PreparedStatement>(shared_from_this(), std::move(subquery_stmt), std::move(statement_query),
-			                                 n_param, std::move(named_param_map));
+			auto prepared_stmt = make_uniq<PreparedStatement>(
+			    shared_from_this(), std::move(subquery_stmt), result->unbound_statement->query,
+			    result->unbound_statement->n_param, result->unbound_statement->named_param_map);
 			duckdb::vector<Value> bound_values;
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "adapt to selection time is\n");
@@ -634,6 +643,15 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			}
 			needToSplit = false;
 		}
+#endif
+
+#if MANUAL_EXPLAIN_ANALYZE
+		auto explain_sub_plan = plan->Copy(*this);
+		explain_sub_plan = make_uniq<LogicalExplain>(std::move(explain_sub_plan), ExplainType::EXPLAIN_ANALYZE);
+		explain_sub_plan = optimizer.PostOptimize(std::move(explain_sub_plan));
+		subquery_preparer.ExplainAnalyzeSubQuery(lock, result, std::move(explain_sub_plan), result->catalog_version,
+		                                         result->unbound_statement->query, result->unbound_statement->n_param,
+		                                         result->unbound_statement->named_param_map);
 #endif
 
 		plan = optimizer.PostOptimize(std::move(plan));
