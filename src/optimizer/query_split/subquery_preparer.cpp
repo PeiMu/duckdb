@@ -419,7 +419,7 @@ bool SubqueryPreparer::Rewrite(unique_ptr<LogicalOperator> &plan) {
 		return false;
 	}
 
-	// 1. collect the condition of the last join
+	// 1. collect the condition of JOINs
 	auto op_child = plan.get();
 	std::stack<std::pair<LogicalOperator *, int>> join_pointers_pair;
 	int op_level = 0;

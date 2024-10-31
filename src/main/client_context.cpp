@@ -455,6 +455,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if TIME_BREAK_DOWN
 		chrono_toc(&timer, "PreOptimize time is\n");
 #endif
+
+		SubqueryPreparer subquery_preparer(*planner.binder, *this);
 #if ENABLE_QUERY_SPLIT
 		bool needToSplit = ENABLE_QUERY_SPLIT;
 		// todo: refactor - move these to a standalone function
@@ -463,7 +465,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		std::vector<TableExpr> proj_expr;
 		bool merge_sibling_expr = false;
 		QuerySplit query_splitter(*this);
-		SubqueryPreparer subquery_preparer(*planner.binder, *this);
 
 		while (ENABLE_QUERY_SPLIT) {
 #if ENABLE_CROSS_PRODUCT_REWRITE
@@ -534,6 +535,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			subquery_preparer.ExplainAnalyzeSubQuery(
 			    lock, result, std::move(explain_sub_plan), result->catalog_version, result->unbound_statement->query,
 			    result->unbound_statement->n_param, result->unbound_statement->named_param_map);
+#endif
+
+#if TIME_BREAK_DOWN
+			timer = chrono_tic();
 #endif
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
 #if TIME_BREAK_DOWN
@@ -654,6 +659,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		                                         result->unbound_statement->named_param_map);
 #endif
 
+#if TIME_BREAK_DOWN
+		timer = chrono_tic();
+#endif
 		plan = optimizer.PostOptimize(std::move(plan));
 		profiler.EndPhase();
 #if TIME_BREAK_DOWN
