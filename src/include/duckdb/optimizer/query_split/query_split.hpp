@@ -14,7 +14,7 @@
 //#define ENABLE_PARALLEL_EXECUTION    true
 //#define ENABLE_DEBUG_PRINT           false
 #define TIME_BREAK_DOWN              false
-#define MANUAL_EXPLAIN_ANALYZE       true
+#define MANUAL_EXPLAIN_ANALYZE       false
 //#define ENABLE_CROSS_PRODUCT_REWRITE true
 
 namespace duckdb {

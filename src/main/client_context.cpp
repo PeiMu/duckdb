@@ -774,6 +774,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				Printer::Print("new duckdb subquery plan");
 				new_sub_plan->Print();
 #endif
+#if MANUAL_EXPLAIN_ANALYZE
+				auto explain_sub_plan = new_sub_plan->Copy(*this);
+				explain_sub_plan = make_uniq<LogicalExplain>(std::move(explain_sub_plan), ExplainType::EXPLAIN_ANALYZE);
+				subquery_preparer.ExplainAnalyzeSubQuery(
+				    lock, result, std::move(explain_sub_plan), result->catalog_version, result->unbound_statement->query,
+				    result->unbound_statement->n_param, result->unbound_statement->named_param_map);
+#endif
 				// 2. adapt select node
 				auto subquery_stmt = subquery_preparer.AdaptSelect(result, new_sub_plan);
 				// 3. create physical plan
@@ -809,6 +816,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				std::vector<TableExpr> new_proj_table_expr =
 				    ir_converter.GetTableExprFromTargetList(postgres_stmt->target_list, pg_duckdb_table_idx);
 				plan = subquery_preparer.UpdateProjHead(std::move(plan), new_proj_table_expr);
+#if MANUAL_EXPLAIN_ANALYZE
+				auto explain_sub_plan = plan->Copy(*this);
+				explain_sub_plan = make_uniq<LogicalExplain>(std::move(explain_sub_plan), ExplainType::EXPLAIN_ANALYZE);
+				subquery_preparer.ExplainAnalyzeSubQuery(
+				    lock, result, std::move(explain_sub_plan), result->catalog_version, result->unbound_statement->query,
+				    result->unbound_statement->n_param, result->unbound_statement->named_param_map);
+#endif
 			}
 		}
 
