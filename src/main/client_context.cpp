@@ -684,6 +684,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		plan->Print();
 #endif
 
+#if TIME_BREAK_DOWN
+		auto read_str_timer = chrono_tic();
+#if TIME_BREAK_DOWN
 		IRConverter ir_converter(*planner.binder, *this);
 		// todo: It's better to generate the Filter Expression from postgres, but needs a lot of engineering work.
 		//  Currently, we reuse the Filter Expression from duckdb
@@ -732,12 +735,18 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			query_string_vec.emplace_back(str_line);
 		}
 		size_t subqueries_num = query_string_vec.size();
+#if TIME_BREAK_DOWN
+		chrono_toc(&read_str_timer, "Read string time: ");
+#endif
 
 		std::unordered_map<std::string, unique_ptr<ColumnDataCollection>> subquery_results;
 		unsigned int subquery_index = 0;
 		// <temp%, subquery_dd_index>
 		std::unordered_map<std::string, unsigned int> temp_table_map;
 		for (size_t i = 0; i < subqueries_num; i++) {
+#if TIME_BREAK_DOWN
+			auto converter_timer = chrono_tic();
+#endif
 			PlanReader plan_reader;
 			unique_ptr<SimplestNode> postgres_plan = plan_reader.StringToNode(query_string_vec[i].c_str());
 			//	D_ASSERT(AggregateNode == postgres_plan->GetNodeType());
@@ -764,6 +773,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			// construct plan from postgres
 			auto new_duckdb_plan = ir_converter.ConstructDuckdbPlan(
 			    postgres_plan_pointer, table_map, pg_duckdb_table_idx, expr_vec, subquery_results, temp_table_map);
+#if TIME_BREAK_DOWN
+			chrono_toc(&converter_timer, "Convert plan time: ");
+#endif
 
 			SubqueryPreparer subquery_preparer(*planner.binder, *this);
 			if (i != subqueries_num - 1) {
