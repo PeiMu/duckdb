@@ -29,7 +29,7 @@
 #include "read.hpp"
 #include "simplest_ir.h"
 
-#define INJECT_PLAN true
+#define INJECT_PLAN false
 
 namespace duckdb {
 class IRConverter {
