@@ -685,10 +685,14 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		// merge sub_plan to whole_plan
 		auto explain_whole_plan = subquery_preparer.MergeBack(std::move(whole_plan), plan);
 		if (explain_whole_plan) {
+#if MANUAL_EXPLAIN_ANALYZE
 			explain_whole_plan = make_uniq<LogicalExplain>(std::move(explain_whole_plan), ExplainType::EXPLAIN_ANALYZE);
 			subquery_preparer.ExplainAnalyzeSubQuery(
 			    lock, result, std::move(explain_whole_plan), result->catalog_version, result->unbound_statement->query,
 			    result->unbound_statement->n_param, result->unbound_statement->named_param_map);
+#else
+			plan = std::move(explain_whole_plan);
+#endif
 		}
 #endif
 
