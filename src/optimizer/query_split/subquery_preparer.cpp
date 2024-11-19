@@ -746,32 +746,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 	}
 
 	auto current_sub_plan = sub_plan->Copy(context);
-	if (nullptr == last_sub_plan) {
-		return current_sub_plan;
-	}
-
-#if ENABLE_DEBUG_PRINT
-	Printer::Print("last_sub_plan");
-	last_sub_plan->Print();
-	Printer::Print("current_sub_plan");
-	current_sub_plan->Print();
-#endif
-
-	// 1. revert the indexes of the current_sub_plan
-#ifdef DEBUG
-	D_ASSERT(LogicalOperatorType::LOGICAL_PROJECTION == last_sub_plan->type);
-#endif
-	auto &proj_node = last_sub_plan->Cast<LogicalProjection>();
-	//	// 1.1. proj_node's expressions might have new_table_idx
-	//	for (auto &proj_expr : proj_node.expressions) {
-	//		RevertSubqueriesIndex(proj_expr);
-	//	}
-	stored_sub_plan_exprs[new_table_idx] = std::move(proj_node.expressions);
-
-	// 2. clean the last_sub_plan
-	// 2.1. remove projection head
-	last_sub_plan = std::move(last_sub_plan->children[0]);
-	// 2.2. remove the projection_map of JOINs
+	// 1. remove the projection_map of JOINs in the current_sub_plan
 	std::function<void(unique_ptr<LogicalOperator> & op)> remove_projection_map;
 	remove_projection_map = [&remove_projection_map](unique_ptr<LogicalOperator> &op) {
 		switch (op->type) {
@@ -789,12 +764,37 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 			remove_projection_map(child);
 		}
 	};
-	remove_projection_map(last_sub_plan);
+	remove_projection_map(current_sub_plan);
 
-	// 3. store the last_sub_plan into a map<merge_index, operator>
+	if (nullptr == last_sub_plan) {
+		return current_sub_plan;
+	}
+
+#if ENABLE_DEBUG_PRINT
+	Printer::Print("last_sub_plan");
+	last_sub_plan->Print();
+	Printer::Print("current_sub_plan");
+	current_sub_plan->Print();
+#endif
+
+	// 2. revert the indexes of the current_sub_plan
+#ifdef DEBUG
+	D_ASSERT(LogicalOperatorType::LOGICAL_PROJECTION == last_sub_plan->type);
+#endif
+	auto &proj_node = last_sub_plan->Cast<LogicalProjection>();
+	//	// 1.1. proj_node's expressions might have new_table_idx
+	//	for (auto &proj_expr : proj_node.expressions) {
+	//		RevertSubqueriesIndex(proj_expr);
+	//	}
+	stored_sub_plan_exprs[new_table_idx] = std::move(proj_node.expressions);
+
+	// 3. remove projection head of the last_sub_plan
+	last_sub_plan = std::move(last_sub_plan->children[0]);
+
+	// 4. store the last_sub_plan into a map<merge_index, operator>
 	stored_sub_plans[new_table_idx] = std::move(last_sub_plan);
 
-	// 4. merge back the sub plans and revert the indexes
+	// 5. merge back the sub plans and revert the indexes
 	std::function<void(unique_ptr<LogicalOperator> & op)> merge_back;
 	merge_back = [&merge_back, this](unique_ptr<LogicalOperator> &op) {
 		switch (op->type) {
