@@ -717,4 +717,145 @@ void SubqueryPreparer::ExplainAnalyzeSubQuery(ClientContextLock &lock,
 	Printer::Print("EXPLAIN ANALYZE:");
 	explain_result->Print();
 }
+
+void SubqueryPreparer::RevertSubqueriesIndex(unique_ptr<Expression> &expr) {
+#ifdef DEBUG
+	D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
+#endif
+	auto &bound_col_ref_expr = expr->Cast<BoundColumnRefExpression>();
+	auto find_expr = stored_sub_plan_exprs.find(bound_col_ref_expr.binding.table_index);
+	if (find_expr != stored_sub_plan_exprs.end()) {
+		auto &origin_expr = find_expr->second[bound_col_ref_expr.binding.column_index];
+#ifdef DEBUG
+		D_ASSERT(origin_expr != nullptr);
+		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == origin_expr->type);
+#endif
+		auto &bound_col_ref_origin = origin_expr->Cast<BoundColumnRefExpression>();
+		bound_col_ref_expr.binding.table_index = bound_col_ref_origin.binding.table_index;
+		bound_col_ref_expr.binding.column_index = bound_col_ref_origin.binding.column_index;
+	}
+}
+
+unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperator> last_sub_plan,
+                                                        const unique_ptr<LogicalOperator> &sub_plan) {
+	switch (sub_plan->type) {
+	case LogicalOperatorType::LOGICAL_PROJECTION:
+		break;
+	default:
+		return nullptr;
+	}
+
+	auto current_sub_plan = sub_plan->Copy(context);
+	if (nullptr == last_sub_plan) {
+		return current_sub_plan;
+	}
+
+#if ENABLE_DEBUG_PRINT
+	Printer::Print("last_sub_plan");
+	last_sub_plan->Print();
+	Printer::Print("current_sub_plan");
+	current_sub_plan->Print();
+#endif
+
+	// 1. revert the indexes of the current_sub_plan
+#ifdef DEBUG
+	D_ASSERT(LogicalOperatorType::LOGICAL_PROJECTION == last_sub_plan->type);
+#endif
+	auto &proj_node = last_sub_plan->Cast<LogicalProjection>();
+	//	// 1.1. proj_node's expressions might have new_table_idx
+	//	for (auto &proj_expr : proj_node.expressions) {
+	//		RevertSubqueriesIndex(proj_expr);
+	//	}
+	stored_sub_plan_exprs[new_table_idx] = std::move(proj_node.expressions);
+
+	// 2. clean the last_sub_plan
+	// 2.1. remove projection head
+	last_sub_plan = std::move(last_sub_plan->children[0]);
+	// 2.2. remove the projection_map of JOINs
+	std::function<void(unique_ptr<LogicalOperator> & op)> remove_projection_map;
+	remove_projection_map = [&remove_projection_map](unique_ptr<LogicalOperator> &op) {
+		switch (op->type) {
+		case LogicalOperatorType::LOGICAL_COMPARISON_JOIN: {
+			auto &join = op->Cast<LogicalComparisonJoin>();
+			join.left_projection_map.clear();
+			join.right_projection_map.clear();
+			break;
+		}
+		default:
+			break;
+		}
+
+		for (auto &child : op->children) {
+			remove_projection_map(child);
+		}
+	};
+	remove_projection_map(last_sub_plan);
+
+	// 3. store the last_sub_plan into a map<merge_index, operator>
+	stored_sub_plans[new_table_idx] = std::move(last_sub_plan);
+
+	// 4. merge back the sub plans and revert the indexes
+	std::function<void(unique_ptr<LogicalOperator> & op)> merge_back;
+	merge_back = [&merge_back, this](unique_ptr<LogicalOperator> &op) {
+		switch (op->type) {
+		// todo: refactor to a standalone class
+		case LogicalOperatorType::LOGICAL_PROJECTION: {
+			auto &proj = op->Cast<LogicalProjection>();
+			auto &exprs = proj.expressions;
+			for (auto &expr : exprs) {
+				RevertSubqueriesIndex(expr);
+			}
+			break;
+		}
+		case LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY: {
+			auto &agg_group_by = op->Cast<LogicalAggregate>();
+			auto &exprs = agg_group_by.expressions;
+			for (auto &expr : exprs) {
+#ifdef DEBUG
+				D_ASSERT(ExpressionType::BOUND_AGGREGATE == expr->type);
+#endif
+				auto &bound_agg_exprs = expr->Cast<BoundAggregateExpression>().children;
+				for (auto &bound_agg_expr : bound_agg_exprs) {
+					RevertSubqueriesIndex(bound_agg_expr);
+				}
+			}
+			break;
+		}
+		case LogicalOperatorType::LOGICAL_COMPARISON_JOIN: {
+			auto &join = op->Cast<LogicalComparisonJoin>();
+			auto &conditions = join.conditions;
+			for (auto &cond : conditions) {
+				RevertSubqueriesIndex(cond.left);
+				RevertSubqueriesIndex(cond.right);
+			}
+			break;
+		}
+		default:
+			break;
+		}
+
+		for (auto child_it = op->children.begin(); child_it != op->children.end(); child_it++) {
+			if (LogicalOperatorType::LOGICAL_CHUNK_GET == (*child_it)->type) {
+				// check if it's a new generated one
+				auto &chunk_get = (*child_it)->Cast<LogicalColumnDataGet>();
+				auto find_sub_plan = stored_sub_plans.find(chunk_get.table_index);
+				if (find_sub_plan != stored_sub_plans.end()) {
+#ifdef DEBUG
+					D_ASSERT(nullptr != find_sub_plan->second);
+#endif
+					op->children.erase(child_it);
+					op->children.insert(child_it, std::move(find_sub_plan->second));
+					stored_sub_plans.erase(find_sub_plan);
+				}
+			}
+			merge_back(*child_it);
+		}
+	};
+	merge_back(current_sub_plan);
+#if ENABLE_DEBUG_PRINT
+	Printer::Print("After MergeBack");
+	current_sub_plan->Print();
+#endif
+	return current_sub_plan;
+}
 } // namespace duckdb

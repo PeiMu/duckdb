@@ -16,6 +16,7 @@
 #define TIME_BREAK_DOWN              false
 #define MANUAL_EXPLAIN_ANALYZE       false
 //#define ENABLE_CROSS_PRODUCT_REWRITE true
+#define MergeBackToWholeQuery		true
 
 namespace duckdb {
 

@@ -466,6 +466,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		bool merge_sibling_expr = false;
 		QuerySplit query_splitter(*this);
 
+#if MergeBackToWholeQuery
+		unique_ptr<LogicalOperator> whole_plan;
+#endif
+
 		while (ENABLE_QUERY_SPLIT) {
 #if ENABLE_CROSS_PRODUCT_REWRITE
 			if (needToSplit || subquery_preparer.NeedRewrite(subqueries.front())) {
@@ -550,6 +554,11 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			sub_plan->Print();
 
 			Planner::VerifyPlan(optimizer.context, sub_plan);
+#endif
+
+#if MergeBackToWholeQuery
+			// merge sub_plan to whole_plan
+			whole_plan = subquery_preparer.MergeBack(std::move(whole_plan), sub_plan);
 #endif
 
 			auto subquery_stmt = subquery_preparer.AdaptSelect(result, sub_plan);
@@ -672,6 +681,16 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		Printer::Print("After the last PostOptimization");
 		plan->Print();
 #endif
+#if MergeBackToWholeQuery
+		// merge sub_plan to whole_plan
+		auto explain_whole_plan = subquery_preparer.MergeBack(std::move(whole_plan), plan);
+		if (explain_whole_plan) {
+			explain_whole_plan = make_uniq<LogicalExplain>(std::move(explain_whole_plan), ExplainType::EXPLAIN_ANALYZE);
+			subquery_preparer.ExplainAnalyzeSubQuery(
+			    lock, result, std::move(explain_whole_plan), result->catalog_version, result->unbound_statement->query,
+			    result->unbound_statement->n_param, result->unbound_statement->named_param_map);
+		}
+#endif
 
 #ifdef DEBUG
 		plan->Verify(*this);
@@ -686,7 +705,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 #if TIME_BREAK_DOWN
 		auto read_str_timer = chrono_tic();
-#if TIME_BREAK_DOWN
+#endif
 		IRConverter ir_converter(*planner.binder, *this);
 		// todo: It's better to generate the Filter Expression from postgres, but needs a lot of engineering work.
 		//  Currently, we reuse the Filter Expression from duckdb
@@ -789,9 +808,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if MANUAL_EXPLAIN_ANALYZE
 				auto explain_sub_plan = new_sub_plan->Copy(*this);
 				explain_sub_plan = make_uniq<LogicalExplain>(std::move(explain_sub_plan), ExplainType::EXPLAIN_ANALYZE);
-				subquery_preparer.ExplainAnalyzeSubQuery(
-				    lock, result, std::move(explain_sub_plan), result->catalog_version, result->unbound_statement->query,
-				    result->unbound_statement->n_param, result->unbound_statement->named_param_map);
+				subquery_preparer.ExplainAnalyzeSubQuery(lock, result, std::move(explain_sub_plan),
+				                                         result->catalog_version, result->unbound_statement->query,
+				                                         result->unbound_statement->n_param,
+				                                         result->unbound_statement->named_param_map);
 #endif
 				// 2. adapt select node
 				auto subquery_stmt = subquery_preparer.AdaptSelect(result, new_sub_plan);
@@ -831,9 +851,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if MANUAL_EXPLAIN_ANALYZE
 				auto explain_sub_plan = plan->Copy(*this);
 				explain_sub_plan = make_uniq<LogicalExplain>(std::move(explain_sub_plan), ExplainType::EXPLAIN_ANALYZE);
-				subquery_preparer.ExplainAnalyzeSubQuery(
-				    lock, result, std::move(explain_sub_plan), result->catalog_version, result->unbound_statement->query,
-				    result->unbound_statement->n_param, result->unbound_statement->named_param_map);
+				subquery_preparer.ExplainAnalyzeSubQuery(lock, result, std::move(explain_sub_plan),
+				                                         result->catalog_version, result->unbound_statement->query,
+				                                         result->unbound_statement->n_param,
+				                                         result->unbound_statement->named_param_map);
 #endif
 			}
 		}

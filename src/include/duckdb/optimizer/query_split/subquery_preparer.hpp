@@ -53,6 +53,7 @@ public:
 	unique_ptr<LogicalOperator> UpdateProjHead(unique_ptr<LogicalOperator> plan,
 	                                           const std::vector<TableExpr> &original_proj_expr);
 
+	// todo: refactor to a standalone class
 	bool Rewrite(unique_ptr<LogicalOperator> &plan);
 	//! Check if current `subqueries_vec` has CROSS_PRODUCT
 	bool NeedRewrite(const std::vector<unique_ptr<LogicalOperator>> &subqueries_vec);
@@ -67,9 +68,14 @@ public:
 
 	void AddOldTableIndex(const unique_ptr<LogicalOperator> &op);
 
+	// todo: refactor to a standalone class
 	void ExplainAnalyzeSubQuery(ClientContextLock &lock, shared_ptr<PreparedStatementData> original_stmt_data,
 	                            unique_ptr<LogicalOperator> explain_sub_plan, idx_t catalog_version,
 	                            string statement_query, idx_t n_param, case_insensitive_map_t<idx_t> named_param_map);
+
+	// todo: refactor to a standalone class
+	unique_ptr<LogicalOperator> MergeBack(unique_ptr<LogicalOperator> last_sub_plan,
+	                                      const unique_ptr<LogicalOperator> &sub_plan);
 
 private:
 	//! 1. find the insert point and insert the `ColumnDataGet` node to the logical plan;
@@ -84,6 +90,8 @@ private:
 	                       std::deque<idx_t> &table_blocks_key_order);
 
 	bool BlockUsed(const unordered_set<idx_t> &left_cond_table_index, const unique_ptr<LogicalOperator> &op);
+
+	void RevertSubqueriesIndex(unique_ptr<Expression> &expr);
 
 private:
 	Binder &binder;
@@ -101,5 +109,10 @@ private:
 	std::set<idx_t> old_table_idx;
 
 	int merge_index = 0;
+
+	// store the sub_plans and sub_plan_exprs in case the current_sub_plan doesn't have the CHUNK_GET node
+	// (in `MergeBack`)
+	std::unordered_map<int, unique_ptr<LogicalOperator>> stored_sub_plans;
+	std::unordered_map<int, vector<unique_ptr<Expression>>> stored_sub_plan_exprs;
 };
 } // namespace duckdb
