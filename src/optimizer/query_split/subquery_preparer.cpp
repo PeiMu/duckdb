@@ -411,15 +411,16 @@ void SubqueryPreparer::UpdateSubqueriesIndex(subquery_queue &subqueries) {
 	}
 }
 
-bool SubqueryPreparer::Rewrite(unique_ptr<LogicalOperator> &plan) {
+void SubqueryPreparer::Rewrite(unique_ptr<LogicalOperator> &plan) {
 	switch (plan->type) {
 	case LogicalOperatorType::LOGICAL_PROJECTION:
 		break;
 	default:
-		return false;
+		return;
 	}
 
-	// 1. collect the condition of JOINs
+	// 1. collect the (JOIN, op_level) pair
+	// it is a left-deep plan at this point (before the JoinOrderOpt)
 	auto op_child = plan.get();
 	std::stack<std::pair<LogicalOperator *, int>> join_pointers_pair;
 	int op_level = 0;
@@ -432,89 +433,27 @@ bool SubqueryPreparer::Rewrite(unique_ptr<LogicalOperator> &plan) {
 	}
 
 	while (!join_pointers_pair.empty()) {
+		// check if the current level JOIN needs to rewrite
 		auto current_pair = join_pointers_pair.top();
 		LogicalOperator *current_join_pointer = current_pair.first;
 		int current_join_level = current_pair.second;
 		join_pointers_pair.pop();
 		auto &current_join = current_join_pointer->Cast<LogicalComparisonJoin>();
 
-		// select the needed tables
 		std::unordered_set<idx_t> left_cond_table_index;
-		for (const auto &cond : current_join.conditions) {
-#ifdef DEBUG
-			D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.left->type);
-#endif
-			auto &left_expr = cond.left->Cast<BoundColumnRefExpression>();
-			left_cond_table_index.emplace(left_expr.binding.table_index);
-		}
-
-		// 2. collect all tables below the current JOIN in the top-down order
 		std::unordered_map<idx_t, unique_ptr<LogicalOperator>> table_blocks;
 		std::deque<idx_t> table_blocks_key_order;
-
-		if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT != current_join_pointer->children[0]->type) {
-			continue;
-		}
-		// it's an ugly way... since we cannot convert row pointer to unique_ptr
-		auto second_last_pointer = current_join_pointer;
-		auto last_cross_product = current_join_pointer->children[0].get();
-		while (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == last_cross_product->type) {
-			auto &cross_product_op = last_cross_product->Cast<LogicalCrossProduct>();
-			if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == cross_product_op.children[1]->type) {
-				// skip the right hand JOINs, except SEMI JOIN
-				auto &join_op = cross_product_op.children[1]->Cast<LogicalJoin>();
-				if (JoinType::SEMI != join_op.join_type) {
-					break;
-				}
-			}
-			InsertTableBlocks(cross_product_op.children[1], table_blocks, table_blocks_key_order);
-			last_cross_product = last_cross_product->children[0].get();
-			second_last_pointer = second_last_pointer->children[0].get();
-		}
-		auto &last_block = second_last_pointer->children[0];
-
-		// if the last block is unused in the last join, find the used table from `table_blocks_key_order` as the
-		// `last_block`
-		bool used = BlockUsed(left_cond_table_index, last_block);
-		if (!used) {
-			idx_t last_sibling_index = -1;
-			for (auto it = table_blocks_key_order.begin(); it != table_blocks_key_order.end(); it++) {
-				if (left_cond_table_index.count(*it)) {
-					last_sibling_index = *it;
-					table_blocks_key_order.erase(it);
-					break;
-				}
-			}
-#ifdef DEBUG
-			D_ASSERT(left_cond_table_index.count(last_sibling_index));
-#endif
-			auto last_sibling = std::move(table_blocks[last_sibling_index]);
-			table_blocks.erase(last_sibling_index);
-			InsertTableBlocks(last_block, table_blocks, table_blocks_key_order);
-			last_block = std::move(last_sibling);
-		}
-
 		std::queue<unique_ptr<LogicalOperator>> unused_blocks;
-		for (auto &block : table_blocks) {
-			if (!left_cond_table_index.count(block.first)) {
-				unused_blocks.push(std::move(block.second));
-			}
-		}
 
-		// if all tables below the last join are used
+		unique_ptr<LogicalOperator> last_block = CheckTableUsage(current_join_pointer, left_cond_table_index,
+		                                                         table_blocks, table_blocks_key_order, unused_blocks);
+		if (nullptr == last_block)
+			continue;
+
+		// 2. if all tables below the last join are used,
+		// revert to the original sub plan and check the next JOIN point
 		if (unused_blocks.empty()) {
-			// revert table blocks to plan
-			auto revert_pointer = current_join_pointer;
-			while (!table_blocks_key_order.empty() &&
-			       LogicalOperatorType::LOGICAL_CROSS_PRODUCT == revert_pointer->children[0]->type) {
-				revert_pointer = revert_pointer->children[0].get();
-				auto &revert_op = revert_pointer->Cast<LogicalCrossProduct>();
-				revert_op.children[1] = std::move(table_blocks[table_blocks_key_order.front()]);
-				table_blocks_key_order.pop_front();
-			}
-#ifdef DEBUG
-			D_ASSERT(table_blocks_key_order.empty());
-#endif
+			RevertUsedBlocks(current_join_pointer, std::move(last_block), table_blocks_key_order, table_blocks);
 			continue;
 		}
 
@@ -553,7 +492,6 @@ bool SubqueryPreparer::Rewrite(unique_ptr<LogicalOperator> &plan) {
 		// add the aboved_cross_product
 		reordered_plan->children[0] = std::move(aboved_cross_product);
 	}
-	return true;
 }
 
 bool SubqueryPreparer::NeedRewrite(const std::vector<unique_ptr<LogicalOperator>> &subqueries_vec) {
@@ -561,19 +499,29 @@ bool SubqueryPreparer::NeedRewrite(const std::vector<unique_ptr<LogicalOperator>
 		return true;
 	}
 
-	bool has_cross_product = false;
-	std::function<void(const unique_ptr<LogicalOperator> &op)> check_cross_product;
-	check_cross_product = [&check_cross_product, &has_cross_product](const unique_ptr<LogicalOperator> &op) {
-		for (auto &child : op->children) {
-			if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == child->type) {
-				has_cross_product = true;
-			}
-			check_cross_product(child);
-		}
-	};
-	// TODO: need to fix when supporting parallel execution
-	check_cross_product(subqueries_vec[0]);
-	return has_cross_product;
+#ifdef DEBUG
+	D_ASSERT(LogicalOperatorType::LOGICAL_COMPARISON_JOIN == subqueries_vec[0]->type);
+#endif
+
+	LogicalOperator *current_join_pointer = subqueries_vec[0].get();
+	std::unordered_set<idx_t> left_cond_table_index;
+	std::unordered_map<idx_t, unique_ptr<LogicalOperator>> table_blocks;
+	std::deque<idx_t> table_blocks_key_order;
+	std::queue<unique_ptr<LogicalOperator>> unused_blocks;
+
+	unique_ptr<LogicalOperator> last_block = CheckTableUsage(current_join_pointer, left_cond_table_index, table_blocks,
+	                                                         table_blocks_key_order, unused_blocks);
+
+	if (nullptr == last_block) {
+		return false;
+	}
+
+	if (unused_blocks.empty()) {
+		RevertUsedBlocks(current_join_pointer, std::move(last_block), table_blocks_key_order, table_blocks);
+		return false;
+	}
+
+	return true;
 }
 
 void SubqueryPreparer::MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries) {
@@ -857,5 +805,99 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 	current_sub_plan->Print();
 #endif
 	return current_sub_plan;
+}
+
+unique_ptr<LogicalOperator>
+SubqueryPreparer::CheckTableUsage(LogicalOperator *current_join_pointer, unordered_set<idx_t> &left_cond_table_index,
+                                  std::unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks,
+                                  std::deque<idx_t> &table_blocks_key_order,
+                                  std::queue<unique_ptr<LogicalOperator>> &unused_blocks) {
+	auto &current_join = current_join_pointer->Cast<LogicalComparisonJoin>();
+
+	// 1. collect the left-cond of JOIN, since the right child must be shown in the right-cond
+	for (const auto &cond : current_join.conditions) {
+#ifdef DEBUG
+		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.left->type);
+#endif
+		auto &left_expr = cond.left->Cast<BoundColumnRefExpression>();
+		left_cond_table_index.emplace(left_expr.binding.table_index);
+	}
+
+	// 2. collect all tables below the current JOIN in the top-down order
+	if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT != current_join_pointer->children[0]->type) {
+		// we only want to confirm if the CROSS_PRODUCT can be simplified
+		// which means if the child node is not a CROSS_PRODUCT, it's not necessary to check
+		return nullptr;
+	}
+	// it's an ugly way... since we cannot convert row pointer to unique_ptr
+	auto last_cross_product = current_join_pointer;
+	auto check_pointer = current_join_pointer->children[0].get();
+	while (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == check_pointer->type) {
+		auto &cross_product_op = check_pointer->Cast<LogicalCrossProduct>();
+		if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == cross_product_op.children[1]->type) {
+			// skip the right hand JOINs, except SEMI JOIN
+			auto &join_op = cross_product_op.children[1]->Cast<LogicalJoin>();
+			if (JoinType::SEMI != join_op.join_type) {
+				break;
+			}
+		}
+		InsertTableBlocks(cross_product_op.children[1], table_blocks, table_blocks_key_order);
+		check_pointer = check_pointer->children[0].get();
+		last_cross_product = last_cross_product->children[0].get();
+	}
+	auto &last_block = last_cross_product->children[0];
+
+	// 3. if the last block is unused in the last join, find the used table from `table_blocks_key_order` as the
+	// new `last_block`
+	bool used = BlockUsed(left_cond_table_index, last_block);
+	if (!used) {
+		idx_t last_sibling_index = -1;
+		for (auto it = table_blocks_key_order.begin(); it != table_blocks_key_order.end(); it++) {
+			if (left_cond_table_index.count(*it)) {
+				last_sibling_index = *it;
+				table_blocks_key_order.erase(it);
+				break;
+			}
+		}
+#ifdef DEBUG
+		D_ASSERT(left_cond_table_index.count(last_sibling_index));
+#endif
+		auto last_sibling = std::move(table_blocks[last_sibling_index]);
+		table_blocks.erase(last_sibling_index);
+		InsertTableBlocks(last_block, table_blocks, table_blocks_key_order);
+		last_block = std::move(last_sibling);
+	}
+
+	// 4. get the unused blocks
+	for (auto &block : table_blocks) {
+		if (!left_cond_table_index.count(block.first)) {
+			unused_blocks.push(std::move(block.second));
+		}
+	}
+
+	return std::move(last_block);
+}
+
+void SubqueryPreparer::RevertUsedBlocks(LogicalOperator *current_join_pointer, unique_ptr<LogicalOperator> last_block,
+                                        deque<idx_t> &table_blocks_key_order,
+                                        std::unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks) {
+	LogicalOperator *revert_pointer = current_join_pointer;
+
+	while (!table_blocks_key_order.empty() &&
+	       LogicalOperatorType::LOGICAL_CROSS_PRODUCT == revert_pointer->children[0]->type) {
+		revert_pointer = revert_pointer->children[0].get();
+		auto &revert_op = revert_pointer->Cast<LogicalCrossProduct>();
+		revert_op.children[1] = std::move(table_blocks[table_blocks_key_order.front()]);
+		table_blocks_key_order.pop_front();
+	}
+
+#ifdef DEBUG
+	D_ASSERT(nullptr == revert_pointer->children[0]);
+	revert_pointer->children[0] = std::move(last_block);
+#endif
+
+#ifdef DEBUG
+	D_ASSERT(table_blocks_key_order.empty());
+#endif
 }
 } // namespace duckdb

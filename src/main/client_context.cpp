@@ -472,7 +472,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 		while (ENABLE_QUERY_SPLIT) {
 #if ENABLE_CROSS_PRODUCT_REWRITE
-			if (needToSplit || subquery_preparer.NeedRewrite(subqueries.front())) {
+			needToSplit = needToSplit || subquery_preparer.NeedRewrite(subqueries.front());
+			if (needToSplit) {
 				if (!subqueries.empty()) {
 					subquery_preparer.MergeSubquery(plan, std::move(subqueries));
 #if ENABLE_DEBUG_PRINT
@@ -488,7 +489,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					chrono_toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
 #endif
 				}
-				needToSplit = subquery_preparer.Rewrite(plan);
+				subquery_preparer.Rewrite(plan);
 #if TIME_BREAK_DOWN
 				chrono_toc(&timer, "Rewrite time is\n");
 #endif
@@ -685,7 +686,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		// merge sub_plan to whole_plan
 		auto explain_whole_plan = subquery_preparer.MergeBack(std::move(whole_plan), plan);
 		if (explain_whole_plan) {
-#if MANUAL_EXPLAIN_ANALYZE
+#if WHOLE_PLAN_EXPLAIN_ANALYZE
 			explain_whole_plan = make_uniq<LogicalExplain>(std::move(explain_whole_plan), ExplainType::EXPLAIN_ANALYZE);
 			subquery_preparer.ExplainAnalyzeSubQuery(
 			    lock, result, std::move(explain_whole_plan), result->catalog_version, result->unbound_statement->query,

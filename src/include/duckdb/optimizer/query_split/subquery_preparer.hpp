@@ -54,7 +54,7 @@ public:
 	                                           const std::vector<TableExpr> &original_proj_expr);
 
 	// todo: refactor to a standalone class
-	bool Rewrite(unique_ptr<LogicalOperator> &plan);
+	void Rewrite(unique_ptr<LogicalOperator> &plan);
 	//! Check if current `subqueries_vec` has CROSS_PRODUCT
 	bool NeedRewrite(const std::vector<unique_ptr<LogicalOperator>> &subqueries_vec);
 	void MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries);
@@ -92,6 +92,18 @@ private:
 	bool BlockUsed(const unordered_set<idx_t> &left_cond_table_index, const unique_ptr<LogicalOperator> &op);
 
 	void RevertSubqueriesIndex(unique_ptr<Expression> &expr);
+
+	//! collect necessary info and return the last (lowest) non-CROSS_PRODUCT block
+	unique_ptr<LogicalOperator> CheckTableUsage(LogicalOperator *current_join_pointer,
+	                                            unordered_set<idx_t> &left_cond_table_index,
+	                                            std::unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks,
+	                                            std::deque<idx_t> &table_blocks_key_order,
+	                                            std::queue<unique_ptr<LogicalOperator>> &unused_blocks);
+
+	//! revert the plan, keep the same table order
+	void RevertUsedBlocks(LogicalOperator *current_join_pointer, unique_ptr<LogicalOperator> last_block,
+	                      deque<idx_t> &table_blocks_key_order,
+	                      std::unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks);
 
 private:
 	Binder &binder;
