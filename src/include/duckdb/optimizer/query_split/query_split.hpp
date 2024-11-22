@@ -10,13 +10,14 @@
 
 #include "duckdb/optimizer/query_split/split_algo_factor.hpp"
 
-//#define ENABLE_QUERY_SPLIT           true
-//#define ENABLE_PARALLEL_EXECUTION    true
-//#define ENABLE_DEBUG_PRINT           false
-#define TIME_BREAK_DOWN              false
-#define MANUAL_EXPLAIN_ANALYZE       false
-//#define ENABLE_CROSS_PRODUCT_REWRITE true
-#define MergeBackToWholeQuery		true
+// #define ENABLE_QUERY_SPLIT				true
+// #define ENABLE_PARALLEL_EXECUTION		true
+// #define ENABLE_DEBUG_PRINT				false
+#define TIME_BREAK_DOWN            false
+#define MANUAL_EXPLAIN_ANALYZE     false
+#define WHOLE_PLAN_EXPLAIN_ANALYZE false
+// #define ENABLE_CROSS_PRODUCT_REWRITE		true
+#define MergeBackToWholeQuery false
 
 namespace duckdb {
 
