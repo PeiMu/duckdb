@@ -516,12 +516,14 @@ bool SubqueryPreparer::NeedRewrite(const std::vector<unique_ptr<LogicalOperator>
 		return false;
 	}
 
-	if (unused_blocks.empty()) {
-		RevertUsedBlocks(current_join_pointer, std::move(last_block), table_blocks_key_order, table_blocks);
+	RevertUsedBlocks(current_join_pointer, std::move(last_block), table_blocks_key_order, table_blocks);
+
+	if (!unused_blocks.empty()) {
+		RevertUnusedBlocks(current_join_pointer, unused_blocks);
+		return true;
+	} else {
 		return false;
 	}
-
-	return true;
 }
 
 void SubqueryPreparer::MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries) {
@@ -898,6 +900,25 @@ void SubqueryPreparer::RevertUsedBlocks(LogicalOperator *current_join_pointer, u
 
 #ifdef DEBUG
 	D_ASSERT(table_blocks_key_order.empty());
+#endif
+}
+
+void SubqueryPreparer::RevertUnusedBlocks(LogicalOperator *current_join_pointer,
+                                          std::queue<unique_ptr<LogicalOperator>> &unused_blocks) {
+	LogicalOperator *revert_pointer = current_join_pointer;
+
+	while (!unused_blocks.empty() && LogicalOperatorType::LOGICAL_CROSS_PRODUCT == revert_pointer->children[0]->type) {
+		revert_pointer = revert_pointer->children[0].get();
+		auto &revert_op = revert_pointer->Cast<LogicalCrossProduct>();
+		if (nullptr == revert_op.children[1]) {
+			revert_op.children[1] = std::move(unused_blocks.front());
+			unused_blocks.pop();
+		}
+	}
+
+#ifdef DEBUG
+	D_ASSERT(nullptr != revert_pointer->children[0]);
+	D_ASSERT(unused_blocks.empty());
 #endif
 }
 } // namespace duckdb

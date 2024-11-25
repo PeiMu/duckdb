@@ -104,6 +104,8 @@ private:
 	void RevertUsedBlocks(LogicalOperator *current_join_pointer, unique_ptr<LogicalOperator> last_block,
 	                      deque<idx_t> &table_blocks_key_order,
 	                      std::unordered_map<idx_t, unique_ptr<LogicalOperator>> &table_blocks);
+	void RevertUnusedBlocks(LogicalOperator *current_join_pointer,
+	                        std::queue<unique_ptr<LogicalOperator>> &unused_blocks);
 
 private:
 	Binder &binder;
