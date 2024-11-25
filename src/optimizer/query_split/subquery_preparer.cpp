@@ -893,8 +893,8 @@ void SubqueryPreparer::RevertUsedBlocks(LogicalOperator *current_join_pointer, u
 
 #ifdef DEBUG
 	D_ASSERT(nullptr == revert_pointer->children[0]);
-	revert_pointer->children[0] = std::move(last_block);
 #endif
+	revert_pointer->children[0] = std::move(last_block);
 
 #ifdef DEBUG
 	D_ASSERT(table_blocks_key_order.empty());
