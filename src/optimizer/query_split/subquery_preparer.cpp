@@ -154,7 +154,7 @@ shared_ptr<PreparedStatementData> SubqueryPreparer::AdaptSelect(shared_ptr<Prepa
 }
 
 void SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
-                                      unique_ptr<ColumnDataCollection> previous_result) {
+                                      unique_ptr<ColumnDataCollection> previous_result, idx_t estimated_card) {
 
 	//	unique_ptr<MaterializedQueryResult> result_materialized;
 	//	auto collection = make_uniq<ColumnDataCollection>(Allocator::DefaultAllocator(), types);
@@ -193,7 +193,14 @@ void SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &
 	new_table_idx = binder.GenerateTableIndex();
 
 	chunk_scan = make_uniq<LogicalColumnDataGet>(new_table_idx, previous_result->Types(), std::move(previous_result));
+#if SpecifyEstCard
+#ifdef DEBUG
+	D_ASSERT(0 != estimated_card);
+#endif
+	chunk_scan->estimated_cardinality = estimated_card;
+#else
 	chunk_scan->estimated_cardinality = chunk_size;
+#endif
 	chunk_scan->has_estimated_cardinality = true;
 	bool merged = false;
 	MergeToSubquery(*current_level_subqueries[0], merged);
@@ -920,5 +927,19 @@ void SubqueryPreparer::RevertUnusedBlocks(LogicalOperator *current_join_pointer,
 	D_ASSERT(nullptr != revert_pointer->children[0]);
 	D_ASSERT(unused_blocks.empty());
 #endif
+}
+
+idx_t SubqueryPreparer::GetEstCard(const unique_ptr<LogicalOperator> &sub_plan) {
+	std::function<void(const unique_ptr<LogicalOperator> &current_op)> get_est_card;
+	idx_t est_card = 0;
+	get_est_card = [&get_est_card, &est_card](const unique_ptr<LogicalOperator> &current_op) {
+		for (auto &child_op : current_op->children) {
+			get_est_card(child_op);
+			est_card = est_card > child_op->estimated_cardinality ? est_card : child_op->estimated_cardinality;
+		}
+	};
+
+	get_est_card(sub_plan);
+	return est_card;
 }
 } // namespace duckdb

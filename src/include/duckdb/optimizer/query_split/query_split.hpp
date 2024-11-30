@@ -18,6 +18,7 @@
 #define WHOLE_PLAN_EXPLAIN_ANALYZE false
 // #define ENABLE_CROSS_PRODUCT_REWRITE		true
 #define MergeBackToWholeQuery false
+#define SpecifyEstCard        false
 
 namespace duckdb {
 

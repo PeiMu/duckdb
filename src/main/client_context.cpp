@@ -557,6 +557,11 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			Planner::VerifyPlan(optimizer.context, sub_plan);
 #endif
 
+			idx_t estimated_card = 0;
+#if SpecifyEstCard
+			estimated_card = subquery_preparer.GetEstCard(sub_plan);
+#endif
+
 #if MergeBackToWholeQuery
 			// merge sub_plan to whole_plan
 			whole_plan = subquery_preparer.MergeBack(std::move(whole_plan), sub_plan);
@@ -597,7 +602,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "Execute time is\n");
 #endif
-			subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result));
+			subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result), estimated_card);
 			if (!ENABLE_PARALLEL_EXECUTION && nullptr != last_sibling_node) {
 				merge_sibling_expr = subquery_preparer.MergeSibling(subqueries.front(), std::move(last_sibling_node));
 			} else {

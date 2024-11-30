@@ -31,7 +31,7 @@ public:
 
 	//! Merge the data chunk (temp table) to the current subquery
 	void MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
-	                    unique_ptr<ColumnDataCollection> previous_result);
+	                    unique_ptr<ColumnDataCollection> previous_result, idx_t estimated_card);
 
 	//! Merge the previous sibling node. If merged to the main stream (left node), we add the sibling expr to proj.
 	bool MergeSibling(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
@@ -76,6 +76,8 @@ public:
 	// todo: refactor to a standalone class
 	unique_ptr<LogicalOperator> MergeBack(unique_ptr<LogicalOperator> last_sub_plan,
 	                                      const unique_ptr<LogicalOperator> &sub_plan);
+
+	idx_t GetEstCard(const unique_ptr<LogicalOperator> &sub_plan);
 
 private:
 	//! 1. find the insert point and insert the `ColumnDataGet` node to the logical plan;
