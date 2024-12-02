@@ -101,26 +101,6 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 		}
 		VisitOperator(*child);
 
-#if ENABLE_CROSS_PRODUCT_REWRITE
-		// we need to further check if all the CROSS_PRODUCT can be simplified in the subqueries
-		// in a bottom-up order
-		// here has a small "bug": we assume it's a left-deep plan, so we don't split the right child node
-		if (LogicalOperatorType::LOGICAL_GET == child->type) {
-			auto &get = child->Cast<LogicalGet>();
-			used_table_ids.emplace(get.table_index);
-		} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == child->type) {
-			auto &col_get = child->Cast<LogicalColumnDataGet>();
-			used_table_ids.emplace(col_get.table_index);
-		} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->type) {
-			auto &join_op = child->Cast<LogicalComparisonJoin>();
-			join_cond_number += join_op.conditions.size();
-			// if the table_number > join_cond_number+1, there might be CROSS_PRODUCT node
-			if (used_table_ids.size() > join_cond_number + 1) {
-				child->split_index = 0;
-			}
-		}
-#endif
-
 		if (child->split_index) {
 			same_level_subqueries.emplace_back(std::move(child));
 		}
