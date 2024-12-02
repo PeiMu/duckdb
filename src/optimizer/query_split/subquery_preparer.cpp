@@ -584,7 +584,7 @@ void SubqueryPreparer::InsertTableBlocks(unique_ptr<LogicalOperator> &op,
 	} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->type) {
 		// insert the SEMI JOIN to `table_blocks`, e.g.
 		// SEMI JION (table.index = CHUNK_GET.0)
-		auto &join_op = op->Cast<LogicalJoin>();
+		auto &join_op = op->Cast<LogicalComparisonJoin>();
 #ifdef DEBUG
 		D_ASSERT(JoinType::SEMI == join_op.join_type);
 #endif
@@ -845,7 +845,7 @@ SubqueryPreparer::CheckTableUsage(LogicalOperator *current_join_pointer, unorder
 		auto &cross_product_op = check_pointer->Cast<LogicalCrossProduct>();
 		if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == cross_product_op.children[1]->type) {
 			// skip the right hand JOINs, except SEMI JOIN
-			auto &join_op = cross_product_op.children[1]->Cast<LogicalJoin>();
+			auto &join_op = cross_product_op.children[1]->Cast<LogicalComparisonJoin>();
 			if (JoinType::SEMI != join_op.join_type) {
 				break;
 			}
