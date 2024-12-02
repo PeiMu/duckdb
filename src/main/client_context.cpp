@@ -537,6 +537,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			auto explain_sub_plan = sub_plan->Copy(*this);
 			explain_sub_plan = make_uniq<LogicalExplain>(std::move(explain_sub_plan), ExplainType::EXPLAIN_ANALYZE);
 			explain_sub_plan = optimizer.PostOptimize(std::move(explain_sub_plan));
+#if ENABLE_DEBUG_PRINT
+			// debug: print subquery
+			Printer::Print("After PostOptimization");
+			explain_sub_plan->Print();
+
+			Planner::VerifyPlan(optimizer.context, explain_sub_plan);
+#endif
 			subquery_preparer.ExplainAnalyzeSubQuery(
 			    lock, result, std::move(explain_sub_plan), result->catalog_version, result->unbound_statement->query,
 			    result->unbound_statement->n_param, result->unbound_statement->named_param_map);
@@ -546,6 +553,12 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			timer = chrono_tic();
 #endif
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
+
+			// todo: for each sub_plan, to get a better statistics, we check the right child
+			//  if it is a HASH_JOIN, which means it is a break-point following the duckdb's pipeline breaker role
+			//  we can split at this point
+			//  benefit: get a more reliable real statistics; drawback: creating a DATA_CHUNK and reading it
+
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "PostOptimize time is\n");
 #endif
@@ -669,6 +682,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		auto explain_sub_plan = plan->Copy(*this);
 		explain_sub_plan = make_uniq<LogicalExplain>(std::move(explain_sub_plan), ExplainType::EXPLAIN_ANALYZE);
 		explain_sub_plan = optimizer.PostOptimize(std::move(explain_sub_plan));
+#if ENABLE_DEBUG_PRINT
+		// debug: print subquery
+		Printer::Print("After the last PostOptimization");
+		explain_sub_plan->Print();
+
+		Planner::VerifyPlan(optimizer.context, explain_sub_plan);
+#endif
 		subquery_preparer.ExplainAnalyzeSubQuery(lock, result, std::move(explain_sub_plan), result->catalog_version,
 		                                         result->unbound_statement->query, result->unbound_statement->n_param,
 		                                         result->unbound_statement->named_param_map);
