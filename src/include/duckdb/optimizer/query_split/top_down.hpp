@@ -10,6 +10,7 @@
 
 #include "duckdb/catalog/catalog_entry/table_catalog_entry.hpp"
 #include "duckdb/optimizer/query_split/split_algorithm.hpp"
+#include "duckdb/planner/expression/bound_between_expression.hpp"
 #include "duckdb/planner/expression/bound_comparison_expression.hpp"
 #include "duckdb/planner/expression/bound_conjunction_expression.hpp"
 #include "duckdb/planner/expression/bound_function_expression.hpp"
@@ -19,7 +20,7 @@
 
 namespace duckdb {
 
-#define SPLIT_FILTER false
+#define SPLIT_FILTER            false
 #define FOLLOW_PIPELINE_BREAKER !ENABLE_CROSS_PRODUCT_REWRITE
 
 //! Based on the DAG of the logical plan, we generate the subqueries bottom-up
@@ -30,7 +31,9 @@ public:
 	//! Perform Query Split
 	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) override;
 	void Clear() {
+#if SPLIT_FILTER
 		filter_parent = false;
+#endif
 		while (!table_expr_queue.empty()) {
 			table_expr_queue.pop();
 		}
@@ -79,7 +82,9 @@ private:
 	void GetTargetTables(LogicalOperator &op);
 
 private:
+#if SPLIT_FILTER
 	bool filter_parent = false;
+#endif
 	// todo: hack code (in the old split strategy, each JOIN including the top-most JOIN is regarded as a subquery)
 	bool top_most = true;
 	std::set<TableExpr> last_level_table_exprs;

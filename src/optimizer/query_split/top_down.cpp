@@ -15,88 +15,73 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 	std::vector<unique_ptr<LogicalOperator>> same_level_subqueries;
 	std::vector<std::set<TableExpr>> same_level_table_exprs;
 
-	// if ENABLE_CROSS_PRODUCT_REWRITE
-	// todo: fix this when supporting parallel execution
-	// Since we don't split at CROSS_PRODUCT, we don't split its sibling
-	bool cross_product_sibling = false;
-
-	// todo: fix this when supporting parallel execution
-	// Since we currently don't support parallel execution, we have the issue
-	// e.g. comp_join --------
-	//          |            |
-	//      chunk_get      filter
-	// for now we just ignore the sibling of chunk_get
-	bool chunk_get_sibling = false;
-
 	// TODO: This code is very ugly...
 	// If we follow the pipeline breaker role, where we only split at the right child node of JOIN,
 	// we need to check the right child first to fit the table_expr process - commit 1883b62
 	// Else (we ENABLE_CROSS_PRODUCT_REWRITE), we want to get the deep-first tables,
 	// to see if the CROSS_PRODUCTs of the subquery can be simplified
-#if FOLLOW_PIPELINE_BREAKER
-	for (int idx = op.children.size()-1; idx > -1; idx--) {
-#else
-	for (int idx = 0; idx < op.children.size(); idx++) {
-#endif
+	for (int idx = op.children.size() - 1; idx > -1; idx--) {
 		auto &child = op.children[idx];
 		std::set<TableExpr> table_exprs;
-		if (cross_product_sibling || chunk_get_sibling)
-			break;
 		switch (child->type) {
-		// if the other child node is not CROSS_PRODUCT, JOIN nor FILTER
+			// if the other child node is not CROSS_PRODUCT, JOIN nor FILTER
 #if SPLIT_FILTER
-		case LogicalOperatorType::LOGICAL_FILTER:
-		{
+		case LogicalOperatorType::LOGICAL_FILTER: {
 			// add filter's column usage
 			table_exprs = GetFilterTableExpr(child->Cast<LogicalFilter>());
 			// check continuous filter nodes, only split the first one
-//			if (!filter_parent) {
-			query_split_index++;
-			child->split_index = query_split_index;
-			// inherit from the children until it is not a filter
-			auto child_pointer = child.get();
-			while (LogicalOperatorType::LOGICAL_FILTER == child_pointer->type) {
-				auto child_exprs = GetFilterTableExpr(child_pointer->Cast<LogicalFilter>());
-				table_exprs.insert(child_exprs.begin(), child_exprs.end());
-				child_pointer = child_pointer->children[0].get();
+			if (!filter_parent) {
+				query_split_index++;
+				child->split_index = query_split_index;
+				// inherit from the children until it is not a filter
+				auto child_pointer = child.get();
+				while (LogicalOperatorType::LOGICAL_FILTER == child_pointer->type) {
+					auto child_exprs = GetFilterTableExpr(child_pointer->Cast<LogicalFilter>());
+					table_exprs.insert(child_exprs.begin(), child_exprs.end());
+					child_pointer = child_pointer->children[0].get();
+				}
+				if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child_pointer->type) {
+					auto child_exprs = GetJoinTableExpr(child_pointer->Cast<LogicalComparisonJoin>());
+					table_exprs.insert(child_exprs.begin(), child_exprs.end());
+				}
 			}
-			if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child_pointer->type) {
-				auto child_exprs = GetJoinTableExpr(child_pointer->Cast<LogicalComparisonJoin>());
-				table_exprs.insert(child_exprs.begin(), child_exprs.end());
-			}
-//			}
-//			filter_parent = true;
+			filter_parent = true;
 			break;
 		}
 #endif
 		case LogicalOperatorType::LOGICAL_COMPARISON_JOIN:
 			// if comp_join is the child of filter, we split at the filter node,
 			// and inherit the table_exprs by the filter node
-//			if (!filter_parent) {
-#if FOLLOW_PIPELINE_BREAKER
-			if (top_most || 1==idx) {
-				top_most = false;
+#if SPLIT_FILTER
+			if (!filter_parent)
 #endif
-				query_split_index++;
-				child->split_index = query_split_index;
+			{
+				// we skip the SEMI JOIN
+				auto &join_op = child->Cast<LogicalComparisonJoin>();
+				if (JoinType::SEMI == join_op.join_type) {
+					child->split_index = 0;
+					break;
+				}
 #if FOLLOW_PIPELINE_BREAKER
+				if (top_most || 1 == idx) {
+					top_most = false;
+#endif
+					query_split_index++;
+					child->split_index = query_split_index;
+#if FOLLOW_PIPELINE_BREAKER
+				}
+#endif
+				table_exprs = GetJoinTableExpr(join_op);
 			}
+#if SPLIT_FILTER
+			filter_parent = false;
 #endif
-			table_exprs = GetJoinTableExpr(child->Cast<LogicalComparisonJoin>());
-//			}
-//			filter_parent = false;
 			break;
 		default:
-			if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == child->type)
-				cross_product_sibling = true;
-			else
-				cross_product_sibling = false;
-			if (LogicalOperatorType::LOGICAL_CHUNK_GET == child->type)
-				chunk_get_sibling = true;
-			else
-				chunk_get_sibling = false;
 			child->split_index = 0;
-//			filter_parent = false;
+#if SPLIT_FILTER
+			filter_parent = false;
+#endif
 			break;
 		}
 		VisitOperator(*child);
@@ -107,9 +92,9 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 
 		if (!table_exprs.empty()) {
 			// if the last level JOIN cannot be split, we merge the table exprs
-			if (child && LogicalOperatorType::LOGICAL_COMPARISON_JOIN==child->type && !child->split_index) {
-				std::merge(last_level_table_exprs.begin(), last_level_table_exprs.end(),
-				           table_exprs.begin(), table_exprs.end(),
+			if (child && LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->type && !child->split_index) {
+				std::merge(last_level_table_exprs.begin(), last_level_table_exprs.end(), table_exprs.begin(),
+				           table_exprs.end(),
 				           std::inserter(last_level_table_exprs, std::begin(last_level_table_exprs)));
 				table_exprs.clear();
 			} else {
@@ -218,7 +203,6 @@ std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter
 
 	auto get_column_ref_expr = [&table_exprs, this](const BoundColumnRefExpression &column_ref_expr) {
 		TableExpr table_expr;
-		//		auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
 		table_expr.table_idx = column_ref_expr.binding.table_index;
 		table_expr.column_idx = column_ref_expr.binding.column_index;
 		table_expr.column_name = column_ref_expr.alias;
@@ -295,6 +279,9 @@ std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter
 			for (const auto &child_expr : operator_expr.children) {
 				get_expr(child_expr);
 			}
+		} else if (ExpressionType::COMPARE_BETWEEN == expr->type) {
+			auto &bound_between_expr = expr->Cast<BoundBetweenExpression>();
+			get_expr(bound_between_expr.input);
 		} else if (ExpressionType::VALUE_CONSTANT == expr->type) {
 			// it's a constant value, skip it
 		} else {
