@@ -433,29 +433,28 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	plan->Verify(*this);
 #endif
 
-	if (config.enable_debug_print) {
-		// to show when have the real query
-		Printer::Print("Init plan");
-		plan->Print();
-	}
+#if ENABLE_DEBUG_PRINT
+	// to show when have the real query
+	Printer::Print("Init plan");
+	plan->Print();
+#endif
 
-	std::chrono::high_resolution_clock::time_point timer;
-	if (config.perf_breakdown) {
-		timer = chrono_tic();
-	}
+#if TIME_BREAK_DOWN
+	auto timer = chrono_tic();
+#endif
 	if (config.enable_optimizer && plan->RequireOptimizer()) {
 		profiler.StartPhase("optimizer");
 		Optimizer optimizer(*planner.binder, *this);
 		plan = optimizer.PreOptimize(std::move(plan));
-		if (config.enable_debug_print) {
-			D_ASSERT(plan);
-			// debug: print subquery
-			Printer::Print("After PreOptimization");
-			plan->Print();
-		}
-		if (config.perf_breakdown) {
-			chrono_toc(&timer, "PreOptimize time is\n");
-		}
+#if ENABLE_DEBUG_PRINT
+		D_ASSERT(plan);
+		// debug: print subquery
+		Printer::Print("After PreOptimization");
+		plan->Print();
+#endif
+#if TIME_BREAK_DOWN
+		chrono_toc(&timer, "PreOptimize time is\n");
+#endif
 
 		SubqueryPreparer subquery_preparer(*planner.binder, *this);
 
@@ -477,29 +476,29 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				if (needToSplit) {
 					if (!subqueries.empty()) {
 						subquery_preparer.MergeSubquery(plan, std::move(subqueries));
-						if (config.enable_debug_print) {
-							Printer::Print("after MergeSubquery");
-							plan->Print();
-						}
+#if ENABLE_DEBUG_PRINT
+						Printer::Print("after MergeSubquery");
+						plan->Print();
+#endif
 						plan = subquery_preparer.UpdateProjHead(std::move(plan), proj_expr);
-						if (config.enable_debug_print) {
-							Printer::Print("after UpdateProjHead");
-							plan->Print();
-						}
-						if (config.perf_breakdown) {
-							chrono_toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
-						}
+#if ENABLE_DEBUG_PRINT
+						Printer::Print("after UpdateProjHead");
+						plan->Print();
+#endif
+#if TIME_BREAK_DOWN
+						chrono_toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
+#endif
 					}
 					subquery_preparer.Rewrite(plan);
-					if (config.perf_breakdown) {
-						chrono_toc(&timer, "Rewrite time is\n");
-					}
-					if (config.enable_debug_print) {
-						D_ASSERT(plan);
-						// debug: print subquery
-						Printer::Print("After subquery_preparer.Rewrite");
-						plan->Print();
-					}
+#if TIME_BREAK_DOWN
+					chrono_toc(&timer, "Rewrite time is\n");
+#endif
+#if ENABLE_DEBUG_PRINT
+					D_ASSERT(plan);
+					// debug: print subquery
+					Printer::Print("After subquery_preparer.Rewrite");
+					plan->Print();
+#endif
 				}
 			}
 			if (needToSplit) {
@@ -509,9 +508,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				table_expr_queue = query_splitter.GetTableExprQueue();
 				proj_expr = query_splitter.GetProjExpr();
 				subquery_preparer.SetMergeIndex(query_splitter.GetSplitNumber());
-				if (config.perf_breakdown) {
-					chrono_toc(&timer, "Split time is\n");
-				}
+#if TIME_BREAK_DOWN
+				chrono_toc(&timer, "Split time is\n");
+#endif
 			}
 			if (subqueries.empty())
 				break;
@@ -554,12 +553,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			timer = chrono_tic();
 #endif
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
-
-			// todo: for each sub_plan, to get a better statistics, we check the right child
-			//  if it is a HASH_JOIN, which means it is a break-point following the duckdb's pipeline breaker role
-			//  we can split at this point
-			//  benefit: get a more reliable real statistics; drawback: creating a DATA_CHUNK and reading it
-
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "PostOptimize time is\n");
 #endif

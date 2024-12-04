@@ -141,14 +141,6 @@ static void PragmaDisableSplitJop(ClientContext &context, const FunctionParamete
 	ClientConfig::GetConfig(context).enable_dbshaker_split_jop = false;
 }
 
-static void PragmaEnableDebugPrint(ClientContext &context, const FunctionParameters &parameters) {
-	ClientConfig::GetConfig(context).enable_debug_print = true;
-}
-
-static void PragmaPerfBreakDown(ClientContext &context, const FunctionParameters &parameters) {
-	ClientConfig::GetConfig(context).perf_breakdown = true;
-}
-
 static void PragmaMergeBackPlan(ClientContext &context, const FunctionParameters &parameters) {
 	ClientConfig::GetConfig(context).merge_back_plan = true;
 }
