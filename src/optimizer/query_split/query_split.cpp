@@ -2,7 +2,7 @@
 
 namespace duckdb {
 
-unique_ptr<LogicalOperator> QuerySplit::Split(unique_ptr<LogicalOperator> plan) {
+unique_ptr<LogicalOperator> QuerySplit::Split(unique_ptr<LogicalOperator> plan, bool follow_pipeline_breaker) {
 	// remove redundant joins if the current query is not a CMD_UTILITY
 	// todo: check if the current query is a CMD_UTILITY
 	if (LogicalOperatorType::LOGICAL_PROJECTION != plan->type && LogicalOperatorType::LOGICAL_ORDER_BY != plan->type &&
@@ -10,11 +10,7 @@ unique_ptr<LogicalOperator> QuerySplit::Split(unique_ptr<LogicalOperator> plan) 
 		return std::move(plan);
 	}
 
-	if (ENABLE_QUERY_SPLIT) {
-		return query_splitter->Split(std::move(plan));
-	} else {
-		return std::move(plan);
-	}
+	return query_splitter->Split(std::move(plan), follow_pipeline_breaker);
 }
 
 } // namespace duckdb

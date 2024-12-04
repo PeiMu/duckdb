@@ -2,7 +2,8 @@
 
 namespace duckdb {
 
-unique_ptr<LogicalOperator> ForeignKeyCenterSplit::Split(unique_ptr<LogicalOperator> plan) {
+unique_ptr<LogicalOperator> ForeignKeyCenterSplit::Split(unique_ptr<LogicalOperator> plan,
+                                                         bool follow_pipeline_breaker) {
 #if ENABLE_DEBUG_PRINT
 	// debug: print subquery
 	Printer::Print("Current subquery");

@@ -50,6 +50,16 @@ public:
 	ofstream out_file;
 	ofstream log_file;
 	uint32_t threads = std::thread::hardware_concurrency();
+
+	bool enable_dbshaker_query_split = false;
+	bool enable_dbshaker_split_jop = false;
+	//! blow is unused yet
+	bool merge_back_plan = false;
+	bool specify_estimated_card = false;
+	bool manual_explain_analyze = false;
+	bool whole_plan_manual_explain_analyze = false;
+
+	uint32_t nruns = 5;
 };
 
 } // namespace duckdb

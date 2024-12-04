@@ -101,10 +101,10 @@ void BenchmarkRunner::LogLine(string message) {
 
 void BenchmarkRunner::LogResult(string message) {
 	LogLine(message);
-	if (out_file.good()) {
-		out_file << message << endl;
-		out_file.flush();
-	}
+//	if (out_file.good()) {
+//		out_file << message << endl;
+//		out_file.flush();
+//	}
 }
 
 void BenchmarkRunner::LogOutput(string message) {
@@ -119,8 +119,11 @@ void BenchmarkRunner::RunBenchmark(Benchmark *benchmark) {
 	auto display_name = benchmark->DisplayName();
 
 	auto state = benchmark->Initialize(configuration);
-	auto nruns = benchmark->NRuns();
-	for (size_t i = 0; i < nruns + 1; i++) {
+	auto benchmark_runs = nruns;
+	if (nruns > 1) {
+		benchmark_runs += 1;
+	}
+	for (size_t i = 0; i < benchmark_runs; i++) {
 		bool hotrun = i > 0;
 		if (hotrun) {
 			Log(StringUtil::Format("%s\t%d\t", benchmark->name, i));
@@ -154,6 +157,10 @@ void BenchmarkRunner::RunBenchmark(Benchmark *benchmark) {
 					break;
 				} else {
 					LogResult(std::to_string(profiler.Elapsed()));
+					if (out_file.good()) {
+						out_file << benchmark->name << "," << i << "," << profiler.Elapsed() << endl;
+						out_file.flush();
+					}
 				}
 			}
 		}
@@ -181,6 +188,12 @@ void print_help() {
 	fprintf(stderr, "              --log=[file]           Move log output to file\n");
 	fprintf(stderr, "              --info                 Prints info about the benchmark\n");
 	fprintf(stderr, "              --query                Prints query of the benchmark\n");
+	fprintf(stderr, "              --dbshaker_mode=[query_split/split_jop]\n");
+	fprintf(stderr, "              --merge_back_plan=[true/false, default=false]\n");
+	fprintf(stderr, "              --specify_estimated_card=[true/false, default=false]\n");
+	fprintf(stderr, "              --manual_explain_analyze=[true/false, default=false]\n");
+	fprintf(stderr, "              --whole_plan_manual_explain_analyze=[true/false, default=false]\n");
+	fprintf(stderr, "              --nruns=[default=5]\n");
 	fprintf(stderr, "              --root-dir             Sets the root directory for where to store temp data and "
 	                "look for the 'benchmarks' directory\n");
 	fprintf(stderr,
@@ -247,6 +260,33 @@ void parse_arguments(const int arg_counter, char const *const *arg_values) {
 			// write info of benchmark
 			auto splits = StringUtil::Split(arg, '=');
 			instance.threads = Value(splits[1]).DefaultCastAs(LogicalType::UINTEGER).GetValue<uint32_t>();
+		} else if (StringUtil::StartsWith(arg, "--nruns=")) {
+			// write info of benchmark
+			auto splits = StringUtil::Split(arg, '=');
+			instance.nruns = Value(splits[1]).DefaultCastAs(LogicalType::UINTEGER).GetValue<uint32_t>();
+		} else if (StringUtil::StartsWith(arg, "--dbshaker_mode=")) {
+			auto splits = StringUtil::Split(arg, '=');
+			if (splits.size() != 2) {
+				fprintf(stderr, "need to set the dbshaker mode\n");
+				print_help();
+				exit(1);
+			}
+			if (splits[1] == "query_split") {
+				instance.enable_dbshaker_query_split = true;
+			} else if (splits[1] == "split_jop") {
+				instance.enable_dbshaker_split_jop = true;
+			} else {
+				print_help();
+				exit(1);
+			}
+		} else if (arg == "--merge_back_plan") {
+			instance.merge_back_plan = true;
+		} else if (arg == "--specify_estimated_card") {
+			instance.specify_estimated_card = true;
+		} else if (arg == "--manual_explain_analyze") {
+			instance.manual_explain_analyze = true;
+		} else if (arg == "--whole_plan_manual_explain_analyze") {
+			instance.whole_plan_manual_explain_analyze = true;
 		} else if (arg == "--root-dir") {
 			// We've already handled this, skip it
 			arg_index++;

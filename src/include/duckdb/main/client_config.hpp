@@ -115,6 +115,16 @@ struct ClientConfig {
 	//! Defaults to PhysicalMaterializedCollector
 	get_result_collector_t result_collector = nullptr;
 
+	//! Enable DBShaker
+	bool enable_dbshaker_query_split = false;
+	bool enable_dbshaker_split_jop = false;
+
+	//! blow is unused yet
+	bool merge_back_plan = false;
+	bool specify_estimated_card = false;
+	bool manual_explain_analyze = false;
+	bool whole_plan_manual_explain_analyze = false;
+
 public:
 	static ClientConfig &GetConfig(ClientContext &context);
 	static const ClientConfig &GetConfig(const ClientContext &context);

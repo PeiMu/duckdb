@@ -46,6 +46,31 @@ struct InterpretedBenchmarkState : public BenchmarkState {
 		auto &instance = BenchmarkRunner::GetInstance();
 		auto res = con.Query("PRAGMA threads=" + to_string(instance.threads));
 		D_ASSERT(!res->HasError());
+
+		if (instance.enable_dbshaker_query_split) {
+			res = con.Query("PRAGMA enable_dbshaker_query_split");
+			D_ASSERT(!res->HasError());
+		} else if (instance.enable_dbshaker_split_jop) {
+			res = con.Query("PRAGMA enable_dbshaker_split_jop");
+			D_ASSERT(!res->HasError());
+		}
+
+		if (instance.merge_back_plan) {
+			res = con.Query("PRAGMA merge_back_plan");
+			D_ASSERT(!res->HasError());
+		}
+		if (instance.specify_estimated_card) {
+			res = con.Query("PRAGMA specify_estimated_card");
+			D_ASSERT(!res->HasError());
+		}
+		if (instance.manual_explain_analyze) {
+			res = con.Query("PRAGMA manual_explain_analyze");
+			D_ASSERT(!res->HasError());
+		}
+		if (instance.whole_plan_manual_explain_analyze) {
+			res = con.Query("PRAGMA whole_plan_manual_explain_analyze");
+			D_ASSERT(!res->HasError());
+		}
 	}
 
 	duckdb::unique_ptr<DBConfig> GetBenchmarkConfig() {

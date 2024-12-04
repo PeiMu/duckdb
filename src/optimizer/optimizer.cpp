@@ -127,46 +127,45 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 		plan = deliminator.Optimize(std::move(plan));
 	});
 
-#if ENABLE_CROSS_PRODUCT_REWRITE
-	RunOptimizer(OptimizerType::REORDER_GET, [&]() {
-		ReorderGet reorder_get(context);
-		plan = reorder_get.Optimize(std::move(plan));
-	});
-#endif
+	if (context.config.enable_dbshaker_split_jop) {
+		RunOptimizer(OptimizerType::REORDER_GET, [&]() {
+			ReorderGet reorder_get(context);
+			plan = reorder_get.Optimize(std::move(plan));
+		});
+	}
 
-#if !ENABLE_CROSS_PRODUCT_REWRITE
-	// then we perform the join ordering optimization
-	// this also rewrites cross products + filters into joins and performs filter pushdowns
-	RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {
-		JoinOrderOptimizer optimizer(context);
-		plan = optimizer.Optimize(std::move(plan));
-	});
+	if (!context.config.enable_dbshaker_split_jop) {
+		// then we perform the join ordering optimization
+		// this also rewrites cross products + filters into joins and performs filter pushdowns
+		RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {
+			JoinOrderOptimizer optimizer(context);
+			plan = optimizer.Optimize(std::move(plan));
+		});
 
-	// rewrites UNNESTs in DelimJoins by moving them to the projection
-	RunOptimizer(OptimizerType::UNNEST_REWRITER, [&]() {
-		UnnestRewriter unnest_rewriter;
-		plan = unnest_rewriter.Optimize(std::move(plan));
-	});
+		// rewrites UNNESTs in DelimJoins by moving them to the projection
+		RunOptimizer(OptimizerType::UNNEST_REWRITER, [&]() {
+			UnnestRewriter unnest_rewriter;
+			plan = unnest_rewriter.Optimize(std::move(plan));
+		});
 
-	// removes unused columns
-	RunOptimizer(OptimizerType::UNUSED_COLUMNS, [&]() {
-		RemoveUnusedColumns unused(binder, context, true);
-		unused.VisitOperator(*plan);
-	});
+		// removes unused columns
+		RunOptimizer(OptimizerType::UNUSED_COLUMNS, [&]() {
+			RemoveUnusedColumns unused(binder, context, true);
+			unused.VisitOperator(*plan);
+		});
 
-	// Remove duplicate groups from aggregates
-	RunOptimizer(OptimizerType::DUPLICATE_GROUPS, [&]() {
-		RemoveDuplicateGroups remove;
-		remove.VisitOperator(*plan);
-	});
+		// Remove duplicate groups from aggregates
+		RunOptimizer(OptimizerType::DUPLICATE_GROUPS, [&]() {
+			RemoveDuplicateGroups remove;
+			remove.VisitOperator(*plan);
+		});
 
-	// then we extract common subexpressions inside the different operators
-	RunOptimizer(OptimizerType::COMMON_SUBEXPRESSIONS, [&]() {
-		CommonSubExpressionOptimizer cse_optimizer(binder);
-		cse_optimizer.VisitOperator(*plan);
-	});
-
-#endif
+		// then we extract common subexpressions inside the different operators
+		RunOptimizer(OptimizerType::COMMON_SUBEXPRESSIONS, [&]() {
+			CommonSubExpressionOptimizer cse_optimizer(binder);
+			cse_optimizer.VisitOperator(*plan);
+		});
+	}
 
 	// perform statistics propagation
 	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
@@ -192,52 +191,52 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 
 	this->plan = std::move(plan_p);
 
-#if ENABLE_CROSS_PRODUCT_REWRITE
-	// then we perform the join ordering optimization
-	// this also rewrites cross products + filters into joins and performs filter pushdowns
-	RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {
-		JoinOrderOptimizer optimizer(context);
-		plan = optimizer.Optimize(std::move(plan));
-	});
+	if (context.config.enable_dbshaker_split_jop) {
+		// then we perform the join ordering optimization
+		// this also rewrites cross products + filters into joins and performs filter pushdowns
+		RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {
+			JoinOrderOptimizer optimizer(context);
+			plan = optimizer.Optimize(std::move(plan));
+		});
 #ifdef DEBUG
-	// check if CORSS_PRODUCT are all simplified
-	std::function<void(unique_ptr<LogicalOperator> & op)> check_cross_product;
-	check_cross_product = [&check_cross_product](unique_ptr<LogicalOperator> &op) {
-		for (auto &child : op->children) {
-			if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == child->type) {
-				Printer::Print("We have un-simplified CROSS_PRODUCT!!!");
-				D_ASSERT(false);
+		// check if CORSS_PRODUCT are all simplified
+		std::function<void(unique_ptr<LogicalOperator> & op)> check_cross_product;
+		check_cross_product = [&check_cross_product](unique_ptr<LogicalOperator> &op) {
+			for (auto &child : op->children) {
+				if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == child->type) {
+					Printer::Print("We have un-simplified CROSS_PRODUCT!!!");
+					D_ASSERT(false);
+				}
+				check_cross_product(child);
 			}
-			check_cross_product(child);
-		}
-	};
-	check_cross_product(plan);
+		};
+		check_cross_product(plan);
 #endif
 
-	// rewrites UNNESTs in DelimJoins by moving them to the projection
-	RunOptimizer(OptimizerType::UNNEST_REWRITER, [&]() {
-		UnnestRewriter unnest_rewriter;
-		plan = unnest_rewriter.Optimize(std::move(plan));
-	});
+		// rewrites UNNESTs in DelimJoins by moving them to the projection
+		RunOptimizer(OptimizerType::UNNEST_REWRITER, [&]() {
+			UnnestRewriter unnest_rewriter;
+			plan = unnest_rewriter.Optimize(std::move(plan));
+		});
 
-	// removes unused columns
-	RunOptimizer(OptimizerType::UNUSED_COLUMNS, [&]() {
-		RemoveUnusedColumns unused(binder, context, true);
-		unused.VisitOperator(*plan);
-	});
+		// removes unused columns
+		RunOptimizer(OptimizerType::UNUSED_COLUMNS, [&]() {
+			RemoveUnusedColumns unused(binder, context, true);
+			unused.VisitOperator(*plan);
+		});
 
-	// Remove duplicate groups from aggregates
-	RunOptimizer(OptimizerType::DUPLICATE_GROUPS, [&]() {
-		RemoveDuplicateGroups remove;
-		remove.VisitOperator(*plan);
-	});
+		// Remove duplicate groups from aggregates
+		RunOptimizer(OptimizerType::DUPLICATE_GROUPS, [&]() {
+			RemoveDuplicateGroups remove;
+			remove.VisitOperator(*plan);
+		});
 
-	// then we extract common subexpressions inside the different operators
-	RunOptimizer(OptimizerType::COMMON_SUBEXPRESSIONS, [&]() {
-		CommonSubExpressionOptimizer cse_optimizer(binder);
-		cse_optimizer.VisitOperator(*plan);
-	});
-#endif
+		// then we extract common subexpressions inside the different operators
+		RunOptimizer(OptimizerType::COMMON_SUBEXPRESSIONS, [&]() {
+			CommonSubExpressionOptimizer cse_optimizer(binder);
+			cse_optimizer.VisitOperator(*plan);
+		});
+	}
 
 	// creates projection maps so unused columns are projected out early
 	RunOptimizer(OptimizerType::COLUMN_LIFETIME, [&]() {

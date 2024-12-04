@@ -433,32 +433,33 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	plan->Verify(*this);
 #endif
 
-#if TIME_BREAK_DOWN
-	// to show when have the real query
-	Printer::Print("Init plan");
-	plan->Print();
-#endif
+	if (config.enable_debug_print) {
+		// to show when have the real query
+		Printer::Print("Init plan");
+		plan->Print();
+	}
 
-#if TIME_BREAK_DOWN
-	auto timer = chrono_tic();
-#endif
+	std::chrono::high_resolution_clock::time_point timer;
+	if (config.perf_breakdown) {
+		timer = chrono_tic();
+	}
 	if (config.enable_optimizer && plan->RequireOptimizer()) {
 		profiler.StartPhase("optimizer");
 		Optimizer optimizer(*planner.binder, *this);
 		plan = optimizer.PreOptimize(std::move(plan));
-#if ENABLE_DEBUG_PRINT
-		D_ASSERT(plan);
-		// debug: print subquery
-		Printer::Print("After PreOptimization");
-		plan->Print();
-#endif
-#if TIME_BREAK_DOWN
-		chrono_toc(&timer, "PreOptimize time is\n");
-#endif
+		if (config.enable_debug_print) {
+			D_ASSERT(plan);
+			// debug: print subquery
+			Printer::Print("After PreOptimization");
+			plan->Print();
+		}
+		if (config.perf_breakdown) {
+			chrono_toc(&timer, "PreOptimize time is\n");
+		}
 
 		SubqueryPreparer subquery_preparer(*planner.binder, *this);
-#if ENABLE_QUERY_SPLIT
-		bool needToSplit = ENABLE_QUERY_SPLIT;
+
+		bool needToSplit = config.enable_dbshaker_query_split;
 		// todo: refactor - move these to a standalone function
 		subquery_queue subqueries;
 		table_expr_info table_expr_queue;
@@ -470,47 +471,47 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		unique_ptr<LogicalOperator> whole_plan;
 #endif
 
-		while (ENABLE_QUERY_SPLIT) {
-#if ENABLE_CROSS_PRODUCT_REWRITE
-			needToSplit = needToSplit || subquery_preparer.NeedRewrite(subqueries.front());
-			if (needToSplit) {
-				if (!subqueries.empty()) {
-					subquery_preparer.MergeSubquery(plan, std::move(subqueries));
-#if ENABLE_DEBUG_PRINT
-					Printer::Print("after MergeSubquery");
-					plan->Print();
-#endif
-					plan = subquery_preparer.UpdateProjHead(std::move(plan), proj_expr);
-#if ENABLE_DEBUG_PRINT
-					Printer::Print("after UpdateProjHead");
-					plan->Print();
-#endif
-#if TIME_BREAK_DOWN
-					chrono_toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
-#endif
+		while (config.enable_dbshaker_query_split) {
+			if (config.enable_dbshaker_split_jop) {
+				needToSplit = needToSplit || subquery_preparer.NeedRewrite(subqueries.front());
+				if (needToSplit) {
+					if (!subqueries.empty()) {
+						subquery_preparer.MergeSubquery(plan, std::move(subqueries));
+						if (config.enable_debug_print) {
+							Printer::Print("after MergeSubquery");
+							plan->Print();
+						}
+						plan = subquery_preparer.UpdateProjHead(std::move(plan), proj_expr);
+						if (config.enable_debug_print) {
+							Printer::Print("after UpdateProjHead");
+							plan->Print();
+						}
+						if (config.perf_breakdown) {
+							chrono_toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
+						}
+					}
+					subquery_preparer.Rewrite(plan);
+					if (config.perf_breakdown) {
+						chrono_toc(&timer, "Rewrite time is\n");
+					}
+					if (config.enable_debug_print) {
+						D_ASSERT(plan);
+						// debug: print subquery
+						Printer::Print("After subquery_preparer.Rewrite");
+						plan->Print();
+					}
 				}
-				subquery_preparer.Rewrite(plan);
-#if TIME_BREAK_DOWN
-				chrono_toc(&timer, "Rewrite time is\n");
-#endif
-#if ENABLE_DEBUG_PRINT
-				D_ASSERT(plan);
-				// debug: print subquery
-				Printer::Print("After subquery_preparer.Rewrite");
-				plan->Print();
-#endif
 			}
-#endif
 			if (needToSplit) {
 				query_splitter.Clear();
-				plan = query_splitter.Split(std::move(plan));
+				plan = query_splitter.Split(std::move(plan), !config.enable_dbshaker_split_jop);
 				subqueries = query_splitter.GetSubqueries();
 				table_expr_queue = query_splitter.GetTableExprQueue();
 				proj_expr = query_splitter.GetProjExpr();
 				subquery_preparer.SetMergeIndex(query_splitter.GetSplitNumber());
-#if TIME_BREAK_DOWN
-				chrono_toc(&timer, "Split time is\n");
-#endif
+				if (config.perf_breakdown) {
+					chrono_toc(&timer, "Split time is\n");
+				}
 			}
 			if (subqueries.empty())
 				break;
@@ -676,7 +677,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			}
 			needToSplit = false;
 		}
-#endif
 
 #if MANUAL_EXPLAIN_ANALYZE
 		auto explain_sub_plan = plan->Copy(*this);
@@ -728,7 +728,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	}
 
 	if (INJECT_PLAN && LogicalOperatorType::LOGICAL_PROJECTION == plan->type) {
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG_PRINT
 		Printer::Print("original duckdb plan");
 		plan->Print();
 #endif
@@ -803,7 +803,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			    unique_ptr_cast<SimplestNode, SimplestStmt>(std::move(postgres_plan));
 			// add table/column name from plan_reader.table_col_names
 			ir_converter.AddTableColumnName(postgres_stmt, plan_reader.table_col_names);
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG_PRINT
 			postgres_stmt->Print();
 #endif
 			auto postgres_plan_pointer = postgres_stmt.get();
@@ -831,7 +831,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				// 1. generate proj head based on the `target_list`
 				unique_ptr<LogicalOperator> new_sub_plan =
 				    ir_converter.GenerateProjHead(plan, std::move(new_duckdb_plan), postgres_stmt, pg_duckdb_table_idx);
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG_PRINT
 				Printer::Print("new duckdb subquery plan");
 				new_sub_plan->Print();
 #endif
@@ -902,7 +902,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		D_ASSERT(expr_vec.empty());
 #endif
 
-#ifdef DEBUG
+#ifdef ENABLE_DEBUG_PRINT
 		Printer::Print("new duckdb plan");
 		plan->Print();
 #endif

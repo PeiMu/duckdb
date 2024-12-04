@@ -10,15 +10,13 @@
 
 #include "duckdb/optimizer/query_split/split_algo_factor.hpp"
 
-// #define ENABLE_QUERY_SPLIT				true
-// #define ENABLE_PARALLEL_EXECUTION		true
-// #define ENABLE_DEBUG_PRINT				false
+//#define ENABLE_PARALLEL_EXECUTION		false
+//#define ENABLE_DEBUG_PRINT				false
 #define TIME_BREAK_DOWN            false
 #define MANUAL_EXPLAIN_ANALYZE     false
 #define WHOLE_PLAN_EXPLAIN_ANALYZE false
-// #define ENABLE_CROSS_PRODUCT_REWRITE		true
-#define MergeBackToWholeQuery false
-#define SpecifyEstCard        false
+#define MergeBackToWholeQuery      false
+#define SpecifyEstCard             false
 
 namespace duckdb {
 
@@ -31,7 +29,7 @@ public:
 	};
 	~QuerySplit() = default;
 	//! Perform Query Split
-	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan);
+	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan, bool follow_pipeline_breaker);
 
 	void Clear() {
 		if (nullptr != query_splitter) {

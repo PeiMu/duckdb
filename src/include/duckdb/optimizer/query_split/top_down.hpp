@@ -21,7 +21,6 @@
 namespace duckdb {
 
 #define SPLIT_FILTER            false
-#define FOLLOW_PIPELINE_BREAKER !ENABLE_CROSS_PRODUCT_REWRITE
 
 //! Based on the DAG of the logical plan, we generate the subqueries bottom-up
 class TopDownSplit : public SplitAlgorithm {
@@ -29,7 +28,7 @@ public:
 	explicit TopDownSplit(ClientContext &context) : SplitAlgorithm(context) {};
 	~TopDownSplit() override = default;
 	//! Perform Query Split
-	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) override;
+	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan, bool follow_pipeline_breaker) override;
 	void Clear() {
 #if SPLIT_FILTER
 		filter_parent = false;
@@ -106,6 +105,8 @@ private:
 	// in a bottom-up order
 	std::unordered_set<idx_t> used_table_ids;
 	idx_t join_cond_number = 0;
+
+	bool follow_pipeline_breaker_ = false;
 };
 
 } // namespace duckdb

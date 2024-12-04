@@ -121,6 +121,50 @@ static void PragmaDisableOptimizer(ClientContext &context, const FunctionParamet
 	ClientConfig::GetConfig(context).enable_optimizer = false;
 }
 
+static void PragmaEnableQuerySplit(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).enable_dbshaker_query_split = true;
+	ClientConfig::GetConfig(context).enable_dbshaker_split_jop = false;
+}
+
+static void PragmaDisableQuerySplit(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).enable_dbshaker_query_split = false;
+	ClientConfig::GetConfig(context).enable_dbshaker_split_jop = false;
+}
+
+static void PragmaEnableSplitJop(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).enable_dbshaker_query_split = true;
+	ClientConfig::GetConfig(context).enable_dbshaker_split_jop = true;
+}
+
+static void PragmaDisableSplitJop(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).enable_dbshaker_query_split = false;
+	ClientConfig::GetConfig(context).enable_dbshaker_split_jop = false;
+}
+
+static void PragmaEnableDebugPrint(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).enable_debug_print = true;
+}
+
+static void PragmaPerfBreakDown(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).perf_breakdown = true;
+}
+
+static void PragmaMergeBackPlan(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).merge_back_plan = true;
+}
+
+static void PragmaSpecifyEstimatedCard(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).specify_estimated_card = true;
+}
+
+static void PragmaManualExplainAnalyze(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).manual_explain_analyze = true;
+}
+
+static void PragmaWholePlanManualExplainAnalyze(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).whole_plan_manual_explain_analyze = true;
+}
+
 void PragmaFunctions::RegisterFunction(BuiltinFunctions &set) {
 	RegisterEnableProfiling(set);
 
@@ -159,6 +203,17 @@ void PragmaFunctions::RegisterFunction(BuiltinFunctions &set) {
 	set.AddFunction(PragmaFunction::PragmaStatement("enable_checkpoint_on_shutdown", PragmaEnableCheckpointOnShutdown));
 	set.AddFunction(
 	    PragmaFunction::PragmaStatement("disable_checkpoint_on_shutdown", PragmaDisableCheckpointOnShutdown));
+
+	set.AddFunction(PragmaFunction::PragmaStatement("enable_dbshaker_query_split", PragmaEnableQuerySplit));
+	set.AddFunction(PragmaFunction::PragmaStatement("disable_dbshaker_query_split", PragmaDisableQuerySplit));
+
+	set.AddFunction(PragmaFunction::PragmaStatement("enable_dbshaker_split_jop", PragmaEnableSplitJop));
+	set.AddFunction(PragmaFunction::PragmaStatement("disable_dbshaker_split_jop", PragmaDisableSplitJop));
+
+	set.AddFunction(PragmaFunction::PragmaStatement("merge_back_plan", PragmaMergeBackPlan));
+	set.AddFunction(PragmaFunction::PragmaStatement("specify_estimated_card", PragmaSpecifyEstimatedCard));
+	set.AddFunction(PragmaFunction::PragmaStatement("manual_explain_analyze", PragmaManualExplainAnalyze));
+	set.AddFunction(PragmaFunction::PragmaStatement("whole_plan_manual_explain_analyze", PragmaWholePlanManualExplainAnalyze));
 }
 
 } // namespace duckdb

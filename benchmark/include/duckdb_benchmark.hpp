@@ -47,6 +47,30 @@ struct DuckDBBenchmarkState : public BenchmarkState {
 			res = conn.Query("PRAGMA profiling_mode=" + profiling_mode);
 			D_ASSERT(!res->HasError());
 		}
+
+		if (instance.enable_dbshaker_query_split) {
+			res = conn.Query("PRAGMA enable_dbshaker_query_split");
+			D_ASSERT(!res->HasError());
+		} else if (instance.enable_dbshaker_split_jop) {
+			res = conn.Query("PRAGMA enable_dbshaker_split_jop");
+			D_ASSERT(!res->HasError());
+		}
+		if (instance.merge_back_plan) {
+			res = conn.Query("PRAGMA merge_back_plan");
+			D_ASSERT(!res->HasError());
+		}
+		if (instance.specify_estimated_card) {
+			res = conn.Query("PRAGMA specify_estimated_card");
+			D_ASSERT(!res->HasError());
+		}
+		if (instance.manual_explain_analyze) {
+			res = conn.Query("PRAGMA manual_explain_analyze");
+			D_ASSERT(!res->HasError());
+		}
+		if (instance.whole_plan_manual_explain_analyze) {
+			res = conn.Query("PRAGMA whole_plan_manual_explain_analyze");
+			D_ASSERT(!res->HasError());
+		}
 	}
 	virtual ~DuckDBBenchmarkState() {
 	}

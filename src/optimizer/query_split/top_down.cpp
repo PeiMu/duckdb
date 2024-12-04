@@ -2,10 +2,11 @@
 
 namespace duckdb {
 
-unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan) {
+unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan, bool follow_pipeline_breaker) {
 	// for the first n-1 subqueries, only select the most related nodes/expressions
 	// for the last subquery, merge the previous subqueries
 	unique_ptr<LogicalOperator> subquery;
+	follow_pipeline_breaker_ = follow_pipeline_breaker;
 	GetTargetTables(*plan);
 	VisitOperator(*plan);
 	return std::move(plan);
@@ -62,15 +63,18 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 					child->split_index = 0;
 					break;
 				}
-#if FOLLOW_PIPELINE_BREAKER
-				if (top_most || 1 == idx) {
-					top_most = false;
-#endif
+
+				if (follow_pipeline_breaker_) {
+					if (top_most || 1 == idx) {
+						top_most = false;
+						query_split_index++;
+						child->split_index = query_split_index;
+					}
+				} else {
 					query_split_index++;
 					child->split_index = query_split_index;
-#if FOLLOW_PIPELINE_BREAKER
 				}
-#endif
+
 				table_exprs = GetJoinTableExpr(join_op);
 			}
 #if SPLIT_FILTER

@@ -39,7 +39,7 @@ public:
 	    : SplitAlgorithm(context), split_algorithm(split_algorithm) {};
 	~ForeignKeyCenterSplit() override = default;
 	//! Perform Query Split
-	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan) override;
+	unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan, bool follow_pipeline_breaker) override;
 
 protected:
 	void VisitOperator(LogicalOperator &op) override;
