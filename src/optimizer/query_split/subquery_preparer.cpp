@@ -102,19 +102,15 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 #endif
 	}
 
-	// todo: can we clear children then copy?
-	auto new_plan = original_plan->Copy(context);
-	new_plan->children.clear();
-	new_plan->AddChild(std::move(subquery));
-	new_plan->expressions.clear();
-	new_plan->expressions = std::move(new_exprs);
+	auto new_proj_node = make_uniq<LogicalProjection>(binder.GenerateTableIndex(), std::move(new_exprs));
+	new_proj_node->AddChild(std::move(subquery));
 
 #if ENABLE_DEBUG_PRINT
 	// debug: print subquery
 	Printer::Print("Current subquery with projection");
-	new_plan->Print();
+	new_proj_node->Print();
 #endif
-	return new_plan;
+	return unique_ptr_cast<LogicalProjection, LogicalOperator>(std::move(new_proj_node));
 }
 
 shared_ptr<PreparedStatementData> SubqueryPreparer::AdaptSelect(shared_ptr<PreparedStatementData> original_stmt_data,
@@ -345,10 +341,14 @@ table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_que
 
 unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalOperator> plan,
                                                              const std::vector<TableExpr> &original_proj_expr) {
+	auto plan_pointer = plan.get();
+	if (LogicalOperatorType::LOGICAL_ORDER_BY == plan_pointer->type) {
+		plan_pointer = plan_pointer->children[0].get();
+	}
 #ifdef DEBUG
-	D_ASSERT(LogicalOperatorType::LOGICAL_PROJECTION == plan->type);
+	D_ASSERT(LogicalOperatorType::LOGICAL_PROJECTION == plan_pointer->type);
 #endif
-	auto &proj_op = plan->Cast<LogicalProjection>();
+	auto &proj_op = plan_pointer->Cast<LogicalProjection>();
 	if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == proj_op.children[0]->type) {
 		// update aggregate expressions
 		auto &aggregate_op = proj_op.children[0]->Cast<LogicalAggregate>();

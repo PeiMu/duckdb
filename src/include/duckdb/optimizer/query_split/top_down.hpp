@@ -11,6 +11,8 @@
 #include "duckdb/catalog/catalog_entry/table_catalog_entry.hpp"
 #include "duckdb/optimizer/query_split/split_algorithm.hpp"
 #include "duckdb/planner/expression/bound_between_expression.hpp"
+#include "duckdb/planner/expression/bound_cast_expression.hpp"
+#include "duckdb/planner/expression/bound_columnref_expression.hpp"
 #include "duckdb/planner/expression/bound_comparison_expression.hpp"
 #include "duckdb/planner/expression/bound_conjunction_expression.hpp"
 #include "duckdb/planner/expression/bound_function_expression.hpp"
@@ -20,7 +22,7 @@
 
 namespace duckdb {
 
-#define SPLIT_FILTER            false
+#define SPLIT_FILTER false
 
 //! Based on the DAG of the logical plan, we generate the subqueries bottom-up
 class TopDownSplit : public SplitAlgorithm {
@@ -79,6 +81,12 @@ private:
 
 	//! Collect all used tables into `target_tables`
 	void GetTargetTables(LogicalOperator &op);
+	void GetColRefExpr(std::set<TableExpr> &table_exprs, const BoundColumnRefExpression &column_ref_expr);
+	void GetColRefExpr(const BoundColumnRefExpression &column_ref_expr);
+	void GetFunctionExpr(std::set<TableExpr> &table_exprs, const BoundFunctionExpression &function_expr);
+	void GetFunctionExpr(const BoundFunctionExpression &function_expr);
+	void GetCastExpr(const BoundCastExpression &cast_expr);
+	void GetComparisonExpr(std::set<TableExpr> &table_exprs, const BoundComparisonExpression &comparison_expr);
 
 private:
 #if SPLIT_FILTER

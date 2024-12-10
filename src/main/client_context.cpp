@@ -470,6 +470,20 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		unique_ptr<LogicalOperator> whole_plan;
 #endif
 
+		auto merge_child = [](LogicalOperator *subquery_pointer, unique_ptr<LogicalOperator> child_node) {
+			while (!subquery_pointer->children.empty()) {
+				if (subquery_pointer->children.size() > 1 && nullptr == subquery_pointer->children[1]) {
+					subquery_pointer->children[1] = std::move(child_node);
+					return true;
+				} else if (nullptr == subquery_pointer->children[0]) {
+					subquery_pointer->children[0] = std::move(child_node);
+					return true;
+				}
+				subquery_pointer = subquery_pointer->children[0].get();
+			}
+			return false;
+		};
+
 		while (config.enable_dbshaker_query_split) {
 			if (config.enable_dbshaker_split_jop) {
 				needToSplit = needToSplit || subquery_preparer.NeedRewrite(subqueries.front());
@@ -514,6 +528,17 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			}
 			if (subqueries.empty())
 				break;
+			if (1 == subqueries.size()) {
+				auto &child_node = subqueries.front()[0];
+#ifdef DEBUG
+				D_ASSERT(nullptr != child_node);
+#endif
+				bool merged = merge_child(plan.get(), std::move(child_node));
+#ifdef DEBUG
+				D_ASSERT(merged);
+#endif
+				break;
+			}
 
 			unique_ptr<LogicalOperator> last_sibling_node = nullptr;
 			if (subqueries.front().size() > 1) {
@@ -639,20 +664,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #ifdef DEBUG
 				D_ASSERT(nullptr != child_node);
 #endif
-				auto merge_child = [&child_node](LogicalOperator *subquery_pointer) {
-					while (!subquery_pointer->children.empty()) {
-						if (subquery_pointer->children.size() > 1 && nullptr == subquery_pointer->children[1]) {
-							subquery_pointer->children[1] = std::move(child_node);
-							return true;
-						} else if (nullptr == subquery_pointer->children[0]) {
-							subquery_pointer->children[0] = std::move(child_node);
-							return true;
-						}
-						subquery_pointer = subquery_pointer->children[0].get();
-					}
-					return false;
-				};
-				bool merged = merge_child(child);
+				bool merged = merge_child(child, std::move(child_node));
 #ifdef DEBUG
 				D_ASSERT(merged);
 #endif
