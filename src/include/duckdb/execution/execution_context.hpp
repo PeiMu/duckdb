@@ -11,6 +11,8 @@
 #include "duckdb/common/common.hpp"
 #include "duckdb/common/optional_ptr.hpp"
 
+#define BREAKDOWN_EXECUTE false
+
 namespace duckdb {
 class ClientContext;
 class ThreadContext;

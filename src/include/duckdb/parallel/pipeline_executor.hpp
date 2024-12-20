@@ -18,7 +18,6 @@
 
 #include <functional>
 
-#define BREAKDOWN_EXECUTE false
 
 namespace duckdb {
 class Executor;

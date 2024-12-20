@@ -60,6 +60,16 @@ unique_ptr<LogicalOperator> JoinOrderOptimizer::Optimize(unique_ptr<LogicalOpera
 		}
 	}
 
+//	// debug test: set statistics
+//	if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == new_logical_plan->type) {
+//		if (LogicalOperatorType::LOGICAL_CHUNK_GET == new_logical_plan->children[1]->type) {
+//			auto &chunk_get = new_logical_plan->children[1]->Cast<LogicalColumnDataGet>();
+//			if (chunk_get.table_index == 15) {
+//				new_logical_plan->children[0]->estimated_cardinality = 2832555;
+//			}
+//		}
+//	}
+
 	// only perform left right optimizations when stats is null (means we have the top level optimize call)
 	// Don't check reorderability because non-reorderable joins will result in 1 relation, but we can
 	// still switch the children.

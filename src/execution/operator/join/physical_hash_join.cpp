@@ -239,6 +239,10 @@ SinkResultType PhysicalHashJoin::Sink(ExecutionContext &context, DataChunk &chun
 	lstate.join_keys.Reset();
 	lstate.join_key_executor.Execute(chunk, lstate.join_keys);
 
+#if BREAKDOWN_EXECUTE
+	auto build_ht_timer = chrono_tic();
+#endif
+
 	// build the HT
 	auto &ht = *lstate.hash_table;
 	if (payload_types.empty()) {
@@ -254,6 +258,12 @@ SinkResultType PhysicalHashJoin::Sink(ExecutionContext &context, DataChunk &chun
 		}
 		ht.Build(lstate.append_state, lstate.join_keys, lstate.payload_chunk);
 	}
+
+#if BREAKDOWN_EXECUTE
+	if (probe_flag) {
+		chrono_toc(&build_ht_timer, "Build Hash Table Time: ", true);
+	}
+#endif
 
 	if (++lstate.chunk_count % HashJoinLocalSinkState::CHUNK_COUNT_UPDATE_INTERVAL == 0) {
 		auto &gstate = input.global_state.Cast<HashJoinGlobalSinkState>();
@@ -565,6 +575,9 @@ unique_ptr<OperatorState> PhysicalHashJoin::GetOperatorState(ExecutionContext &c
 
 OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, DataChunk &input, DataChunk &chunk,
                                                      GlobalOperatorState &gstate, OperatorState &state_p) const {
+#if BREAKDOWN_EXECUTE
+	auto hash_join_execute_timer = chrono_tic();
+#endif
 	auto &state = state_p.Cast<HashJoinOperatorState>();
 	auto &sink = sink_state->Cast<HashJoinGlobalSinkState>();
 	D_ASSERT(sink.finalized);
@@ -585,12 +598,23 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 
 	if (sink.perfect_join_executor) {
 		D_ASSERT(!sink.external);
-		return sink.perfect_join_executor->ProbePerfectHashTable(context, input, chunk, *state.perfect_hash_join_state);
+		auto res = sink.perfect_join_executor->ProbePerfectHashTable(context, input, chunk, *state.perfect_hash_join_state);
+#if BREAKDOWN_EXECUTE
+		if (probe_flag) {
+			chrono_toc(&hash_join_execute_timer, "ProbePerfectHashTable Time: ", true);
+		}
+#endif
+		return res;
 	}
 
 	if (state.scan_structure) {
 		// still have elements remaining (i.e. we got >STANDARD_VECTOR_SIZE elements in the previous probe)
 		state.scan_structure->Next(state.join_keys, input, chunk);
+#if BREAKDOWN_EXECUTE
+		if (probe_flag) {
+			hash_join_fetch_next_time += chrono_toc(&hash_join_execute_timer, "Fetch Next Time: ", false);
+		}
+#endif
 		if (!state.scan_structure->PointersExhausted() || chunk.size() > 0) {
 			return OperatorResultType::HAVE_MORE_OUTPUT;
 		}
@@ -601,6 +625,11 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 	// probe the HT
 	if (sink.hash_table->Count() == 0) {
 		ConstructEmptyJoinResult(sink.hash_table->join_type, sink.hash_table->has_null, input, chunk);
+#if BREAKDOWN_EXECUTE
+		if (probe_flag) {
+			chrono_toc(&hash_join_execute_timer, "ConstructEmptyJoinResult Time: ", true);
+		}
+#endif
 		return OperatorResultType::NEED_MORE_INPUT;
 	}
 
@@ -616,6 +645,11 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 		state.scan_structure = sink.hash_table->Probe(state.join_keys, state.join_key_state);
 	}
 	state.scan_structure->Next(state.join_keys, input, chunk);
+#if BREAKDOWN_EXECUTE
+	if (probe_flag) {
+		hash_join_probe_time += chrono_toc(&hash_join_execute_timer, "Actual Probe Time: ", false);
+	}
+#endif
 	return OperatorResultType::HAVE_MORE_OUTPUT;
 }
 

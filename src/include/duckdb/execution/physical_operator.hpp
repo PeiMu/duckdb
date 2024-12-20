@@ -21,7 +21,11 @@
 
 // todo: debug vars need to delete
 inline bool probe_flag = false;
-inline bool build_flag = false;
+inline long cache_chunk_append_time = 0;
+inline long execute_internal_time = 0;
+inline long hash_join_probe_time = 0;
+inline long hash_join_fetch_next_time = 0;
+inline long filter_execute_time = 0;
 
 namespace duckdb {
 class Event;

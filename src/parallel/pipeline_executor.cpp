@@ -10,6 +10,7 @@ long fetch_source_time = 0;
 long next_batch_time = 0;
 long detail_execute_time = 0; // probe
 long detail_sink_time = 0; // build
+long operator_execute_time = 0;
 
 #ifdef DUCKDB_DEBUG_ASYNC_SINK_SOURCE
 #include <thread>
@@ -176,34 +177,23 @@ SinkNextBatchType PipelineExecutor::NextBatch(duckdb::DataChunk &source_chunk) {
 PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 	D_ASSERT(pipeline.sink);
 #if BREAKDOWN_EXECUTE
+	probe_flag = false;
+	if (PhysicalOperatorType::TABLE_SCAN == pipeline.source->type) {
+		auto &get = pipeline.source->Cast<PhysicalTableScan>();
+		if (get.function.to_string(get.bind_data.get()) == "cast_info") {
+			probe_flag = true;
+			Printer::Print("start to breaking down execution");
+		}
+	}
 	Printer::Print("PipelineExecutor::pipeline");
 	pipeline.Print();
+	// source is the node for the build phase
 	Printer::Print("PipelineExecutor::pipeline.source");
 	pipeline.source->Print();
+	Printer::Print("PipelineExecutor::pipeline.sink");
+	pipeline.sink->Print();
 
-//
-//	if (PhysicalOperatorType::TABLE_SCAN == pipeline.source->type) {
-//		auto &get = pipeline.source->Cast<PhysicalTableScan>();
-//		if (get.function.to_string(get.bind_data.get()) == "movie_companies") {
-//			probe_flag = true;
-//		}
-//		else
-//			probe_flag = false;
-//	} else {
-//		probe_flag = false;
-//	}
-
-//	if (pipeline.sink->children.size() > 1 && PhysicalOperatorType::TABLE_SCAN == pipeline.sink->children[0]->type) {
-//		auto &get = pipeline.sink->children[0]->Cast<PhysicalTableScan>();
-//		if (get.function.to_string(get.bind_data.get()) == "movie_keyword") {
-//			build_flag = true;
-//		}
-//		else
-//			build_flag = false;
-//	} else
-//		build_flag = false;
-
-	auto timer = chrono_tic();
+	auto total_execute_timer = chrono_tic();
 #endif
 	auto &source_chunk = pipeline.operators.empty() ? final_chunk : *intermediate_chunks[0];
 	for (idx_t i = 0; i < max_chunks; i++) {
@@ -234,7 +224,7 @@ PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 			} else {
 #if BREAKDOWN_EXECUTE
 				if (probe_flag) {
-					total_execute_time += chrono_toc(&timer, "return PipelineExecuteResult::INTERRUPTED\n", true);
+					total_execute_time += chrono_toc(&total_execute_timer, "return PipelineExecuteResult::INTERRUPTED\n", true);
 				}
 #endif
 				return PipelineExecuteResult::INTERRUPTED;
@@ -256,7 +246,7 @@ PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 				if (source_result == SourceResultType::BLOCKED) {
 #if BREAKDOWN_EXECUTE
 					if (probe_flag) {
-						total_execute_time += chrono_toc(&timer, "return PipelineExecuteResult::INTERRUPTED 2\n", true);
+						total_execute_time += chrono_toc(&total_execute_timer, "return PipelineExecuteResult::INTERRUPTED 2\n", true);
 					}
 #endif
 					return PipelineExecuteResult::INTERRUPTED;
@@ -280,7 +270,7 @@ PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 				if (next_batch_blocked) {
 #if BREAKDOWN_EXECUTE
 					if (probe_flag) {
-						total_execute_time += chrono_toc(&timer, "return PipelineExecuteResult::INTERRUPTED 3\n", true);
+						total_execute_time += chrono_toc(&total_execute_timer, "return PipelineExecuteResult::INTERRUPTED 3\n", true);
 					}
 #endif
 					return PipelineExecuteResult::INTERRUPTED;
@@ -302,7 +292,7 @@ PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 			remaining_sink_chunk = true;
 #if BREAKDOWN_EXECUTE
 			if (probe_flag) {
-				total_execute_time += chrono_toc(&timer, "return PipelineExecuteResult::INTERRUPTED 4\n", true);
+				total_execute_time += chrono_toc(&total_execute_timer, "return PipelineExecuteResult::INTERRUPTED 4\n", true);
 			}
 #endif
 			return PipelineExecuteResult::INTERRUPTED;
@@ -316,7 +306,7 @@ PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 	if ((!exhausted_source || !done_flushing) && !IsFinished()) {
 #if BREAKDOWN_EXECUTE
 		if (probe_flag) {
-			total_execute_time += chrono_toc(&timer, "return PipelineExecuteResult::NOT_FINISHED\n", false);
+			total_execute_time += chrono_toc(&total_execute_timer, "return PipelineExecuteResult::NOT_FINISHED\n", false);
 		}
 #endif
 		return PipelineExecuteResult::NOT_FINISHED;
@@ -324,7 +314,7 @@ PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 
 #if BREAKDOWN_EXECUTE
 	if (probe_flag) {
-		total_execute_time += chrono_toc(&timer, "return PushFinalize\n", false);
+		total_execute_time += chrono_toc(&total_execute_timer, "return PushFinalize\n", false);
 		std::string op_name;
 		if (PhysicalOperatorType::TABLE_SCAN == pipeline.source->type) {
 			auto &get = pipeline.source->Cast<PhysicalTableScan>();
@@ -333,9 +323,15 @@ PipelineExecuteResult PipelineExecutor::Execute(idx_t max_chunks) {
 			op_name = PhysicalOperatorToString(pipeline.source->type);
 		}
 		Printer::Print(op_name + ": hot_spot_execute_time = " + std::to_string(total_execute_time));
-//		Printer::Print("fetch source time = " + std::to_string(fetch_source_time));
-//		Printer::Print("next batch time = " + std::to_string(next_batch_time));
+		Printer::Print("fetch source time = " + std::to_string(fetch_source_time));
+		Printer::Print("next batch time = " + std::to_string(next_batch_time));
 		Printer::Print("detail execute time = " + std::to_string(detail_execute_time));
+		Printer::Print("operator execute time = " + std::to_string(operator_execute_time));
+		Printer::Print("cache chunk append time = " + std::to_string(cache_chunk_append_time));
+		Printer::Print("physical operator execute internal time = " + std::to_string(execute_internal_time));
+		Printer::Print("hash join probe time = " + std::to_string(hash_join_probe_time));
+		Printer::Print("hash join fetch next time = " + std::to_string(hash_join_fetch_next_time));
+		Printer::Print("filter execute time = " + std::to_string(filter_execute_time));
 		Printer::Print("detail sink time = " + std::to_string(detail_sink_time));
 		Printer::Print("return PushFinalize");
 	}
@@ -517,8 +513,20 @@ OperatorResultType PipelineExecutor::Execute(DataChunk &input, DataChunk &result
 			// if current_idx > source_idx, we pass the previous operators' output through the Execute of the current
 			// operator
 			StartOperator(current_operator);
+#if BREAKDOWN_EXECUTE
+			if (probe_flag && current_operator.type != PhysicalOperatorType::HASH_JOIN && current_operator.type != PhysicalOperatorType::FILTER) {
+				Printer::Print("current operator type is: ");
+				Printer::Print(PhysicalOperatorToString(current_operator.type));
+			}
+			auto execute_timer = chrono_tic();
+#endif
 			auto result = current_operator.Execute(context, prev_chunk, current_chunk, *current_operator.op_state,
 			                                       *intermediate_states[current_intermediate - 1]);
+#if BREAKDOWN_EXECUTE
+			if (probe_flag) {
+				operator_execute_time += chrono_toc(&execute_timer, "current_operator.Execute time is: ", false);
+			}
+#endif
 			EndOperator(current_operator, &current_chunk);
 			if (result == OperatorResultType::HAVE_MORE_OUTPUT) {
 				// more data remains in this operator

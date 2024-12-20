@@ -251,10 +251,18 @@ CachingPhysicalOperator::CachingPhysicalOperator(PhysicalOperatorType type, vect
 
 OperatorResultType CachingPhysicalOperator::Execute(ExecutionContext &context, DataChunk &input, DataChunk &chunk,
                                                     GlobalOperatorState &gstate, OperatorState &state_p) const {
+#if BREAKDOWN_EXECUTE
+	auto physical_op_execute_timer = chrono_tic();
+#endif
 	auto &state = state_p.Cast<CachingOperatorState>();
 
 	// Execute child operator
 	auto child_result = ExecuteInternal(context, input, chunk, gstate, state);
+#if BREAKDOWN_EXECUTE
+	if (probe_flag) {
+		execute_internal_time += chrono_toc(&physical_op_execute_timer, "ExecuteInternal Time: ", false);
+	}
+#endif
 
 #if STANDARD_VECTOR_SIZE >= 128
 	if (!state.initialized) {
@@ -281,6 +289,12 @@ OperatorResultType CachingPhysicalOperator::Execute(ExecutionContext &context, D
 			// chunk cache full: return it
 			chunk.Move(*state.cached_chunk);
 			state.cached_chunk->Initialize(Allocator::Get(context.client), chunk.GetTypes());
+#if BREAKDOWN_EXECUTE
+			if (probe_flag) {
+				cache_chunk_append_time += chrono_toc(&physical_op_execute_timer, "cache chunk append Time: ", false);
+			}
+//			Printer::Print("physical operator execute time = " + std::to_string(cache_chunk_append_time));
+#endif
 			return child_result;
 		} else {
 			// chunk cache not full return empty result
@@ -289,6 +303,11 @@ OperatorResultType CachingPhysicalOperator::Execute(ExecutionContext &context, D
 	}
 #endif
 
+#if BREAKDOWN_EXECUTE
+	if (probe_flag) {
+		cache_chunk_append_time += chrono_toc(&physical_op_execute_timer, "physical operator execute Time: ", false);
+	}
+#endif
 	return child_result;
 }
 

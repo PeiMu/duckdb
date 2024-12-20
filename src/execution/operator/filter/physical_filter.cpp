@@ -41,6 +41,9 @@ unique_ptr<OperatorState> PhysicalFilter::GetOperatorState(ExecutionContext &con
 
 OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, DataChunk &input, DataChunk &chunk,
                                                    GlobalOperatorState &gstate, OperatorState &state_p) const {
+#if BREAKDOWN_EXECUTE
+	auto execute_timer = chrono_tic();
+#endif
 	auto &state = state_p.Cast<FilterState>();
 	idx_t result_count = state.executor.SelectExpression(input, state.sel);
 	if (result_count == input.size()) {
@@ -49,6 +52,11 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 	} else {
 		chunk.Slice(input, state.sel, result_count);
 	}
+#if BREAKDOWN_EXECUTE
+		if (probe_flag) {
+		    filter_execute_time += chrono_toc(&execute_timer, "Execute Filter Time: ", false);
+		}
+#endif
 	return OperatorResultType::NEED_MORE_INPUT;
 }
 
