@@ -466,7 +466,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		bool merge_sibling_expr = false;
 		QuerySplit query_splitter(*this);
 
-#if MergeBackToWholeQuery
+#if ENABLE_MERGE_BACK_PLAN
 		unique_ptr<LogicalOperator> whole_plan;
 #endif
 
@@ -540,6 +540,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				break;
 			}
 
+#if ENABLE_MEASURE_EXE_TIME
+			execute_plan = true;
+#endif
+
 			unique_ptr<LogicalOperator> last_sibling_node = nullptr;
 			if (subqueries.front().size() > 1) {
 				if (ENABLE_PARALLEL_EXECUTION) {
@@ -590,11 +594,11 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 
 			idx_t estimated_card = 0;
-#if SpecifyEstCard
+#if ENABLE_SPECIFY_EST_CARD
 			estimated_card = subquery_preparer.GetEstCard(sub_plan);
 #endif
 
-#if MergeBackToWholeQuery
+#if ENABLE_MERGE_BACK_PLAN
 			// merge sub_plan to whole_plan
 			whole_plan = subquery_preparer.MergeBack(std::move(whole_plan), sub_plan);
 #endif
@@ -712,7 +716,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		Printer::Print("After the last PostOptimization");
 		plan->Print();
 #endif
-#if MergeBackToWholeQuery
+#if ENABLE_MERGE_BACK_PLAN
 		// merge sub_plan to whole_plan
 		auto explain_whole_plan = subquery_preparer.MergeBack(std::move(whole_plan), plan);
 		if (explain_whole_plan) {

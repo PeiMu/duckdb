@@ -191,7 +191,7 @@ void SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &
 	new_table_idx = binder.GenerateTableIndex();
 
 	chunk_scan = make_uniq<LogicalColumnDataGet>(new_table_idx, previous_result->Types(), std::move(previous_result));
-#if SpecifyEstCard
+#if ENABLE_SPECIFY_EST_CARD
 #ifdef DEBUG
 	D_ASSERT(0 != estimated_card);
 #endif

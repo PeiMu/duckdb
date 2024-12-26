@@ -79,16 +79,23 @@ unique_ptr<QueryResult> PreparedStatement::Execute(case_insensitive_map_t<Value>
 }
 
 unique_ptr<QueryResult> PreparedStatement::Execute(vector<Value> &values, bool allow_stream_result) {
-#if TIME_BREAK_DOWN
-	auto timer = chrono_tic();
-#endif
 	auto pending = PendingQuery(values, allow_stream_result);
 	if (pending->HasError()) {
 		return make_uniq<MaterializedQueryResult>(pending->GetErrorObject());
 	}
+#if ENABLE_MEASURE_EXE_TIME
+	auto timer = chrono_tic();
+#endif
 	auto ret = pending->Execute();
-#if TIME_BREAK_DOWN
-	chrono_toc(&timer, "PreparedStatement::Execute time is\n");
+#if ENABLE_MEASURE_EXE_TIME
+	if (execute_plan) {
+		auto execute_time = chrono_toc(&timer, "PreparedStatement::Execute time is\n", false);
+		// save time to a file
+		std::ofstream log_file;
+		log_file.open("time_log.csv", std::ios_base::app);
+		log_file << std::to_string(execute_time/1000) + "\n";
+		log_file.close();
+	}
 #endif
 	return ret;
 }
@@ -139,7 +146,19 @@ unique_ptr<ColumnDataCollection> PreparedStatement::ExecuteRow(ClientContextLock
 	if (pending->HasError()) {
 		pending->GetErrorObject().Throw("has error with ");
 	}
-	return pending->ExecuteRow(lock);
+#if ENABLE_MEASURE_EXE_TIME
+	auto timer = chrono_tic();
+#endif
+	auto ret = pending->ExecuteRow(lock);
+#if ENABLE_MEASURE_EXE_TIME
+	auto execute_time = chrono_toc(&timer, "PreparedStatement::Execute time is\n", false);
+	// save time to a file
+	std::ofstream log_file;
+	log_file.open("time_log.csv", std::ios_base::app);
+	log_file << std::to_string(execute_time/1000) + ",";
+	log_file.close();
+#endif
+	return ret;
 }
 
 unique_ptr<PendingQueryResult> PreparedStatement::PendingQuery(ClientContextLock &lock, vector<Value> &values,
