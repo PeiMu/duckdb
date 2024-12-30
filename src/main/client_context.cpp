@@ -594,7 +594,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 
 			idx_t estimated_card = 0;
-#if ENABLE_SPECIFY_EST_CARD
+#if ENABLE_SPECIFY_EST_STAT
 			estimated_card = subquery_preparer.GetEstCard(sub_plan);
 #endif
 
