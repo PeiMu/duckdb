@@ -88,7 +88,7 @@ unique_ptr<QueryResult> PreparedStatement::Execute(vector<Value> &values, bool a
 #endif
 	auto ret = pending->Execute();
 #if ENABLE_MEASURE_EXE_TIME
-	if (execute_plan) {
+	if (execute_plan || !context->config.enable_dbshaker_query_split) {
 		auto execute_time = chrono_toc(&timer, "PreparedStatement::Execute time is\n", false);
 		// save time to a file
 		std::ofstream log_file;
