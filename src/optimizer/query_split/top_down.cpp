@@ -57,9 +57,12 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 			if (!filter_parent)
 #endif
 			{
-				// we skip the SEMI JOIN
+				// we skip the IN clause
 				auto &join_op = child->Cast<LogicalComparisonJoin>();
-				if (JoinType::SEMI == join_op.join_type) {
+				if ((LogicalOperatorType::LOGICAL_GET == join_op.children[0]->type &&
+				     LogicalOperatorType::LOGICAL_CHUNK_GET == join_op.children[1]->type) ||
+				    (LogicalOperatorType::LOGICAL_CHUNK_GET == join_op.children[0]->type &&
+				     LogicalOperatorType::LOGICAL_GET == join_op.children[1]->type)) {
 					child->split_index = 0;
 					break;
 				}
