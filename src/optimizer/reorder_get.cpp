@@ -31,6 +31,23 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 				}
 				table_card_order.push_back(temp_table_card);
 				continue;
+#if REORDER_DATACHUNK
+			} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == child->type) {
+				auto &chunk_get_op = child->Cast<LogicalColumnDataGet>();
+				auto temp_table_card =
+				    std::make_pair(chunk_get_op.table_index, chunk_get_op.EstimateCardinality(context));
+				table_index_blocks[chunk_get_op.table_index] = std::move(child);
+				// sort the table index with card, from the biggest to the smallest
+				for (size_t idx = 0; idx < table_card_order.size(); idx++) {
+					if (table_card_order[idx].second < temp_table_card.second) {
+						auto temp = table_card_order[idx];
+						table_card_order[idx] = temp_table_card;
+						temp_table_card = temp;
+					}
+				}
+				table_card_order.push_back(temp_table_card);
+				continue;
+#endif
 			} else if (LogicalOperatorType::LOGICAL_FILTER == child->type) {
 				// we consider the FILTER block as a whole, even it has JOINs
 				std::function<void(unique_ptr<LogicalOperator> & op)> collect_filter;
@@ -58,6 +75,27 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 #endif
 							table_index = get_op.table_index;
 							continue;
+#if REORDER_DATACHUNK
+						} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == child->type) {
+							if (-1 != table_index) {
+								// we ignore filter->join->scan+chunk_get, e.g. `IN` clause
+								continue;
+							}
+							auto &chunk_get_op = child->Cast<LogicalColumnDataGet>();
+							auto temp_table_card =
+							    std::make_pair(chunk_get_op.table_index, chunk_get_op.EstimateCardinality(context));
+							// sort the table index with card, from the biggest to the smallest
+							for (size_t idx = 0; idx < table_card_order.size(); idx++) {
+								if (table_card_order[idx].second < temp_table_card.second) {
+									auto temp = table_card_order[idx];
+									table_card_order[idx] = temp_table_card;
+									temp_table_card = temp;
+								}
+							}
+							table_card_order.push_back(temp_table_card);
+							table_index = chunk_get_op.table_index;
+							continue;
+#endif
 						}
 						collect_filter(child);
 					}

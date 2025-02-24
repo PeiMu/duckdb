@@ -127,12 +127,14 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 		plan = deliminator.Optimize(std::move(plan));
 	});
 
+#if !REORDER_DATACHUNK
 	if (context.config.enable_dbshaker_split_jop) {
 		RunOptimizer(OptimizerType::REORDER_GET, [&]() {
 			ReorderGet reorder_get(context);
 			plan = reorder_get.Optimize(std::move(plan));
 		});
 	}
+#endif
 
 	if (!context.config.enable_dbshaker_split_jop) {
 		if (context.config.enable_dbshaker_query_split) {
@@ -177,6 +179,26 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 	}
 
 	Planner::VerifyPlan(context, plan);
+
+	return std::move(plan);
+}
+
+unique_ptr<LogicalOperator> Optimizer::ReorderGetOptimize(unique_ptr<LogicalOperator> plan_p) {
+	Verify(*plan_p);
+
+	switch (plan_p->type) {
+	case LogicalOperatorType::LOGICAL_TRANSACTION:
+		return plan_p; // skip optimizing simple & often-occurring plans unaffected by rewrites
+	default:
+		break;
+	}
+
+	this->plan = std::move(plan_p);
+
+	RunOptimizer(OptimizerType::REORDER_GET, [&]() {
+		ReorderGet reorder_get(context);
+		plan = reorder_get.Optimize(std::move(plan));
+	});
 
 	return std::move(plan);
 }

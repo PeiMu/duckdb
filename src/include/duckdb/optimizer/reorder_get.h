@@ -1,12 +1,14 @@
 //===----------------------------------------------------------------------===//
 //                         DuckDB
 //
-// duckdb/optimizer/query_split.hpp
+// duckdb/optimizer/reorder_get.hpp
 //
 //
 //===----------------------------------------------------------------------===//
 
 #pragma once
+
+#define REORDER_DATACHUNK			true
 
 namespace duckdb {
 class ReorderGet {

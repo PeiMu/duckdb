@@ -486,8 +486,12 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 		while (config.enable_dbshaker_query_split) {
 			if (config.enable_dbshaker_split_jop) {
+#if REORDER_DATACHUNK
+				needToSplit = true;
+#else
 				needToSplit = needToSplit || subquery_preparer.NeedRewrite(subqueries.front());
 				if (needToSplit) {
+#endif
 					if (!subqueries.empty()) {
 						subquery_preparer.MergeSubquery(plan, std::move(subqueries));
 #if ENABLE_DEBUG_PRINT
@@ -503,6 +507,15 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 						chrono_toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
 #endif
 					}
+#if REORDER_DATACHUNK
+				    plan = optimizer.ReorderGetOptimize(std::move(plan));
+#if ENABLE_DEBUG_PRINT
+				    D_ASSERT(plan);
+				    // debug: print subquery
+				    Printer::Print("After ReorderGetOptimize");
+				    plan->Print();
+#endif
+#endif
 					subquery_preparer.Rewrite(plan);
 #if TIME_BREAK_DOWN
 					chrono_toc(&timer, "Rewrite time is\n");
@@ -513,7 +526,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					Printer::Print("After subquery_preparer.Rewrite");
 					plan->Print();
 #endif
+#if !REORDER_DATACHUNK
 				}
+#endif
 			}
 			if (needToSplit) {
 				query_splitter.Clear();

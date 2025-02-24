@@ -27,6 +27,8 @@ public:
 	unique_ptr<LogicalOperator> Optimize(unique_ptr<LogicalOperator> plan);
 	//! Optimize a plan by running specialized optimizers before join order optimization
 	unique_ptr<LogicalOperator> PreOptimize(unique_ptr<LogicalOperator> plan_p);
+	//! Optimize a plan by running specialized optimizers when enable split_jop config
+	unique_ptr<LogicalOperator> ReorderGetOptimize(unique_ptr<LogicalOperator> plan_p);
 	//! Optimize a plan by running specialized optimizers after join order optimization
 	unique_ptr<LogicalOperator> PostOptimize(unique_ptr<LogicalOperator> plan);
 	//! Return a reference to the client context of this optimizer
