@@ -135,6 +135,15 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 	}
 
 	if (!context.config.enable_dbshaker_split_jop) {
+		if (context.config.enable_dbshaker_query_split) {
+			// perform statistics propagation
+			RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
+				StatisticsPropagator propagator(*this);
+				propagator.PropagateStatistics(plan);
+				statistics_map = propagator.GetStatisticsMap();
+			});
+		}
+
 		// then we perform the join ordering optimization
 		// this also rewrites cross products + filters into joins and performs filter pushdowns
 		RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {
@@ -167,13 +176,6 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 		});
 	}
 
-	// perform statistics propagation
-	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
-		StatisticsPropagator propagator(*this);
-		propagator.PropagateStatistics(plan);
-		statistics_map = propagator.GetStatisticsMap();
-	});
-
 	Planner::VerifyPlan(context, plan);
 
 	return std::move(plan);
@@ -192,6 +194,13 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 	this->plan = std::move(plan_p);
 
 	if (context.config.enable_dbshaker_split_jop) {
+		// perform statistics propagation
+		RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
+			StatisticsPropagator propagator(*this);
+			propagator.PropagateStatistics(plan);
+			statistics_map = propagator.GetStatisticsMap();
+		});
+
 		// then we perform the join ordering optimization
 		// this also rewrites cross products + filters into joins and performs filter pushdowns
 		RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {
