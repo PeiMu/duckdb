@@ -21,5 +21,7 @@ public:
 
 private:
 	ClientContext &context;
+
+	bool in_clause = false;
 };
 } // namespace duckdb

@@ -17,7 +17,6 @@
 #include "duckdb/optimizer/regex_range_filter.hpp"
 #include "duckdb/optimizer/remove_duplicate_groups.hpp"
 #include "duckdb/optimizer/remove_unused_columns.hpp"
-#include "duckdb/optimizer/reorder_get.h"
 #include "duckdb/optimizer/rule/equal_or_null_simplification.hpp"
 #include "duckdb/optimizer/rule/in_clause_simplification.hpp"
 #include "duckdb/optimizer/rule/list.hpp"
@@ -194,6 +193,13 @@ unique_ptr<LogicalOperator> Optimizer::ReorderGetOptimize(unique_ptr<LogicalOper
 	}
 
 	this->plan = std::move(plan_p);
+
+//	// todo: have STATISTICS_PROPAGATION before REORDER_GET when it can get better cardEst for filter
+//	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
+//		StatisticsPropagator propagator(*this);
+//		propagator.PropagateStatistics(plan);
+//		statistics_map = propagator.GetStatisticsMap();
+//	});
 
 	RunOptimizer(OptimizerType::REORDER_GET, [&]() {
 		ReorderGet reorder_get(context);
