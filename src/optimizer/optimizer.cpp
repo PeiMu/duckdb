@@ -84,7 +84,9 @@ unique_ptr<LogicalOperator> Optimizer::Optimize(unique_ptr<LogicalOperator> plan
 }
 
 unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> plan_p) {
+#ifdef DEBUG
 	Verify(*plan_p);
+#endif
 
 	switch (plan_p->type) {
 	case LogicalOperatorType::LOGICAL_TRANSACTION:
@@ -177,13 +179,17 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 		});
 	}
 
+#ifdef DEBUG
 	Planner::VerifyPlan(context, plan);
+#endif
 
 	return std::move(plan);
 }
 
 unique_ptr<LogicalOperator> Optimizer::ReorderGetOptimize(unique_ptr<LogicalOperator> plan_p) {
+#ifdef DEBUG
 	Verify(*plan_p);
+#endif
 
 	switch (plan_p->type) {
 	case LogicalOperatorType::LOGICAL_TRANSACTION:
@@ -210,7 +216,9 @@ unique_ptr<LogicalOperator> Optimizer::ReorderGetOptimize(unique_ptr<LogicalOper
 }
 
 unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> plan_p) {
+#ifdef DEBUG
 	Verify(*plan_p);
+#endif
 
 	switch (plan_p->type) {
 	case LogicalOperatorType::LOGICAL_TRANSACTION:
@@ -337,7 +345,9 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 		});
 	}
 
+#ifdef DEBUG
 	Planner::VerifyPlan(context, plan);
+#endif
 
 	return std::move(plan);
 }
