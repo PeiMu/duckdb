@@ -465,6 +465,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		std::vector<TableExpr> proj_expr;
 		bool merge_sibling_expr = false;
 		QuerySplit query_splitter(*this);
+		ReorderGet reorder_get(*this);
+		std::deque<std::pair<idx_t, idx_t>> table_card_order;
+		int64_t previous_result_card;
 
 #if ENABLE_MERGE_BACK_PLAN
 		unique_ptr<LogicalOperator> whole_plan;
@@ -486,12 +489,19 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 		while (config.enable_dbshaker_query_split) {
 			if (config.enable_dbshaker_split_jop) {
-#if REORDER_DATACHUNK
-				needToSplit = true;
-#else
 				needToSplit = needToSplit || subquery_preparer.NeedRewrite(subqueries.front());
-				if (needToSplit) {
+#if ENABLE_DEBUG_PRINT
+				if (needToSplit)
+					Printer::Print("need rewrite");
 #endif
+				table_card_order = reorder_get.GetTableCardOrder();
+				needToSplit = needToSplit ||
+				              subquery_preparer.NeedReorder(subqueries.front(), table_card_order, previous_result_card);
+#if ENABLE_DEBUG_PRINT
+				if (needToSplit)
+					Printer::Print("need reorder");
+#endif
+				if (needToSplit) {
 					if (!subqueries.empty()) {
 						subquery_preparer.MergeSubquery(plan, std::move(subqueries));
 #if ENABLE_DEBUG_PRINT
@@ -506,9 +516,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if TIME_BREAK_DOWN
 						chrono_toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
 #endif
+						merge_sibling_expr = false;
 					}
 #if REORDER_DATACHUNK
-				    plan = optimizer.ReorderGetOptimize(std::move(plan));
+				    plan = reorder_get.Optimize(std::move(plan));
 #if ENABLE_DEBUG_PRINT
 				    D_ASSERT(plan);
 				    // debug: print subquery
@@ -526,9 +537,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					Printer::Print("After subquery_preparer.Rewrite");
 					plan->Print();
 #endif
-#if !REORDER_DATACHUNK
 				}
-#endif
 			}
 			if (needToSplit) {
 				query_splitter.Clear();
@@ -654,7 +663,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "Execute time is\n");
 #endif
-			subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result), estimated_card);
+			previous_result_card = subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result),
+			                                                        estimated_card);
 			if (!ENABLE_PARALLEL_EXECUTION && nullptr != last_sibling_node) {
 				merge_sibling_expr = subquery_preparer.MergeSibling(subqueries.front(), std::move(last_sibling_node));
 			    // check if we need to swap the children
@@ -697,6 +707,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					    }
 					    D_ASSERT(find_old_in_right);
 #endif
+						// todo: which will be better? swap children or swap condition?
 					    auto tmp = std::move(join_op.children[0]);
 					    join_op.children[0] = std::move(join_op.children[1]);
 					    join_op.children[1] = std::move(tmp);
@@ -1014,7 +1025,6 @@ ClientContext::CreatePreparedStatement(ClientContextLock &lock, const string &qu
 		}
 	}
 	if (can_request_rebind) {
-		Printer::Print("can_request_rebind");
 		bool rebind = false;
 		// if any registered state can request a rebind we do the binding on a copy first
 		shared_ptr<PreparedStatementData> result;

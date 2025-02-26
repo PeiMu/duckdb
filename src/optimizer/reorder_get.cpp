@@ -149,6 +149,7 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 		Printer::Print("table " + std::to_string(ele.first) + " with card = " + std::to_string(ele.second));
 	}
 #endif
+	table_card_order_bak = table_card_order;
 
 	auto plan_pointer = plan.get();
 	// get the position before the first join

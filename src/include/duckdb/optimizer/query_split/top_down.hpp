@@ -35,6 +35,7 @@ public:
 #if SPLIT_FILTER
 		filter_parent = false;
 #endif
+		top_most = true;
 		while (!table_expr_queue.empty()) {
 			table_expr_queue.pop();
 		}
@@ -44,6 +45,8 @@ public:
 		sibling_used_table.clear();
 		target_tables.clear();
 		proj_expr.clear();
+		query_split_index = 0;
+		used_table_ids.clear();
 	};
 
 public:
@@ -112,7 +115,6 @@ private:
 	// we need to further check if all the CROSS_PRODUCT can be simplified in the subqueries
 	// in a bottom-up order
 	std::unordered_set<idx_t> used_table_ids;
-	idx_t join_cond_number = 0;
 
 	bool follow_pipeline_breaker_ = false;
 };

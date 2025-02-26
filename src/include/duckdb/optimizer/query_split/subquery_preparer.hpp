@@ -30,7 +30,7 @@ public:
 	~SubqueryPreparer() = default;
 
 	//! Merge the data chunk (temp table) to the current subquery
-	void MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
+	int64_t MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
 	                    unique_ptr<ColumnDataCollection> previous_result, idx_t estimated_card);
 
 	//! Merge the previous sibling node. If merged to the main stream (left node), we add the sibling expr to proj.
@@ -55,8 +55,10 @@ public:
 
 	// todo: refactor to a standalone class
 	void Rewrite(unique_ptr<LogicalOperator> &plan);
-	//! Check if current `subqueries_vec` has CROSS_PRODUCT
+	//! Check if current `subqueries_vec` has CROSS_PRODUCT that cannot be simplified
 	bool NeedRewrite(const std::vector<unique_ptr<LogicalOperator>> &subqueries_vec);
+	bool NeedReorder(const std::vector<unique_ptr<LogicalOperator>> &subqueries_vec,
+	                 std::deque<std::pair<idx_t, idx_t>> table_card_order, idx_t previous_result_card);
 	void MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries);
 
 	//! update the table_idx and column_idx
@@ -133,5 +135,29 @@ private:
 	// (in `MergeBack`)
 	std::unordered_map<int, unique_ptr<LogicalOperator>> stored_sub_plans;
 	std::unordered_map<int, vector<unique_ptr<Expression>>> stored_sub_plan_exprs;
+};
+
+// find the tables in table_blocks are separate or union
+class UnionFind {
+public:
+	unordered_map<int, int> parent;
+
+	int find_parent(int x) {
+		if (parent.find(x) == parent.end()) {
+			parent[x] = x;
+		}
+		if (parent[x] != x) {
+			parent[x] = find_parent(parent[x]);
+		}
+		return parent[x];
+	}
+
+	void unite(int x, int y) {
+		int rootX = find_parent(x);
+		int rootY = find_parent(y);
+		if (rootX != rootY) {
+			parent[rootX] = rootY;
+		}
+	}
 };
 } // namespace duckdb

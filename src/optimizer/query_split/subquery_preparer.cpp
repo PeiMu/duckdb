@@ -151,8 +151,8 @@ shared_ptr<PreparedStatementData> SubqueryPreparer::AdaptSelect(shared_ptr<Prepa
 	return subquery_stmt;
 }
 
-void SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
-                                      unique_ptr<ColumnDataCollection> previous_result, idx_t estimated_card) {
+int64_t SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
+                                         unique_ptr<ColumnDataCollection> previous_result, idx_t estimated_card) {
 
 	//	unique_ptr<MaterializedQueryResult> result_materialized;
 	//	auto collection = make_uniq<ColumnDataCollection>(Allocator::DefaultAllocator(), types);
@@ -211,20 +211,28 @@ void SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &
 #ifdef DEBUG
 	D_ASSERT(merged);
 #endif
+
+	return chunk_size;
 }
 
 bool SubqueryPreparer::MergeSibling(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
                                     unique_ptr<LogicalOperator> last_sibling_node) {
 	auto merge_sibling = [&last_sibling_node](LogicalOperator *subquery_pointer) {
-		while (!subquery_pointer->children.empty()) {
-			if (subquery_pointer->children.size() > 1 && nullptr == subquery_pointer->children[1]) {
+		while (LogicalOperatorType::LOGICAL_GET != subquery_pointer->type &&
+		       LogicalOperatorType::LOGICAL_CHUNK_GET != subquery_pointer->type &&
+		       !subquery_pointer->children.empty()) {
+			if (nullptr == subquery_pointer->children[0]) {
+				subquery_pointer->children[0] = std::move(last_sibling_node);
+				return true;
+			} else if (subquery_pointer->children.size() > 1 && nullptr == subquery_pointer->children[1]) {
 #ifdef DEBUG
 				D_ASSERT(nullptr != last_sibling_node);
 #endif
 				subquery_pointer->children[1] = std::move(last_sibling_node);
 				return true;
+			} else {
+				subquery_pointer = subquery_pointer->children[0].get();
 			}
-			subquery_pointer = subquery_pointer->children[0].get();
 		}
 		return false;
 	};
@@ -266,21 +274,21 @@ void SubqueryPreparer::AddOldTableIndex(const unique_ptr<LogicalOperator> &op) {
 }
 
 void SubqueryPreparer::MergeToSubquery(LogicalOperator &op, bool &merged) {
-	for (auto child_it = op.children.begin(); child_it != op.children.end(); child_it++) {
+	for (int idx = op.children.size() - 1; idx > -1; idx--) {
+		auto &child = op.children[idx];
 		if (merged)
 			return;
 		// find the insert point and insert the `ColumnDataGet` node to the logical plan
-		if (nullptr == (*child_it) || (*child_it)->split_index == merge_index) {
+		if (nullptr == child || child->split_index == merge_index) {
 #ifdef DEBUG
 			D_ASSERT(nullptr != chunk_scan);
 #endif
-			op.children.erase(child_it);
-			op.children.insert(child_it, std::move(chunk_scan));
+			child = std::move(chunk_scan);
 			merged = true;
 			merge_index--;
 			return;
 		}
-		MergeToSubquery(*(*child_it), merged);
+		MergeToSubquery(*child, merged);
 	}
 }
 
@@ -508,9 +516,12 @@ bool SubqueryPreparer::NeedRewrite(const std::vector<unique_ptr<LogicalOperator>
 		return true;
 	}
 
+	if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN != subqueries_vec[0]->type) {
 #ifdef DEBUG
-	D_ASSERT(LogicalOperatorType::LOGICAL_COMPARISON_JOIN == subqueries_vec[0]->type);
+		D_ASSERT(LogicalOperatorType::LOGICAL_FILTER == subqueries_vec[0]->type);
 #endif
+		return false;
+	}
 
 	LogicalOperator *current_join_pointer = subqueries_vec[0].get();
 	std::unordered_set<idx_t> left_cond_table_index;
@@ -518,6 +529,48 @@ bool SubqueryPreparer::NeedRewrite(const std::vector<unique_ptr<LogicalOperator>
 	std::deque<idx_t> table_blocks_key_order;
 	std::queue<unique_ptr<LogicalOperator>> unused_blocks;
 
+	std::vector<std::pair<idx_t, idx_t>> table_index_pairs;
+	auto collect_cond_tables = [&table_index_pairs](const unique_ptr<LogicalOperator> &op,
+	                                                auto &&collect_cond_tables) -> void {
+		if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->type) {
+			auto &join_op = op->Cast<LogicalComparisonJoin>();
+
+			// collect table pairs form JOIN
+			for (const auto &cond : join_op.conditions) {
+#ifdef DEBUG
+				D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.left->type);
+				D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.right->type);
+#endif
+				auto &left_expr = cond.left->Cast<BoundColumnRefExpression>();
+				auto &right_expr = cond.right->Cast<BoundColumnRefExpression>();
+				table_index_pairs.emplace_back(
+				    std::make_pair(left_expr.binding.table_index, right_expr.binding.table_index));
+			}
+		}
+
+		for (auto &child : op->children) {
+			collect_cond_tables(child, collect_cond_tables);
+		}
+	};
+
+	collect_cond_tables(subqueries_vec[0], collect_cond_tables);
+
+	UnionFind uf;
+	// Union the pairs
+	for (auto &index_pair : table_index_pairs) {
+		uf.unite(index_pair.first, index_pair.second);
+	}
+	// Find distinct groups
+	unordered_set<int> groups;
+	for (auto &index_pair : table_index_pairs) {
+		groups.insert(uf.find_parent(index_pair.first));
+		groups.insert(uf.find_parent(index_pair.second));
+	}
+
+	if (groups.size() > 1)
+		return true;
+
+	// fixme: it may have more JOINs
 	unique_ptr<LogicalOperator> last_block = CheckTableUsage(current_join_pointer, left_cond_table_index, table_blocks,
 	                                                         table_blocks_key_order, unused_blocks);
 
@@ -533,6 +586,45 @@ bool SubqueryPreparer::NeedRewrite(const std::vector<unique_ptr<LogicalOperator>
 	} else {
 		return false;
 	}
+}
+
+bool SubqueryPreparer::NeedReorder(const std::vector<unique_ptr<LogicalOperator>> &subqueries_vec,
+                                   std::deque<std::pair<idx_t, idx_t>> table_card_order, idx_t previous_result_card) {
+	if (subqueries_vec.empty()) {
+		return true;
+	}
+
+	if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN != subqueries_vec[0]->type) {
+		return false;
+	}
+
+	LogicalOperator *current_join_pointer = subqueries_vec[0].get();
+	auto &current_join = current_join_pointer->Cast<LogicalComparisonJoin>();
+
+	// collect all table index
+	std::unordered_set<idx_t> table_indexes;
+	for (const auto &cond : current_join.conditions) {
+#ifdef DEBUG
+		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.left->type);
+		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.right->type);
+#endif
+		auto &left_expr = cond.left->Cast<BoundColumnRefExpression>();
+		table_indexes.insert(left_expr.binding.table_index);
+		auto &right_expr = cond.right->Cast<BoundColumnRefExpression>();
+		table_indexes.insert(right_expr.binding.table_index);
+	}
+
+	// check if it is needed to reorder,
+	// when the previous_result_card is larger than the smallest one of the table in the upper level subquery
+	for (auto cid = table_card_order.cbegin(); cid != table_card_order.cend();) {
+		if (table_indexes.count(cid->first)) {
+			cid = table_card_order.erase(cid);
+		} else {
+			cid++;
+		}
+	}
+
+	return previous_result_card > table_card_order.back().second;
 }
 
 void SubqueryPreparer::MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries) {
@@ -843,7 +935,7 @@ SubqueryPreparer::CheckTableUsage(LogicalOperator *current_join_pointer, unorder
 		// which means if the child node is not a CROSS_PRODUCT, it's not necessary to check
 		return nullptr;
 	}
-	// it's an ugly way... since we cannot convert row pointer to unique_ptr
+	// fixme: it's an ugly way... since we cannot convert row pointer to unique_ptr
 	auto last_cross_product = current_join_pointer;
 	auto check_pointer = current_join_pointer->children[0].get();
 	while (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == check_pointer->type) {
