@@ -22,7 +22,7 @@
 
 namespace duckdb {
 
-#define SPLIT_FILTER false
+#define SPLIT_FILTER true
 
 //! Based on the DAG of the logical plan, we generate the subqueries bottom-up
 class TopDownSplit : public SplitAlgorithm {

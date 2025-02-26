@@ -28,65 +28,69 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 			// if the other child node is not CROSS_PRODUCT, JOIN nor FILTER
 #if SPLIT_FILTER
 		case LogicalOperatorType::LOGICAL_FILTER: {
-			// add filter's column usage
-			table_exprs = GetFilterTableExpr(child->Cast<LogicalFilter>());
-			// check continuous filter nodes, only split the first one
-			if (!filter_parent) {
+			if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->children[0]->type) {
+				auto &join_op = child->children[0]->Cast<LogicalComparisonJoin>();
+				if (JoinType::SEMI != join_op.join_type && JoinType::MARK != join_op.join_type) {
+					child->split_index = 0;
+					break;
+				}
+			}
+			// for easier implementation, we only split the Filter when it is a left child for non-parallel case
+			if (ENABLE_PARALLEL_EXECUTION) {
+				// todo
+			} else {
+#ifdef DEBUG
+				D_ASSERT(LogicalOperatorType::LOGICAL_GET == child->children[0]->type ||
+				         LogicalOperatorType::LOGICAL_CHUNK_GET == child->children[0]->type ||
+				         LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->children[0]->type);
+#endif
+				// add filter's column usage
+				table_exprs = GetFilterTableExpr(child->Cast<LogicalFilter>());
+				// check continuous filter nodes, only split the first one
 				query_split_index++;
 				child->split_index = query_split_index;
 				// inherit from the children until it is not a filter
-				auto child_pointer = child.get();
-				while (LogicalOperatorType::LOGICAL_FILTER == child_pointer->type) {
-					auto child_exprs = GetFilterTableExpr(child_pointer->Cast<LogicalFilter>());
-					table_exprs.insert(child_exprs.begin(), child_exprs.end());
-					child_pointer = child_pointer->children[0].get();
-				}
+				auto child_pointer = child->children[0].get();
 				if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child_pointer->type) {
 					auto child_exprs = GetJoinTableExpr(child_pointer->Cast<LogicalComparisonJoin>());
 					table_exprs.insert(child_exprs.begin(), child_exprs.end());
 				}
+				break;
 			}
-			filter_parent = true;
-			break;
 		}
 #endif
-		case LogicalOperatorType::LOGICAL_COMPARISON_JOIN:
-			// if comp_join is the child of filter, we split at the filter node,
-			// and inherit the table_exprs by the filter node
-#if SPLIT_FILTER
-			if (!filter_parent)
-#endif
-			{
-				// we skip the SEMI JOIN or MARK JOIN
-				// fixme: may have bugs
-				auto &join_op = child->Cast<LogicalComparisonJoin>();
-				if (JoinType::SEMI == join_op.join_type || JoinType::MARK == join_op.join_type) {
-					child->split_index = 0;
-					break;
-				}
+		case LogicalOperatorType::LOGICAL_COMPARISON_JOIN: {
+			// we skip the SEMI JOIN or MARK JOIN
+			// fixme: may have bugs
+			auto &join_op = child->Cast<LogicalComparisonJoin>();
+			if (JoinType::SEMI == join_op.join_type || JoinType::MARK == join_op.join_type) {
+				child->split_index = 0;
+				break;
+			}
 
-				if (follow_pipeline_breaker_) {
-					if (top_most || 1 == idx) {
-						top_most = false;
-						query_split_index++;
-						child->split_index = query_split_index;
-					}
-				} else {
+			if (follow_pipeline_breaker_) {
+				if (top_most || 1 == idx) {
+					top_most = false;
 					query_split_index++;
 					child->split_index = query_split_index;
 				}
-
-				table_exprs = GetJoinTableExpr(join_op);
+			} else {
+				query_split_index++;
+				child->split_index = query_split_index;
 			}
-#if SPLIT_FILTER
-			filter_parent = false;
-#endif
+
+			table_exprs = GetJoinTableExpr(join_op);
 			break;
+		}
+		case LogicalOperatorType::LOGICAL_CROSS_PRODUCT: {
+			if (0 == idx && nullptr == op.children[1]) {
+				query_split_index++;
+				child->split_index = query_split_index;
+			}
+			break;
+		}
 		default:
 			child->split_index = 0;
-#if SPLIT_FILTER
-			filter_parent = false;
-#endif
 			break;
 		}
 		VisitOperator(*child);

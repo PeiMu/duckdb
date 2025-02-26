@@ -79,6 +79,9 @@ public:
 
 	idx_t GetEstCard(const unique_ptr<LogicalOperator> &sub_plan);
 
+	std::set<idx_t> GetOldTableIndex() const { return old_table_idx; }
+	void ClearOldTableIndex() { old_table_idx.clear(); }
+
 private:
 	//! 1. find the insert point and insert the `ColumnDataGet` node to the logical plan;
 	//! 2. update the table_idx and column_idx

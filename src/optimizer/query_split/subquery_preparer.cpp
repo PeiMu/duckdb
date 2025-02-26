@@ -541,12 +541,15 @@ void SubqueryPreparer::MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery
 	while (true) {
 		if (nullptr == new_plan->children[0]) {
 			auto old_subquery_pair = std::move(old_subqueries.back());
-			new_plan->children[0] = std::move(old_subquery_pair[0]);
 			if (2 == old_subquery_pair.size()) {
 #ifdef DEBUG
 				D_ASSERT(nullptr == new_plan->children[1]);
 #endif
-				new_plan->children[1] = std::move(old_subquery_pair[1]);
+				// keep the same order
+				new_plan->children[0] = std::move(old_subquery_pair[1]);
+				new_plan->children[1] = std::move(old_subquery_pair[0]);
+			} else {
+				new_plan->children[0] = std::move(old_subquery_pair[0]);
 			}
 			old_subqueries.pop_back();
 		}
