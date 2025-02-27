@@ -530,8 +530,8 @@ bool SubqueryPreparer::NeedRewrite(const std::vector<unique_ptr<LogicalOperator>
 	std::queue<unique_ptr<LogicalOperator>> unused_blocks;
 
 	std::vector<std::pair<idx_t, idx_t>> table_index_pairs;
-	auto collect_cond_tables = [&table_index_pairs](const unique_ptr<LogicalOperator> &op,
-	                                                auto &&collect_cond_tables) -> void {
+	std::function<void(const unique_ptr<LogicalOperator> &op)> collect_cond_tables;
+	collect_cond_tables = [&collect_cond_tables, &table_index_pairs](const unique_ptr<LogicalOperator> &op) {
 		if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->type) {
 			auto &join_op = op->Cast<LogicalComparisonJoin>();
 
@@ -549,11 +549,11 @@ bool SubqueryPreparer::NeedRewrite(const std::vector<unique_ptr<LogicalOperator>
 		}
 
 		for (auto &child : op->children) {
-			collect_cond_tables(child, collect_cond_tables);
+			collect_cond_tables(child);
 		}
 	};
 
-	collect_cond_tables(subqueries_vec[0], collect_cond_tables);
+	collect_cond_tables(subqueries_vec[0]);
 
 	UnionFind uf;
 	// Union the pairs

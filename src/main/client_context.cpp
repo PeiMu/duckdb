@@ -489,6 +489,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 		while (config.enable_dbshaker_query_split) {
 			if (config.enable_dbshaker_split_jop) {
+#if ALWAYS_SPLIT
+				needToSplit = true;
+#else
 				needToSplit = needToSplit || subquery_preparer.NeedRewrite(subqueries.front());
 #if ENABLE_DEBUG_PRINT
 				if (needToSplit)
@@ -500,6 +503,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if ENABLE_DEBUG_PRINT
 				if (needToSplit)
 					Printer::Print("need reorder");
+#endif
 #endif
 				if (needToSplit) {
 					if (!subqueries.empty()) {
@@ -667,55 +671,55 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			                                                        estimated_card);
 			if (!ENABLE_PARALLEL_EXECUTION && nullptr != last_sibling_node) {
 				merge_sibling_expr = subquery_preparer.MergeSibling(subqueries.front(), std::move(last_sibling_node));
-			    // check if we need to swap the children
-			    // fixme: might have bugs when the data chunk merge to subqueries.front()[1]
-			    auto front_subquery_pointer = subqueries.front()[0].get();
-			    if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == front_subquery_pointer->type) {
-				    auto &join_op = front_subquery_pointer->Cast<LogicalComparisonJoin>();
-				    std::unordered_set<idx_t> left_cond_index, right_cond_index;
-				    auto get_cond_index = [](const unique_ptr<Expression> &expr) {
-#ifdef DEBUG
-					    D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
-#endif
-					    auto &bound_col_ref_expr = expr->Cast<BoundColumnRefExpression>();
-					    return bound_col_ref_expr.binding.table_index;
-				    };
-
-				    for (const auto &cond : join_op.conditions) {
-					    left_cond_index.insert(get_cond_index(cond.left));
-#ifdef DEBUG
-					    right_cond_index.insert(get_cond_index(cond.right));
-#endif
-				    }
-
-				    bool find_old_in_left = false;
-				    for (const auto &old_table_index : subquery_preparer.GetOldTableIndex()) {
-					    if (left_cond_index.count(old_table_index)) {
-						    find_old_in_left = true;
-						    break;
-					    }
-				    }
-
-				    if (!find_old_in_left) {
-#ifdef DEBUG
-					    bool find_old_in_right;
-					    for (const auto &old_table_index : subquery_preparer.GetOldTableIndex()) {
-						    if (right_cond_index.count(old_table_index)) {
-							    find_old_in_right = true;
-							    break;
-						    }
-					    }
-					    D_ASSERT(find_old_in_right);
-#endif
-						// todo: which will be better? swap children or swap condition?
-					    auto tmp = std::move(join_op.children[0]);
-					    join_op.children[0] = std::move(join_op.children[1]);
-					    join_op.children[1] = std::move(tmp);
-
-					    // because we swap the children, and it is not sibling anymore
-					    merge_sibling_expr = false;
-				    }
-			    }
+//			    // check if we need to swap the children
+//			    // fixme: might have bugs when the data chunk merge to subqueries.front()[1]
+//			    auto front_subquery_pointer = subqueries.front()[0].get();
+//			    if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == front_subquery_pointer->type) {
+//				    auto &join_op = front_subquery_pointer->Cast<LogicalComparisonJoin>();
+//				    std::unordered_set<idx_t> left_cond_index, right_cond_index;
+//				    auto get_cond_index = [](const unique_ptr<Expression> &expr) {
+//#ifdef DEBUG
+//					    D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
+//#endif
+//					    auto &bound_col_ref_expr = expr->Cast<BoundColumnRefExpression>();
+//					    return bound_col_ref_expr.binding.table_index;
+//				    };
+//
+//				    for (const auto &cond : join_op.conditions) {
+//					    left_cond_index.insert(get_cond_index(cond.left));
+//#ifdef DEBUG
+//					    right_cond_index.insert(get_cond_index(cond.right));
+//#endif
+//				    }
+//
+//				    bool find_old_in_left = false;
+//				    for (const auto &old_table_index : subquery_preparer.GetOldTableIndex()) {
+//					    if (left_cond_index.count(old_table_index)) {
+//						    find_old_in_left = true;
+//						    break;
+//					    }
+//				    }
+//
+//				    if (!find_old_in_left) {
+//#ifdef DEBUG
+//					    bool find_old_in_right;
+//					    for (const auto &old_table_index : subquery_preparer.GetOldTableIndex()) {
+//						    if (right_cond_index.count(old_table_index)) {
+//							    find_old_in_right = true;
+//							    break;
+//						    }
+//					    }
+//					    D_ASSERT(find_old_in_right);
+//#endif
+//						// todo: which will be better? swap children or swap condition?
+//					    auto tmp = std::move(join_op.children[0]);
+//					    join_op.children[0] = std::move(join_op.children[1]);
+//					    join_op.children[1] = std::move(tmp);
+//
+//					    // because we swap the children, and it is not sibling anymore
+//					    merge_sibling_expr = false;
+//				    }
+//			    }
 			} else {
 				merge_sibling_expr = false;
 			}

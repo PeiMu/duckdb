@@ -15,6 +15,7 @@
 #define TIME_BREAK_DOWN            false
 #define MANUAL_EXPLAIN_ANALYZE     false
 #define WHOLE_PLAN_EXPLAIN_ANALYZE false
+#define ALWAYS_SPLIT			   true
 
 #if ENABLE_MEASURE_EXE_TIME
 inline bool execute_plan = false;
