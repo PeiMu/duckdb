@@ -16,8 +16,9 @@
 #define MANUAL_EXPLAIN_ANALYZE     false
 #define WHOLE_PLAN_EXPLAIN_ANALYZE false
 #define ALWAYS_SPLIT			   true
+//#define ENABLE_MEASURE_EXE_TIME    true
 
-#if ENABLE_MEASURE_EXE_TIME
+#if ENABLE_MEASURE_EXE_TIME || ENABLE_MERGE_BACK_PLAN
 inline bool execute_plan = false;
 #endif
 

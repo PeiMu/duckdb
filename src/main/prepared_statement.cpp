@@ -83,13 +83,13 @@ unique_ptr<QueryResult> PreparedStatement::Execute(vector<Value> &values, bool a
 	if (pending->HasError()) {
 		return make_uniq<MaterializedQueryResult>(pending->GetErrorObject());
 	}
-#if ENABLE_MEASURE_EXE_TIME
+#if ENABLE_MEASURE_EXE_TIME || ENABLE_MERGE_BACK_PLAN
 	auto timer = chrono_tic();
 #endif
 	auto ret = pending->Execute();
-#if ENABLE_MEASURE_EXE_TIME
-	if (execute_plan || !context->config.enable_dbshaker_query_split) {
-		auto execute_time = chrono_toc(&timer, "PreparedStatement::Execute time is\n", false);
+#if ENABLE_MEASURE_EXE_TIME || ENABLE_MERGE_BACK_PLAN
+	if (execute_plan) {
+		auto execute_time = chrono_toc(&timer, "PreparedStatement::Execute time is, ", false);
 		// save time to a file
 		std::ofstream log_file;
 		log_file.open("time_log.csv", std::ios_base::app);
@@ -151,12 +151,14 @@ unique_ptr<ColumnDataCollection> PreparedStatement::ExecuteRow(ClientContextLock
 #endif
 	auto ret = pending->ExecuteRow(lock);
 #if ENABLE_MEASURE_EXE_TIME
-	auto execute_time = chrono_toc(&timer, "PreparedStatement::Execute time is\n", false);
-	// save time to a file
-	std::ofstream log_file;
-	log_file.open("time_log.csv", std::ios_base::app);
-	log_file << std::to_string(execute_time/1000) + ",";
-	log_file.close();
+	if (execute_plan) {
+		auto execute_time = chrono_toc(&timer, "PreparedStatement::Execute time is, ", false);
+		// save time to a file
+		std::ofstream log_file;
+		log_file.open("time_log.csv", std::ios_base::app);
+		log_file << std::to_string(execute_time / 1000) + ", ";
+		log_file.close();
+	}
 #endif
 	return ret;
 }

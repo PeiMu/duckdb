@@ -433,27 +433,48 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	plan->Verify(*this);
 #endif
 
-#if ENABLE_DEBUG_PRINT
-	// to show when have the real query
-	Printer::Print("Init plan");
-	plan->Print();
+#if ENABLE_MEASURE_EXE_TIME || ENABLE_MERGE_BACK_PLAN
+	execute_plan = plan->type == LogicalOperatorType::LOGICAL_PROJECTION;
 #endif
 
-#if TIME_BREAK_DOWN
-	auto timer = chrono_tic();
+#if ENABLE_DEBUG_PRINT
+	if (execute_plan) {
+		// to show when have the real query
+		Printer::Print("Init plan");
+		plan->Print();
+	}
 #endif
+
+#if TIME_BREAK_DOWN || ENABLE_MEASURE_EXE_TIME
+	std::chrono::high_resolution_clock::time_point timer;
+	if (execute_plan)
+		timer = chrono_tic();
+#endif
+
 	if (config.enable_optimizer && plan->RequireOptimizer()) {
 		profiler.StartPhase("optimizer");
 		Optimizer optimizer(*planner.binder, *this);
 		plan = optimizer.PreOptimize(std::move(plan));
 #if ENABLE_DEBUG_PRINT
-		D_ASSERT(plan);
-		// debug: print subquery
-		Printer::Print("After PreOptimization");
-		plan->Print();
+		if (execute_plan) {
+			// debug: print subquery
+			Printer::Print("After PreOptimization");
+			plan->Print();
+		}
 #endif
 #if TIME_BREAK_DOWN
-		chrono_toc(&timer, "PreOptimize time is\n");
+		if (execute_plan)
+			chrono_toc(&timer, "PreOptimize time is\n");
+#endif
+#if ENABLE_MEASURE_EXE_TIME
+		if (execute_plan) {
+			auto execute_time = chrono_toc(&timer, "PreOptimize time is\n", false);
+			// save time to a file
+			std::ofstream log_file;
+			log_file.open("time_log.csv", std::ios_base::app);
+			log_file << std::to_string(execute_time/1000) + ", ";
+			log_file.close();
+		}
 #endif
 
 		SubqueryPreparer subquery_preparer(*planner.binder, *this);
@@ -525,21 +546,25 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if REORDER_DATACHUNK
 				    plan = reorder_get.Optimize(std::move(plan));
 #if ENABLE_DEBUG_PRINT
-				    D_ASSERT(plan);
-				    // debug: print subquery
-				    Printer::Print("After ReorderGetOptimize");
-				    plan->Print();
+					if (execute_plan) {
+						D_ASSERT(plan);
+						// debug: print subquery
+						Printer::Print("After ReorderGetOptimize");
+						plan->Print();
+					}
 #endif
 #endif
 					subquery_preparer.Rewrite(plan);
 #if TIME_BREAK_DOWN
-					chrono_toc(&timer, "Rewrite time is\n");
+					if (execute_plan)
+						chrono_toc(&timer, "Rewrite time is\n");
 #endif
 #if ENABLE_DEBUG_PRINT
-					D_ASSERT(plan);
-					// debug: print subquery
-					Printer::Print("After subquery_preparer.Rewrite");
-					plan->Print();
+					if (execute_plan) {
+						// debug: print subquery
+						Printer::Print("After subquery_preparer.Rewrite");
+						plan->Print();
+					}
 #endif
 				}
 			}
@@ -567,10 +592,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 				break;
 			}
-
-#if ENABLE_MEASURE_EXE_TIME
-			execute_plan = true;
-#endif
 
 			unique_ptr<LogicalOperator> last_sibling_node = nullptr;
 			if (subqueries.front().size() > 1) {
@@ -610,9 +631,29 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if TIME_BREAK_DOWN
 			timer = chrono_tic();
 #endif
+#if ENABLE_MEASURE_EXE_TIME
+			if (execute_plan) {
+				auto execute_time = chrono_toc(&timer, "AQP pre-process time is\n", false);
+				// save time to a file
+				std::ofstream log_file;
+				log_file.open("time_log.csv", std::ios_base::app);
+				log_file << std::to_string(execute_time/1000) + ", ";
+				log_file.close();
+			}
+#endif
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "PostOptimize time is\n");
+#endif
+#if ENABLE_MEASURE_EXE_TIME
+			if (execute_plan) {
+				auto execute_time = chrono_toc(&timer, "PostOptimize time is\n", false);
+				// save time to a file
+				std::ofstream log_file;
+				log_file.open("time_log.csv", std::ios_base::app);
+				log_file << std::to_string(execute_time/1000) + ", ";
+				log_file.close();
+			}
 #endif
 #if ENABLE_DEBUG_PRINT
 			// debug: print subquery
@@ -631,7 +672,16 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			// merge sub_plan to whole_plan
 			whole_plan = subquery_preparer.MergeBack(std::move(whole_plan), sub_plan);
 #endif
-
+#if ENABLE_MEASURE_EXE_TIME
+			if (execute_plan) {
+				auto execute_time = chrono_toc(&timer, "AdaptSelect time is\n", false);
+				// save time to a file
+				std::ofstream log_file;
+				log_file.open("time_log.csv", std::ios_base::app);
+				log_file << std::to_string(execute_time/1000) + ", ";
+				log_file.close();
+			}
+#endif
 			auto subquery_stmt = subquery_preparer.AdaptSelect(result, sub_plan);
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "AdaptSelect time is\n");
@@ -644,6 +694,16 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			auto physical_plan = physical_planner.CreatePlan(std::move(sub_plan));
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "Create Physical Plan time is\n");
+#endif
+#if ENABLE_MEASURE_EXE_TIME
+			if (execute_plan) {
+				auto execute_time = chrono_toc(&timer, "CreatePlan time is\n", false);
+				// save time to a file
+				std::ofstream log_file;
+				log_file.open("time_log.csv", std::ios_base::app);
+				log_file << std::to_string(execute_time/1000) + ", ";
+				log_file.close();
+			}
 #endif
 #if ENABLE_DEBUG_PRINT
 			Printer::Print("subquery physical plan");
@@ -666,6 +726,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			unique_ptr<ColumnDataCollection> subquery_result = prepared_stmt->ExecuteRow(lock, bound_values, false);
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "Execute time is\n");
+#endif
+#if ENABLE_MEASURE_EXE_TIME
+			timer = chrono_tic();
 #endif
 			previous_result_card = subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result),
 			                                                        estimated_card);
@@ -761,9 +824,29 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if TIME_BREAK_DOWN
 				chrono_toc(&timer, "Prepare last subquery time is\n");
 #endif
+#if ENABLE_MEASURE_EXE_TIME
+				if (execute_plan) {
+					auto execute_time = chrono_toc(&timer, "AQP final post-process time is\n", false);
+					// save time to a file
+					std::ofstream log_file;
+					log_file.open("time_log.csv", std::ios_base::app);
+					log_file << std::to_string(execute_time/1000) + ", ";
+					log_file.close();
+				}
+#endif
 				break;
 			}
 			needToSplit = false;
+#if ENABLE_MEASURE_EXE_TIME
+			if (execute_plan) {
+				auto execute_time = chrono_toc(&timer, "AQP post-process time is\n", false);
+				// save time to a file
+				std::ofstream log_file;
+				log_file.open("time_log.csv", std::ios_base::app);
+				log_file << std::to_string(execute_time/1000) + ", ";
+				log_file.close();
+			}
+#endif
 		}
 
 #if MANUAL_EXPLAIN_ANALYZE
@@ -783,17 +866,31 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 
 #if TIME_BREAK_DOWN
-		timer = chrono_tic();
+		if (execute_plan)
+			timer = chrono_tic();
 #endif
 		plan = optimizer.PostOptimize(std::move(plan));
 		profiler.EndPhase();
 #if TIME_BREAK_DOWN
-		chrono_toc(&timer, "PostOptimize time is\n");
+		if (execute_plan)
+			chrono_toc(&timer, "PostOptimize time is\n");
+#endif
+#if ENABLE_MEASURE_EXE_TIME
+		if (execute_plan) {
+			auto execute_time = chrono_toc(&timer, "final PostOptimize time is\n", false);
+			// save time to a file
+			std::ofstream log_file;
+			log_file.open("time_log.csv", std::ios_base::app);
+			log_file << std::to_string(execute_time/1000) + ", ";
+			log_file.close();
+		}
 #endif
 #if ENABLE_DEBUG_PRINT
-		// debug: print subquery
-		Printer::Print("After the last PostOptimization");
-		plan->Print();
+		if (execute_plan) {
+			// debug: print subquery
+			Printer::Print("After the last PostOptimization");
+			plan->Print();
+		}
 #endif
 #if ENABLE_MERGE_BACK_PLAN
 		// merge sub_plan to whole_plan
@@ -1002,11 +1099,24 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	auto physical_plan = physical_planner.CreatePlan(std::move(plan));
 	profiler.EndPhase();
 #if TIME_BREAK_DOWN
-	chrono_toc(&timer, "Create Physical Plan time is\n");
+	if (execute_plan)
+		chrono_toc(&timer, "Create Physical Plan time is\n");
+#endif
+#if ENABLE_MEASURE_EXE_TIME
+	if (execute_plan) {
+		auto execute_time = chrono_toc(&timer, "final CreatePlan time is\n", false);
+		// save time to a file
+		std::ofstream log_file;
+		log_file.open("time_log.csv", std::ios_base::app);
+		log_file << std::to_string(execute_time/1000) + ", ";
+		log_file.close();
+	}
 #endif
 #if ENABLE_DEBUG_PRINT
-	Printer::Print("final physical plan");
-	physical_plan->Print();
+	if (execute_plan) {
+		Printer::Print("final physical plan");
+		physical_plan->Print();
+	}
 #endif
 
 #ifdef DEBUG
