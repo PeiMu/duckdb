@@ -1,6 +1,5 @@
 #!/bin/bash
 
-rm -rf job_result/
 mkdir -p job_result/
 rm -rf compile.log
 
