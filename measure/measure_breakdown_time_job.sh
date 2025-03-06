@@ -19,7 +19,7 @@ for sql in "${dir}"/*; do
     echo -ne ".read ${sql}" | duckdb ./imdb.db;
   done
 done
-mv ${LOG_NAME} official_breakdown_${LOG_NAME}
+mv ${LOG_NAME} duckdb_official_breakdown_${LOG_NAME}
 
 
 ###### without updating statistics
@@ -30,7 +30,7 @@ mv ${LOG_NAME} official_breakdown_${LOG_NAME}
 #    echo -ne ".read ${sql}" | duckdb ./imdb.db;
 #  done
 #done
-#mv ${LOG_NAME} js_wo_stats_breakdown_${LOG_NAME}
+#mv ${LOG_NAME} duckdb_js_wo_stats_breakdown_${LOG_NAME}
 
 cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWRITE=1 ENABLE_SPECIFY_EST_STAT=1 ENABLE_MEASURE_EXE_TIME=1 VERBOSE=1 make && cd measure/
 for sql in "${dir}"/*; do
@@ -39,7 +39,7 @@ for sql in "${dir}"/*; do
     echo -ne ".read ${sql}" | duckdb ./imdb.db;
   done
 done
-mv ${LOG_NAME} rsj_wo_stats_breakdown_${LOG_NAME}
+mv ${LOG_NAME} duckdb_rsj_wo_stats_breakdown_${LOG_NAME}
 
 ####### join order opt + split + merge back to the whole plan
 #cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWRITE=0 ENABLE_SPECIFY_EST_STAT=1 ENABLE_MERGE_BACK_PLAN=1 VERBOSE=1 make && cd measure/
@@ -49,7 +49,7 @@ mv ${LOG_NAME} rsj_wo_stats_breakdown_${LOG_NAME}
 #    echo -ne ".read ${sql}" | duckdb ./imdb.db;
 #  done
 #done
-#mv ${LOG_NAME} js_whole_plan_breakdown_${LOG_NAME}
+#mv ${LOG_NAME} duckdb_js_whole_plan_breakdown_${LOG_NAME}
 
 ###### reorder table + split + join order opt + merge back to the whole plan
 cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWRITE=1 ENABLE_SPECIFY_EST_STAT=1 ENABLE_MERGE_BACK_PLAN=1 VERBOSE=1 make && cd measure/
@@ -59,7 +59,7 @@ for sql in "${dir}"/*; do
     echo -ne ".read ${sql}" | duckdb ./imdb.db;
   done
 done
-mv ${LOG_NAME} rsj_whole_plan_wo_stats_breakdown_${LOG_NAME}
+mv ${LOG_NAME} duckdb_rsj_whole_plan_wo_stats_breakdown_${LOG_NAME}
 ###### without updating statistics
 
 
@@ -71,7 +71,7 @@ mv ${LOG_NAME} rsj_whole_plan_wo_stats_breakdown_${LOG_NAME}
 #    echo -ne ".read ${sql}" | duckdb ./imdb.db;
 #  done
 #done
-#mv ${LOG_NAME} js_breakdown_${LOG_NAME}
+#mv ${LOG_NAME} duckdb_js_breakdown_${LOG_NAME}
 
 ###### reorder table + split + join order opt
 cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWRITE=1 VERBOSE=1 ENABLE_MEASURE_EXE_TIME=1 make && cd measure/
@@ -81,7 +81,7 @@ for sql in "${dir}"/*; do
     echo -ne ".read ${sql}" | duckdb ./imdb.db;
   done
 done
-mv ${LOG_NAME} rsj_breakdown_${LOG_NAME}
+mv ${LOG_NAME} duckdb_rsj_breakdown_${LOG_NAME}
 
 
 ####### join order opt + split + merge back to the whole plan
@@ -92,7 +92,7 @@ mv ${LOG_NAME} rsj_breakdown_${LOG_NAME}
 #    echo -ne ".read ${sql}" | duckdb ./imdb.db;
 #  done
 #done
-#mv ${LOG_NAME} js_whole_plan_breakdown_${LOG_NAME}
+#mv ${LOG_NAME} duckdb_js_whole_plan_breakdown_${LOG_NAME}
 
 ###### reorder table + split + join order opt + merge back to the whole plan
 cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_MERGE_BACK_PLAN=1 ENABLE_CROSS_PRODUCT_REWRITE=1 VERBOSE=1 make && cd measure/
@@ -102,7 +102,7 @@ for sql in "${dir}"/*; do
     echo -ne ".read ${sql}" | duckdb ./imdb.db;
   done
 done
-mv ${LOG_NAME} rsj_whole_plan_breakdown_${LOG_NAME}
+mv ${LOG_NAME} duckdb_rsj_whole_plan_breakdown_${LOG_NAME}
 
 
 mv *${LOG_NAME} job_result/.
