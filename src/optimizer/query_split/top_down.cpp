@@ -264,6 +264,7 @@ void TopDownSplit::GetAggregateTableExpr(const LogicalAggregate &aggregate_op) {
 				GetCastExpr(expr->Cast<BoundCastExpression>());
 			} else {
 				Printer::Print("Doesn't support " + ExpressionTypeToString(expr->type) + " yet!");
+				D_ASSERT(false);
 			}
 		}
 	}

@@ -884,6 +884,60 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 			}
 			break;
 		}
+		case LogicalOperatorType::LOGICAL_FILTER: {
+			auto &filter = op->Cast<LogicalFilter>();
+			auto &exprs = filter.expressions;
+			for (auto &expr : exprs) {
+				if (ExpressionType::BOUND_COLUMN_REF == expr->type) {
+					RevertSubqueriesIndex(expr);
+				} else if (ExpressionType::VALUE_CONSTANT == expr->type) {
+					// it's a constant value, skip it
+				} else if (ExpressionType::BOUND_FUNCTION == expr->type) {
+					auto &bound_func_expr = expr->Cast<BoundFunctionExpression>();
+					for (auto &child_expr : bound_func_expr.children) {
+						if (ExpressionType::BOUND_COLUMN_REF == child_expr->type) {
+							RevertSubqueriesIndex(child_expr);
+						}
+					}
+				} else if (ExpressionType::COMPARE_BETWEEN == expr->type ||
+				           ExpressionType::COMPARE_NOT_BETWEEN == expr->type) {
+					auto &compare_expr = expr->Cast<BoundBetweenExpression>();
+					RevertSubqueriesIndex(compare_expr.input);
+				} else if (ExpressionType::COMPARE_NOTEQUAL == expr->type ||
+				           ExpressionType::COMPARE_EQUAL == expr->type ||
+				           ExpressionType::COMPARE_GREATERTHAN == expr->type ||
+				           ExpressionType::COMPARE_LESSTHAN == expr->type ||
+				           ExpressionType::COMPARE_GREATERTHANOREQUALTO == expr->type ||
+				           ExpressionType::COMPARE_LESSTHANOREQUALTO == expr->type) {
+					auto &compare_expr = expr->Cast<BoundComparisonExpression>();
+					if (ExpressionType::BOUND_COLUMN_REF == compare_expr.left->type) {
+						RevertSubqueriesIndex(compare_expr.left);
+					}
+					if (ExpressionType::BOUND_COLUMN_REF == compare_expr.right->type) {
+						RevertSubqueriesIndex(compare_expr.right);
+					}
+				} else if (ExpressionType::CONJUNCTION_OR == expr->type || ExpressionType::CONJUNCTION_AND == expr->type) {
+					auto &conjunction_expr = expr->Cast<BoundConjunctionExpression>();
+					for (auto &child_expr : conjunction_expr.children) {
+						if (ExpressionType::BOUND_COLUMN_REF == child_expr->type) {
+							RevertSubqueriesIndex(child_expr);
+						}
+					}
+				} else if (ExpressionType::OPERATOR_IS_NULL == expr->type ||
+				           ExpressionType::OPERATOR_IS_NOT_NULL == expr->type || ExpressionType::OPERATOR_NOT == expr->type) {
+					auto &operator_expr = expr->Cast<BoundOperatorExpression>();
+					for (auto &child_expr : operator_expr.children) {
+						if (ExpressionType::BOUND_COLUMN_REF == child_expr->type) {
+							RevertSubqueriesIndex(child_expr);
+						}
+					}
+				} else {
+					Printer::Print("Doesn't support " + ExpressionTypeToString(expr->type) + " in MergeBack yet!");
+					D_ASSERT(false);
+				}
+			}
+			break;
+		}
 		default:
 			break;
 		}
