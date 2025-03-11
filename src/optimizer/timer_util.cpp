@@ -107,6 +107,11 @@ const std::pair<idx_t, idx_t> GetExprIndex(const unique_ptr<Expression> &expr) {
 			return left_idx;
 		}
 	}
+	case ExpressionType::COMPARE_BETWEEN:
+	case ExpressionType::COMPARE_NOT_BETWEEN: {
+		auto &compare_expr = expr->Cast<BoundBetweenExpression>();
+		return GetExprIndex(compare_expr.input);
+	}
 	default:
 		Printer::Print("Doesn't support " + ExpressionTypeToString(expr->type) + " in GetExprIndex yet!");
 		D_ASSERT(false);
@@ -138,6 +143,11 @@ ColumnBinding &GetColumnBinding(unique_ptr<Expression> &expr) {
 #endif
 			return left_idx;
 		}
+	}
+	case ExpressionType::COMPARE_BETWEEN:
+	case ExpressionType::COMPARE_NOT_BETWEEN: {
+		auto &compare_expr = expr->Cast<BoundBetweenExpression>();
+		return GetColumnBinding(compare_expr.input);
 	}
 	default:
 		Printer::Print("Doesn't support " + ExpressionTypeToString(expr->type) + " in GetColumnBinding yet!");

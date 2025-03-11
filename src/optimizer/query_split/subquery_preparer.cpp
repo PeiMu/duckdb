@@ -862,56 +862,53 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 		case LogicalOperatorType::LOGICAL_FILTER: {
 			auto &filter = op->Cast<LogicalFilter>();
 			auto &exprs = filter.expressions;
-			for (auto &expr : exprs) {
-				if (ExpressionType::BOUND_COLUMN_REF == expr->type) {
-					RevertSubqueriesIndex(expr);
-				} else if (ExpressionType::VALUE_CONSTANT == expr->type) {
-					// it's a constant value, skip it
-				} else if (ExpressionType::BOUND_FUNCTION == expr->type) {
+			std::function<void(unique_ptr<Expression> & expr)> revert_index;
+			revert_index = [this, &revert_index](unique_ptr<Expression> &expr) {
+				switch (expr->type) {
+				case ExpressionType::VALUE_CONSTANT:
+					break;
+				case ExpressionType::BOUND_FUNCTION: {
 					auto &bound_func_expr = expr->Cast<BoundFunctionExpression>();
 					for (auto &child_expr : bound_func_expr.children) {
-						if (ExpressionType::BOUND_COLUMN_REF == child_expr->type) {
-							RevertSubqueriesIndex(child_expr);
-						}
+						revert_index(child_expr);
 					}
-				} else if (ExpressionType::COMPARE_BETWEEN == expr->type ||
-				           ExpressionType::COMPARE_NOT_BETWEEN == expr->type) {
-					auto &compare_expr = expr->Cast<BoundBetweenExpression>();
-					RevertSubqueriesIndex(compare_expr.input);
-				} else if (ExpressionType::COMPARE_NOTEQUAL == expr->type ||
-				           ExpressionType::COMPARE_EQUAL == expr->type ||
-				           ExpressionType::COMPARE_GREATERTHAN == expr->type ||
-				           ExpressionType::COMPARE_LESSTHAN == expr->type ||
-				           ExpressionType::COMPARE_GREATERTHANOREQUALTO == expr->type ||
-				           ExpressionType::COMPARE_LESSTHANOREQUALTO == expr->type) {
+					break;
+				}
+				case ExpressionType::COMPARE_NOTEQUAL:
+				case ExpressionType::COMPARE_EQUAL:
+				case ExpressionType::COMPARE_GREATERTHAN:
+				case ExpressionType::COMPARE_LESSTHAN:
+				case ExpressionType::COMPARE_GREATERTHANOREQUALTO:
+				case ExpressionType::COMPARE_LESSTHANOREQUALTO: {
 					auto &compare_expr = expr->Cast<BoundComparisonExpression>();
-					if (ExpressionType::BOUND_COLUMN_REF == compare_expr.left->type) {
-						RevertSubqueriesIndex(compare_expr.left);
-					}
-					if (ExpressionType::BOUND_COLUMN_REF == compare_expr.right->type) {
-						RevertSubqueriesIndex(compare_expr.right);
-					}
-				} else if (ExpressionType::CONJUNCTION_OR == expr->type ||
-				           ExpressionType::CONJUNCTION_AND == expr->type) {
+					revert_index(compare_expr.left);
+					revert_index(compare_expr.right);
+					break;
+				}
+				case ExpressionType::CONJUNCTION_OR:
+				case ExpressionType::CONJUNCTION_AND: {
 					auto &conjunction_expr = expr->Cast<BoundConjunctionExpression>();
 					for (auto &child_expr : conjunction_expr.children) {
-						if (ExpressionType::BOUND_COLUMN_REF == child_expr->type) {
-							RevertSubqueriesIndex(child_expr);
-						}
+						revert_index(child_expr);
 					}
-				} else if (ExpressionType::OPERATOR_IS_NULL == expr->type ||
-				           ExpressionType::OPERATOR_IS_NOT_NULL == expr->type ||
-				           ExpressionType::OPERATOR_NOT == expr->type) {
+					break;
+				}
+				case ExpressionType::OPERATOR_IS_NULL:
+				case ExpressionType::OPERATOR_IS_NOT_NULL:
+				case ExpressionType::OPERATOR_NOT: {
 					auto &operator_expr = expr->Cast<BoundOperatorExpression>();
 					for (auto &child_expr : operator_expr.children) {
-						if (ExpressionType::BOUND_COLUMN_REF == child_expr->type) {
-							RevertSubqueriesIndex(child_expr);
-						}
+						revert_index(child_expr);
 					}
-				} else {
-					Printer::Print("Doesn't support " + ExpressionTypeToString(expr->type) + " in MergeBack yet!");
-					D_ASSERT(false);
+					break;
 				}
+				default:
+					RevertSubqueriesIndex(expr);
+				}
+			};
+
+			for (auto &expr : exprs) {
+				revert_index(expr);
 			}
 			break;
 		}

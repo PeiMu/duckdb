@@ -194,33 +194,46 @@ std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter
 
 	std::function<void(const unique_ptr<Expression> &expr)> add_expr;
 	add_expr = [&table_exprs, this, &add_expr](const unique_ptr<Expression> &expr) {
-		if (ExpressionType::BOUND_COLUMN_REF == expr->type) {
+		switch (expr->type) {
+		case ExpressionType::VALUE_CONSTANT:
+			break;
+		case ExpressionType::BOUND_COLUMN_REF:
 			AddTableExprs(table_exprs, expr);
-		} else if (ExpressionType::BOUND_FUNCTION == expr->type) {
+			break;
+		case ExpressionType::BOUND_FUNCTION:
 			AddFunctionExpr(table_exprs, expr->Cast<BoundFunctionExpression>());
-		} else if (ExpressionType::COMPARE_NOTEQUAL == expr->type || ExpressionType::COMPARE_EQUAL == expr->type ||
-		           ExpressionType::COMPARE_GREATERTHAN == expr->type ||
-		           ExpressionType::COMPARE_LESSTHAN == expr->type ||
-		           ExpressionType::COMPARE_GREATERTHANOREQUALTO == expr->type ||
-		           ExpressionType::COMPARE_LESSTHANOREQUALTO == expr->type) {
+			break;
+		case ExpressionType::COMPARE_NOTEQUAL:
+		case ExpressionType::COMPARE_EQUAL:
+		case ExpressionType::COMPARE_GREATERTHAN:
+		case ExpressionType::COMPARE_LESSTHAN:
+		case ExpressionType::COMPARE_GREATERTHANOREQUALTO:
+		case ExpressionType::COMPARE_LESSTHANOREQUALTO:
 			AddComparisonExpr(table_exprs, expr->Cast<BoundComparisonExpression>());
-		} else if (ExpressionType::CONJUNCTION_OR == expr->type || ExpressionType::CONJUNCTION_AND == expr->type) {
+			break;
+		case ExpressionType::CONJUNCTION_OR:
+		case ExpressionType::CONJUNCTION_AND: {
 			auto &conjunction_expr = expr->Cast<BoundConjunctionExpression>();
 			for (const auto &child_expr : conjunction_expr.children) {
 				add_expr(child_expr);
 			}
-		} else if (ExpressionType::OPERATOR_IS_NULL == expr->type ||
-		           ExpressionType::OPERATOR_IS_NOT_NULL == expr->type || ExpressionType::OPERATOR_NOT == expr->type) {
+			break;
+		}
+		case ExpressionType::OPERATOR_IS_NULL:
+		case ExpressionType::OPERATOR_IS_NOT_NULL:
+		case ExpressionType::OPERATOR_NOT: {
 			auto &operator_expr = expr->Cast<BoundOperatorExpression>();
 			for (const auto &child_expr : operator_expr.children) {
 				add_expr(child_expr);
 			}
-		} else if (ExpressionType::COMPARE_BETWEEN == expr->type) {
+			break;
+		}
+		case ExpressionType::COMPARE_BETWEEN: {
 			auto &bound_between_expr = expr->Cast<BoundBetweenExpression>();
 			add_expr(bound_between_expr.input);
-		} else if (ExpressionType::VALUE_CONSTANT == expr->type) {
-			// it's a constant value, skip it
-		} else {
+			break;
+		}
+		default:
 			Printer::Print(
 			    StringUtil::Format("Do not support yet, expr->type:  %s", ExpressionTypeToString(expr->type)));
 			D_ASSERT(false);
