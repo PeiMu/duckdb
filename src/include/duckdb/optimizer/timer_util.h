@@ -9,6 +9,7 @@
 #pragma once
 
 #include "duckdb/common/printer.hpp"
+
 #include <chrono>
 #include <fstream>
 
@@ -19,7 +20,10 @@ void toc(timespec *start_time, const char *prefix);
 
 std::chrono::high_resolution_clock::time_point chrono_tic();
 
-long chrono_toc(std::chrono::high_resolution_clock::time_point* start_time, const char* prefix, bool print=true);
+long chrono_toc(std::chrono::high_resolution_clock::time_point *start_time, const char *prefix, bool print = true);
 
 void appendLineToFile(string filepath, string line);
+
+const std::pair<idx_t, idx_t> GetExprIndex(const unique_ptr<Expression> &expr);
+ColumnBinding &GetColumnBinding(unique_ptr<Expression> &expr);
 } // namespace duckdb

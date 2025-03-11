@@ -13,7 +13,7 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 #endif
 
 	// collect all tables
-	std::map<std::pair<idx_t, idx_t>, JoinCondition> join_conds;
+	std::map<std::pair<idx_t, idx_t>, std::vector<JoinCondition>> join_conds;
 	std::map<idx_t, unique_ptr<LogicalOperator>> table_index_blocks;
 	// <table_index, card>
 	std::deque<std::pair<idx_t, idx_t>> table_card_order;
@@ -57,13 +57,12 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 				std::function<void(unique_ptr<LogicalOperator> & op)> collect_filter;
 				std::pair<idx_t, idx_t> temp_table_card;
 				int table_index = -1;
-				collect_filter = [&collect_filter, &table_card_order, &table_index, &temp_table_card,
+				collect_filter = [&collect_filter, &table_index, &temp_table_card,
 				                  this](unique_ptr<LogicalOperator> &op) {
 					for (auto &child : op->children) {
 						if (LogicalOperatorType::LOGICAL_GET == child->type) {
 							auto &get_op = child->Cast<LogicalGet>();
-							temp_table_card =
-							    std::make_pair(get_op.table_index, get_op.EstimateCardinality(context));
+							temp_table_card = std::make_pair(get_op.table_index, get_op.EstimateCardinality(context));
 #if DEBUG
 							// the FILTER should only have one table,
 							// and we ignore DATA_CHUNK since it should only have a small number of records
@@ -99,12 +98,21 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 							if (JoinType::MARK == join_op.join_type || JoinType::SEMI == join_op.join_type) {
 								// todo: estimate the cardinality of IN clause, after modifying STATISTICS_PROPAGATION
 							}
+						} else if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == child->type) {
+							// skip
 						} else {
-							collect_filter(child);
+							Printer::Print("Doesn't support " + LogicalOperatorToString(child->type) +
+							               " in ReorderGet Opt yet!");
+							D_ASSERT(false);
 						}
 					}
 				};
 				collect_filter(child);
+				if (-1 == table_index) {
+					collect_block(child->children[0]);
+					continue;
+				}
+
 				if (in_clause) {
 					// todo: estimate the cardinality of IN clause
 				}
@@ -117,25 +125,14 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 					}
 				}
 				table_card_order.push_back(temp_table_card);
-#if DEBUG
-				D_ASSERT(table_index != -1);
-#endif
 				table_index_blocks[table_index] = std::move(child);
 				continue;
 			} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->type) {
 				auto &join_op = child->Cast<LogicalComparisonJoin>();
 				for (auto &cond : join_op.conditions) {
-					auto &left_table = cond.left;
-#ifdef DEBUG
-					D_ASSERT(left_table->type == ExpressionType::BOUND_COLUMN_REF);
-#endif
-					auto left_table_index = left_table->Cast<BoundColumnRefExpression>().binding.table_index;
-					auto &right_table = cond.right;
-#ifdef DEBUG
-					D_ASSERT(right_table->type == ExpressionType::BOUND_COLUMN_REF);
-#endif
-					auto right_table_index = right_table->Cast<BoundColumnRefExpression>().binding.table_index;
-					join_conds[std::make_pair(left_table_index, right_table_index)] = std::move(cond);
+					auto left_table_index = GetExprIndex(cond.left).first;
+					auto right_table_index = GetExprIndex(cond.right).first;
+					join_conds[std::make_pair(left_table_index, right_table_index)].emplace_back(std::move(cond));
 				}
 			}
 			collect_block(child);
@@ -169,17 +166,39 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 		for (auto it = join_conds.begin(); it != join_conds.end();) {
 			bool find_in_left = false;
 			if (it->first.first == table_index) {
-#ifdef DEBUG
-				D_ASSERT(it->second.comparison == ExpressionType::COMPARE_EQUAL);
-#endif
-				// swap the cond
-				auto temp = std::move(it->second.left);
-				it->second.left = std::move(it->second.right);
-				it->second.right = std::move(temp);
+				for (auto &cond : it->second) {
+					// swap the cond
+					auto temp = std::move(cond.left);
+					cond.left = std::move(cond.right);
+					cond.right = std::move(temp);
+					// change the comparison symbol if necessary
+					switch (cond.comparison) {
+					case ExpressionType::COMPARE_EQUAL:
+						break;
+					case ExpressionType::COMPARE_NOTEQUAL:
+						break;
+					case ExpressionType::COMPARE_LESSTHAN:
+						cond.comparison = ExpressionType::COMPARE_GREATERTHAN;
+						break;
+					case ExpressionType::COMPARE_GREATERTHAN:
+						cond.comparison = ExpressionType::COMPARE_LESSTHAN;
+						break;
+					case ExpressionType::COMPARE_LESSTHANOREQUALTO:
+						cond.comparison = ExpressionType::COMPARE_GREATERTHANOREQUALTO;
+						break;
+					case ExpressionType::COMPARE_GREATERTHANOREQUALTO:
+						cond.comparison = ExpressionType::COMPARE_LESSTHANOREQUALTO;
+						break;
+					default:
+						Printer::Print("Doesn't support " + ExpressionTypeToString(cond.comparison) +
+						               " in ReorderGet Opt yet!");
+						D_ASSERT(false);
+					}
+				}
 				find_in_left = true;
 			}
 			if (find_in_left || it->first.second == table_index) {
-				join_conditions.emplace_back(std::move(it->second));
+				std::move(it->second.begin(), it->second.end(), std::back_inserter(join_conditions));
 				if (joined_table_index.empty() || (joined_table_index.top() != table_index)) {
 					used = true;
 					joined_table_index.push(table_index);

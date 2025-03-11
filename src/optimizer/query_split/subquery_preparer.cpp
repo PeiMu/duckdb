@@ -370,15 +370,12 @@ unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalO
 #endif
 			auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
 			for (auto &expr : aggregate_expr.children) {
-#ifdef DEBUG
-				D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
-#endif
-				auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
-				column_ref_expr.binding.table_index = original_proj_expr[proj_expr_index].table_idx;
-				column_ref_expr.binding.column_index = original_proj_expr[proj_expr_index].column_idx;
+				auto &column_binding = GetColumnBinding(expr);
+				column_binding.table_index = original_proj_expr[proj_expr_index].table_idx;
+				column_binding.column_index = original_proj_expr[proj_expr_index].column_idx;
 #ifdef DEBUG
 				// D_ASSERT(column_ref_expr.alias == original_proj_expr[proj_expr_index].column_name);
-				D_ASSERT(column_ref_expr.return_type == original_proj_expr[proj_expr_index].return_type);
+				D_ASSERT(expr->return_type == original_proj_expr[proj_expr_index].return_type);
 #endif
 			}
 			proj_expr_index++;
@@ -390,15 +387,12 @@ unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalO
 #endif
 		auto proj_expr_index = 0;
 		for (auto &expr : proj_op.expressions) {
+			auto &column_binding = GetColumnBinding(expr);
+			column_binding.table_index = original_proj_expr[proj_expr_index].table_idx;
+			column_binding.column_index = original_proj_expr[proj_expr_index].column_idx;
 #ifdef DEBUG
-			D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
-#endif
-			auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
-			column_ref_expr.binding.table_index = original_proj_expr[proj_expr_index].table_idx;
-			column_ref_expr.binding.column_index = original_proj_expr[proj_expr_index].column_idx;
-#ifdef DEBUG
-			D_ASSERT(column_ref_expr.alias == original_proj_expr[proj_expr_index].column_name);
-			D_ASSERT(column_ref_expr.return_type == original_proj_expr[proj_expr_index].return_type);
+			D_ASSERT(expr->alias == original_proj_expr[proj_expr_index].column_name);
+			D_ASSERT(expr->return_type == original_proj_expr[proj_expr_index].return_type);
 #endif
 			proj_expr_index++;
 		}
@@ -537,14 +531,8 @@ bool SubqueryPreparer::NeedRewrite(const std::vector<unique_ptr<LogicalOperator>
 
 			// collect table pairs form JOIN
 			for (const auto &cond : join_op.conditions) {
-#ifdef DEBUG
-				D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.left->type);
-				D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.right->type);
-#endif
-				auto &left_expr = cond.left->Cast<BoundColumnRefExpression>();
-				auto &right_expr = cond.right->Cast<BoundColumnRefExpression>();
 				table_index_pairs.emplace_back(
-				    std::make_pair(left_expr.binding.table_index, right_expr.binding.table_index));
+				    std::make_pair(GetExprIndex(cond.left).first, GetExprIndex(cond.right).first));
 			}
 		}
 
@@ -604,14 +592,8 @@ bool SubqueryPreparer::NeedReorder(const std::vector<unique_ptr<LogicalOperator>
 	// collect all table index
 	std::unordered_set<idx_t> table_indexes;
 	for (const auto &cond : current_join.conditions) {
-#ifdef DEBUG
-		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.left->type);
-		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.right->type);
-#endif
-		auto &left_expr = cond.left->Cast<BoundColumnRefExpression>();
-		table_indexes.insert(left_expr.binding.table_index);
-		auto &right_expr = cond.right->Cast<BoundColumnRefExpression>();
-		table_indexes.insert(right_expr.binding.table_index);
+		table_indexes.insert(GetExprIndex(cond.left).first);
+		table_indexes.insert(GetExprIndex(cond.right).first);
 	}
 
 	// check if it is needed to reorder,
@@ -773,20 +755,13 @@ void SubqueryPreparer::ExplainAnalyzeSubQuery(ClientContextLock &lock,
 }
 
 void SubqueryPreparer::RevertSubqueriesIndex(unique_ptr<Expression> &expr) {
-#ifdef DEBUG
-	D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
-#endif
-	auto &bound_col_ref_expr = expr->Cast<BoundColumnRefExpression>();
-	auto find_expr = stored_sub_plan_exprs.find(bound_col_ref_expr.binding.table_index);
+	auto &column_binding = GetColumnBinding(expr);
+	auto find_expr = stored_sub_plan_exprs.find(column_binding.table_index);
 	if (find_expr != stored_sub_plan_exprs.end()) {
-		auto &origin_expr = find_expr->second[bound_col_ref_expr.binding.column_index];
-#ifdef DEBUG
-		D_ASSERT(origin_expr != nullptr);
-		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == origin_expr->type);
-#endif
-		auto &bound_col_ref_origin = origin_expr->Cast<BoundColumnRefExpression>();
-		bound_col_ref_expr.binding.table_index = bound_col_ref_origin.binding.table_index;
-		bound_col_ref_expr.binding.column_index = bound_col_ref_origin.binding.column_index;
+		auto &origin_expr = find_expr->second[column_binding.column_index];
+		auto origin_expr_index = GetExprIndex(origin_expr);
+		column_binding.table_index = origin_expr_index.first;
+		column_binding.column_index = origin_expr_index.second;
 	}
 }
 
@@ -916,7 +891,8 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 					if (ExpressionType::BOUND_COLUMN_REF == compare_expr.right->type) {
 						RevertSubqueriesIndex(compare_expr.right);
 					}
-				} else if (ExpressionType::CONJUNCTION_OR == expr->type || ExpressionType::CONJUNCTION_AND == expr->type) {
+				} else if (ExpressionType::CONJUNCTION_OR == expr->type ||
+				           ExpressionType::CONJUNCTION_AND == expr->type) {
 					auto &conjunction_expr = expr->Cast<BoundConjunctionExpression>();
 					for (auto &child_expr : conjunction_expr.children) {
 						if (ExpressionType::BOUND_COLUMN_REF == child_expr->type) {
@@ -924,7 +900,8 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 						}
 					}
 				} else if (ExpressionType::OPERATOR_IS_NULL == expr->type ||
-				           ExpressionType::OPERATOR_IS_NOT_NULL == expr->type || ExpressionType::OPERATOR_NOT == expr->type) {
+				           ExpressionType::OPERATOR_IS_NOT_NULL == expr->type ||
+				           ExpressionType::OPERATOR_NOT == expr->type) {
 					auto &operator_expr = expr->Cast<BoundOperatorExpression>();
 					for (auto &child_expr : operator_expr.children) {
 						if (ExpressionType::BOUND_COLUMN_REF == child_expr->type) {
@@ -976,11 +953,7 @@ SubqueryPreparer::CheckTableUsage(LogicalOperator *current_join_pointer, unorder
 
 	// 1. collect the left-cond of JOIN, since the right child must be shown in the right-cond
 	for (const auto &cond : current_join.conditions) {
-#ifdef DEBUG
-		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.left->type);
-#endif
-		auto &left_expr = cond.left->Cast<BoundColumnRefExpression>();
-		left_cond_table_index.emplace(left_expr.binding.table_index);
+		left_cond_table_index.emplace(GetExprIndex(cond.left).first);
 	}
 
 	// 2. collect all tables below the current JOIN in the top-down order

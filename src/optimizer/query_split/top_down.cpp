@@ -85,7 +85,7 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 		case LogicalOperatorType::LOGICAL_CROSS_PRODUCT: {
 			if (0 == idx && nullptr == op.children[1]) {
 				// fixme: add query_split_index when support ENABLE_PARALLEL_EXECUTION
-//				query_split_index++;
+				//				query_split_index++;
 				child->split_index = query_split_index;
 			}
 			break;
@@ -157,11 +157,8 @@ void TopDownSplit::GetTargetTables(LogicalOperator &op) {
 std::set<TableExpr> TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &join_op) {
 	std::set<TableExpr> table_exprs;
 	for (const auto &cond : join_op.conditions) {
-#ifdef DEBUG
-		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == cond.left->type);
-#endif
-		GetColRefExpr(table_exprs, cond.left->Cast<BoundColumnRefExpression>());
-		GetColRefExpr(table_exprs, cond.right->Cast<BoundColumnRefExpression>());
+		AddTableExprs(table_exprs, cond.left);
+		AddTableExprs(table_exprs, cond.right);
 	}
 	return table_exprs;
 }
@@ -195,32 +192,32 @@ std::set<TableExpr> TopDownSplit::GetSeqScanTableExpr(const LogicalGet &get_op) 
 std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter_op) {
 	std::set<TableExpr> table_exprs;
 
-	std::function<void(const unique_ptr<Expression> &expr)> get_expr;
-	get_expr = [&table_exprs, this, &get_expr](const unique_ptr<Expression> &expr) {
+	std::function<void(const unique_ptr<Expression> &expr)> add_expr;
+	add_expr = [&table_exprs, this, &add_expr](const unique_ptr<Expression> &expr) {
 		if (ExpressionType::BOUND_COLUMN_REF == expr->type) {
-			GetColRefExpr(table_exprs, expr->Cast<BoundColumnRefExpression>());
+			AddTableExprs(table_exprs, expr);
 		} else if (ExpressionType::BOUND_FUNCTION == expr->type) {
-			GetFunctionExpr(table_exprs, expr->Cast<BoundFunctionExpression>());
+			AddFunctionExpr(table_exprs, expr->Cast<BoundFunctionExpression>());
 		} else if (ExpressionType::COMPARE_NOTEQUAL == expr->type || ExpressionType::COMPARE_EQUAL == expr->type ||
 		           ExpressionType::COMPARE_GREATERTHAN == expr->type ||
 		           ExpressionType::COMPARE_LESSTHAN == expr->type ||
 		           ExpressionType::COMPARE_GREATERTHANOREQUALTO == expr->type ||
 		           ExpressionType::COMPARE_LESSTHANOREQUALTO == expr->type) {
-			GetComparisonExpr(table_exprs, expr->Cast<BoundComparisonExpression>());
+			AddComparisonExpr(table_exprs, expr->Cast<BoundComparisonExpression>());
 		} else if (ExpressionType::CONJUNCTION_OR == expr->type || ExpressionType::CONJUNCTION_AND == expr->type) {
 			auto &conjunction_expr = expr->Cast<BoundConjunctionExpression>();
 			for (const auto &child_expr : conjunction_expr.children) {
-				get_expr(child_expr);
+				add_expr(child_expr);
 			}
 		} else if (ExpressionType::OPERATOR_IS_NULL == expr->type ||
 		           ExpressionType::OPERATOR_IS_NOT_NULL == expr->type || ExpressionType::OPERATOR_NOT == expr->type) {
 			auto &operator_expr = expr->Cast<BoundOperatorExpression>();
 			for (const auto &child_expr : operator_expr.children) {
-				get_expr(child_expr);
+				add_expr(child_expr);
 			}
 		} else if (ExpressionType::COMPARE_BETWEEN == expr->type) {
 			auto &bound_between_expr = expr->Cast<BoundBetweenExpression>();
-			get_expr(bound_between_expr.input);
+			add_expr(bound_between_expr.input);
 		} else if (ExpressionType::VALUE_CONSTANT == expr->type) {
 			// it's a constant value, skip it
 		} else {
@@ -231,7 +228,7 @@ std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter
 	};
 
 	for (const auto &expr : filter_op.expressions) {
-		get_expr(expr);
+		add_expr(expr);
 	}
 	return table_exprs;
 }
@@ -276,12 +273,13 @@ void TopDownSplit::GetAggregateTableExpr(const LogicalAggregate &aggregate_op) {
 	}
 }
 
-void TopDownSplit::GetColRefExpr(set<TableExpr> &table_exprs, const BoundColumnRefExpression &column_ref_expr) {
+void TopDownSplit::AddTableExprs(std::set<TableExpr> &table_exprs, const unique_ptr<Expression> &expr) {
 	TableExpr table_expr;
-	table_expr.table_idx = column_ref_expr.binding.table_index;
-	table_expr.column_idx = column_ref_expr.binding.column_index;
-	table_expr.column_name = column_ref_expr.alias;
-	table_expr.return_type = column_ref_expr.return_type;
+	auto expr_index = GetExprIndex(expr);
+	table_expr.table_idx = expr_index.first;
+	table_expr.column_idx = expr_index.second;
+	table_expr.column_name = expr->alias;
+	table_expr.return_type = expr->return_type;
 	if (target_tables.count(table_expr.table_idx)) {
 		table_exprs.emplace(table_expr);
 	}
@@ -298,12 +296,14 @@ void TopDownSplit::GetColRefExpr(const BoundColumnRefExpression &column_ref_expr
 	}
 }
 
-void TopDownSplit::GetFunctionExpr(set<TableExpr> &table_exprs, const BoundFunctionExpression &function_expr) {
+void TopDownSplit::AddFunctionExpr(std::set<TableExpr> &table_exprs, const BoundFunctionExpression &function_expr) {
 	for (const auto &func_child : function_expr.children) {
 		if (ExpressionType::BOUND_COLUMN_REF == func_child->type) {
-			GetColRefExpr(table_exprs, func_child->Cast<BoundColumnRefExpression>());
+			AddTableExprs(table_exprs, func_child);
 		} else if (ExpressionType::VALUE_CONSTANT == func_child->type) {
 			// it's a constant value, skip it
+		} else if (ExpressionType::OPERATOR_CAST == func_child->type) {
+			AddCastExpr(table_exprs, func_child->Cast<BoundCastExpression>());
 		} else {
 			Printer::Print(StringUtil::Format("Do not support yet, func_child->type:  %s",
 			                                  ExpressionTypeToString(func_child->type)));
@@ -328,6 +328,17 @@ void TopDownSplit::GetFunctionExpr(const BoundFunctionExpression &function_expr)
 	}
 }
 
+void TopDownSplit::AddCastExpr(std::set<TableExpr> &table_exprs, const BoundCastExpression &cast_expr) {
+	if (ExpressionType::BOUND_COLUMN_REF == cast_expr.child->type) {
+		AddTableExprs(table_exprs, cast_expr.child);
+	} else if (ExpressionType::BOUND_FUNCTION == cast_expr.child->type) {
+		AddFunctionExpr(table_exprs, cast_expr.child->Cast<BoundFunctionExpression>());
+	} else {
+		Printer::Print("Doesn't support " + ExpressionTypeToString(cast_expr.child->type) + " yet!");
+		D_ASSERT(false);
+	}
+}
+
 void TopDownSplit::GetCastExpr(const BoundCastExpression &cast_expr) {
 	if (ExpressionType::BOUND_COLUMN_REF == cast_expr.child->type) {
 		GetColRefExpr(cast_expr.child->Cast<BoundColumnRefExpression>());
@@ -339,12 +350,13 @@ void TopDownSplit::GetCastExpr(const BoundCastExpression &cast_expr) {
 	}
 }
 
-void TopDownSplit::GetComparisonExpr(set<TableExpr> &table_exprs, const BoundComparisonExpression &comparison_expr) {
+void TopDownSplit::AddComparisonExpr(std::set<TableExpr> &table_exprs,
+                                     const BoundComparisonExpression &comparison_expr) {
 	auto &left_expr = comparison_expr.left;
 	if (ExpressionType::BOUND_COLUMN_REF == left_expr->type) {
-		GetColRefExpr(table_exprs, left_expr->Cast<BoundColumnRefExpression>());
+		AddTableExprs(table_exprs, left_expr);
 	} else if (ExpressionType::BOUND_FUNCTION == left_expr->type) {
-		GetFunctionExpr(table_exprs, left_expr->Cast<BoundFunctionExpression>());
+		AddFunctionExpr(table_exprs, left_expr->Cast<BoundFunctionExpression>());
 	} else if (ExpressionType::VALUE_CONSTANT == left_expr->type) {
 		// it's a constant value, skip it
 	} else {
@@ -355,9 +367,9 @@ void TopDownSplit::GetComparisonExpr(set<TableExpr> &table_exprs, const BoundCom
 
 	auto &right_expr = comparison_expr.right;
 	if (ExpressionType::BOUND_COLUMN_REF == right_expr->type) {
-		GetColRefExpr(table_exprs, right_expr->Cast<BoundColumnRefExpression>());
+		AddTableExprs(table_exprs, right_expr);
 	} else if (ExpressionType::BOUND_FUNCTION == left_expr->type) {
-		GetFunctionExpr(table_exprs, left_expr->Cast<BoundFunctionExpression>());
+		AddFunctionExpr(table_exprs, left_expr->Cast<BoundFunctionExpression>());
 	} else if (ExpressionType::VALUE_CONSTANT == right_expr->type) {
 		// it's a constant value, skip it
 	} else {

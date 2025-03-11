@@ -10,6 +10,7 @@
 
 #include "duckdb/catalog/catalog_entry/table_catalog_entry.hpp"
 #include "duckdb/optimizer/query_split/split_algorithm.hpp"
+#include "duckdb/optimizer/timer_util.h"
 #include "duckdb/planner/expression/bound_between_expression.hpp"
 #include "duckdb/planner/expression/bound_cast_expression.hpp"
 #include "duckdb/planner/expression/bound_columnref_expression.hpp"
@@ -84,12 +85,13 @@ private:
 
 	//! Collect all used tables into `target_tables`
 	void GetTargetTables(LogicalOperator &op);
-	void GetColRefExpr(std::set<TableExpr> &table_exprs, const BoundColumnRefExpression &column_ref_expr);
+	void AddTableExprs(std::set<TableExpr> &table_exprs, const unique_ptr<Expression> &expr);
 	void GetColRefExpr(const BoundColumnRefExpression &column_ref_expr);
-	void GetFunctionExpr(std::set<TableExpr> &table_exprs, const BoundFunctionExpression &function_expr);
+	void AddFunctionExpr(std::set<TableExpr> &table_exprs, const BoundFunctionExpression &function_expr);
 	void GetFunctionExpr(const BoundFunctionExpression &function_expr);
+	void AddCastExpr(std::set<TableExpr> &table_exprs, const BoundCastExpression &cast_expr);
 	void GetCastExpr(const BoundCastExpression &cast_expr);
-	void GetComparisonExpr(std::set<TableExpr> &table_exprs, const BoundComparisonExpression &comparison_expr);
+	void AddComparisonExpr(std::set<TableExpr> &table_exprs, const BoundComparisonExpression &comparison_expr);
 
 private:
 #if SPLIT_FILTER
