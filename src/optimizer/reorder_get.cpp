@@ -246,6 +246,11 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 
 	plan_pointer->children.push_back(std::move(current_plan));
 
+#ifdef DEBUG
+	Printer::Print("after ReorderGet");
+	plan->Print();
+#endif
+
 	return std::move(plan);
 }
 } // namespace duckdb

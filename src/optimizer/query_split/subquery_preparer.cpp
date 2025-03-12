@@ -360,27 +360,41 @@ unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalO
 	if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == proj_op.children[0]->type) {
 		// update aggregate expressions
 		auto &aggregate_op = proj_op.children[0]->Cast<LogicalAggregate>();
-#ifdef DEBUG
-		D_ASSERT(aggregate_op.expressions.size() == original_proj_expr.size());
-#endif
 		auto proj_expr_index = 0;
-		for (auto &agg_expr : aggregate_op.expressions) {
+		if (aggregate_op.groups.empty()) {
+			// it's a aggregate node
 #ifdef DEBUG
-			D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
+			D_ASSERT(aggregate_op.expressions.size() == original_proj_expr.size());
 #endif
-			auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
-			for (auto &expr : aggregate_expr.children) {
-				auto &column_binding = GetColumnBinding(expr);
+			for (auto &agg_expr : aggregate_op.expressions) {
+#ifdef DEBUG
+				D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
+#endif
+				auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
+				for (auto &expr : aggregate_expr.children) {
+					auto &column_binding = GetColumnBinding(expr);
+					column_binding.table_index = original_proj_expr[proj_expr_index].table_idx;
+					column_binding.column_index = original_proj_expr[proj_expr_index].column_idx;
+#ifdef DEBUG
+					// D_ASSERT(expr.alias == original_proj_expr[proj_expr_index].column_name);
+					D_ASSERT(expr->return_type == original_proj_expr[proj_expr_index].return_type);
+#endif
+				}
+				proj_expr_index++;
+			}
+		} else {
+			// it's a group by node
+			for (auto &agg_expr : aggregate_op.groups) {
+				auto &column_binding = GetColumnBinding(agg_expr);
 				column_binding.table_index = original_proj_expr[proj_expr_index].table_idx;
 				column_binding.column_index = original_proj_expr[proj_expr_index].column_idx;
 #ifdef DEBUG
-				// D_ASSERT(column_ref_expr.alias == original_proj_expr[proj_expr_index].column_name);
-				D_ASSERT(expr->return_type == original_proj_expr[proj_expr_index].return_type);
+				// D_ASSERT(agg_expr.alias == original_proj_expr[proj_expr_index].column_name);
+				D_ASSERT(agg_expr->return_type == original_proj_expr[proj_expr_index].return_type);
 #endif
+				proj_expr_index++;
 			}
-			proj_expr_index++;
 		}
-
 	} else {
 #ifdef DEBUG
 		D_ASSERT(proj_op.expressions.size() == original_proj_expr.size());
@@ -425,6 +439,7 @@ void SubqueryPreparer::UpdateSubqueriesIndex(subquery_queue &subqueries) {
 void SubqueryPreparer::Rewrite(unique_ptr<LogicalOperator> &plan) {
 	switch (plan->type) {
 	case LogicalOperatorType::LOGICAL_PROJECTION:
+	case LogicalOperatorType::LOGICAL_ORDER_BY:
 		break;
 	default:
 		return;
@@ -727,6 +742,7 @@ void SubqueryPreparer::ExplainAnalyzeSubQuery(ClientContextLock &lock,
                                               case_insensitive_map_t<idx_t> named_param_map) {
 	switch (explain_sub_plan->children[0]->type) {
 	case LogicalOperatorType::LOGICAL_PROJECTION:
+	case LogicalOperatorType::LOGICAL_ORDER_BY:
 		break;
 	default:
 		return;
@@ -769,6 +785,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
                                                         const unique_ptr<LogicalOperator> &sub_plan) {
 	switch (sub_plan->type) {
 	case LogicalOperatorType::LOGICAL_PROJECTION:
+	case LogicalOperatorType::LOGICAL_ORDER_BY:
 		break;
 	default:
 		return nullptr;
@@ -807,6 +824,9 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 #endif
 
 	// 2. revert the indexes of the current_sub_plan
+	if (LogicalOperatorType::LOGICAL_ORDER_BY == last_sub_plan->type) {
+		last_sub_plan = std::move(last_sub_plan->children[0]);
+	}
 #ifdef DEBUG
 	D_ASSERT(LogicalOperatorType::LOGICAL_PROJECTION == last_sub_plan->type);
 #endif
@@ -838,14 +858,22 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 		}
 		case LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY: {
 			auto &agg_group_by = op->Cast<LogicalAggregate>();
-			auto &exprs = agg_group_by.expressions;
-			for (auto &expr : exprs) {
+			if (agg_group_by.groups.empty()) {
+				// it's a aggregate node
+				auto &exprs = agg_group_by.expressions;
+				for (auto &expr : exprs) {
 #ifdef DEBUG
-				D_ASSERT(ExpressionType::BOUND_AGGREGATE == expr->type);
+					D_ASSERT(ExpressionType::BOUND_AGGREGATE == expr->type);
 #endif
-				auto &bound_agg_exprs = expr->Cast<BoundAggregateExpression>().children;
-				for (auto &bound_agg_expr : bound_agg_exprs) {
-					RevertSubqueriesIndex(bound_agg_expr);
+					auto &bound_agg_exprs = expr->Cast<BoundAggregateExpression>().children;
+					for (auto &bound_agg_expr : bound_agg_exprs) {
+						RevertSubqueriesIndex(bound_agg_expr);
+					}
+				}
+			} else {
+				// it's a group by node
+				for (auto &agg_expr : agg_group_by.groups) {
+					RevertSubqueriesIndex(agg_expr);
 				}
 			}
 			break;

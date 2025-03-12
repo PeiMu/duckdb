@@ -18,7 +18,7 @@
 #define ALWAYS_SPLIT			   true
 //#define ENABLE_MEASURE_EXE_TIME    true
 
-#if ENABLE_MEASURE_EXE_TIME || ENABLE_MERGE_BACK_PLAN
+#if ENABLE_MEASURE_EXE_TIME || ENABLE_MERGE_BACK_PLAN || ENABLE_DEBUG_PRINT
 inline bool execute_plan = false;
 #endif
 

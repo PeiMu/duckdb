@@ -261,27 +261,30 @@ void TopDownSplit::GetProjTableExpr(const LogicalProjection &proj_op) {
 }
 
 void TopDownSplit::GetAggregateTableExpr(const LogicalAggregate &aggregate_op) {
-
-	for (const auto &agg_expr : aggregate_op.expressions) {
+	if (aggregate_op.groups.empty()) {
+		// it's a aggregate node
+		for (const auto &agg_expr : aggregate_op.expressions) {
 #ifdef DEBUG
-		D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
+			D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
 #endif
-		auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
-		for (const auto &expr : aggregate_expr.children) {
-			if (ExpressionType::BOUND_COLUMN_REF == expr->type) {
-				GetColRefExpr(expr->Cast<BoundColumnRefExpression>());
-			} else if (ExpressionType::OPERATOR_CAST == expr->type) {
-				GetCastExpr(expr->Cast<BoundCastExpression>());
-			} else {
-				Printer::Print("Doesn't support " + ExpressionTypeToString(expr->type) + " yet!");
-				D_ASSERT(false);
+			auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
+			for (const auto &expr : aggregate_expr.children) {
+				if (ExpressionType::BOUND_COLUMN_REF == expr->type) {
+					GetColRefExpr(expr->Cast<BoundColumnRefExpression>());
+				} else if (ExpressionType::OPERATOR_CAST == expr->type) {
+					GetCastExpr(expr->Cast<BoundCastExpression>());
+				} else {
+					Printer::Print("Doesn't support " + ExpressionTypeToString(expr->type) + " yet!");
+					D_ASSERT(false);
+				}
 			}
 		}
-	}
-
-	for (const auto &group_expr : aggregate_op.groups) {
-		if (ExpressionType::BOUND_COLUMN_REF == group_expr->type) {
-			GetColRefExpr(group_expr->Cast<BoundColumnRefExpression>());
+	} else {
+		// it's a group by node
+		for (const auto &group_expr : aggregate_op.groups) {
+			if (ExpressionType::BOUND_COLUMN_REF == group_expr->type) {
+				GetColRefExpr(group_expr->Cast<BoundColumnRefExpression>());
+			}
 		}
 	}
 }

@@ -433,8 +433,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	plan->Verify(*this);
 #endif
 
-#if ENABLE_MEASURE_EXE_TIME || ENABLE_MERGE_BACK_PLAN
-	execute_plan = plan->type == LogicalOperatorType::LOGICAL_PROJECTION;
+#if ENABLE_MEASURE_EXE_TIME || ENABLE_MERGE_BACK_PLAN || ENABLE_DEBUG_PRINT
+	execute_plan =
+	    plan->type == LogicalOperatorType::LOGICAL_PROJECTION || plan->type == LogicalOperatorType::LOGICAL_ORDER_BY;
 #endif
 
 #if ENABLE_DEBUG_PRINT
@@ -472,7 +473,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			// save time to a file
 			std::ofstream log_file;
 			log_file.open("time_log.csv", std::ios_base::app);
-			log_file << std::to_string(execute_time/1000) + ", ";
+			log_file << std::to_string(execute_time / 1000) + ", ";
 			log_file.close();
 		}
 #endif
@@ -544,15 +545,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 						merge_sibling_expr = false;
 					}
 #if REORDER_DATACHUNK
-				    plan = reorder_get.Optimize(std::move(plan));
-#if ENABLE_DEBUG_PRINT
-					if (execute_plan) {
-						D_ASSERT(plan);
-						// debug: print subquery
-						Printer::Print("After ReorderGetOptimize");
-						plan->Print();
-					}
-#endif
+					plan = reorder_get.Optimize(std::move(plan));
 #endif
 					subquery_preparer.Rewrite(plan);
 #if TIME_BREAK_DOWN
@@ -602,7 +595,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				}
 			}
 
-		    subquery_preparer.ClearOldTableIndex();
+			subquery_preparer.ClearOldTableIndex();
 			subquery_preparer.AddOldTableIndex(subqueries.front()[0]);
 			auto sub_plan = subquery_preparer.GenerateProjHead(plan, std::move(subqueries.front()[0]), table_expr_queue,
 			                                                   proj_expr, merge_sibling_expr);
@@ -637,7 +630,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				// save time to a file
 				std::ofstream log_file;
 				log_file.open("time_log.csv", std::ios_base::app);
-				log_file << std::to_string(execute_time/1000) + ", ";
+				log_file << std::to_string(execute_time / 1000) + ", ";
 				log_file.close();
 			}
 #endif
@@ -651,7 +644,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				// save time to a file
 				std::ofstream log_file;
 				log_file.open("time_log.csv", std::ios_base::app);
-				log_file << std::to_string(execute_time/1000) + ", ";
+				log_file << std::to_string(execute_time / 1000) + ", ";
 				log_file.close();
 			}
 #endif
@@ -678,7 +671,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				// save time to a file
 				std::ofstream log_file;
 				log_file.open("time_log.csv", std::ios_base::app);
-				log_file << std::to_string(execute_time/1000) + ", ";
+				log_file << std::to_string(execute_time / 1000) + ", ";
 				log_file.close();
 			}
 #endif
@@ -701,7 +694,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				// save time to a file
 				std::ofstream log_file;
 				log_file.open("time_log.csv", std::ios_base::app);
-				log_file << std::to_string(execute_time/1000) + ", ";
+				log_file << std::to_string(execute_time / 1000) + ", ";
 				log_file.close();
 			}
 #endif
@@ -730,8 +723,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if ENABLE_MEASURE_EXE_TIME
 			timer = chrono_tic();
 #endif
-			previous_result_card = subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result),
-			                                                        estimated_card);
+			previous_result_card =
+			    subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result), estimated_card);
 			if (!ENABLE_PARALLEL_EXECUTION && nullptr != last_sibling_node) {
 				merge_sibling_expr = subquery_preparer.MergeSibling(subqueries.front(), std::move(last_sibling_node));
 //			    // check if we need to swap the children
@@ -830,7 +823,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					// save time to a file
 					std::ofstream log_file;
 					log_file.open("time_log.csv", std::ios_base::app);
-					log_file << std::to_string(execute_time/1000) + ", ";
+					log_file << std::to_string(execute_time / 1000) + ", ";
 					log_file.close();
 				}
 #endif
@@ -843,7 +836,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				// save time to a file
 				std::ofstream log_file;
 				log_file.open("time_log.csv", std::ios_base::app);
-				log_file << std::to_string(execute_time/1000) + ", ";
+				log_file << std::to_string(execute_time / 1000) + ", ";
 				log_file.close();
 			}
 #endif
@@ -881,7 +874,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			// save time to a file
 			std::ofstream log_file;
 			log_file.open("time_log.csv", std::ios_base::app);
-			log_file << std::to_string(execute_time/1000) + ", ";
+			log_file << std::to_string(execute_time / 1000) + ", ";
 			log_file.close();
 		}
 #endif
@@ -912,7 +905,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 	}
 
-	if (INJECT_PLAN && LogicalOperatorType::LOGICAL_PROJECTION == plan->type) {
+	if (INJECT_PLAN && (LogicalOperatorType::LOGICAL_PROJECTION == plan->type ||
+	                    LogicalOperatorType::LOGICAL_ORDER_BY == plan->type)) {
 #ifdef ENABLE_DEBUG_PRINT
 		Printer::Print("original duckdb plan");
 		plan->Print();
@@ -1108,7 +1102,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		// save time to a file
 		std::ofstream log_file;
 		log_file.open("time_log.csv", std::ios_base::app);
-		log_file << std::to_string(execute_time/1000) + ", ";
+		log_file << std::to_string(execute_time / 1000) + ", ";
 		log_file.close();
 	}
 #endif
