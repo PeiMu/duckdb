@@ -133,6 +133,11 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 		RunOptimizer(OptimizerType::REORDER_GET, [&]() {
 			ReorderGet reorder_get(context);
 			plan = reorder_get.Optimize(std::move(plan));
+
+			if (reorder_get.NeedFilterPushDown()) {
+				FilterPushdown filter_pushdown(*this);
+				plan = filter_pushdown.Rewrite(std::move(plan));
+			}
 		});
 	}
 #endif
@@ -200,16 +205,21 @@ unique_ptr<LogicalOperator> Optimizer::ReorderGetOptimize(unique_ptr<LogicalOper
 
 	this->plan = std::move(plan_p);
 
-//	// todo: have STATISTICS_PROPAGATION before REORDER_GET when it can get better cardEst for filter
-//	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
-//		StatisticsPropagator propagator(*this);
-//		propagator.PropagateStatistics(plan);
-//		statistics_map = propagator.GetStatisticsMap();
-//	});
+	//	// todo: have STATISTICS_PROPAGATION before REORDER_GET when it can get better cardEst for filter
+	//	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
+	//		StatisticsPropagator propagator(*this);
+	//		propagator.PropagateStatistics(plan);
+	//		statistics_map = propagator.GetStatisticsMap();
+	//	});
 
 	RunOptimizer(OptimizerType::REORDER_GET, [&]() {
 		ReorderGet reorder_get(context);
 		plan = reorder_get.Optimize(std::move(plan));
+
+		if (reorder_get.NeedFilterPushDown()) {
+			FilterPushdown filter_pushdown(*this);
+			plan = filter_pushdown.Rewrite(std::move(plan));
+		}
 	});
 
 	return std::move(plan);

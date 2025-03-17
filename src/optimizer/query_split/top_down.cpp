@@ -83,9 +83,9 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 			break;
 		}
 		case LogicalOperatorType::LOGICAL_CROSS_PRODUCT: {
-			if (0 == idx && nullptr == op.children[1]) {
+			if (0 == idx && 2 == op.children.size() && nullptr == op.children[1]) {
 				// fixme: add query_split_index when support ENABLE_PARALLEL_EXECUTION
-				//				query_split_index++;
+				// query_split_index++;
 				child->split_index = query_split_index;
 			}
 			break;

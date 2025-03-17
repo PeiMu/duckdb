@@ -7,7 +7,7 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 	    LogicalOperatorType::LOGICAL_EXPLAIN != plan->type) {
 		return std::move(plan);
 	}
-#if DEBUG
+#ifdef DEBUG
 	Printer::Print("before ReorderGet");
 	plan->Print();
 #endif
@@ -15,10 +15,11 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 	// collect all tables
 	std::map<std::pair<idx_t, idx_t>, std::vector<JoinCondition>> join_conds;
 	std::map<idx_t, unique_ptr<LogicalOperator>> table_index_blocks;
+	std::stack<unique_ptr<LogicalOperator>> filter_nodes;
 	// <table_index, card>
 	std::deque<std::pair<idx_t, idx_t>> table_card_order;
 	std::function<void(unique_ptr<LogicalOperator> & op)> collect_block;
-	collect_block = [&collect_block, &join_conds, &table_index_blocks, &table_card_order,
+	collect_block = [&collect_block, &join_conds, &table_index_blocks, &table_card_order, &filter_nodes,
 	                 this](unique_ptr<LogicalOperator> &op) {
 		for (auto &child : op->children) {
 			if (LogicalOperatorType::LOGICAL_GET == child->type) {
@@ -53,41 +54,41 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 				continue;
 #endif
 			} else if (LogicalOperatorType::LOGICAL_FILTER == child->type) {
-				// we consider the FILTER block as a whole, even it has JOINs
+				// PS: we consider the FILTER+JOIN+[SCAN+CHUNK_GET] block as a whole
 				std::function<void(unique_ptr<LogicalOperator> & op)> collect_filter;
 				std::pair<idx_t, idx_t> temp_table_card;
 				int table_index = -1;
-				collect_filter = [&collect_filter, &table_index, &temp_table_card,
+				bool more_tables = false;
+				collect_filter = [&collect_filter, &table_index, &temp_table_card, &more_tables, &filter_nodes,
 				                  this](unique_ptr<LogicalOperator> &op) {
 					for (auto &child : op->children) {
-						if (LogicalOperatorType::LOGICAL_GET == child->type) {
+						if (-1 != table_index && !in_clause) {
+							more_tables = true;
+							break;
+						}
+
+						switch (child->type) {
+						case LogicalOperatorType::LOGICAL_GET: {
 							auto &get_op = child->Cast<LogicalGet>();
 							temp_table_card = std::make_pair(get_op.table_index, get_op.EstimateCardinality(context));
-#if DEBUG
-							// the FILTER should only have one table,
-							// and we ignore DATA_CHUNK since it should only have a small number of records
-							D_ASSERT(-1 == table_index);
-#endif
 							table_index = get_op.table_index;
-							continue;
+							break;
+						}
 #if REORDER_DATACHUNK
-						} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == child->type) {
+						case LogicalOperatorType::LOGICAL_CHUNK_GET: {
 							auto &chunk_get_op = child->Cast<LogicalColumnDataGet>();
 							if (in_clause) {
 								// todo: estimate the cardinality of IN clause
+								in_clause = false;
 							} else {
 								temp_table_card =
 								    std::make_pair(chunk_get_op.table_index, chunk_get_op.EstimateCardinality(context));
-#if DEBUG
-								// the FILTER should only have one table,
-								// and we ignore DATA_CHUNK since it should only have a small number of records
-								D_ASSERT(-1 == table_index);
-#endif
 								table_index = chunk_get_op.table_index;
 							}
-							continue;
+							break;
+						}
 #endif
-						} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->type) {
+						case LogicalOperatorType::LOGICAL_COMPARISON_JOIN: {
 							auto &join_op = child->Cast<LogicalComparisonJoin>();
 							if (JoinType::MARK == join_op.join_type || JoinType::SEMI == join_op.join_type) {
 								// todo: estimate the cardinality of IN clause, after modifying STATISTICS_PROPAGATION
@@ -98,9 +99,15 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 							if (JoinType::MARK == join_op.join_type || JoinType::SEMI == join_op.join_type) {
 								// todo: estimate the cardinality of IN clause, after modifying STATISTICS_PROPAGATION
 							}
-						} else if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == child->type) {
+							break;
+						}
+						case LogicalOperatorType::LOGICAL_FILTER:
+							collect_filter(child);
+							break;
+						case LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY:
 							// skip
-						} else {
+							break;
+						default:
 							Printer::Print("Doesn't support " + LogicalOperatorToString(child->type) +
 							               " in ReorderGet Opt yet!");
 							D_ASSERT(false);
@@ -109,7 +116,14 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 				};
 				collect_filter(child);
 				if (-1 == table_index) {
-					collect_block(child->children[0]);
+					// fixme: need to refactor
+					// have operators like aggregate, projection, etc.
+					collect_block(child);
+					continue;
+				}
+				if (more_tables) {
+					collect_block(child);
+					filter_nodes.push(std::move(child));
 					continue;
 				}
 
@@ -155,6 +169,17 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 		plan_pointer = plan_pointer->children[0].get();
 	}
 	plan_pointer->children.clear();
+
+	// insert the filter nodes
+	while (!filter_nodes.empty()) {
+		auto &filter = filter_nodes.top();
+		filter->children.clear();
+		plan_pointer->children.emplace_back(std::move(filter));
+		plan_pointer = plan_pointer->children[0].get();
+		filter_nodes.pop();
+		need_filter_push_down = true;
+	}
+
 	std::stack<vector<JoinCondition>> join_conditions_stack;
 	std::stack<idx_t> joined_table_index;
 
