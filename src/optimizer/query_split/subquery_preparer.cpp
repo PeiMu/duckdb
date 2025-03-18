@@ -350,6 +350,9 @@ table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_que
 unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalOperator> plan,
                                                              const std::vector<TableExpr> &original_proj_expr) {
 	auto plan_pointer = plan.get();
+	if (LogicalOperatorType::LOGICAL_LIMIT == plan_pointer->type) {
+		plan_pointer = plan_pointer->children[0].get();
+	}
 	if (LogicalOperatorType::LOGICAL_ORDER_BY == plan_pointer->type) {
 		plan_pointer = plan_pointer->children[0].get();
 	}
@@ -440,6 +443,7 @@ void SubqueryPreparer::Rewrite(unique_ptr<LogicalOperator> &plan) {
 	switch (plan->type) {
 	case LogicalOperatorType::LOGICAL_PROJECTION:
 	case LogicalOperatorType::LOGICAL_ORDER_BY:
+	case LogicalOperatorType::LOGICAL_LIMIT:
 		break;
 	default:
 		return;
@@ -743,6 +747,7 @@ void SubqueryPreparer::ExplainAnalyzeSubQuery(ClientContextLock &lock,
 	switch (explain_sub_plan->children[0]->type) {
 	case LogicalOperatorType::LOGICAL_PROJECTION:
 	case LogicalOperatorType::LOGICAL_ORDER_BY:
+	case LogicalOperatorType::LOGICAL_LIMIT:
 		break;
 	default:
 		return;
@@ -786,6 +791,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 	switch (sub_plan->type) {
 	case LogicalOperatorType::LOGICAL_PROJECTION:
 	case LogicalOperatorType::LOGICAL_ORDER_BY:
+	case LogicalOperatorType::LOGICAL_LIMIT:
 		break;
 	default:
 		return nullptr;
@@ -824,6 +830,9 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 #endif
 
 	// 2. revert the indexes of the current_sub_plan
+	if (LogicalOperatorType::LOGICAL_LIMIT == last_sub_plan->type) {
+		last_sub_plan = std::move(last_sub_plan->children[0]);
+	}
 	if (LogicalOperatorType::LOGICAL_ORDER_BY == last_sub_plan->type) {
 		last_sub_plan = std::move(last_sub_plan->children[0]);
 	}

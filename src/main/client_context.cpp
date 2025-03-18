@@ -436,7 +436,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 #if ENABLE_MEASURE_EXE_TIME || ENABLE_MERGE_BACK_PLAN || ENABLE_DEBUG_PRINT
 	execute_plan =
-	    plan->type == LogicalOperatorType::LOGICAL_PROJECTION || plan->type == LogicalOperatorType::LOGICAL_ORDER_BY;
+	    plan->type == LogicalOperatorType::LOGICAL_PROJECTION || plan->type == LogicalOperatorType::LOGICAL_ORDER_BY
+	    || plan->type == LogicalOperatorType::LOGICAL_LIMIT;
 #endif
 
 #if ENABLE_DEBUG_PRINT
@@ -917,7 +918,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	}
 
 	if (INJECT_PLAN && (LogicalOperatorType::LOGICAL_PROJECTION == plan->type ||
-	                    LogicalOperatorType::LOGICAL_ORDER_BY == plan->type)) {
+	                    LogicalOperatorType::LOGICAL_ORDER_BY == plan->type ||
+	                    LogicalOperatorType::LOGICAL_LIMIT == plan->type)) {
 #ifdef ENABLE_DEBUG_PRINT
 		Printer::Print("original duckdb plan");
 		plan->Print();

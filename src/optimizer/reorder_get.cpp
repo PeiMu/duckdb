@@ -4,7 +4,7 @@ namespace duckdb {
 
 unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> plan) {
 	if (LogicalOperatorType::LOGICAL_PROJECTION != plan->type && LogicalOperatorType::LOGICAL_ORDER_BY != plan->type &&
-	    LogicalOperatorType::LOGICAL_EXPLAIN != plan->type) {
+	    LogicalOperatorType::LOGICAL_LIMIT != plan->type && LogicalOperatorType::LOGICAL_EXPLAIN != plan->type) {
 		return std::move(plan);
 	}
 #ifdef DEBUG
@@ -102,6 +102,7 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 							break;
 						}
 						case LogicalOperatorType::LOGICAL_FILTER:
+						case LogicalOperatorType::LOGICAL_CROSS_PRODUCT:
 							collect_filter(child);
 							break;
 						case LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY:
@@ -164,7 +165,7 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 
 	auto plan_pointer = plan.get();
 	// get the position before the first join
-	while (!plan_pointer->children.empty() &&
+	while (!plan_pointer->children.empty() && nullptr != plan_pointer->children[0] &&
 	       LogicalOperatorType::LOGICAL_COMPARISON_JOIN != plan_pointer->children[0]->type) {
 		plan_pointer = plan_pointer->children[0].get();
 	}
