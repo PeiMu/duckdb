@@ -435,9 +435,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 
 #if ENABLE_MEASURE_EXE_TIME || ENABLE_MERGE_BACK_PLAN || ENABLE_DEBUG_PRINT
-	execute_plan =
-	    plan->type == LogicalOperatorType::LOGICAL_PROJECTION || plan->type == LogicalOperatorType::LOGICAL_ORDER_BY
-	    || plan->type == LogicalOperatorType::LOGICAL_LIMIT;
+	execute_plan = plan->type == LogicalOperatorType::LOGICAL_PROJECTION ||
+	               plan->type == LogicalOperatorType::LOGICAL_ORDER_BY ||
+	               plan->type == LogicalOperatorType::LOGICAL_LIMIT;
 #endif
 
 #if ENABLE_DEBUG_PRINT
@@ -802,6 +802,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			}
 #endif
 			subquery_preparer.UpdateSubqueriesIndex(subqueries);
+#if ENABLE_DEBUG_PRINT
+			Printer::Print("after UpdateSubqueriesIndex");
+			subqueries.front()[0]->Print();
+			if (subqueries.front().size() == 2) {
+				subqueries.front()[1]->Print();
+			}
+#endif
 			table_expr_queue = subquery_preparer.UpdateTableExpr(table_expr_queue, proj_expr);
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "Update Index time is\n");
@@ -917,9 +924,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 	}
 
-	if (INJECT_PLAN && (LogicalOperatorType::LOGICAL_PROJECTION == plan->type ||
-	                    LogicalOperatorType::LOGICAL_ORDER_BY == plan->type ||
-	                    LogicalOperatorType::LOGICAL_LIMIT == plan->type)) {
+	if (INJECT_PLAN &&
+	    (LogicalOperatorType::LOGICAL_PROJECTION == plan->type || LogicalOperatorType::LOGICAL_ORDER_BY == plan->type ||
+	     LogicalOperatorType::LOGICAL_LIMIT == plan->type)) {
 #ifdef ENABLE_DEBUG_PRINT
 		Printer::Print("original duckdb plan");
 		plan->Print();

@@ -97,7 +97,8 @@ private:
 #if SPLIT_FILTER
 	bool filter_parent = false;
 #endif
-	// todo: hack code (in the old split strategy, each JOIN including the top-most JOIN is regarded as a subquery)
+	// when following the pipeline breaker role, we need to split the top-most JOIN; sometimes the top-most operator is
+	//  a filter node, which should also be splitted.
 	bool top_most = true;
 	std::set<TableExpr> last_level_table_exprs;
 
