@@ -14,5 +14,5 @@ for sql in "${dir}"/*.sql; do
   cat temp.csv >> ${log_name}
 done
 
-mv duckdb_$1_$2.csv job_result/.
+mv duckdb_$1_$2_job.csv job_result/.
 rm temp.csv
