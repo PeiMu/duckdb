@@ -5,7 +5,7 @@ dir_1="/home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_witho
 dir_2="/home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_without_subquery/2/"
 iteration=15 # 5 warm up, 10 runs
 
-LOG_NAME=dsb_time_log.csv
+LOG_NAME=time_log.csv
 
 rm -rf *${LOG_NAME}
 rm -rf dsb_result/*${LOG_NAME}

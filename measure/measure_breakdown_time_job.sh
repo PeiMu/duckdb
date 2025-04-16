@@ -4,7 +4,7 @@
 dir="/home/pei/Project/benchmarks/imdb_job-postgres/queries"
 iteration=15 # 5 warm up, 10 runs
 
-LOG_NAME=job_time_log.csv
+LOG_NAME=time_log.csv
 
 rm -rf *${LOG_NAME}
 rm -rf job_result/*${LOG_NAME}
