@@ -10,7 +10,7 @@ cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWR
 cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWRITE=1 ENABLE_SPECIFY_EST_STAT=1 VERBOSE=1 make
 ```
 
-### Compilation with Execution Breakdown
+### Compilation with Performance Breakdown
 ```bash
 # official
 cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=0 ENABLE_CROSS_PRODUCT_REWRITE=0 VERBOSE=1 ENABLE_MEASURE_EXE_TIME=1 make
@@ -34,9 +34,11 @@ cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWR
 ## Measure Performance
 ```bash
 # measure JOB
+sudo rm -rf job_result/
 bash ./measure_job.sh && bash ./measure_breakdown_time_job.sh
 
 # measure DSB
+sudo rm -rf dsb_result/
 bash ./measure_dsb.sh && bash ./measure_breakdown_time_dsb.sh
 ```
 
