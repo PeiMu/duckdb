@@ -34,9 +34,11 @@ cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWR
 ## Measure Performance
 ```bash
 # measure JOB
+sudo rm -rf job_result/
 bash ./measure_job.sh && bash ./measure_breakdown_time_job.sh
 
 # measure DSB
+sudo rm -rf dsb_result/
 bash ./measure_dsb.sh && bash ./measure_breakdown_time_dsb.sh
 ```
 
