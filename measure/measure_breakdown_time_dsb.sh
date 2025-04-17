@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # execute queries
-dir_1="/home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_without_subquery/1/"
-dir_2="/home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_without_subquery/2/"
+dir_1="/home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/"
+dir_2="/home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/"
 iteration=15 # 5 warm up, 10 runs
 
 LOG_NAME=time_log.csv

@@ -2,8 +2,8 @@
 
 log_name=duckdb_$1_$2.csv
 
-rm -rf duckdb_$1_$2.csv
-rm -rf job_result/duckdb_$1_$2.csv
+rm -rf ${log_name}
+rm -rf job_result/${log_name}
 
 dir="/home/pei/Project/benchmarks/imdb_job-postgres/queries"
 iteration=10
@@ -14,5 +14,5 @@ for sql in "${dir}"/*.sql; do
   cat temp.csv >> ${log_name}
 done
 
-mv duckdb_$1_$2_job.csv job_result/.
+mv ${log_name} job_result/.
 rm temp.csv
