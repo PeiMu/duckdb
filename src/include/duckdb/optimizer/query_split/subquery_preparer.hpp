@@ -12,8 +12,8 @@
 #include "duckdb/main/client_context.hpp"
 #include "duckdb/main/prepared_statement.hpp"
 #include "duckdb/main/prepared_statement_data.hpp"
+#include "duckdb/optimizer/query_split/query_split_util.h"
 #include "duckdb/optimizer/query_split/top_down.hpp"
-#include "duckdb/optimizer/timer_util.h"
 #include "duckdb/parser/query_node/select_node.hpp"
 #include "duckdb/parser/statement/explain_statement.hpp"
 #include "duckdb/planner/binder.hpp"
@@ -127,9 +127,9 @@ private:
 	// todo: should be changed when supporting the parallel execution of sibling execution
 	std::set<TableExpr> last_sibling_exprs;
 	// a new chunk scan node with the last level's result, generated and merged in `MergeDataChunk`
-	unique_ptr<LogicalColumnDataGet> chunk_scan;
+	unique_ptr<LogicalColumnDataGet> chunk_scan = nullptr;
 	// `chunk_scan` will be moved, and we need one extra member to remember the new table index
-	idx_t new_table_idx = (uint64_t)-1;
+	idx_t new_table_idx = DConstants::INVALID_INDEX;
 	// the collection of the old table indexes, to detect and be replaced to the new index by `UpdateTableExpr`
 	std::set<idx_t> old_table_idx;
 

@@ -9,8 +9,8 @@
 #pragma once
 
 #include "duckdb/catalog/catalog_entry/table_catalog_entry.hpp"
+#include "duckdb/optimizer/query_split/query_split_util.h"
 #include "duckdb/optimizer/query_split/split_algorithm.hpp"
-#include "duckdb/optimizer/timer_util.h"
 #include "duckdb/planner/expression/bound_between_expression.hpp"
 #include "duckdb/planner/expression/bound_cast_expression.hpp"
 #include "duckdb/planner/expression/bound_columnref_expression.hpp"

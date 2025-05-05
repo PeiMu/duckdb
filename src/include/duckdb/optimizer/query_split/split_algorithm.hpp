@@ -17,29 +17,9 @@
 
 // debug
 #include "duckdb/common/printer.hpp"
+#include "duckdb/optimizer/query_split/query_split_util.h"
 
 namespace duckdb {
-
-struct TableExpr {
-	idx_t table_idx;
-	idx_t column_idx;
-	std::string column_name;
-	LogicalType return_type;
-
-	bool operator==(const TableExpr &other) const {
-		return table_idx == other.table_idx && column_idx == other.column_idx;
-	}
-
-	bool operator<(const TableExpr &other) const {
-		return ((table_idx < other.table_idx) || (table_idx == other.table_idx && column_idx < other.column_idx));
-	}
-};
-
-struct TableExprHash {
-	size_t operator()(const TableExpr &table_expr) const {
-		return std::hash<idx_t> {}(table_expr.table_idx) ^ std::hash<idx_t> {}(table_expr.column_idx);
-	}
-};
 
 enum EnumSplitAlgorithm { foreign_key_center = 1, min_sub_query, top_down };
 

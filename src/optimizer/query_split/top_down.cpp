@@ -51,7 +51,8 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 #ifdef DEBUG
 				D_ASSERT(LogicalOperatorType::LOGICAL_GET == child->children[0]->type ||
 				         LogicalOperatorType::LOGICAL_CHUNK_GET == child->children[0]->type ||
-				         LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->children[0]->type);
+				         LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->children[0]->type ||
+				         LogicalOperatorType::LOGICAL_CROSS_PRODUCT == child->children[0]->type);
 #endif
 				// add filter's column usage
 				table_exprs = GetFilterTableExpr(child->Cast<LogicalFilter>());
@@ -93,6 +94,13 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 			}
 
 			table_exprs = GetJoinTableExpr(join_op);
+
+			// we need to collect the FILTER table_exprs if we push the FILTER down to the JOIN
+			if (LogicalOperatorType::LOGICAL_FILTER == child->children[0]->type) {
+				auto &inner_filter = child->children[0]->Cast<LogicalFilter>();
+				auto child_exprs = GetFilterTableExpr(inner_filter);
+				table_exprs.insert(child_exprs.begin(), child_exprs.end());
+			}
 			top_most = false;
 			break;
 		}
@@ -306,11 +314,14 @@ void TopDownSplit::GetAggregateTableExpr(const LogicalAggregate &aggregate_op) {
 
 void TopDownSplit::AddTableExprs(std::set<TableExpr> &table_exprs, const unique_ptr<Expression> &expr) {
 	TableExpr table_expr;
-	auto expr_index = GetExprIndex(expr);
-	table_expr.table_idx = expr_index.first;
-	table_expr.column_idx = expr_index.second;
-	table_expr.column_name = expr->alias;
-	table_expr.return_type = expr->return_type;
+	auto expr_info = GetTableExpr(expr);
+	table_expr.table_idx = expr_info.table_idx;
+	table_expr.column_idx = expr_info.column_idx;
+	if (0 == table_expr.table_idx && 6 == table_expr.column_idx) {
+		int a = 0;
+	}
+	table_expr.column_name = expr_info.column_name;
+	table_expr.return_type = expr_info.return_type;
 	if (target_tables.count(table_expr.table_idx)) {
 		table_exprs.emplace(table_expr);
 	}

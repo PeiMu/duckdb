@@ -1,4 +1,4 @@
-#include "duckdb/optimizer/timer_util.h"
+#include "duckdb/optimizer/query_split/query_split_util.h"
 
 /***************************************
  * Timer functions of the test framework
@@ -82,25 +82,27 @@ void appendLineToFile(string filepath, string line) {
 	file << line << std::endl;
 }
 
-const std::pair<idx_t, idx_t> GetExprIndex(const unique_ptr<Expression> &expr) {
+const TableExpr GetTableExpr(const unique_ptr<Expression> &expr) {
 	switch (expr->type) {
-	case ExpressionType::BOUND_COLUMN_REF:
-		return std::make_pair(expr->Cast<BoundColumnRefExpression>().binding.table_index,
-		                      expr->Cast<BoundColumnRefExpression>().binding.column_index);
+	case ExpressionType::BOUND_COLUMN_REF: {
+		auto &bound_col_ref_expr = expr->Cast<BoundColumnRefExpression>();
+		return TableExpr {bound_col_ref_expr.binding.table_index, bound_col_ref_expr.binding.column_index,
+		                  bound_col_ref_expr.alias, bound_col_ref_expr.return_type};
+	}
 	case ExpressionType::OPERATOR_CAST:
-		return GetExprIndex(expr->Cast<BoundCastExpression>().child);
+		return GetTableExpr(expr->Cast<BoundCastExpression>().child);
 	case ExpressionType::BOUND_FUNCTION: {
 		auto &bound_func_expr = expr->Cast<BoundFunctionExpression>();
 #ifdef DEBUG
 		D_ASSERT(2 == bound_func_expr.children.size());
 #endif
 		if (ExpressionType::VALUE_CONSTANT == bound_func_expr.children[0]->type) {
-			return GetExprIndex(bound_func_expr.children[1]);
+			return GetTableExpr(bound_func_expr.children[1]);
 		} else if (ExpressionType::VALUE_CONSTANT == bound_func_expr.children[1]->type) {
-			return GetExprIndex(bound_func_expr.children[0]);
+			return GetTableExpr(bound_func_expr.children[0]);
 		} else {
-			auto left_idx = GetExprIndex(bound_func_expr.children[0]);
-			auto right_idx = GetExprIndex(bound_func_expr.children[1]);
+			auto left_idx = GetTableExpr(bound_func_expr.children[0]);
+			auto right_idx = GetTableExpr(bound_func_expr.children[1]);
 #ifdef DEBUG
 			D_ASSERT(left_idx == right_idx);
 #endif
@@ -110,14 +112,14 @@ const std::pair<idx_t, idx_t> GetExprIndex(const unique_ptr<Expression> &expr) {
 	case ExpressionType::COMPARE_BETWEEN:
 	case ExpressionType::COMPARE_NOT_BETWEEN: {
 		auto &compare_expr = expr->Cast<BoundBetweenExpression>();
-		return GetExprIndex(compare_expr.input);
+		return GetTableExpr(compare_expr.input);
 	}
 	default:
-		Printer::Print("Doesn't support " + ExpressionTypeToString(expr->type) + " in GetExprIndex yet!");
+		Printer::Print("Doesn't support " + ExpressionTypeToString(expr->type) + " in GetTableExpr yet!");
 		D_ASSERT(false);
 	}
 	D_ASSERT(false);
-	return std::make_pair(-1, -1);
+	return TableExpr {DConstants::INVALID_INDEX, DConstants::INVALID_INDEX, "", LogicalType::INVALID};
 }
 
 ColumnBinding &GetColumnBinding(unique_ptr<Expression> &expr) {

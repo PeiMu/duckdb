@@ -139,6 +139,10 @@ shared_ptr<PreparedStatementData> SubqueryPreparer::AdaptSelect(shared_ptr<Prepa
 		subquery_stmt->types.clear();
 		for (const auto &proj_expr : subquery->expressions) {
 			if (ExpressionType::BOUND_COLUMN_REF == proj_expr->type) {
+				// we should have gotten every information about the table_expr, including alias
+#ifdef DEBUG
+				D_ASSERT(!proj_expr->alias.empty());
+#endif
 				unique_ptr<ColumnRefExpression> new_select_expr = make_uniq<ColumnRefExpression>(proj_expr->alias);
 				select_node.select_list.emplace_back(std::move(new_select_expr));
 				auto new_name = proj_expr->alias;
@@ -190,7 +194,15 @@ int64_t SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>
 	// generate an unused table index by the binder
 	new_table_idx = binder.GenerateTableIndex();
 
-	chunk_scan = make_uniq<LogicalColumnDataGet>(new_table_idx, previous_result->Types(), std::move(previous_result));
+	if (nullptr == chunk_scan) {
+		chunk_scan =
+		    make_uniq<LogicalColumnDataGet>(new_table_idx, previous_result->Types(), std::move(previous_result));
+	} else {
+		chunk_scan->table_index = new_table_idx;
+		chunk_scan->chunk_types = previous_result->Types();
+		chunk_scan->collection = std::move(previous_result);
+	}
+
 #if ENABLE_SPECIFY_EST_STAT
 #ifdef DEBUG
 	D_ASSERT(0 != estimated_card);
@@ -264,7 +276,8 @@ void SubqueryPreparer::AddOldTableIndex(const unique_ptr<LogicalOperator> &op) {
 	} else if (LogicalOperatorType::LOGICAL_FILTER == op->type) {
 		AddOldTableIndex(std::move(op->children[0]));
 	} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->type ||
-	           LogicalOperatorType::LOGICAL_CROSS_PRODUCT == op->type) {
+	           LogicalOperatorType::LOGICAL_CROSS_PRODUCT == op->type ||
+	           LogicalOperatorType::LOGICAL_ANY_JOIN == op->type) {
 		AddOldTableIndex(std::move(op->children[0]));
 		AddOldTableIndex(std::move(op->children[1]));
 	} else {
@@ -551,7 +564,7 @@ bool SubqueryPreparer::NeedRewrite(const std::vector<unique_ptr<LogicalOperator>
 			// collect table pairs form JOIN
 			for (const auto &cond : join_op.conditions) {
 				table_index_pairs.emplace_back(
-				    std::make_pair(GetExprIndex(cond.left).first, GetExprIndex(cond.right).first));
+				    std::make_pair(GetTableExpr(cond.left).table_idx, GetTableExpr(cond.right).table_idx));
 			}
 		}
 
@@ -611,8 +624,8 @@ bool SubqueryPreparer::NeedReorder(const std::vector<unique_ptr<LogicalOperator>
 	// collect all table index
 	std::unordered_set<idx_t> table_indexes;
 	for (const auto &cond : current_join.conditions) {
-		table_indexes.insert(GetExprIndex(cond.left).first);
-		table_indexes.insert(GetExprIndex(cond.right).first);
+		table_indexes.insert(GetTableExpr(cond.left).table_idx);
+		table_indexes.insert(GetTableExpr(cond.right).table_idx);
 	}
 
 	// check if it is needed to reorder,
@@ -780,9 +793,9 @@ void SubqueryPreparer::RevertSubqueriesIndex(unique_ptr<Expression> &expr) {
 	auto find_expr = stored_sub_plan_exprs.find(column_binding.table_index);
 	if (find_expr != stored_sub_plan_exprs.end()) {
 		auto &origin_expr = find_expr->second[column_binding.column_index];
-		auto origin_expr_index = GetExprIndex(origin_expr);
-		column_binding.table_index = origin_expr_index.first;
-		column_binding.column_index = origin_expr_index.second;
+		auto origin_expr_index = GetTableExpr(origin_expr);
+		column_binding.table_index = origin_expr_index.table_idx;
+		column_binding.column_index = origin_expr_index.column_idx;
 	}
 }
 
@@ -987,7 +1000,7 @@ SubqueryPreparer::CheckTableUsage(LogicalOperator *current_join_pointer, unorder
 
 	// 1. collect the left-cond of JOIN, since the right child must be shown in the right-cond
 	for (const auto &cond : current_join.conditions) {
-		left_cond_table_index.emplace(GetExprIndex(cond.left).first);
+		left_cond_table_index.emplace(GetTableExpr(cond.left).table_idx);
 	}
 
 	// 2. collect all tables below the current JOIN in the top-down order

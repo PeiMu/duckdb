@@ -24,7 +24,8 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 		for (auto &child : op->children) {
 			if (LogicalOperatorType::LOGICAL_GET == child->type) {
 				auto &get_op = child->Cast<LogicalGet>();
-				auto temp_table_card = std::make_pair(get_op.table_index, get_op.EstimateCardinality(context));
+				idx_t estimated_card = get_op.EstimateCardinality(context);
+				auto temp_table_card = std::make_pair(get_op.table_index, estimated_card);
 				table_index_blocks[get_op.table_index] = std::move(child);
 				// sort the table index with card, from the biggest to the smallest
 				for (size_t idx = 0; idx < table_card_order.size(); idx++) {
@@ -145,8 +146,8 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 			} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->type) {
 				auto &join_op = child->Cast<LogicalComparisonJoin>();
 				for (auto &cond : join_op.conditions) {
-					auto left_table_index = GetExprIndex(cond.left).first;
-					auto right_table_index = GetExprIndex(cond.right).first;
+					auto left_table_index = GetTableExpr(cond.left).table_idx;
+					auto right_table_index = GetTableExpr(cond.right).table_idx;
 					join_conds[std::make_pair(left_table_index, right_table_index)].emplace_back(std::move(cond));
 				}
 			}
