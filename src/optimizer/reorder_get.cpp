@@ -146,8 +146,8 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 			} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->type) {
 				auto &join_op = child->Cast<LogicalComparisonJoin>();
 				for (auto &cond : join_op.conditions) {
-					auto left_table_index = GetTableExpr(cond.left).table_idx;
-					auto right_table_index = GetTableExpr(cond.right).table_idx;
+					auto left_table_index = GetConstTableExpr(cond.left).table_idx;
+					auto right_table_index = GetConstTableExpr(cond.right).table_idx;
 					join_conds[std::make_pair(left_table_index, right_table_index)].emplace_back(std::move(cond));
 				}
 			}

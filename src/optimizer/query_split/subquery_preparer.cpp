@@ -377,39 +377,39 @@ unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalO
 		// update aggregate expressions
 		auto &aggregate_op = proj_op.children[0]->Cast<LogicalAggregate>();
 		auto proj_expr_index = 0;
-		if (aggregate_op.groups.empty()) {
-			// it's a aggregate node
+
+		// update expr of group by
+		for (auto &agg_group_expr : aggregate_op.groups) {
+			// we assume the group by node can be covered by `GetRefColumnBinding`
+			// or we will update it by `UpdateExprs` if it's necessary
+			auto &column_binding = GetRefColumnBinding(agg_group_expr);
+			column_binding.table_index = original_proj_expr[proj_expr_index].table_idx;
+			column_binding.column_index = original_proj_expr[proj_expr_index].column_idx;
 #ifdef DEBUG
-			D_ASSERT(aggregate_op.expressions.size() == original_proj_expr.size());
+			// D_ASSERT(agg_expr.alias == original_proj_expr[proj_expr_index].column_name);
+			D_ASSERT(agg_expr->return_type == original_proj_expr[proj_expr_index].return_type);
 #endif
-			for (auto &agg_expr : aggregate_op.expressions) {
+			proj_expr_index++;
+		}
+
+		// update expr of aggregate op expression
+		for (auto &agg_expr : aggregate_op.expressions) {
 #ifdef DEBUG
-				D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
+			D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
 #endif
-				auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
-				for (auto &expr : aggregate_expr.children) {
-					auto &column_binding = GetColumnBinding(expr);
+			auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
+			for (auto &expr : aggregate_expr.children) {
+				UpdateExprs(expr, [original_proj_expr, proj_expr_index](unique_ptr<Expression> &expr) {
+					auto &column_binding = GetRefColumnBinding(expr);
 					column_binding.table_index = original_proj_expr[proj_expr_index].table_idx;
 					column_binding.column_index = original_proj_expr[proj_expr_index].column_idx;
+				});
 #ifdef DEBUG
-					// D_ASSERT(expr.alias == original_proj_expr[proj_expr_index].column_name);
-					D_ASSERT(expr->return_type == original_proj_expr[proj_expr_index].return_type);
+				// D_ASSERT(expr.alias == original_proj_expr[proj_expr_index].column_name);
+				D_ASSERT(expr->return_type == original_proj_expr[proj_expr_index].return_type);
 #endif
-				}
-				proj_expr_index++;
 			}
-		} else {
-			// it's a group by node
-			for (auto &agg_expr : aggregate_op.groups) {
-				auto &column_binding = GetColumnBinding(agg_expr);
-				column_binding.table_index = original_proj_expr[proj_expr_index].table_idx;
-				column_binding.column_index = original_proj_expr[proj_expr_index].column_idx;
-#ifdef DEBUG
-				// D_ASSERT(agg_expr.alias == original_proj_expr[proj_expr_index].column_name);
-				D_ASSERT(agg_expr->return_type == original_proj_expr[proj_expr_index].return_type);
-#endif
-				proj_expr_index++;
-			}
+			proj_expr_index++;
 		}
 	} else {
 #ifdef DEBUG
@@ -417,7 +417,9 @@ unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalO
 #endif
 		auto proj_expr_index = 0;
 		for (auto &expr : proj_op.expressions) {
-			auto &column_binding = GetColumnBinding(expr);
+			// we assume the group by node can be covered by `GetRefColumnBinding`
+			// or we will update it by `UpdateExprs` if it's necessary
+			auto &column_binding = GetRefColumnBinding(expr);
 			column_binding.table_index = original_proj_expr[proj_expr_index].table_idx;
 			column_binding.column_index = original_proj_expr[proj_expr_index].column_idx;
 #ifdef DEBUG
@@ -564,7 +566,7 @@ bool SubqueryPreparer::NeedRewrite(const std::vector<unique_ptr<LogicalOperator>
 			// collect table pairs form JOIN
 			for (const auto &cond : join_op.conditions) {
 				table_index_pairs.emplace_back(
-				    std::make_pair(GetTableExpr(cond.left).table_idx, GetTableExpr(cond.right).table_idx));
+				    std::make_pair(GetConstTableExpr(cond.left).table_idx, GetConstTableExpr(cond.right).table_idx));
 			}
 		}
 
@@ -624,8 +626,8 @@ bool SubqueryPreparer::NeedReorder(const std::vector<unique_ptr<LogicalOperator>
 	// collect all table index
 	std::unordered_set<idx_t> table_indexes;
 	for (const auto &cond : current_join.conditions) {
-		table_indexes.insert(GetTableExpr(cond.left).table_idx);
-		table_indexes.insert(GetTableExpr(cond.right).table_idx);
+		table_indexes.insert(GetConstTableExpr(cond.left).table_idx);
+		table_indexes.insert(GetConstTableExpr(cond.right).table_idx);
 	}
 
 	// check if it is needed to reorder,
@@ -789,14 +791,16 @@ void SubqueryPreparer::ExplainAnalyzeSubQuery(ClientContextLock &lock,
 }
 
 void SubqueryPreparer::RevertSubqueriesIndex(unique_ptr<Expression> &expr) {
-	auto &column_binding = GetColumnBinding(expr);
-	auto find_expr = stored_sub_plan_exprs.find(column_binding.table_index);
-	if (find_expr != stored_sub_plan_exprs.end()) {
-		auto &origin_expr = find_expr->second[column_binding.column_index];
-		auto origin_expr_index = GetTableExpr(origin_expr);
-		column_binding.table_index = origin_expr_index.table_idx;
-		column_binding.column_index = origin_expr_index.column_idx;
-	}
+	UpdateExprs(expr, [this](unique_ptr<Expression> &expr) {
+		auto &column_binding = GetRefColumnBinding(expr);
+		auto find_expr = stored_sub_plan_exprs.find(column_binding.table_index);
+		if (find_expr != stored_sub_plan_exprs.end()) {
+			auto &origin_expr = find_expr->second[column_binding.column_index];
+			auto origin_expr_index = GetConstTableExpr(origin_expr);
+			column_binding.table_index = origin_expr_index.table_idx;
+			column_binding.column_index = origin_expr_index.column_idx;
+		}
+	});
 }
 
 unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperator> last_sub_plan,
@@ -879,23 +883,19 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 			break;
 		}
 		case LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY: {
-			auto &agg_group_by = op->Cast<LogicalAggregate>();
-			if (agg_group_by.groups.empty()) {
-				// it's a aggregate node
-				auto &exprs = agg_group_by.expressions;
-				for (auto &expr : exprs) {
+			auto &aggregate_op = op->Cast<LogicalAggregate>();
+			// revert expr of group by
+			for (auto &agg_group_expr : aggregate_op.groups) {
+				RevertSubqueriesIndex(agg_group_expr);
+			}
+			// revert expr of aggregate op expression
+			for (auto &agg_expr : aggregate_op.expressions) {
 #ifdef DEBUG
-					D_ASSERT(ExpressionType::BOUND_AGGREGATE == expr->type);
+				D_ASSERT(ExpressionType::BOUND_AGGREGATE == expr->type);
 #endif
-					auto &bound_agg_exprs = expr->Cast<BoundAggregateExpression>().children;
-					for (auto &bound_agg_expr : bound_agg_exprs) {
-						RevertSubqueriesIndex(bound_agg_expr);
-					}
-				}
-			} else {
-				// it's a group by node
-				for (auto &agg_expr : agg_group_by.groups) {
-					RevertSubqueriesIndex(agg_expr);
+				auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
+				for (auto &bound_agg_expr : aggregate_expr.children) {
+					RevertSubqueriesIndex(bound_agg_expr);
 				}
 			}
 			break;
@@ -1000,7 +1000,7 @@ SubqueryPreparer::CheckTableUsage(LogicalOperator *current_join_pointer, unorder
 
 	// 1. collect the left-cond of JOIN, since the right child must be shown in the right-cond
 	for (const auto &cond : current_join.conditions) {
-		left_cond_table_index.emplace(GetTableExpr(cond.left).table_idx);
+		left_cond_table_index.emplace(GetConstTableExpr(cond.left).table_idx);
 	}
 
 	// 2. collect all tables below the current JOIN in the top-down order

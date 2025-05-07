@@ -7,7 +7,7 @@ unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan
 	// for the last subquery, merge the previous subqueries
 	unique_ptr<LogicalOperator> subquery;
 	follow_pipeline_breaker_ = follow_pipeline_breaker;
-	GetTargetTables(*plan);
+	AddTargetTables(*plan);
 	VisitOperator(*plan);
 	return std::move(plan);
 }
@@ -158,11 +158,11 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 
 	// collect table_expr_queue from projection node
 	if (LogicalOperatorType::LOGICAL_PROJECTION == op.type) {
-		GetProjTableExpr(op.Cast<LogicalProjection>());
+		AddProjTableExpr(op.Cast<LogicalProjection>());
 	}
 }
 
-void TopDownSplit::GetTargetTables(LogicalOperator &op) {
+void TopDownSplit::AddTargetTables(LogicalOperator &op) {
 	if (LogicalOperatorType::LOGICAL_GET == op.type) {
 		auto &get_op = op.Cast<LogicalGet>();
 		auto current_table_index = get_op.table_index;
@@ -173,20 +173,23 @@ void TopDownSplit::GetTargetTables(LogicalOperator &op) {
 		target_tables.emplace(current_table_index);
 	}
 	for (auto &child : op.children) {
-		GetTargetTables(*child);
+		AddTargetTables(*child);
 	}
 }
 
 std::set<TableExpr> TopDownSplit::GetJoinTableExpr(const LogicalComparisonJoin &join_op) {
 	std::set<TableExpr> table_exprs;
 	for (const auto &cond : join_op.conditions) {
+		// the JOIN nodes seems to only have one expr on each side of operator (e.g., '==')
+		// so it's safe to use `AddTableExprs`
+		// or we can use `VisitExprs` with `TableExprCollector` if we find it's necessary
 		AddTableExprs(table_exprs, cond.left);
 		AddTableExprs(table_exprs, cond.right);
 	}
 	return table_exprs;
 }
 
-std::set<TableExpr> TopDownSplit::GetCrossProductTableExpr(const duckdb::LogicalCrossProduct &product_op) {
+std::set<TableExpr> TopDownSplit::GetCrossProductTableExpr(const LogicalCrossProduct &product_op) {
 	std::set<TableExpr> table_exprs;
 	TableExpr cross_product_table_expr;
 	// cross_product_table_expr.cross_product = true;
@@ -215,111 +218,49 @@ std::set<TableExpr> TopDownSplit::GetSeqScanTableExpr(const LogicalGet &get_op) 
 std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter_op) {
 	std::set<TableExpr> table_exprs;
 
-	std::function<void(const unique_ptr<Expression> &expr)> add_expr;
-	add_expr = [&table_exprs, this, &add_expr](const unique_ptr<Expression> &expr) {
-		switch (expr->type) {
-		case ExpressionType::VALUE_CONSTANT:
-			break;
-		case ExpressionType::BOUND_COLUMN_REF:
-			AddTableExprs(table_exprs, expr);
-			break;
-		case ExpressionType::BOUND_FUNCTION:
-			AddFunctionExpr(table_exprs, expr->Cast<BoundFunctionExpression>());
-			break;
-		case ExpressionType::COMPARE_NOTEQUAL:
-		case ExpressionType::COMPARE_EQUAL:
-		case ExpressionType::COMPARE_GREATERTHAN:
-		case ExpressionType::COMPARE_LESSTHAN:
-		case ExpressionType::COMPARE_GREATERTHANOREQUALTO:
-		case ExpressionType::COMPARE_LESSTHANOREQUALTO:
-			AddComparisonExpr(table_exprs, expr->Cast<BoundComparisonExpression>());
-			break;
-		case ExpressionType::CONJUNCTION_OR:
-		case ExpressionType::CONJUNCTION_AND: {
-			auto &conjunction_expr = expr->Cast<BoundConjunctionExpression>();
-			for (const auto &child_expr : conjunction_expr.children) {
-				add_expr(child_expr);
-			}
-			break;
-		}
-		case ExpressionType::OPERATOR_IS_NULL:
-		case ExpressionType::OPERATOR_IS_NOT_NULL:
-		case ExpressionType::OPERATOR_NOT: {
-			auto &operator_expr = expr->Cast<BoundOperatorExpression>();
-			for (const auto &child_expr : operator_expr.children) {
-				add_expr(child_expr);
-			}
-			break;
-		}
-		case ExpressionType::COMPARE_BETWEEN: {
-			auto &bound_between_expr = expr->Cast<BoundBetweenExpression>();
-			add_expr(bound_between_expr.input);
-			break;
-		}
-		default:
-			Printer::Print(
-			    StringUtil::Format("Do not support yet, expr->type:  %s", ExpressionTypeToString(expr->type)));
-			D_ASSERT(false);
-		}
-	};
-
 	for (const auto &expr : filter_op.expressions) {
-		add_expr(expr);
+		VisitExprs(expr, TableExprCollector {this, table_exprs});
 	}
 	return table_exprs;
 }
 
-void TopDownSplit::GetProjTableExpr(const LogicalProjection &proj_op) {
+void TopDownSplit::AddProjTableExpr(const LogicalProjection &proj_op) {
 	// if it's children is `aggregate` or `group by`, we only check the child op
 	if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == proj_op.children[0]->type) {
-		GetAggregateTableExpr(proj_op.children[0]->Cast<LogicalAggregate>());
+		AddAggregateTableExpr(proj_op.children[0]->Cast<LogicalAggregate>());
 	} else {
 		for (const auto &expr : proj_op.expressions) {
 #ifdef DEBUG
 			D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
 #endif
-			GetColRefExpr(expr->Cast<BoundColumnRefExpression>());
+			VisitExprs(expr, HeaderExprCollector {this});
 		}
 	}
 }
 
-void TopDownSplit::GetAggregateTableExpr(const LogicalAggregate &aggregate_op) {
-	if (aggregate_op.groups.empty()) {
-		// it's a aggregate node
-		for (const auto &agg_expr : aggregate_op.expressions) {
+void TopDownSplit::AddAggregateTableExpr(const LogicalAggregate &aggregate_op) {
+	// add table_expr of group by
+	for (const auto &group_expr : aggregate_op.groups) {
+		VisitExprs(group_expr, HeaderExprCollector {this});
+	}
+
+	// add table_expr of aggregate op expression
+	for (const auto &agg_expr : aggregate_op.expressions) {
 #ifdef DEBUG
-			D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
+		D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
 #endif
-			auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
-			for (const auto &expr : aggregate_expr.children) {
-				if (ExpressionType::BOUND_COLUMN_REF == expr->type) {
-					GetColRefExpr(expr->Cast<BoundColumnRefExpression>());
-				} else if (ExpressionType::OPERATOR_CAST == expr->type) {
-					GetCastExpr(expr->Cast<BoundCastExpression>());
-				} else {
-					Printer::Print("Doesn't support " + ExpressionTypeToString(expr->type) + " yet!");
-					D_ASSERT(false);
-				}
-			}
-		}
-	} else {
-		// it's a group by node
-		for (const auto &group_expr : aggregate_op.groups) {
-			if (ExpressionType::BOUND_COLUMN_REF == group_expr->type) {
-				GetColRefExpr(group_expr->Cast<BoundColumnRefExpression>());
-			}
+		auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
+		for (const auto &expr : aggregate_expr.children) {
+			VisitExprs(expr, HeaderExprCollector {this});
 		}
 	}
 }
 
 void TopDownSplit::AddTableExprs(std::set<TableExpr> &table_exprs, const unique_ptr<Expression> &expr) {
 	TableExpr table_expr;
-	auto expr_info = GetTableExpr(expr);
+	auto expr_info = GetConstTableExpr(expr);
 	table_expr.table_idx = expr_info.table_idx;
 	table_expr.column_idx = expr_info.column_idx;
-	if (0 == table_expr.table_idx && 6 == table_expr.column_idx) {
-		int a = 0;
-	}
 	table_expr.column_name = expr_info.column_name;
 	table_expr.return_type = expr_info.return_type;
 	if (target_tables.count(table_expr.table_idx)) {
@@ -327,98 +268,15 @@ void TopDownSplit::AddTableExprs(std::set<TableExpr> &table_exprs, const unique_
 	}
 }
 
-void TopDownSplit::GetColRefExpr(const BoundColumnRefExpression &column_ref_expr) {
+void TopDownSplit::AddHeaderTableExprs(const unique_ptr<Expression> &expr) {
 	TableExpr table_expr;
-	table_expr.table_idx = column_ref_expr.binding.table_index;
-	table_expr.column_idx = column_ref_expr.binding.column_index;
-	table_expr.column_name = column_ref_expr.alias;
-	table_expr.return_type = column_ref_expr.return_type;
+	auto expr_info = GetConstTableExpr(expr);
+	table_expr.table_idx = expr_info.table_idx;
+	table_expr.column_idx = expr_info.column_idx;
+	table_expr.column_name = expr_info.column_name;
+	table_expr.return_type = expr_info.return_type;
 	if (target_tables.count(table_expr.table_idx)) {
-		proj_expr.emplace_back(table_expr);
+		header_expr.emplace_back(table_expr);
 	}
 }
-
-void TopDownSplit::AddFunctionExpr(std::set<TableExpr> &table_exprs, const BoundFunctionExpression &function_expr) {
-	for (const auto &func_child : function_expr.children) {
-		if (ExpressionType::BOUND_COLUMN_REF == func_child->type) {
-			AddTableExprs(table_exprs, func_child);
-		} else if (ExpressionType::VALUE_CONSTANT == func_child->type) {
-			// it's a constant value, skip it
-		} else if (ExpressionType::OPERATOR_CAST == func_child->type) {
-			AddCastExpr(table_exprs, func_child->Cast<BoundCastExpression>());
-		} else {
-			Printer::Print(StringUtil::Format("Do not support yet, func_child->type:  %s",
-			                                  ExpressionTypeToString(func_child->type)));
-			D_ASSERT(false);
-		}
-	}
-}
-
-void TopDownSplit::GetFunctionExpr(const BoundFunctionExpression &function_expr) {
-	for (const auto &func_child : function_expr.children) {
-		if (ExpressionType::BOUND_COLUMN_REF == func_child->type) {
-			GetColRefExpr(func_child->Cast<BoundColumnRefExpression>());
-		} else if (ExpressionType::VALUE_CONSTANT == func_child->type) {
-			// it's a constant value, skip it
-		} else if (ExpressionType::OPERATOR_CAST == func_child->type) {
-			GetCastExpr(func_child->Cast<BoundCastExpression>());
-		} else {
-			Printer::Print(StringUtil::Format("Do not support yet, func_child->type:  %s",
-			                                  ExpressionTypeToString(func_child->type)));
-			D_ASSERT(false);
-		}
-	}
-}
-
-void TopDownSplit::AddCastExpr(std::set<TableExpr> &table_exprs, const BoundCastExpression &cast_expr) {
-	if (ExpressionType::BOUND_COLUMN_REF == cast_expr.child->type) {
-		AddTableExprs(table_exprs, cast_expr.child);
-	} else if (ExpressionType::BOUND_FUNCTION == cast_expr.child->type) {
-		AddFunctionExpr(table_exprs, cast_expr.child->Cast<BoundFunctionExpression>());
-	} else {
-		Printer::Print("Doesn't support " + ExpressionTypeToString(cast_expr.child->type) + " yet!");
-		D_ASSERT(false);
-	}
-}
-
-void TopDownSplit::GetCastExpr(const BoundCastExpression &cast_expr) {
-	if (ExpressionType::BOUND_COLUMN_REF == cast_expr.child->type) {
-		GetColRefExpr(cast_expr.child->Cast<BoundColumnRefExpression>());
-	} else if (ExpressionType::BOUND_FUNCTION == cast_expr.child->type) {
-		GetFunctionExpr(cast_expr.child->Cast<BoundFunctionExpression>());
-	} else {
-		Printer::Print("Doesn't support " + ExpressionTypeToString(cast_expr.child->type) + " yet!");
-		D_ASSERT(false);
-	}
-}
-
-void TopDownSplit::AddComparisonExpr(std::set<TableExpr> &table_exprs,
-                                     const BoundComparisonExpression &comparison_expr) {
-	auto &left_expr = comparison_expr.left;
-	if (ExpressionType::BOUND_COLUMN_REF == left_expr->type) {
-		AddTableExprs(table_exprs, left_expr);
-	} else if (ExpressionType::BOUND_FUNCTION == left_expr->type) {
-		AddFunctionExpr(table_exprs, left_expr->Cast<BoundFunctionExpression>());
-	} else if (ExpressionType::VALUE_CONSTANT == left_expr->type) {
-		// it's a constant value, skip it
-	} else {
-		Printer::Print(
-		    StringUtil::Format("Do not support yet, left_expr->type:  %s", ExpressionTypeToString(left_expr->type)));
-		D_ASSERT(false);
-	}
-
-	auto &right_expr = comparison_expr.right;
-	if (ExpressionType::BOUND_COLUMN_REF == right_expr->type) {
-		AddTableExprs(table_exprs, right_expr);
-	} else if (ExpressionType::BOUND_FUNCTION == left_expr->type) {
-		AddFunctionExpr(table_exprs, left_expr->Cast<BoundFunctionExpression>());
-	} else if (ExpressionType::VALUE_CONSTANT == right_expr->type) {
-		// it's a constant value, skip it
-	} else {
-		Printer::Print(
-		    StringUtil::Format("Do not support yet, right_expr->type:  %s", ExpressionTypeToString(right_expr->type)));
-		D_ASSERT(false);
-	}
-}
-
 } // namespace duckdb

@@ -12,6 +12,7 @@
 #include "duckdb/optimizer/query_split/query_split_util.h"
 #include "duckdb/optimizer/query_split/split_algorithm.hpp"
 #include "duckdb/planner/expression/bound_between_expression.hpp"
+#include "duckdb/planner/expression/bound_case_expression.hpp"
 #include "duckdb/planner/expression/bound_cast_expression.hpp"
 #include "duckdb/planner/expression/bound_columnref_expression.hpp"
 #include "duckdb/planner/expression/bound_comparison_expression.hpp"
@@ -45,7 +46,7 @@ public:
 		}
 		sibling_used_table.clear();
 		target_tables.clear();
-		proj_expr.clear();
+		header_expr.clear();
 		query_split_index = 0;
 		used_table_ids.clear();
 	};
@@ -56,7 +57,7 @@ public:
 	}
 
 	std::vector<TableExpr> GetProjExpr() {
-		return proj_expr;
+		return header_expr;
 	}
 
 	int GetSplitNumber() {
@@ -70,10 +71,6 @@ protected:
 	void VisitOperator(LogicalOperator &op) override;
 
 private:
-	//! get the `proj_expr` by checking which column is used in the projection
-	void GetProjTableExpr(const LogicalProjection &proj_op);
-	//! get the `proj_expr` by checking which column is used in the aggregate
-	void GetAggregateTableExpr(const LogicalAggregate &aggregate_op);
 	//! get the `table_expr_queue` by checking which column is used in the join
 	std::set<TableExpr> GetJoinTableExpr(const LogicalComparisonJoin &join_op);
 	//! get the `table_expr_queue` by checking which column is used in the cross_product
@@ -84,14 +81,15 @@ private:
 	std::set<TableExpr> GetSeqScanTableExpr(const LogicalGet &get_op);
 
 	//! Collect all used tables into `target_tables`
-	void GetTargetTables(LogicalOperator &op);
+	void AddTargetTables(LogicalOperator &op);
+
+	//! get the `header_expr` by checking which column is used in the projection
+	void AddProjTableExpr(const LogicalProjection &proj_op);
+	//! get the `header_expr` by checking which column is used in the aggregate
+	void AddAggregateTableExpr(const LogicalAggregate &aggregate_op);
+
 	void AddTableExprs(std::set<TableExpr> &table_exprs, const unique_ptr<Expression> &expr);
-	void GetColRefExpr(const BoundColumnRefExpression &column_ref_expr);
-	void AddFunctionExpr(std::set<TableExpr> &table_exprs, const BoundFunctionExpression &function_expr);
-	void GetFunctionExpr(const BoundFunctionExpression &function_expr);
-	void AddCastExpr(std::set<TableExpr> &table_exprs, const BoundCastExpression &cast_expr);
-	void GetCastExpr(const BoundCastExpression &cast_expr);
-	void AddComparisonExpr(std::set<TableExpr> &table_exprs, const BoundComparisonExpression &comparison_expr);
+	void AddHeaderTableExprs(const unique_ptr<Expression> &expr);
 
 private:
 #if SPLIT_FILTER
@@ -112,7 +110,7 @@ private:
 	// table index, table entry
 	std::unordered_set<idx_t> target_tables;
 	// expressions in the projection node
-	std::vector<TableExpr> proj_expr;
+	std::vector<TableExpr> header_expr;
 	int query_split_index = 0;
 
 	// we need to further check if all the CROSS_PRODUCT can be simplified in the subqueries
@@ -120,6 +118,28 @@ private:
 	std::unordered_set<idx_t> used_table_ids;
 
 	bool follow_pipeline_breaker_ = false;
+
+private:
+	struct TableExprCollector {
+		TopDownSplit *owner;
+		std::set<TableExpr> &table_exprs;
+		explicit TableExprCollector(TopDownSplit *o, std::set<TableExpr> &ref_table_exprs)
+		    : owner(o), table_exprs(ref_table_exprs) {
+		}
+
+		void operator()(const unique_ptr<Expression> &expr) {
+			owner->AddTableExprs(table_exprs, expr);
+		}
+	};
+	struct HeaderExprCollector {
+		TopDownSplit *owner;
+		explicit HeaderExprCollector(TopDownSplit *o) : owner(o) {
+		}
+
+		void operator()(const unique_ptr<Expression> &expr) {
+			owner->AddHeaderTableExprs(expr);
+		}
+	};
 };
 
 } // namespace duckdb

@@ -1,7 +1,7 @@
 //===----------------------------------------------------------------------===//
 //                         DuckDB
 //
-// duckdb/optimizer/timer_util.h
+// duckdb/optimizer/query_split_util.h
 //
 //
 //===----------------------------------------------------------------------===//
@@ -10,6 +10,9 @@
 
 #include "duckdb/common/printer.hpp"
 #include "duckdb/planner/column_binding.hpp"
+#include "duckdb/planner/expression/bound_case_expression.hpp"
+#include "duckdb/planner/expression/bound_comparison_expression.hpp"
+#include "duckdb/planner/expression/bound_function_expression.hpp"
 
 #include <chrono>
 #include <fstream>
@@ -46,6 +49,30 @@ struct TableExprHash {
 	}
 };
 
-const TableExpr GetTableExpr(const unique_ptr<Expression> &expr);
-ColumnBinding &GetColumnBinding(unique_ptr<Expression> &expr);
+//! Get the const of TableExpr (which has only one binding)
+const TableExpr GetConstTableExpr(const unique_ptr<Expression> &expr);
+
+//! Get the reference of TableExpr (which has only one binding)
+ColumnBinding &GetRefColumnBinding(unique_ptr<Expression> &expr);
+
+// fixme: see if we can refactor this by `VisitReplace`
+template <typename T>
+void UpdateFunctionExpr(BoundFunctionExpression &function_expr, T &&func);
+template <typename T>
+void UpdateCaseExpr(BoundCaseExpression &case_expr, T &&func);
+template <typename T>
+void UpdateComparisonExpr(BoundComparisonExpression &comparison_expr, T &&func);
+template <typename T>
+void UpdateExprs(unique_ptr<Expression> &expr, T &&func);
+
+// fixme: see if we can refactor this by `VisitReplace`
+template <typename T>
+void VisitFunctionExpr(const BoundFunctionExpression &function_expr, T &&func);
+template <typename T>
+void VisitCaseExpr(const BoundCaseExpression &case_expr, T &&func);
+template <typename T>
+void VisitComparisonExpr(const BoundComparisonExpression &comparison_expr, T &&func);
+template <typename T>
+void VisitExprs(const unique_ptr<Expression> &expr, T &&func);
+
 } // namespace duckdb
