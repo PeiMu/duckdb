@@ -55,6 +55,7 @@ const TableExpr GetConstTableExpr(const unique_ptr<Expression> &expr);
 //! Get the reference of TableExpr (which has only one binding)
 ColumnBinding &GetRefColumnBinding(unique_ptr<Expression> &expr);
 
+//! Update the expr (which more than one binding) by `func`
 // fixme: see if we can refactor this by `VisitReplace`
 template <typename T>
 void UpdateFunctionExpr(BoundFunctionExpression &function_expr, T &&func);
@@ -65,6 +66,7 @@ void UpdateComparisonExpr(BoundComparisonExpression &comparison_expr, T &&func);
 template <typename T>
 void UpdateExprs(unique_ptr<Expression> &expr, T &&func);
 
+//! Visit the expr (which more than one binding) by `func`
 // fixme: see if we can refactor this by `VisitReplace`
 template <typename T>
 void VisitFunctionExpr(const BoundFunctionExpression &function_expr, T &&func);

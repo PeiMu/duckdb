@@ -210,7 +210,8 @@ void UpdateExprs(unique_ptr<Expression> &expr, T &&func) {
 	}
 	case ExpressionType::OPERATOR_IS_NULL:
 	case ExpressionType::OPERATOR_IS_NOT_NULL:
-	case ExpressionType::OPERATOR_NOT: {
+	case ExpressionType::OPERATOR_NOT:
+	case ExpressionType::OPERATOR_COALESCE: {
 		auto &operator_expr = expr->Cast<BoundOperatorExpression>();
 		for (auto &child_expr : operator_expr.children) {
 			UpdateExprs(child_expr, func);
@@ -279,7 +280,8 @@ void VisitExprs(const unique_ptr<Expression> &expr, T &&func) {
 	}
 	case ExpressionType::OPERATOR_IS_NULL:
 	case ExpressionType::OPERATOR_IS_NOT_NULL:
-	case ExpressionType::OPERATOR_NOT: {
+	case ExpressionType::OPERATOR_NOT:
+	case ExpressionType::OPERATOR_COALESCE: {
 		auto &operator_expr = expr->Cast<BoundOperatorExpression>();
 		for (const auto &child_expr : operator_expr.children) {
 			VisitExprs(child_expr, func);

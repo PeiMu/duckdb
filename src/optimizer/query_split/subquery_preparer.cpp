@@ -373,7 +373,8 @@ unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalO
 	D_ASSERT(LogicalOperatorType::LOGICAL_PROJECTION == plan_pointer->type);
 #endif
 	auto &proj_op = plan_pointer->Cast<LogicalProjection>();
-	if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == proj_op.children[0]->type) {
+	if (nullptr != proj_op.children[0] &&
+	    LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == proj_op.children[0]->type) {
 		// update aggregate expressions
 		auto &aggregate_op = proj_op.children[0]->Cast<LogicalAggregate>();
 		auto proj_expr_index = 0;
@@ -386,8 +387,8 @@ unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalO
 			column_binding.table_index = original_proj_expr[proj_expr_index].table_idx;
 			column_binding.column_index = original_proj_expr[proj_expr_index].column_idx;
 #ifdef DEBUG
-			// D_ASSERT(agg_expr.alias == original_proj_expr[proj_expr_index].column_name);
-			D_ASSERT(agg_expr->return_type == original_proj_expr[proj_expr_index].return_type);
+			// D_ASSERT(agg_group_expr.alias == original_proj_expr[proj_expr_index].column_name);
+			D_ASSERT(agg_group_expr->return_type == original_proj_expr[proj_expr_index].return_type);
 #endif
 			proj_expr_index++;
 		}
@@ -399,34 +400,31 @@ unique_ptr<LogicalOperator> SubqueryPreparer::UpdateProjHead(unique_ptr<LogicalO
 #endif
 			auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
 			for (auto &expr : aggregate_expr.children) {
-				UpdateExprs(expr, [original_proj_expr, proj_expr_index](unique_ptr<Expression> &expr) {
+				UpdateExprs(expr, [original_proj_expr, &proj_expr_index](unique_ptr<Expression> &expr) {
 					auto &column_binding = GetRefColumnBinding(expr);
 					column_binding.table_index = original_proj_expr[proj_expr_index].table_idx;
 					column_binding.column_index = original_proj_expr[proj_expr_index].column_idx;
-				});
 #ifdef DEBUG
-				// D_ASSERT(expr.alias == original_proj_expr[proj_expr_index].column_name);
-				D_ASSERT(expr->return_type == original_proj_expr[proj_expr_index].return_type);
+					// D_ASSERT(expr.alias == original_proj_expr[proj_expr_index].column_name);
+					D_ASSERT(expr->return_type == original_proj_expr[proj_expr_index].return_type);
 #endif
+					proj_expr_index++;
+				});
 			}
-			proj_expr_index++;
 		}
 	} else {
-#ifdef DEBUG
-		D_ASSERT(proj_op.expressions.size() == original_proj_expr.size());
-#endif
 		auto proj_expr_index = 0;
 		for (auto &expr : proj_op.expressions) {
-			// we assume the group by node can be covered by `GetRefColumnBinding`
-			// or we will update it by `UpdateExprs` if it's necessary
-			auto &column_binding = GetRefColumnBinding(expr);
-			column_binding.table_index = original_proj_expr[proj_expr_index].table_idx;
-			column_binding.column_index = original_proj_expr[proj_expr_index].column_idx;
+			UpdateExprs(expr, [original_proj_expr, &proj_expr_index](unique_ptr<Expression> &expr) {
+				auto &column_binding = GetRefColumnBinding(expr);
+				column_binding.table_index = original_proj_expr[proj_expr_index].table_idx;
+				column_binding.column_index = original_proj_expr[proj_expr_index].column_idx;
 #ifdef DEBUG
-			D_ASSERT(expr->alias == original_proj_expr[proj_expr_index].column_name);
-			D_ASSERT(expr->return_type == original_proj_expr[proj_expr_index].return_type);
+				D_ASSERT(expr->alias == original_proj_expr[proj_expr_index].column_name);
+				D_ASSERT(expr->return_type == original_proj_expr[proj_expr_index].return_type);
 #endif
-			proj_expr_index++;
+				proj_expr_index++;
+			});
 		}
 	}
 	return std::move(plan);
@@ -891,7 +889,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 			// revert expr of aggregate op expression
 			for (auto &agg_expr : aggregate_op.expressions) {
 #ifdef DEBUG
-				D_ASSERT(ExpressionType::BOUND_AGGREGATE == expr->type);
+				D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
 #endif
 				auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
 				for (auto &bound_agg_expr : aggregate_expr.children) {

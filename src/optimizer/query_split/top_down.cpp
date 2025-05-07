@@ -226,13 +226,11 @@ std::set<TableExpr> TopDownSplit::GetFilterTableExpr(const LogicalFilter &filter
 
 void TopDownSplit::AddProjTableExpr(const LogicalProjection &proj_op) {
 	// if it's children is `aggregate` or `group by`, we only check the child op
-	if (LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == proj_op.children[0]->type) {
+	if (nullptr != proj_op.children[0] &&
+	    LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY == proj_op.children[0]->type) {
 		AddAggregateTableExpr(proj_op.children[0]->Cast<LogicalAggregate>());
 	} else {
 		for (const auto &expr : proj_op.expressions) {
-#ifdef DEBUG
-			D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
-#endif
 			VisitExprs(expr, HeaderExprCollector {this});
 		}
 	}
