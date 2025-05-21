@@ -7,7 +7,7 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 	    LogicalOperatorType::LOGICAL_LIMIT != plan->type && LogicalOperatorType::LOGICAL_EXPLAIN != plan->type) {
 		return std::move(plan);
 	}
-#ifdef DEBUG
+#if ENABLE_DEBUG_PRINT
 	Printer::Print("before ReorderGet");
 	plan->Print();
 #endif
@@ -273,7 +273,7 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 
 	plan_pointer->children.push_back(std::move(current_plan));
 
-#ifdef DEBUG
+#if ENABLE_DEBUG_PRINT
 	Printer::Print("after ReorderGet");
 	plan->Print();
 #endif
