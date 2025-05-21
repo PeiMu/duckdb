@@ -521,7 +521,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				if (needToSplit)
 					Printer::Print("need rewrite");
 #endif
-				table_card_order = reorder_get.GetTableCardOrder();
 				needToSplit = needToSplit ||
 				              subquery_preparer.NeedReorder(subqueries.front(), table_card_order, previous_result_card);
 #if ENABLE_DEBUG_PRINT
@@ -548,6 +547,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					}
 #if REORDER_DATACHUNK
 					plan = reorder_get.Optimize(std::move(plan));
+					table_card_order = reorder_get.GetTableCardOrder();
 					if (reorder_get.NeedFilterPushDown()) {
 						FilterPushdown filter_pushdown(optimizer);
 						plan = filter_pushdown.Rewrite(std::move(plan));
@@ -559,15 +559,15 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 					}
 #endif
-					subquery_preparer.Rewrite(plan);
+					subquery_preparer.CanonicalizeCrossProduct(plan);
 #if TIME_BREAK_DOWN
 					if (execute_plan)
-						chrono_toc(&timer, "Rewrite time is\n");
+						chrono_toc(&timer, "CanonicalizeCrossProduct time is\n");
 #endif
 #if ENABLE_DEBUG_PRINT
 					if (execute_plan) {
 						// debug: print subquery
-						Printer::Print("After subquery_preparer.Rewrite");
+						Printer::Print("After subquery_preparer.CanonicalizeCrossProduct");
 						plan->Print();
 					}
 #endif
@@ -615,7 +615,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			chrono_toc(&timer, "GenerateProjHead time is\n");
 #endif
 			subqueries.pop_front();
-			table_expr_queue.pop();
+			table_expr_queue.pop_front();
 
 #if MANUAL_EXPLAIN_ANALYZE
 			auto explain_sub_plan = sub_plan->Copy(*this);

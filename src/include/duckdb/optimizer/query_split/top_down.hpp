@@ -38,9 +38,7 @@ public:
 		filter_parent = false;
 #endif
 		top_most = true;
-		while (!table_expr_queue.empty()) {
-			table_expr_queue.pop();
-		}
+		table_expr_queue.clear();
 		while (!used_table_queue.empty()) {
 			used_table_queue.pop();
 		}
@@ -101,7 +99,8 @@ private:
 	std::set<TableExpr> last_level_table_exprs;
 
 	// the collection of necessary table/column information in a top-down order, e.g. the lowest level is the last
-	// element in the stack and will be got first. PS: we only modify it in `VisitOperator`
+	// element in the deuqe and will be got first. PS: we only modify it in `VisitOperator`.
+	// table_expr_queue.front()[1] means the table_exprs for the sibling node.
 	table_expr_info table_expr_queue;
 	// the collection of the used tables of the current level
 	std::queue<std::set<idx_t>> used_table_queue;

@@ -53,10 +53,10 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 	// `temp_stack` contains the `TableExpr` info of all the upper-level subqueries,
 	// we try to merge the matching tables in a bottom-up order by levels
 	auto temp_stack = table_expr_queue;
-	temp_stack.pop();
+	temp_stack.pop_front();
 	while (!temp_stack.empty()) {
 		auto temp_vec = temp_stack.front();
-		temp_stack.pop();
+		temp_stack.pop_front();
 		for (const auto &temp_set : temp_vec) {
 			for (const auto &table_expr : temp_set) {
 				// check if expressions in the upper operators still use tables in the current level,
@@ -336,8 +336,8 @@ table_expr_info SubqueryPreparer::UpdateTableExpr(table_expr_info table_expr_que
 			}
 			new_vec.emplace_back(new_set);
 		}
-		ret.push(new_vec);
-		table_expr_queue.pop();
+		ret.emplace_back(new_vec);
+		table_expr_queue.pop_front();
 	}
 
 	// find if `original_proj_expr` has the `old_table_idx` that need to be updated
@@ -452,7 +452,7 @@ void SubqueryPreparer::UpdateSubqueriesIndex(subquery_queue &subqueries) {
 	}
 }
 
-void SubqueryPreparer::Rewrite(unique_ptr<LogicalOperator> &plan) {
+void SubqueryPreparer::CanonicalizeCrossProduct(unique_ptr<LogicalOperator> &plan) {
 	switch (plan->type) {
 	case LogicalOperatorType::LOGICAL_PROJECTION:
 	case LogicalOperatorType::LOGICAL_ORDER_BY:
@@ -476,7 +476,7 @@ void SubqueryPreparer::Rewrite(unique_ptr<LogicalOperator> &plan) {
 	}
 
 	while (!join_pointers_pair.empty()) {
-		// check if the current level JOIN needs to rewrite
+		// check if the current level JOIN needs to canonicalize
 		auto current_pair = join_pointers_pair.top();
 		LogicalOperator *current_join_pointer = current_pair.first;
 		int current_join_level = current_pair.second;
@@ -693,21 +693,25 @@ void SubqueryPreparer::InsertTableBlocks(unique_ptr<LogicalOperator> &op,
 		table_blocks.emplace(table_index, std::move(op));
 		table_blocks_key_order.emplace_back(table_index);
 	} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->type) {
-		// insert the SEMI JOIN to `table_blocks`, e.g.
-		// SEMI JION (table.index = CHUNK_GET.0)
 		auto &join_op = op->Cast<LogicalComparisonJoin>();
+		if (JoinType::SEMI == join_op.join_type) {
+			// insert the SEMI JOIN to `table_blocks`, e.g.
+			// SEMI JION (table.index = CHUNK_GET.0)
+			auto &left_child = join_op.children[0];
 #ifdef DEBUG
-		D_ASSERT(JoinType::SEMI == join_op.join_type);
+			auto &right_child = join_op.children[1];
+			D_ASSERT(LogicalOperatorType::LOGICAL_GET == left_child->type);
+			D_ASSERT(LogicalOperatorType::LOGICAL_CHUNK_GET == right_child->type);
 #endif
-		auto &left_child = join_op.children[0];
-#ifdef DEBUG
-		auto &right_child = join_op.children[1];
-		D_ASSERT(LogicalOperatorType::LOGICAL_GET == left_child->type);
-		D_ASSERT(LogicalOperatorType::LOGICAL_CHUNK_GET == right_child->type);
-#endif
-		idx_t table_index = left_child->Cast<LogicalGet>().table_index;
-		table_blocks.emplace(table_index, std::move(op));
-		table_blocks_key_order.emplace_back(table_index);
+			idx_t table_index = left_child->Cast<LogicalGet>().table_index;
+			table_blocks.emplace(table_index, std::move(op));
+			table_blocks_key_order.emplace_back(table_index);
+		} else if (JoinType::INNER == join_op.join_type) {
+			// fixme: should have a smarter decision, but now we only use the right table's index
+			auto &right_table = join_op.children[1]->Cast<LogicalGet>();
+			table_blocks.emplace(right_table.table_index, std::move(op));
+			table_blocks_key_order.emplace_back(right_table.table_index);
+		}
 	} else {
 		Printer::Print(
 		    StringUtil::Format("Do not support yet, block_op->type:  %s", LogicalOperatorToString(op->type)));
@@ -738,10 +742,28 @@ bool SubqueryPreparer::BlockUsed(const unordered_set<idx_t> &left_cond_table_ind
 		};
 		find_get(op);
 	} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->type) {
-		// if it is a JOIN, all blocks should be used
-		return true;
+		auto &join_op = op->Cast<LogicalComparisonJoin>();
+		// fixme: should have a smarter decision
+		if (LogicalOperatorType::LOGICAL_GET == join_op.children[0]->type &&
+		    LogicalOperatorType::LOGICAL_GET == join_op.children[1]->type) {
+			// hint: if all tables have the same name under this JOIN, it shouldn't be a subquery, which means the risk
+			// of use this JOIN block, ref: top_down.cpp, DSB query102_0.sql.
+			auto &left_get = join_op.children[0]->Cast<LogicalGet>();
+			auto &right_get = join_op.children[1]->Cast<LogicalGet>();
+			auto left_table_name = left_get.function.to_string(left_get.bind_data.get());
+			auto right_table_name = right_get.function.to_string(right_get.bind_data.get());
+			if (left_table_name == right_table_name) {
+				return left_cond_table_index.count(right_get.table_index) ||
+				       left_cond_table_index.count(left_get.table_index);
+			} else
+				return true;
+		} else {
+			// all blocks should be used
+			// fixme: might have bugs
+			return true;
+		}
 	} else if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == op->type) {
-		// no need to check the right JOIN
+		// no need to check the right child
 		return BlockUsed(left_cond_table_index, op->children[0]);
 	} else {
 		Printer::Print(
@@ -1037,13 +1059,17 @@ SubqueryPreparer::CheckTableUsage(LogicalOperator *current_join_pointer, unorder
 				break;
 			}
 		}
+		if (left_cond_table_index.count(last_sibling_index)) {
+			auto last_sibling = std::move(table_blocks[last_sibling_index]);
+			table_blocks.erase(last_sibling_index);
+			InsertTableBlocks(last_block, table_blocks, table_blocks_key_order);
+			last_block = std::move(last_sibling);
+		} else {
+			// the last_block should be a JOIN with same tables.
 #ifdef DEBUG
-		D_ASSERT(left_cond_table_index.count(last_sibling_index));
+			D_ASSERT(LogicalOperatorType::LOGICAL_COMPARISON_JOIN == last_block->type);
 #endif
-		auto last_sibling = std::move(table_blocks[last_sibling_index]);
-		table_blocks.erase(last_sibling_index);
-		InsertTableBlocks(last_block, table_blocks, table_blocks_key_order);
-		last_block = std::move(last_sibling);
+		}
 	}
 
 	// 4. get the unused blocks

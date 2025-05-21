@@ -24,7 +24,7 @@ namespace duckdb {
 enum EnumSplitAlgorithm { foreign_key_center = 1, min_sub_query, top_down };
 
 using subquery_queue = std::deque<std::vector<unique_ptr<LogicalOperator>>>;
-using table_expr_info = std::queue<std::vector<std::set<TableExpr>>>;
+using table_expr_info = std::deque<std::vector<std::set<TableExpr>>>;
 
 class SplitAlgorithm : public LogicalOperatorVisitor {
 public:
@@ -37,7 +37,8 @@ public:
 
 public:
 	//! the collection of all levels of subqueries in a bottom-up order, e.g. the lowest level subquery is the first
-	//! element in the queue and will be executed first
+	//! element in the deque and will be executed first.
+	//! subqueries.front()[1] means the sibling subquery.
 	subquery_queue subqueries;
 
 protected:

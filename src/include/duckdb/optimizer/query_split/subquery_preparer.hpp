@@ -55,7 +55,7 @@ public:
 	                                           const std::vector<TableExpr> &original_proj_expr);
 
 	// todo: refactor to a standalone class
-	void Rewrite(unique_ptr<LogicalOperator> &plan);
+	void CanonicalizeCrossProduct(unique_ptr<LogicalOperator> &plan);
 	//! Check if current `subqueries_vec` has CROSS_PRODUCT that cannot be simplified
 	bool NeedRewrite(const std::vector<unique_ptr<LogicalOperator>> &subqueries_vec);
 	bool NeedReorder(const std::vector<unique_ptr<LogicalOperator>> &subqueries_vec,

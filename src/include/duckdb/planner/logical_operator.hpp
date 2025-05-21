@@ -44,6 +44,10 @@ public:
 	//! The node where need to be merged by another subquery, used by query_split
 	int split_index = 0;
 
+	// fixme: used for the very hack verification in top_down Split,
+	//  using it to check if this JOIN was a split point but reverted
+	bool reverted = false;
+
 public:
 	virtual vector<ColumnBinding> GetColumnBindings();
 	static vector<ColumnBinding> GenerateColumnBindings(idx_t table_idx, idx_t column_count);
