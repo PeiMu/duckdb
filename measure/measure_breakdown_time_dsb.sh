@@ -17,7 +17,7 @@ echo "PreOptimize, final-PostOptimize, final-CreatePlan, Execute"  >> ${LOG_NAME
 for sql in $(find "$dir_1" "$dir_2" -type f -name "*.sql"); do
   echo "execute ${sql}" >> ${LOG_NAME};
   for i in $(eval echo {1.."${iteration}"}); do
-    echo -ne ".read ${sql}" | duckdb ./dsb.db;
+    echo -ne ".read ${sql}" | duckdb ./dsb_$1.db;
   done
 done
 mv ${LOG_NAME} duckdb_official_breakdown_${LOG_NAME}
@@ -28,7 +28,7 @@ mv ${LOG_NAME} duckdb_official_breakdown_${LOG_NAME}
 #for sql in $(find "$dir_1" "$dir_2" -type f -name "*.sql"); do
 #  echo "execute ${sql}" >> ${LOG_NAME};
 #  for i in $(eval echo {1.."${iteration}"}); do
-#    echo -ne ".read ${sql}" | duckdb ./dsb.db;
+#    echo -ne ".read ${sql}" | duckdb ./dsb_$1.db;
 #  done
 #done
 #mv ${LOG_NAME} duckdb_js_wo_stats_breakdown_${LOG_NAME}
@@ -37,7 +37,7 @@ cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWR
 for sql in $(find "$dir_1" "$dir_2" -type f -name "*.sql"); do
   echo "execute ${sql}" >> ${LOG_NAME};
   for i in $(eval echo {1.."${iteration}"}); do
-    echo -ne ".read ${sql}" | duckdb ./dsb.db;
+    echo -ne ".read ${sql}" | duckdb ./dsb_$1.db;
   done
 done
 mv ${LOG_NAME} duckdb_rsj_wo_stats_breakdown_${LOG_NAME}
@@ -47,7 +47,7 @@ mv ${LOG_NAME} duckdb_rsj_wo_stats_breakdown_${LOG_NAME}
 #for sql in $(find "$dir_1" "$dir_2" -type f -name "*.sql"); do
 #  echo "execute ${sql}" >> ${LOG_NAME};
 #  for i in $(eval echo {1.."${iteration}"}); do
-#    echo -ne ".read ${sql}" | duckdb ./dsb.db;
+#    echo -ne ".read ${sql}" | duckdb ./dsb_$1.db;
 #  done
 #done
 #mv ${LOG_NAME} duckdb_js_whole_plan_breakdown_${LOG_NAME}
@@ -57,7 +57,7 @@ cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWR
 for sql in $(find "$dir_1" "$dir_2" -type f -name "*.sql"); do
   echo "execute ${sql}" >> ${LOG_NAME};
   for i in $(eval echo {1.."${iteration}"}); do
-    echo -ne ".read ${sql}" | duckdb ./dsb.db;
+    echo -ne ".read ${sql}" | duckdb ./dsb_$1.db;
   done
 done
 mv ${LOG_NAME} duckdb_rsj_whole_plan_wo_stats_breakdown_${LOG_NAME}
@@ -69,7 +69,7 @@ mv ${LOG_NAME} duckdb_rsj_whole_plan_wo_stats_breakdown_${LOG_NAME}
 #for sql in $(find "$dir_1" "$dir_2" -type f -name "*.sql"); do
 #  echo "execute ${sql}" >> ${LOG_NAME};
 #  for i in $(eval echo {1.."${iteration}"}); do
-#    echo -ne ".read ${sql}" | duckdb ./dsb.db;
+#    echo -ne ".read ${sql}" | duckdb ./dsb_$1.db;
 #  done
 #done
 #mv ${LOG_NAME} duckdb_js_breakdown_${LOG_NAME}
@@ -79,7 +79,7 @@ cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWR
 for sql in $(find "$dir_1" "$dir_2" -type f -name "*.sql"); do
   echo "execute ${sql}" >> ${LOG_NAME};
   for i in $(eval echo {1.."${iteration}"}); do
-    echo -ne ".read ${sql}" | duckdb ./dsb.db;
+    echo -ne ".read ${sql}" | duckdb ./dsb_$1.db;
   done
 done
 mv ${LOG_NAME} duckdb_rsj_breakdown_${LOG_NAME}
@@ -90,7 +90,7 @@ mv ${LOG_NAME} duckdb_rsj_breakdown_${LOG_NAME}
 #for sql in $(find "$dir_1" "$dir_2" -type f -name "*.sql"); do
 #  echo "execute ${sql}" >> ${LOG_NAME};
 #  for i in $(eval echo {1.."${iteration}"}); do
-#    echo -ne ".read ${sql}" | duckdb ./dsb.db;
+#    echo -ne ".read ${sql}" | duckdb ./dsb_$1.db;
 #  done
 #done
 #mv ${LOG_NAME} duckdb_js_whole_plan_breakdown_${LOG_NAME}
@@ -100,7 +100,7 @@ cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_MERGE_BACK_PLAN=1 
 for sql in $(find "$dir_1" "$dir_2" -type f -name "*.sql"); do
   echo "execute ${sql}" >> ${LOG_NAME};
   for i in $(eval echo {1.."${iteration}"}); do
-    echo -ne ".read ${sql}" | duckdb ./dsb.db;
+    echo -ne ".read ${sql}" | duckdb ./dsb_$1.db;
   done
 done
 mv ${LOG_NAME} duckdb_rsj_whole_plan_breakdown_${LOG_NAME}
