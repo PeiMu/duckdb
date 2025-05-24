@@ -7,8 +7,13 @@ iteration=15 # 5 warm up, 10 runs
 
 LOG_NAME=time_log.csv
 
+if [ -z "$1" ]; then
+  echo "Please enter scale factor to choose the correct database!"
+  exit 1
+fi
+
 rm -rf *${LOG_NAME}
-rm -rf dsb_result/*${LOG_NAME}
+rm -rf dsb_$1_result/*${LOG_NAME}
 
 
 ###### official duckdb
@@ -106,4 +111,4 @@ done
 mv ${LOG_NAME} duckdb_rsj_whole_plan_breakdown_${LOG_NAME}
 
 
-mv *${LOG_NAME} dsb_result/.
+mv *${LOG_NAME} dsb_$1_result/.
