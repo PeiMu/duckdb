@@ -34,6 +34,9 @@ public:
 	virtual unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan, bool follow_pipeline_breaker) {
 		return plan;
 	};
+	void Clear() {
+		subqueries.clear();
+	}
 
 public:
 	//! the collection of all levels of subqueries in a bottom-up order, e.g. the lowest level subquery is the first

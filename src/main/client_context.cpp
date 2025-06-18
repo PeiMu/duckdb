@@ -545,7 +545,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 						merge_sibling_expr = false;
 					}
-#if REORDER_DATACHUNK
+#if REORDER_DATACHUNK && ENABLE_REORDER_PLAN
 					plan = reorder_get.Optimize(std::move(plan));
 					table_card_order = reorder_get.GetTableCardOrder();
 					if (reorder_get.NeedFilterPushDown()) {
@@ -574,7 +574,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				}
 			}
 			if (needToSplit) {
-				query_splitter.Clear();
+				plan = query_splitter.Clear(std::move(plan));
 				plan = query_splitter.Split(std::move(plan), !config.enable_dbshaker_split_jop);
 				subqueries = query_splitter.GetSubqueries();
 				table_expr_queue = query_splitter.GetTableExprQueue();
