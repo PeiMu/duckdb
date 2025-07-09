@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#cd ../ && make clean && GEN=ninja VERBOSE=1 make 2>&1|tee -a compile.log && cd measure
+
 #rm -f ./imdb.db
 #
 ## create schema
