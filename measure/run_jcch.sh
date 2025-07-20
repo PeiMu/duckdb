@@ -10,14 +10,14 @@ echo -ne ".read jcch_schema.sql" | duckdb ./jcch.db
 for table in region nation part supplier partsupp customer orders lineitem
 do
   echo "duckdb load table from ${table}.tbl"
-  command="copy ${table} from '/home/pei/Project/benchmarks/JCC-H/out/${table}.tbl';"
-  #command="insert into ${table} select * from read_csv('/home/pei/Project/benchmarks/JCC-H/out/${table}.tbl');"
+  command="copy ${table} from '$JCCH_PATH/out/${table}.tbl';"
+  #command="insert into ${table} select * from read_csv('$JCCH_PATH/out/${table}.tbl');"
   echo $command
   echo -ne "${command}" | duckdb ./jcch.db
 done
 
 # execute queries
-dir="/home/pei/Project/benchmarks/JCC-H/out/skinner_explained"
+dir="$JCCH_PATH/out/skinner_explained"
 iteration=10
 
 rm -rf jcch_result/
