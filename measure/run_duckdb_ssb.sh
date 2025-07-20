@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # execute queries
-dir="/home/pei/Project/benchmarks/ssb-skew-duckdb/ssb/queries"
+dir="$SSB_PATH/ssb/queries"
 iteration=1
 
 rm -rf ssb_result/
