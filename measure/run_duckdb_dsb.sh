@@ -23,9 +23,9 @@ fi
 #do
 #  echo "duckdb load table from ${table}.tbl"
 #  if [ "$2" -eq 10 ]; then
-#    command="copy ${table} from '/home/pei/Project/benchmarks/dsb-postgres/code/tools/out/csv/${table}.csv' (quote '\"', escape '\\');"
+#    command="copy ${table} from '$DSB_PATH/code/tools/out/csv/${table}.csv' (quote '\"', escape '\\');"
 #  elif [ "$2" -eq 100 ]; then
-#    command="copy ${table} from '/home/pei/Project/benchmarks/dsb-postgres/code/tools/out_100/csv/${table}.csv' (quote '\"', escape '\\');"
+#    command="copy ${table} from '$DSB_PATH/code/tools/out_100/csv/${table}.csv' (quote '\"', escape '\\');"
 #  else
 #    echo "Please enter a correct scale factor 10/100, or check the csv file path!"
 #  fi
@@ -35,8 +35,8 @@ fi
 
 
 # execute queries
-dir_1="/home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/"
-dir_2="/home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/"
+dir_1="$DSB_PATH/code/tools/1_instance_out_wo_multi_block/1/"
+dir_2="$DSB_PATH/code/tools/1_instance_out_wo_multi_block/2/"
 iteration=1
 
 log_name=duckdb_result_dsb_$2_$1.txt
