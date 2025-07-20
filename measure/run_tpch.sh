@@ -10,13 +10,13 @@ echo -ne ".read tpch_schema.sql" | duckdb ./tpch.db
 for table in region nation part supplier partsupp customer orders lineitem
 do
   echo "duckdb load table from ${table}.tbl"
-  command="copy ${table} from '/home/pei/Project/benchmarks/tpch-postgres/dbgen/out/${table}.tbl';"
+  command="copy ${table} from '$TPCH_PATH/dbgen/out/${table}.tbl';"
   echo $command
   echo -ne "${command}" | duckdb ./tpch.db
 done
 
 # execute queries
-dir="/home/pei/Project/benchmarks/tpch-postgres/dbgen/out/skinner_explained"
+dir="$TPCH_PATH/dbgen/out/skinner_explained"
 iteration=10
 
 rm -rf tpch_result/
