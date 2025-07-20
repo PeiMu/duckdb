@@ -7,9 +7,9 @@ rm -f convert_postgres.log
 
 clear && cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=0 VERBOSE=1 make 2>&1|tee -a compile.log && cd measure && clear
 
-#dir="/home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS_QuerySplit"
-#dir="/home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS_new_QS_settings"
-dir="/home/pei/Project/benchmarks/imdb_job-postgres/QuerySplit/queries_new_settings_QuerySplit"
+#dir="$JOB_PATH/queries_without_AS_QuerySplit"
+#dir="$JOB_PATH/queries_without_AS_new_QS_settings"
+dir="$JOB_PATH/QuerySplit/queries_new_settings_QuerySplit"
 iteration=1
 
 for i in $(eval echo {1.."${iteration}"}); do
