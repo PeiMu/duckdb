@@ -32,10 +32,10 @@
 #define INJECT_PLAN false
 
 namespace duckdb {
-class IRConverter {
+class IRToDuckConverter {
 public:
-	IRConverter(Binder &binder, ClientContext &context) : binder(binder), context(context) {};
-	~IRConverter() = default;
+	IRToDuckConverter(Binder &binder, ClientContext &context) : binder(binder), context(context) {};
+	~IRToDuckConverter() = default;
 
 	std::vector<unique_ptr<Expression>> CollectFilterExpressions(unique_ptr<LogicalOperator> &duckdb_plan);
 

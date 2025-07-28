@@ -2,8 +2,8 @@
 
 namespace duckdb {
 unordered_map<std::string, unique_ptr<LogicalGet>>
-IRConverter::GetDuckdbTableMap(unique_ptr<LogicalOperator> &duckdb_plan,
-                               const std::unordered_map<idx_t, std::string> &table_alias_name) {
+IRToDuckConverter::GetDuckdbTableMap(unique_ptr<LogicalOperator> &duckdb_plan,
+                                     const std::unordered_map<idx_t, std::string> &table_alias_name) {
 	unordered_map<std::string, unique_ptr<LogicalGet>> table_map;
 
 	std::function<void(unique_ptr<LogicalOperator> & duckdb_plan)> iterate_plan;
@@ -26,7 +26,8 @@ IRConverter::GetDuckdbTableMap(unique_ptr<LogicalOperator> &duckdb_plan,
 	return table_map;
 }
 
-std::vector<unique_ptr<Expression>> IRConverter::CollectFilterExpressions(unique_ptr<LogicalOperator> &duckdb_plan) {
+std::vector<unique_ptr<Expression>>
+IRToDuckConverter::CollectFilterExpressions(unique_ptr<LogicalOperator> &duckdb_plan) {
 	std::vector<unique_ptr<Expression>> expr_vec;
 	std::function<void(unique_ptr<LogicalOperator> & duckdb_plan)> iterate_plan;
 	iterate_plan = [&expr_vec, &iterate_plan](unique_ptr<LogicalOperator> &duckdb_plan) {
@@ -47,7 +48,7 @@ std::vector<unique_ptr<Expression>> IRConverter::CollectFilterExpressions(unique
 	return expr_vec;
 }
 
-bool IRConverter::CheckCondIndex(const unique_ptr<Expression> &expr, const unique_ptr<LogicalOperator> &child) {
+bool IRToDuckConverter::CheckCondIndex(const unique_ptr<Expression> &expr, const unique_ptr<LogicalOperator> &child) {
 #ifdef DEBUG
 	D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->GetExpressionType());
 #endif
@@ -82,15 +83,15 @@ bool IRConverter::CheckCondIndex(const unique_ptr<Expression> &expr, const uniqu
 }
 
 std::pair<idx_t, idx_t>
-IRConverter::ConvertTableColumnIndex(std::pair<unsigned int, unsigned int> postgres_table_column_pair,
-                                     const unordered_map<int, int> &pg_duckdb_table_idx) {
-	auto index_find = pg_duckdb_table_idx.find(postgres_table_column_pair.first);
+IRToDuckConverter::ConvertTableColumnIndex(std::pair<unsigned int, unsigned int> table_column_pair,
+                                           const unordered_map<int, int> &pg_duckdb_table_idx) {
+	auto index_find = pg_duckdb_table_idx.find(table_column_pair.first);
 #ifdef DEBUG
 	D_ASSERT(index_find != pg_duckdb_table_idx.end());
 #endif
 	auto table_index = index_find->second;
 	auto find_col_idx = std::find(column_idx_mapping[table_index].begin(), column_idx_mapping[table_index].end(),
-	                              postgres_table_column_pair.second - 1);
+	                              table_column_pair.second - 1);
 #ifdef DEBUG
 	D_ASSERT(find_col_idx != column_idx_mapping[table_index].end());
 #endif
@@ -99,18 +100,18 @@ IRConverter::ConvertTableColumnIndex(std::pair<unsigned int, unsigned int> postg
 	return std::make_pair(table_index, column_index);
 }
 
-unique_ptr<LogicalComparisonJoin> IRConverter::ConstructDuckdbJoin(SimplestJoin *postgres_join,
-                                                                   unique_ptr<LogicalOperator> left_child,
-                                                                   unique_ptr<LogicalOperator> right_child,
-                                                                   const unordered_map<int, int> &pg_duckdb_table_idx) {
+unique_ptr<LogicalComparisonJoin>
+IRToDuckConverter::ConstructDuckdbJoin(SimplestJoin *simplest_join, unique_ptr<LogicalOperator> left_child,
+                                       unique_ptr<LogicalOperator> right_child,
+                                       const unordered_map<int, int> &pg_duckdb_table_idx) {
 	auto duckdb_join = make_uniq<LogicalComparisonJoin>(JoinType::INNER);
 	duckdb_join->children.push_back(std::move(left_child));
 	duckdb_join->children.push_back(std::move(right_child));
 	JoinCondition cond;
-	for (const auto &postgres_cond : postgres_join->join_conditions) {
-		auto comp_op = postgres_cond->GetSimplestExprType();
+	for (const auto &simplest_join_cond : simplest_join->join_conditions) {
+		auto comp_op = simplest_join_cond->GetSimplestExprType();
 		cond.comparison = ConvertCompType(comp_op);
-		auto &left_pg_cond = postgres_cond->left_attr;
+		auto &left_pg_cond = simplest_join_cond->left_attr;
 		LogicalType left_type = ConvertVarType(left_pg_cond->GetType());
 		auto left_table_column_index = ConvertTableColumnIndex(
 		    std::make_pair(left_pg_cond->GetTableIndex(), left_pg_cond->GetColumnIndex()), pg_duckdb_table_idx);
@@ -118,7 +119,7 @@ unique_ptr<LogicalComparisonJoin> IRConverter::ConstructDuckdbJoin(SimplestJoin 
 		    left_pg_cond->GetColumnName(), left_type,
 		    ColumnBinding(left_table_column_index.first, left_table_column_index.second));
 
-		auto &right_pg_cond = postgres_cond->right_attr;
+		auto &right_pg_cond = simplest_join_cond->right_attr;
 		LogicalType right_type = ConvertVarType(right_pg_cond->GetType());
 		auto right_table_column_index = ConvertTableColumnIndex(
 		    std::make_pair(right_pg_cond->GetTableIndex(), right_pg_cond->GetColumnIndex()), pg_duckdb_table_idx);
@@ -143,8 +144,8 @@ unique_ptr<LogicalComparisonJoin> IRConverter::ConstructDuckdbJoin(SimplestJoin 
 	return duckdb_join;
 }
 
-vector<unique_ptr<Expression>> IRConverter::GetFilter_exprs(std::vector<unique_ptr<Expression>> &expr_vec,
-                                                            idx_t table_idx) {
+vector<unique_ptr<Expression>> IRToDuckConverter::GetFilter_exprs(std::vector<unique_ptr<Expression>> &expr_vec,
+                                                                  idx_t table_idx) {
 	vector<unique_ptr<Expression>> filter_expressions;
 
 	for (auto it = expr_vec.begin(); it != expr_vec.end();) {
@@ -161,10 +162,10 @@ vector<unique_ptr<Expression>> IRConverter::GetFilter_exprs(std::vector<unique_p
 	return filter_expressions;
 }
 
-unique_ptr<LogicalOperator> IRConverter::DealWithQual(unique_ptr<LogicalGet> logical_get,
-                                                      std::vector<unique_ptr<Expression>> &expr_vec,
-                                                      const std::vector<unique_ptr<SimplestExpr>> &qual_vec,
-                                                      const unordered_map<int, int> &pg_duckdb_table_idx) {
+unique_ptr<LogicalOperator> IRToDuckConverter::DealWithQual(unique_ptr<LogicalGet> logical_get,
+                                                            std::vector<unique_ptr<Expression>> &expr_vec,
+                                                            const std::vector<unique_ptr<SimplestExpr>> &qual_vec,
+                                                            const unordered_map<int, int> &pg_duckdb_table_idx) {
 	// check if it's necessary to add FILTER by the `qual_vec`
 	vector<unique_ptr<Expression>> filter_expressions;
 	auto attr_table_idx = logical_get->table_index;
@@ -176,7 +177,7 @@ unique_ptr<LogicalOperator> IRConverter::DealWithQual(unique_ptr<LogicalGet> log
 		filter_expressions.emplace_back(std::move(temp_expr));
 	}
 	for (const auto &qual : qual_vec) {
-		// todo: construct filter expressions from postgres info, aka generate unique_ptr<Expression>
+		// todo: construct filter expressions from external plan (e.g., postgres) info, aka generate unique_ptr<Expression>
 	}
 	if (!filter_expressions.empty()) {
 		auto scan_filter = make_uniq<LogicalFilter>();
@@ -249,26 +250,26 @@ unique_ptr<LogicalOperator> IRConverter::DealWithQual(unique_ptr<LogicalGet> log
 	return ret;
 }
 
-unique_ptr<LogicalOperator> IRConverter::ConstructDuckdbPlan(
-    SimplestStmt *postgres_plan_pointer, unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
+unique_ptr<LogicalOperator> IRToDuckConverter::ConstructDuckdbPlan(
+    SimplestStmt *simplest_stmt_pointer, unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
     const unordered_map<int, int> &pg_duckdb_table_idx, std::vector<unique_ptr<Expression>> &expr_vec,
     std::unordered_map<std::string, unique_ptr<ColumnDataCollection>> &subquery_results,
     const std::unordered_map<std::string, unsigned int> &temp_table_map) {
-	std::function<unique_ptr<LogicalOperator>(SimplestStmt * postgres_plan_pointer)> iterate_plan;
+	std::function<unique_ptr<LogicalOperator>(SimplestStmt * simplest_stmt_pointer)> iterate_plan;
 	iterate_plan = [&iterate_plan, &table_map, pg_duckdb_table_idx, &expr_vec, &subquery_results, temp_table_map,
-	                this](SimplestStmt *postgres_plan_pointer) -> unique_ptr<LogicalOperator> {
+	                this](SimplestStmt *simplest_stmt_pointer) -> unique_ptr<LogicalOperator> {
 		unique_ptr<LogicalOperator> left_child, right_child;
-		if (postgres_plan_pointer->children.size() > 0) {
-			left_child = iterate_plan(postgres_plan_pointer->children[0].get());
-			if (postgres_plan_pointer->children.size() == 2)
-				right_child = iterate_plan(postgres_plan_pointer->children[1].get());
+		if (simplest_stmt_pointer->children.size() > 0) {
+			left_child = iterate_plan(simplest_stmt_pointer->children[0].get());
+			if (simplest_stmt_pointer->children.size() == 2)
+				right_child = iterate_plan(simplest_stmt_pointer->children[1].get());
 		}
-		switch (postgres_plan_pointer->GetNodeType()) {
+		switch (simplest_stmt_pointer->GetNodeType()) {
 		case JoinNode: {
-			// get info from postgres_join and construct duckdb_join
-			auto postgres_join = dynamic_cast<SimplestJoin *>(postgres_plan_pointer);
+			// get info from simplest_join and construct duckdb_join
+			auto simplest_join = dynamic_cast<SimplestJoin *>(simplest_stmt_pointer);
 			auto duckdb_join =
-			    ConstructDuckdbJoin(postgres_join, std::move(left_child), std::move(right_child), pg_duckdb_table_idx);
+			    ConstructDuckdbJoin(simplest_join, std::move(left_child), std::move(right_child), pg_duckdb_table_idx);
 			return unique_ptr_cast<LogicalComparisonJoin, LogicalOperator>(std::move(duckdb_join));
 		}
 		case FilterNode:
@@ -278,12 +279,12 @@ unique_ptr<LogicalOperator> IRConverter::ConstructDuckdbPlan(
 			// todo: check if HashNode really doesn't have extra info
 			return left_child;
 		case ScanNode: {
-			auto postgres_scan = dynamic_cast<SimplestScan *>(postgres_plan_pointer);
+			auto simplest_scan = dynamic_cast<SimplestScan *>(simplest_stmt_pointer);
 			// get scan node from table_map
 			// it can be a `temp%` table generated by QuerySplit, skip it
-			auto find_temp_table = temp_table_map.find(postgres_scan->GetTableName());
+			auto find_temp_table = temp_table_map.find(simplest_scan->GetTableName());
 			if (find_temp_table != temp_table_map.end()) {
-				auto find_temp_result = subquery_results.find(postgres_scan->GetTableName());
+				auto find_temp_result = subquery_results.find(simplest_scan->GetTableName());
 #ifdef DEBUG
 				// todo: check if the subqueries can be used in multiple times
 				D_ASSERT(find_temp_result != subquery_results.end());
@@ -296,15 +297,15 @@ unique_ptr<LogicalOperator> IRConverter::ConstructDuckdbPlan(
 				chunk_scan->estimated_cardinality = chunk_size;
 				chunk_scan->has_estimated_cardinality = true;
 				// update column_ids
-				for (size_t idx = 0; idx < postgres_scan->target_list.size(); idx++) {
+				for (size_t idx = 0; idx < simplest_scan->target_list.size(); idx++) {
 					column_idx_mapping[find_temp_table->second].emplace_back(idx);
 				}
 				return unique_ptr_cast<LogicalColumnDataGet, LogicalOperator>(std::move(chunk_scan));
 			}
 
-			auto find_table = table_map.find(postgres_scan->GetTableName());
+			auto find_table = table_map.find(simplest_scan->GetTableName());
 			if (find_table == table_map.end()) {
-				Printer::Print("Error! Couldn't find table \"" + postgres_scan->GetTableName() + "\" in duckdb plan");
+				Printer::Print("Error! Couldn't find table \"" + simplest_scan->GetTableName() + "\" in duckdb plan");
 			}
 			unique_ptr<LogicalGet> duckdb_scan = std::move(find_table->second);
 #ifdef DEBUG
@@ -313,15 +314,15 @@ unique_ptr<LogicalOperator> IRConverter::ConstructDuckdbPlan(
 			auto attr_table_idx = duckdb_scan->table_index;
 			column_idx_mapping[attr_table_idx] = duckdb_scan->column_ids;
 			unique_ptr<LogicalOperator> logical_op_ret =
-			    DealWithQual(std::move(duckdb_scan), expr_vec, postgres_scan->qual_vec, pg_duckdb_table_idx);
+			    DealWithQual(std::move(duckdb_scan), expr_vec, simplest_scan->qual_vec, pg_duckdb_table_idx);
 			return logical_op_ret;
 		}
 		case SortNode: {
-			auto postgres_sort = dynamic_cast<SimplestSort *>(postgres_plan_pointer);
+			auto simplest_sort = dynamic_cast<SimplestSort *>(simplest_stmt_pointer);
 			vector<BoundOrderByNode> orders;
-			auto &target_list = postgres_sort->target_list;
+			auto &target_list = simplest_sort->target_list;
 			D_ASSERT(!target_list.empty());
-			for (const auto &order_struct : postgres_sort->GetOrderStructVec()) {
+			for (const auto &order_struct : simplest_sort->GetOrderStructVec()) {
 				auto duckdb_logical_type = ConvertVarType(target_list[order_struct.sort_col_idx - 1]->GetType());
 				auto expr = make_uniq<BoundConstantExpression>(Value(duckdb_logical_type));
 				auto order_type = ConvertOrderType(order_struct.order_type);
@@ -338,12 +339,12 @@ unique_ptr<LogicalOperator> IRConverter::ConstructDuckdbPlan(
 		}
 	};
 
-	auto new_duckdb_plan = iterate_plan(postgres_plan_pointer);
+	auto new_duckdb_plan = iterate_plan(simplest_stmt_pointer);
 
 	return new_duckdb_plan;
 }
 
-ExpressionType IRConverter::ConvertCompType(SimplestExprType type) {
+ExpressionType IRToDuckConverter::ConvertCompType(SimplestExprType type) {
 	switch (type) {
 	case Equal:
 		return ExpressionType::COMPARE_EQUAL;
@@ -367,7 +368,7 @@ ExpressionType IRConverter::ConvertCompType(SimplestExprType type) {
 	}
 }
 
-LogicalType IRConverter::ConvertVarType(SimplestVarType type) {
+LogicalType IRToDuckConverter::ConvertVarType(SimplestVarType type) {
 	switch (type) {
 	case BoolVar:
 		return LogicalType(LogicalTypeId::BOOLEAN);
@@ -383,7 +384,7 @@ LogicalType IRConverter::ConvertVarType(SimplestVarType type) {
 	}
 }
 
-OrderType IRConverter::ConvertOrderType(SimplestExprType type) {
+OrderType IRToDuckConverter::ConvertOrderType(SimplestExprType type) {
 	switch (type) {
 	case InvalidExprType:
 		Printer::Print("Invalid Order Type!!!");
@@ -398,7 +399,7 @@ OrderType IRConverter::ConvertOrderType(SimplestExprType type) {
 	}
 }
 
-void IRConverter::SetAttrName(unique_ptr<SimplestAttr> &attr, const std::deque<table_str> &table_col_names) {
+void IRToDuckConverter::SetAttrName(unique_ptr<SimplestAttr> &attr, const std::deque<table_str> &table_col_names) {
 	auto col_index = attr->GetColumnIndex();
 #ifdef DEBUG
 	D_ASSERT(table_col_names[attr->GetTableIndex() - 1].size() == 1);
@@ -407,14 +408,14 @@ void IRConverter::SetAttrName(unique_ptr<SimplestAttr> &attr, const std::deque<t
 	attr->SetColumnName(col_name);
 }
 
-void IRConverter::SetAttrVecName(std::vector<unique_ptr<SimplestAttr>> &attr_vec,
-                                 const std::deque<table_str> &table_col_names) {
+void IRToDuckConverter::SetAttrVecName(std::vector<unique_ptr<SimplestAttr>> &attr_vec,
+                                       const std::deque<table_str> &table_col_names) {
 	for (auto &attr_var_node : attr_vec) {
 		SetAttrName(attr_var_node, table_col_names);
 	}
 }
 
-void IRConverter::SetExprName(unique_ptr<SimplestExpr> &expr, const std::deque<table_str> &table_col_names) {
+void IRToDuckConverter::SetExprName(unique_ptr<SimplestExpr> &expr, const std::deque<table_str> &table_col_names) {
 	if (VarConstComparisonNode == expr->GetNodeType()) {
 		auto &var_const_comp = expr->Cast<SimplestVarConstComparison>();
 		auto &expr_attr = var_const_comp.attr;
@@ -441,16 +442,16 @@ void IRConverter::SetExprName(unique_ptr<SimplestExpr> &expr, const std::deque<t
 	}
 }
 
-void IRConverter::SetExprVecName(std::vector<unique_ptr<SimplestExpr>> &expr_vec,
-                                 const std::deque<table_str> &table_col_names) {
+void IRToDuckConverter::SetExprVecName(std::vector<unique_ptr<SimplestExpr>> &expr_vec,
+                                       const std::deque<table_str> &table_col_names) {
 
 	for (auto &expr : expr_vec) {
 		SetExprName(expr, table_col_names);
 	}
 }
 
-void IRConverter::SetExprVecName(std::vector<unique_ptr<SimplestVarComparison>> &comp_vec,
-                                 const std::deque<table_str> &table_col_names) {
+void IRToDuckConverter::SetExprVecName(std::vector<unique_ptr<SimplestVarComparison>> &comp_vec,
+                                       const std::deque<table_str> &table_col_names) {
 	for (auto &comp : comp_vec) {
 		auto &left_attr = comp->left_attr;
 		SetAttrName(left_attr, table_col_names);
@@ -461,9 +462,9 @@ void IRConverter::SetExprVecName(std::vector<unique_ptr<SimplestVarComparison>> 
 }
 
 unordered_map<int, int>
-IRConverter::MatchTableIndex(const unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
-                             const std::deque<table_str> &table_col_names,
-                             const std::unordered_map<std::string, unsigned int> &temp_table_map) {
+IRToDuckConverter::MatchTableIndex(const unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
+                                   const std::deque<table_str> &table_col_names,
+                                   const std::unordered_map<std::string, unsigned int> &temp_table_map) {
 	unordered_map<int, int> pg_duckdb_table_mapping;
 	for (size_t i = 0; i < table_col_names.size(); i++) {
 		auto &table_col = std::move(table_col_names[i]);
@@ -488,44 +489,45 @@ IRConverter::MatchTableIndex(const unordered_map<std::string, unique_ptr<Logical
 	return pg_duckdb_table_mapping;
 }
 
-void IRConverter::AddTableColumnName(unique_ptr<SimplestStmt> &postgres_plan,
-                                     const std::deque<table_str> &table_col_names) {
-	std::function<void(unique_ptr<SimplestStmt> & postgres_plan)> iterate_plan;
-	iterate_plan = [&table_col_names, &iterate_plan, this](unique_ptr<SimplestStmt> &postgres_plan) {
+void IRToDuckConverter::AddTableColumnName(unique_ptr<SimplestStmt> &simplest_stmt,
+                                           const std::deque<table_str> &table_col_names) {
+	std::function<void(unique_ptr<SimplestStmt> & simplest_stmt)> iterate_plan;
+	iterate_plan = [&table_col_names, &iterate_plan, this](unique_ptr<SimplestStmt> &simplest_stmt) {
 		// set col attr names in `target_list`
-		SetAttrVecName(postgres_plan->target_list, table_col_names);
-		SetExprVecName(postgres_plan->qual_vec, table_col_names);
+		SetAttrVecName(simplest_stmt->target_list, table_col_names);
+		SetExprVecName(simplest_stmt->qual_vec, table_col_names);
 
-		if (ScanNode == postgres_plan->GetNodeType()) {
+		if (ScanNode == simplest_stmt->GetNodeType()) {
 			// set scan_node's table_name
-			auto &scan_node = postgres_plan->Cast<SimplestScan>();
+			auto &scan_node = simplest_stmt->Cast<SimplestScan>();
 #ifdef DEBUG
 			D_ASSERT(table_col_names[scan_node.GetTableIndex() - 1].size() == 1);
 #endif
 			auto table_name = table_col_names[scan_node.GetTableIndex() - 1].begin()->first;
 			scan_node.SetTableName(table_name);
-		} else if (HashNode == postgres_plan->GetNodeType()) {
+		} else if (HashNode == simplest_stmt->GetNodeType()) {
 			// hash_node's `hash_keys` has attr
-			auto &hash_node = postgres_plan->Cast<SimplestHash>();
+			auto &hash_node = simplest_stmt->Cast<SimplestHash>();
 			SetAttrVecName(hash_node.hash_keys, table_col_names);
-		} else if (JoinNode == postgres_plan->GetNodeType()) {
+		} else if (JoinNode == simplest_stmt->GetNodeType()) {
 			// join condition has attr
-			auto &join_node = postgres_plan->Cast<SimplestJoin>();
+			auto &join_node = simplest_stmt->Cast<SimplestJoin>();
 			SetExprVecName(join_node.join_conditions, table_col_names);
-		} else if (FilterNode == postgres_plan->GetNodeType()) {
+		} else if (FilterNode == simplest_stmt->GetNodeType()) {
 			// filter condition has attr
-			auto &filter_node = postgres_plan->Cast<SimplestFilter>();
+			auto &filter_node = simplest_stmt->Cast<SimplestFilter>();
 			SetExprVecName(filter_node.filter_conditions, table_col_names);
 		}
 
-		for (auto &child : postgres_plan->children) {
+		for (auto &child : simplest_stmt->children) {
 			iterate_plan(child);
 		}
 	};
 
-	iterate_plan(postgres_plan);
+	iterate_plan(simplest_stmt);
 }
-bool IRConverter::CheckExprExist(const unique_ptr<Expression> &expr, idx_t attr_table_idx) {
+
+bool IRToDuckConverter::CheckExprExist(const unique_ptr<Expression> &expr, idx_t attr_table_idx) {
 	bool find_filter_expr = false;
 	switch (expr->GetExpressionClass()) {
 	case ExpressionClass::CONSTANT:
@@ -589,10 +591,10 @@ bool IRConverter::CheckExprExist(const unique_ptr<Expression> &expr, idx_t attr_
 }
 
 // todo: refactor and reuse `SubqueryPreparer::GenerateProjHead`
-unique_ptr<LogicalOperator> IRConverter::GenerateProjHead(const unique_ptr<LogicalOperator> &origin_dd_plan,
-                                                          unique_ptr<LogicalOperator> new_dd_plan,
-                                                          const unique_ptr<SimplestStmt> &pg_simplest_stmt,
-                                                          const unordered_map<int, int> &pg_duckdb_table_idx) {
+unique_ptr<LogicalOperator> IRToDuckConverter::GenerateProjHead(const unique_ptr<LogicalOperator> &origin_dd_plan,
+                                                                unique_ptr<LogicalOperator> new_dd_plan,
+                                                                const unique_ptr<SimplestStmt> &pg_simplest_stmt,
+                                                                const unordered_map<int, int> &pg_duckdb_table_idx) {
 	// get target_list from `new_dd_plan`
 	auto &target_list = pg_simplest_stmt->target_list;
 
@@ -621,8 +623,8 @@ unique_ptr<LogicalOperator> IRConverter::GenerateProjHead(const unique_ptr<Logic
 
 // todo: move this to subquery_preparer
 std::vector<TableExpr>
-IRConverter::GetTableExprFromTargetList(const std::vector<unique_ptr<SimplestAttr>> &pg_target_list,
-                                        const unordered_map<int, int> &pg_duckdb_table_idx) {
+IRToDuckConverter::GetTableExprFromTargetList(const std::vector<unique_ptr<SimplestAttr>> &pg_target_list,
+                                              const unordered_map<int, int> &pg_duckdb_table_idx) {
 	std::vector<TableExpr> table_expr_vec;
 
 	// if duckdb find two expr are the same, here it will merge to one
