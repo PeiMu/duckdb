@@ -500,12 +500,12 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		unique_ptr<LogicalOperator> whole_plan;
 #endif
 
-		// #if ENABLE_PLAN_CONVERTER
+#if CONVERT_DUCKDB_TO_IR
 		std::unordered_map<std::string, unique_ptr<ColumnDataCollection>> subquery_results;
 		unsigned int subquery_index = 0;
 		// <temp%, subquery_dd_index>
 		std::unordered_map<std::string, unsigned int> temp_table_map;
-		// #endif
+#endif
 
 		auto merge_child = [](LogicalOperator *subquery_pointer, unique_ptr<LogicalOperator> child_node) {
 			while (!subquery_pointer->children.empty()) {
@@ -657,6 +657,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			}
 #endif
 
+#if CONVERT_DUCKDB_TO_IR
 			// export the selected sub-plan, aka the `sub_plan`
 			// #if ENABLE_DEBUG_PRINT
 			//  debug: print subquery
@@ -670,6 +671,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			auto simplest_ir =
 			    duck_to_ir_converter.ConstructSimplestStmt(sub_plan.get(), subquery_results, temp_table_map);
 
+#if CONVERT_IR_TO_SQL
 			IRToSQLConverter ir_to_sql_converter;
 			std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(simplest_ir);
 			std::string sql_file_name =
@@ -677,6 +679,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			std::ofstream sql_file(sql_file_name);
 			sql_file << sql_code;
 			sql_file.close();
+#endif
+#endif
 
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
 #if TIME_BREAK_DOWN
@@ -768,6 +772,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			timer = chrono_tic();
 #endif
 
+#if CONVERT_DUCKDB_TO_IR
 			subquery_index++;
 			std::string new_temp_table_name = "temp" + std::to_string(subquery_index);
 			temp_table_map[new_temp_table_name] = planner.binder->GenerateTableIndex();
@@ -785,6 +790,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			auto created_table = catalog.CreateTable(*this, std::move(info));
 			table_entry = &created_table->Cast<TableCatalogEntry>();
 			table_entry->GetStorage().LocalAppend(*table_entry, *this, *subquery_result);
+#endif
 
 			previous_result_card =
 			    subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result), estimated_card);
@@ -975,7 +981,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 	}
 
-	if (INJECT_PLAN &&
+	if (CONVERT_IR_TO_DUCKDB &&
 	    (LogicalOperatorType::LOGICAL_PROJECTION == plan->type || LogicalOperatorType::LOGICAL_ORDER_BY == plan->type ||
 	     LogicalOperatorType::LOGICAL_LIMIT == plan->type)) {
 #ifdef ENABLE_DEBUG_PRINT

@@ -10,6 +10,8 @@
 
 #include "simplest_ir.h"
 
+#define CONVERT_IR_TO_SQL true
+
 namespace duckdb {
 class IRToSQLConverter {
 public:
@@ -29,4 +31,4 @@ private:
 
 	std::unordered_map<unsigned int, std::string> table_names;
 };
-}
+} // namespace duckdb
