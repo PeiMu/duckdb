@@ -10,6 +10,7 @@
 #pragma once
 
 #include "duckdb/common/printer.hpp"
+#include "duckdb/planner/logical_operator.hpp"
 #include "nodes/pg_list.hpp"
 #include "nodes/value.hpp"
 #include "pg_functions.hpp"

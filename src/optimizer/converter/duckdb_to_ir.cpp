@@ -222,6 +222,7 @@ DuckToIRConverter::CollectQualVecExprs(const vector<unique_ptr<Expression>> &exp
 			    make_uniq<SimplestAttr>(ConvertVarType(left_table_expr.return_type), left_table_expr.table_idx,
 			                            left_table_expr.column_idx, left_table_expr.column_name);
 			auto &right_expr = bound_func.children[1]->Cast<BoundConstantExpression>();
+			// todo: determine the type
 			auto right_simplest_attr = make_uniq<SimplestConstVar>(right_expr.value.ToString());
 			auto simplest_var_const_comp = make_uniq<SimplestVarConstComparison>(
 			    simplest_expr_type, std::move(left_simplest_attr), std::move(right_simplest_attr));

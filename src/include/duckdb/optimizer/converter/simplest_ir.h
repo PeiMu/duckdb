@@ -9,8 +9,6 @@
 #pragma once
 
 #include "duckdb/common/printer.hpp"
-#include "duckdb/planner/logical_operator.hpp"
-#include "read.hpp"
 
 #include <memory>
 

@@ -30,6 +30,7 @@
 #include "duckdb/main/stream_query_result.hpp"
 #include "duckdb/optimizer/converter/duckdb_to_ir.h"
 #include "duckdb/optimizer/converter/ir_to_duckdb.h"
+#include "duckdb/optimizer/converter/ir_to_sql.h"
 #include "duckdb/optimizer/filter_pushdown.hpp"
 #include "duckdb/optimizer/optimizer.hpp"
 #include "duckdb/optimizer/query_split/subquery_preparer.hpp"
@@ -668,6 +669,14 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 			auto simplest_ir =
 			    duck_to_ir_converter.ConstructSimplestStmt(sub_plan.get(), subquery_results, temp_table_map);
+
+			IRToSQLConverter ir_to_sql_converter;
+			std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(simplest_ir);
+			std::string sql_file_name =
+			    "/home/pei/Project/duckdb/measure/sub_plan_" + std::to_string(subquery_index) + ".sql";
+			std::ofstream sql_file(sql_file_name);
+			sql_file << sql_code;
+			sql_file.close();
 
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
 #if TIME_BREAK_DOWN
