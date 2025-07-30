@@ -28,6 +28,7 @@
 #include "duckdb/main/query_result.hpp"
 #include "duckdb/main/relation.hpp"
 #include "duckdb/main/stream_query_result.hpp"
+#include "duckdb/optimizer/converter/duckdb_to_ir.h"
 #include "duckdb/optimizer/converter/ir_to_duckdb.h"
 #include "duckdb/optimizer/filter_pushdown.hpp"
 #include "duckdb/optimizer/optimizer.hpp"
@@ -35,6 +36,7 @@
 #include "duckdb/parser/expression/constant_expression.hpp"
 #include "duckdb/parser/expression/parameter_expression.hpp"
 #include "duckdb/parser/parsed_data/create_function_info.hpp"
+#include "duckdb/parser/parsed_data/create_table_info.hpp"
 #include "duckdb/parser/parser.hpp"
 #include "duckdb/parser/query_node/select_node.hpp"
 #include "duckdb/parser/statement/drop_statement.hpp"
@@ -497,6 +499,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		unique_ptr<LogicalOperator> whole_plan;
 #endif
 
+		// #if ENABLE_PLAN_CONVERTER
+		std::unordered_map<std::string, unique_ptr<ColumnDataCollection>> subquery_results;
+		unsigned int subquery_index = 0;
+		// <temp%, subquery_dd_index>
+		std::unordered_map<std::string, unsigned int> temp_table_map;
+		// #endif
+
 		auto merge_child = [](LogicalOperator *subquery_pointer, unique_ptr<LogicalOperator> child_node) {
 			while (!subquery_pointer->children.empty()) {
 				if (subquery_pointer->children.size() > 1 && nullptr == subquery_pointer->children[1]) {
@@ -646,6 +655,20 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				log_file.close();
 			}
 #endif
+
+			// export the selected sub-plan, aka the `sub_plan`
+			// #if ENABLE_DEBUG_PRINT
+			//  debug: print subquery
+			Printer::Print("Exported sub_plan");
+			sub_plan->Print();
+
+			Planner::VerifyPlan(optimizer.context, sub_plan);
+			// #endif
+			DuckToIRConverter duck_to_ir_converter(*planner.binder, *this);
+
+			auto simplest_ir =
+			    duck_to_ir_converter.ConstructSimplestStmt(sub_plan.get(), subquery_results, temp_table_map);
+
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "PostOptimize time is\n");
@@ -735,6 +758,25 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if ENABLE_MEASURE_EXE_TIME
 			timer = chrono_tic();
 #endif
+
+			subquery_index++;
+			std::string new_temp_table_name = "temp" + std::to_string(subquery_index);
+			temp_table_map[new_temp_table_name] = planner.binder->GenerateTableIndex();
+			// create a table from data chunk
+			auto &catalog = Catalog::GetCatalog(*this, TEMP_CATALOG);
+			auto &types = subquery_result->Types();
+			auto info = make_uniq<CreateTableInfo>(TEMP_CATALOG, DEFAULT_SCHEMA, new_temp_table_name);
+			TableCatalogEntry *table_entry = nullptr;
+			info->temporary = true;
+			info->on_conflict = OnCreateConflict::ERROR_ON_CONFLICT;
+			// add column names and types
+			for (idx_t i = 0; i < types.size(); i++) {
+				info->columns.AddColumn(ColumnDefinition("col" + to_string(i), types[i]));
+			}
+			auto created_table = catalog.CreateTable(*this, std::move(info));
+			table_entry = &created_table->Cast<TableCatalogEntry>();
+			table_entry->GetStorage().LocalAppend(*table_entry, *this, *subquery_result);
+
 			previous_result_card =
 			    subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result), estimated_card);
 			if (!ENABLE_PARALLEL_EXECUTION && nullptr != last_sibling_node) {
@@ -935,14 +977,14 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if TIME_BREAK_DOWN
 		auto read_str_timer = chrono_tic();
 #endif
-		IRConverter ir_converter(*planner.binder, *this);
+		IRToDuckConverter ir_to_duck_converter(*planner.binder, *this);
 		// todo: It's better to generate the Filter Expression from postgres, but needs a lot of engineering work.
 		//  Currently, we reuse the Filter Expression from duckdb
-		std::vector<unique_ptr<Expression>> expr_vec = ir_converter.CollectFilterExpressions(plan);
+		std::vector<unique_ptr<Expression>> expr_vec = ir_to_duck_converter.CollectFilterExpressions(plan);
 
 		// get the table map
 		unordered_map<std::string, unique_ptr<LogicalGet>> table_map =
-		    ir_converter.GetDuckdbTableMap(plan, table_alias_name);
+		    ir_to_duck_converter.GetDuckdbTableMap(plan, table_alias_name);
 
 		// get the parent node of JOIN/CROSS_PRODUCT
 		auto new_plan = plan.get();
@@ -991,17 +1033,16 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		unsigned int subquery_index = 0;
 		// <temp%, subquery_dd_index>
 		std::unordered_map<std::string, unsigned int> temp_table_map;
+		PlanReader plan_reader;
 		for (size_t i = 0; i < subqueries_num; i++) {
 #if TIME_BREAK_DOWN
 			auto converter_timer = chrono_tic();
 #endif
-			PlanReader plan_reader;
 			unique_ptr<SimplestNode> postgres_plan = plan_reader.StringToNode(query_string_vec[i].c_str());
-			//	D_ASSERT(AggregateNode == postgres_plan->GetNodeType());
 			unique_ptr<SimplestStmt> postgres_stmt =
 			    unique_ptr_cast<SimplestNode, SimplestStmt>(std::move(postgres_plan));
 			// add table/column name from plan_reader.table_col_names
-			ir_converter.AddTableColumnName(postgres_stmt, plan_reader.table_col_names);
+			ir_to_duck_converter.AddTableColumnName(postgres_stmt, plan_reader.table_col_names);
 #ifdef ENABLE_DEBUG_PRINT
 			postgres_stmt->Print();
 #endif
@@ -1016,10 +1057,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			};
 
 			std::unordered_map<int, int> pg_duckdb_table_idx =
-			    ir_converter.MatchTableIndex(table_map, plan_reader.table_col_names, temp_table_map);
+			    ir_to_duck_converter.MatchTableIndex(table_map, plan_reader.table_col_names, temp_table_map);
 
 			// construct plan from postgres
-			auto new_duckdb_plan = ir_converter.ConstructDuckdbPlan(
+			auto new_duckdb_plan = ir_to_duck_converter.ConstructDuckdbPlan(
 			    postgres_plan_pointer, table_map, pg_duckdb_table_idx, expr_vec, subquery_results, temp_table_map);
 #if TIME_BREAK_DOWN
 			chrono_toc(&converter_timer, "Convert plan time: ");
@@ -1028,8 +1069,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			SubqueryPreparer subquery_preparer(*planner.binder, *this);
 			if (i != subqueries_num - 1) {
 				// 1. generate proj head based on the `target_list`
-				unique_ptr<LogicalOperator> new_sub_plan =
-				    ir_converter.GenerateProjHead(plan, std::move(new_duckdb_plan), postgres_stmt, pg_duckdb_table_idx);
+				unique_ptr<LogicalOperator> new_sub_plan = ir_to_duck_converter.GenerateProjHead(
+				    plan, std::move(new_duckdb_plan), postgres_stmt, pg_duckdb_table_idx);
 #ifdef ENABLE_DEBUG_PRINT
 				Printer::Print("new duckdb subquery plan");
 				new_sub_plan->Print();
@@ -1075,7 +1116,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				new_plan->AddChild(std::move(new_duckdb_plan));
 				// 6. UpdateProjHead
 				std::vector<TableExpr> new_proj_table_expr =
-				    ir_converter.GetTableExprFromTargetList(postgres_stmt->target_list, pg_duckdb_table_idx);
+				    ir_to_duck_converter.GetTableExprFromTargetList(postgres_stmt->target_list, pg_duckdb_table_idx);
 				plan = subquery_preparer.UpdateProjHead(std::move(plan), new_proj_table_expr);
 #if MANUAL_EXPLAIN_ANALYZE
 				auto explain_sub_plan = plan->Copy(*this);

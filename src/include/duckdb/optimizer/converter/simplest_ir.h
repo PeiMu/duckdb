@@ -48,6 +48,7 @@ enum SimplestNodeType {
 	VarParamComparisonNode,
 	LogicalExprNode,
 	StmtNode,
+	ProjectionNode,
 	AggregateNode,
 	JoinNode,
 	FilterNode,
@@ -621,6 +622,11 @@ public:
 	SimplestStmt(std::vector<unique_ptr<SimplestAttr>> target_list, std::vector<unique_ptr<SimplestExpr>> qual_vec,
 	             SimplestNodeType node_type)
 	    : SimplestNode(node_type), target_list(std::move(target_list)), qual_vec(std::move(qual_vec)) {};
+	SimplestStmt(std::vector<unique_ptr<SimplestStmt>> children, std::vector<unique_ptr<SimplestAttr>> target_list,
+	             SimplestNodeType node_type)
+	    : SimplestNode(node_type), children(std::move(children)), target_list(std::move(target_list)) {};
+	SimplestStmt(std::vector<unique_ptr<SimplestStmt>> children, SimplestNodeType node_type)
+	    : SimplestNode(node_type), children(std::move(children)) {};
 	SimplestStmt(unique_ptr<SimplestStmt> stmt, SimplestNodeType node_type)
 	    : SimplestNode(node_type), target_list(std::move(stmt->target_list)), children(std::move(stmt->children)),
 	      qual_vec(std::move(stmt->qual_vec)) {};
@@ -665,6 +671,35 @@ public:
 	// implicitly condition - from postgres
 	// todo: need to check if only var-const comparison exists
 	std::vector<unique_ptr<SimplestExpr>> qual_vec;
+};
+
+class SimplestProjection : public SimplestStmt {
+public:
+	SimplestProjection(unique_ptr<SimplestStmt> base_stmt, unsigned int table_index)
+	    : SimplestStmt(std::move(base_stmt), ProjectionNode), table_index(table_index) {};
+	~SimplestProjection() = default;
+
+	unsigned int GetIndex() {
+		return table_index;
+	}
+
+	std::string Print(bool print = true) override {
+		std::string str = "\n";
+		str += "╔══════════════════╗\n";
+		str += "Projection: " + std::to_string(table_index);
+
+		str += SimplestStmt::Print(false);
+
+		str += "╚══════════════════╝\n";
+
+		if (print)
+			Printer::Print(str);
+
+		return str;
+	}
+
+private:
+	unsigned int table_index;
 };
 
 class SimplestAggregate : public SimplestStmt {
@@ -779,8 +814,9 @@ private:
 
 class SimplestFilter : public SimplestStmt {
 public:
-	SimplestFilter(unique_ptr<SimplestStmt> base_stmt, std::vector<unique_ptr<SimplestExpr>> filter_conditions)
-	    : SimplestStmt(std::move(base_stmt), FilterNode), filter_conditions(std::move(filter_conditions)) {};
+	SimplestFilter(unique_ptr<SimplestStmt> base_stmt) : SimplestStmt(std::move(base_stmt), FilterNode) {};
+	//	SimplestFilter(unique_ptr<SimplestStmt> base_stmt, std::vector<unique_ptr<SimplestExpr>> filter_conditions)
+	//	    : SimplestStmt(std::move(base_stmt), FilterNode), filter_conditions(std::move(filter_conditions)) {};
 	~SimplestFilter() = default;
 
 	std::string Print(bool print = true) override {
@@ -789,10 +825,10 @@ public:
 
 		str += "Filter:";
 
-		str += "\nFilter Condition:\n";
-		for (const auto &cond : filter_conditions) {
-			str += cond->Print(false);
-		}
+		//		str += "\nFilter Condition:\n";
+		//		for (const auto &cond : filter_conditions) {
+		//			str += cond->Print(false);
+		//		}
 
 		str += SimplestStmt::Print(false);
 		str += "╚══════════════════╝\n";
@@ -803,7 +839,8 @@ public:
 		return str;
 	}
 
-	std::vector<unique_ptr<SimplestExpr>> filter_conditions;
+	// fixme: is this the same as `qual_vec`?
+	//	std::vector<unique_ptr<SimplestExpr>> filter_conditions;
 };
 
 class SimplestScan : public SimplestStmt {

@@ -1,7 +1,7 @@
 //===----------------------------------------------------------------------===//
 //                         DuckDB
 //
-// duckdb/optimizer/ir_to_duckdb.hpp
+// duckdb/optimizer/ir_to_duckdb.h
 //
 //
 //===----------------------------------------------------------------------===//
@@ -44,8 +44,8 @@ public:
 	                  const std::unordered_map<idx_t, std::string> &table_alias_name);
 
 	unique_ptr<LogicalOperator> ConstructDuckdbPlan(
-	    SimplestStmt *postgres_plan_pointer, unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
-	    const unordered_map<int, int> &pg_duckdb_table_idx, std::vector<unique_ptr<Expression>> &expr_vec,
+	    SimplestStmt *simplest_stmt_pointer, unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
+	    const unordered_map<int, int> &simplest_ir_duckdb_table_idx, std::vector<unique_ptr<Expression>> &expr_vec,
 	    std::unordered_map<std::string, unique_ptr<ColumnDataCollection>> &subquery_results,
 	    const std::unordered_map<std::string, unsigned int> &temp_table_map);
 
@@ -68,11 +68,12 @@ public:
 private:
 	bool CheckCondIndex(const unique_ptr<Expression> &expr, const unique_ptr<LogicalOperator> &child);
 	bool CheckExprExist(const unique_ptr<Expression> &expr, idx_t attr_table_idx);
-	std::pair<idx_t, idx_t> ConvertTableColumnIndex(std::pair<unsigned int, unsigned int> postgres_table_column_pair,
-	                                                const unordered_map<int, int> &pg_duckdb_table_idx);
-	unique_ptr<LogicalComparisonJoin> ConstructDuckdbJoin(SimplestJoin *pJoin, unique_ptr<LogicalOperator> left_child,
+	std::pair<idx_t, idx_t> ConvertTableColumnIndex(std::pair<unsigned int, unsigned int> table_column_pair,
+	                                                const unordered_map<int, int> &simplest_ir_duckdb_table_idx);
+	unique_ptr<LogicalComparisonJoin> ConstructDuckdbJoin(SimplestJoin *simplest_join,
+	                                                      unique_ptr<LogicalOperator> left_child,
 	                                                      unique_ptr<LogicalOperator> right_child,
-	                                                      const unordered_map<int, int> &pg_duckdb_table_idx);
+	                                                      const unordered_map<int, int> &simplest_ir_duckdb_table_idx);
 	unique_ptr<LogicalOperator> DealWithQual(unique_ptr<LogicalGet> logical_get,
 	                                         std::vector<unique_ptr<Expression>> &expr_vec,
 	                                         const std::vector<unique_ptr<SimplestExpr>> &qual_vec,

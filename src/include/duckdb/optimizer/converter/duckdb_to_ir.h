@@ -1,7 +1,7 @@
 //===----------------------------------------------------------------------===//
 //                         DuckDB
 //
-// duckdb/optimizer/duckdb_to_ir.hpp
+// duckdb/optimizer/duckdb_to_ir.h
 //
 //
 //===----------------------------------------------------------------------===//
@@ -26,16 +26,33 @@
 #include "duckdb/planner/operator/logical_filter.hpp"
 #include "duckdb/planner/operator/logical_get.hpp"
 #include "duckdb/planner/operator/logical_order.hpp"
+#include "duckdb/planner/operator/logical_projection.hpp"
 #include "read.hpp"
 #include "simplest_ir.h"
 
 namespace duckdb {
-class IRConverter {
+class DuckToIRConverter {
 public:
-	IRConverter(Binder &binder, ClientContext &context) : binder(binder), context(context) {};
-	~IRConverter() = default;
+	DuckToIRConverter(Binder &binder, ClientContext &context) : binder(binder), context(context) {};
+	~DuckToIRConverter() = default;
+
+	unique_ptr<SimplestStmt>
+	ConstructSimplestStmt(LogicalOperator *duckdb_plan_pointer,
+	                      std::unordered_map<std::string, unique_ptr<ColumnDataCollection>> &subquery_results,
+	                      const std::unordered_map<std::string, unsigned int> &temp_table_map);
 
 private:
+	unique_ptr<SimplestProjection> ConstructSimplestProj(LogicalProjection &proj_op, unique_ptr<SimplestStmt> child);
+	unique_ptr<SimplestJoin> ConstructSimplestJoin(LogicalComparisonJoin &join_op, unique_ptr<SimplestStmt> left_child,
+	                                               unique_ptr<SimplestStmt> right_child);
+	unique_ptr<SimplestFilter> ConstructSimplestFilter(LogicalFilter &filter_op, unique_ptr<SimplestStmt> child);
+	unique_ptr<SimplestScan> ConstructSimplestScan(LogicalGet &get_op);
+
+	SimplestExprType ConvertCompType(ExpressionType type);
+	SimplestVarType ConvertVarType(LogicalType type);
+
+	std::vector<unique_ptr<SimplestExpr>> CollectQualVecExprs(const vector<unique_ptr<Expression>> &exprs);
+
 	Binder &binder;
 	ClientContext &context;
 };
