@@ -777,8 +777,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			std::string new_temp_table_name = "temp" + std::to_string(subquery_index);
 			temp_table_map[new_temp_table_name] = planner.binder->GenerateTableIndex();
 			// create a table from data chunk
-//			client_data->catalog_search_path;
-//			this->client_data->catalog_search_path->GetCatalogsForSchema()
 			auto &default_entry = client_data->catalog_search_path->GetDefault();
 			auto current_catalog = default_entry.catalog;
 			auto current_schema = default_entry.schema;
