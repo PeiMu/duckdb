@@ -4,6 +4,7 @@
 #include "duckdb/common/exception/binder_exception.hpp"
 #include "duckdb/main/database_manager.hpp"
 #include "duckdb/transaction/transaction.hpp"
+#include "duckdb/optimizer/converter/duckdb_to_ir.h"
 
 namespace duckdb {
 
@@ -61,10 +62,16 @@ bool PreparedStatementData::RequireRebind(ClientContext &context, optional_ptr<c
 	for (auto &catalog_name : properties.modified_databases) {
 		StartTransactionInCatalog(context, catalog_name);
 	}
+
+#if !CONVERT_DUCKDB_TO_IR
+	// fixme: the catalog_version should be changed when creating new table,
+	//  but not sure where should we update it.
+	//  Here might introduce a bug
 	if (Catalog::GetSystemCatalog(context).GetCatalogVersion() != catalog_version) {
 		//! context is out of bounds
 		return true;
 	}
+#endif
 	return false;
 }
 

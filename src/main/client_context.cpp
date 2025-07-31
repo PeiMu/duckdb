@@ -777,19 +777,26 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			std::string new_temp_table_name = "temp" + std::to_string(subquery_index);
 			temp_table_map[new_temp_table_name] = planner.binder->GenerateTableIndex();
 			// create a table from data chunk
-			auto &catalog = Catalog::GetCatalog(*this, TEMP_CATALOG);
+//			client_data->catalog_search_path;
+//			this->client_data->catalog_search_path->GetCatalogsForSchema()
+			auto &default_entry = client_data->catalog_search_path->GetDefault();
+			auto current_catalog = default_entry.catalog;
+			auto current_schema = default_entry.schema;
+
+
+			auto &catalog = Catalog::GetCatalog(*this, current_catalog);
 			auto &types = subquery_result->Types();
-			auto info = make_uniq<CreateTableInfo>(TEMP_CATALOG, DEFAULT_SCHEMA, new_temp_table_name);
-			TableCatalogEntry *table_entry = nullptr;
-			info->temporary = true;
+			auto info = make_uniq<CreateTableInfo>(current_catalog, current_schema, new_temp_table_name);
+			info->temporary = false;
 			info->on_conflict = OnCreateConflict::ERROR_ON_CONFLICT;
 			// add column names and types
 			for (idx_t i = 0; i < types.size(); i++) {
 				info->columns.AddColumn(ColumnDefinition("col" + to_string(i), types[i]));
 			}
 			auto created_table = catalog.CreateTable(*this, std::move(info));
-			table_entry = &created_table->Cast<TableCatalogEntry>();
-			table_entry->GetStorage().LocalAppend(*table_entry, *this, *subquery_result);
+			auto &table_entry = created_table->Cast<TableCatalogEntry>();
+			table_entry.GetStorage().LocalAppend(table_entry, *this, *subquery_result);
+			result->catalog_version = catalog.GetCatalogVersion();
 #endif
 
 			previous_result_card =
