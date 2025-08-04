@@ -30,5 +30,6 @@ private:
 	std::vector<std::string> order_by;
 
 	std::unordered_map<unsigned int, std::string> table_names;
+	std::unordered_map<unsigned int, std::vector<std::string>> chunk_contents;
 };
 } // namespace duckdb

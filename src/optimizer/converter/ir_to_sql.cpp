@@ -8,7 +8,6 @@ std::string IRToSQLConverter::LogicalPlanToSQL(const unique_ptr<SimplestStmt> &p
 	D_ASSERT(nullptr != plan);
 #endif
 
-	std::string prefix_string;
 	GenerateSQL(plan);
 
 	sql_code = "SELECT ";
@@ -67,13 +66,15 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 #endif
 		// `WHERE `
 		for (const auto &qual : filter_op.qual_vec) {
-#ifdef DEBUG
-			D_ASSERT(SimplestNodeType::VarConstComparisonNode == qual->GetNodeType());
-#endif
-			auto &var_const_comp = qual->Cast<SimplestVarConstComparison>();
-			auto expr_type = var_const_comp.GetSimplestExprType();
+			auto &simplest_expr = qual->Cast<SimplestExpr>();
+			auto expr_type = simplest_expr.GetSimplestExprType();
+
 			switch (expr_type) {
 			case TextLike: {
+#ifdef DEBUG
+				D_ASSERT(SimplestNodeType::VarConstComparisonNode == qual->GetNodeType());
+#endif
+				auto &var_const_comp = qual->Cast<SimplestVarConstComparison>();
 				auto &var_attr = var_const_comp.attr;
 				auto table_name = table_names[var_attr->GetTableIndex()];
 				auto filter_str = table_name + "." + var_attr->GetColumnName();
@@ -83,6 +84,15 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 				filter_str += const_attr->GetStringValue();
 				filter_str += "'";
 				filter_field.emplace_back(filter_str);
+				break;
+			}
+			case SingleAttr: {
+				// the `filter_field` should be collected in the child MARK join node
+#ifdef DEBUG
+				D_ASSERT(SimplestNodeType::JoinNode == filter_op.children[0]->GetNodeType());
+				auto &join_child_op = filter_op.children[0]->Cast<SimplestJoin>();
+				D_ASSERT(SimplestJoinType::Mark == join_child_op.GetSimplestJoinType());
+#endif
 				break;
 			}
 			case InvalidExprType:
@@ -96,9 +106,52 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 		}
 		break;
 	}
+	case SimplestNodeType::JoinNode: {
+		auto &join_op = op->Cast<SimplestJoin>();
+		auto &left_child = join_op.children[0];
+		auto &right_child = join_op.children[1];
+		auto &conditions = join_op.join_conditions;
+		auto join_type = join_op.GetSimplestJoinType();
+		switch (join_type) {
+		case Inner: {
+			// todo
+			break;
+		}
+		case Mark: {
+			// todo: check if it is always be a `IN` claude
+			for (const auto &cond : conditions) {
+				auto &var_comp = cond->Cast<SimplestVarComparison>();
+				auto &left_var_attr = var_comp.left_attr;
+				auto table_name = table_names[left_var_attr->GetTableIndex()];
+				auto filter_str = table_name + "." + left_var_attr->GetColumnName();
+				filter_str += " IN ";
+				filter_str += "(";
+				auto &right_var_attr = var_comp.right_attr;
+				auto chunk_contents_str = chunk_contents[right_var_attr->GetTableIndex()];
+				for (const auto &content : chunk_contents_str) {
+					std::string content_str = "'" + content + "', ";
+					filter_str += content_str;
+				}
+				filter_str.erase(filter_str.size() - 2);
+				filter_str += ")";
+				filter_field.emplace_back(filter_str);
+			}
+			break;
+		}
+		default:
+			Printer::Print(StringUtil::Format("Do not support yet, join_type:  %d", join_type));
+			D_ASSERT(false);
+		}
+		break;
+	}
 	case SimplestNodeType::ScanNode: {
 		auto &scan_op = op->Cast<SimplestScan>();
 		table_names.emplace(scan_op.GetTableIndex(), scan_op.GetTableName());
+		break;
+	}
+	case SimplestNodeType::ChunkNode: {
+		auto &chunk_op = op->Cast<SimplestChunk>();
+		chunk_contents[chunk_op.GetTableIndex()] = chunk_op.GetContents();
 		break;
 	}
 	default:

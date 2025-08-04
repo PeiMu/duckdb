@@ -15,7 +15,7 @@
 namespace duckdb {
 
 enum SimplestVarType { InvalidVarType = 0, BoolVar, IntVar, FloatVar, StringVar, StringVarArr };
-enum SimplestJoinType { InvalidJoinType = 0, Inner, Left, Full, Right, Semi, Anti, UniqueOuter, UniqueInner };
+enum SimplestJoinType { InvalidJoinType = 0, Inner, Left, Full, Right, Mark, Semi, Anti, UniqueOuter, UniqueInner };
 enum SimplestLogicalOp { InvalidLogicalOp = 0, LogicalAnd, LogicalOr, LogicalNot };
 enum SimplestTextOrder { InvalidTextOrder = 0, DefaultTextOrder, UTF8, C };
 enum SimplestExprType {
@@ -30,7 +30,8 @@ enum SimplestExprType {
 	NonNullType,
 	TextLike,
 	TEXT_Not_LIKE,
-	LogicalOp
+	LogicalOp,
+	SingleAttr
 };
 enum SimplestNodeType {
 	InvalidNodeType = 0,
@@ -45,12 +46,14 @@ enum SimplestNodeType {
 	VarConstComparisonNode,
 	VarParamComparisonNode,
 	LogicalExprNode,
+	SingleAttrExprNode,
 	StmtNode,
 	ProjectionNode,
 	AggregateNode,
 	JoinNode,
 	FilterNode,
 	ScanNode,
+	ChunkNode,
 	HashNode,
 	SortNode
 };
@@ -374,7 +377,8 @@ public:
 		case NullType:
 		case NonNullType:
 		case LogicalOp:
-			Printer::Print("This should be a `SimplestIsNullExpr`!!!");
+		case SingleAttr:
+			Printer::Print("This should be a `SimplestVarComparison`!!!");
 			return str;
 		}
 
@@ -435,7 +439,8 @@ public:
 		case NullType:
 		case NonNullType:
 		case LogicalOp:
-			Printer::Print("This should be a `SimplestIsNullExpr`!!!");
+		case SingleAttr:
+			Printer::Print("This should be a `SimplestVarParamComparison`!!!");
 			return str;
 		}
 
@@ -496,7 +501,8 @@ public:
 		case NullType:
 		case NonNullType:
 		case LogicalOp:
-			Printer::Print("This should be a `SimplestIsNullExpr`!!!");
+		case SingleAttr:
+			Printer::Print("This should be a `SimplestVarConstComparison`!!!");
 			return str;
 		}
 
@@ -537,6 +543,7 @@ public:
 		case GreaterEqual:
 		case NotEqual:
 		case LogicalOp:
+		case SingleAttr:
 			Printer::Print("This should not be a `SimplestIsNullExpr`!!!");
 			return str;
 		case NullType:
@@ -609,6 +616,28 @@ public:
 
 private:
 	SimplestLogicalOp logical_op;
+};
+
+// it can be a single attr, e.g. the `In` clause of the Filter node
+class SimplestSingleAttrExpr : public SimplestExpr {
+public:
+	SimplestSingleAttrExpr(unique_ptr<SimplestAttr> attr)
+	    : SimplestExpr(SimplestExprType::SingleAttr, SingleAttrExprNode), attr(std::move(attr)) {};
+	~SimplestSingleAttrExpr() = default;
+
+	std::string Print(bool print = true) override {
+		std::string str;
+		str = "SingleAttrExpr: ";
+		str += attr->Print(false);
+		str += "\n";
+
+		if (print)
+			Printer::Print(str);
+
+		return str;
+	}
+
+	unique_ptr<SimplestAttr> attr;
 };
 
 class SimplestStmt : public SimplestNode {
@@ -875,6 +904,46 @@ public:
 private:
 	unsigned int table_index;
 	std::string table_name;
+};
+
+/*!
+ * E.g. The `In` claude from JOB 6d.sql*/
+class SimplestChunk : public SimplestStmt {
+public:
+	SimplestChunk(unique_ptr<SimplestStmt> base_stmt, unsigned int table_index, std::vector<std::string> contents)
+	    : SimplestStmt(std::move(base_stmt), ChunkNode), table_index(table_index), contents(contents) {};
+	~SimplestChunk() = default;
+
+	unsigned int GetTableIndex() {
+		return table_index;
+	}
+	std::vector<std::string> GetContents() {
+		return contents;
+	}
+
+	std::string Print(bool print = true) override {
+		std::string str = "\n";
+		str += "╔══════════════════╗\n";
+
+		str += "Chunk:\n";
+		for (const auto &content : contents) {
+			str += content;
+			str += ", ";
+		}
+		str.erase(str.size() - 2);
+
+		str += "\n╚══════════════════╝\n";
+
+		if (print)
+			Printer::Print(str);
+
+		return str;
+	}
+
+private:
+	// todo: there might be other types
+	unsigned int table_index;
+	std::vector<std::string> contents;
 };
 
 class SimplestHash : public SimplestStmt {

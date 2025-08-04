@@ -40,8 +40,7 @@ public:
 
 	unique_ptr<SimplestStmt>
 	ConstructSimplestStmt(LogicalOperator *duckdb_plan_pointer,
-	                      std::unordered_map<std::string, unique_ptr<ColumnDataCollection>> &subquery_results,
-	                      const std::unordered_map<std::string, unsigned int> &temp_table_map);
+	                      const std::unordered_map<unsigned int, std::string> &intermediate_table_map);
 
 private:
 	unique_ptr<SimplestProjection> ConstructSimplestProj(LogicalProjection &proj_op, unique_ptr<SimplestStmt> child);
@@ -49,6 +48,8 @@ private:
 	                                               unique_ptr<SimplestStmt> right_child);
 	unique_ptr<SimplestFilter> ConstructSimplestFilter(LogicalFilter &filter_op, unique_ptr<SimplestStmt> child);
 	unique_ptr<SimplestScan> ConstructSimplestScan(LogicalGet &get_op);
+	unique_ptr<SimplestScan> ConstructSimplestScan(LogicalColumnDataGet &get_op, std::string intermediate_table_name);
+	unique_ptr<SimplestChunk> ConstructSimplestChunk(LogicalColumnDataGet &column_data_get_op);
 
 	SimplestExprType ConvertCompType(ExpressionType type);
 	SimplestVarType ConvertVarType(LogicalType type);

@@ -457,7 +457,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		timer = chrono_tic();
 #endif
 
-	if (config.enable_optimizer && plan->RequireOptimizer()) {
+	if (config.enable_optimizer && plan->RequireOptimizer() && StatementType::TRANSACTION_STATEMENT != statement_type &&
+	    StatementType::PRAGMA_STATEMENT != statement_type) {
 		profiler.StartPhase("optimizer");
 		Optimizer optimizer(*planner.binder, *this);
 		plan = optimizer.PreOptimize(std::move(plan));
@@ -504,7 +505,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		std::unordered_map<std::string, unique_ptr<ColumnDataCollection>> subquery_results;
 		unsigned int subquery_index = 0;
 		// <temp%, subquery_dd_index>
-		std::unordered_map<std::string, unsigned int> temp_table_map;
+		std::unordered_map<unsigned int, std::string> intermediate_table_map;
 #endif
 
 		auto merge_child = [](LogicalOperator *subquery_pointer, unique_ptr<LogicalOperator> child_node) {
@@ -659,17 +660,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 #if CONVERT_DUCKDB_TO_IR
 			// export the selected sub-plan, aka the `sub_plan`
-			// #if ENABLE_DEBUG_PRINT
-			//  debug: print subquery
 			Printer::Print("Exported sub_plan");
 			sub_plan->Print();
 
 			Planner::VerifyPlan(optimizer.context, sub_plan);
-			// #endif
 			DuckToIRConverter duck_to_ir_converter(*planner.binder, *this);
 
-			auto simplest_ir =
-			    duck_to_ir_converter.ConstructSimplestStmt(sub_plan.get(), subquery_results, temp_table_map);
+			auto simplest_ir = duck_to_ir_converter.ConstructSimplestStmt(sub_plan.get(), intermediate_table_map);
 
 #if CONVERT_IR_TO_SQL
 			IRToSQLConverter ir_to_sql_converter;
@@ -772,19 +769,21 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			timer = chrono_tic();
 #endif
 
+			auto data_chunk_index = planner.binder->GenerateTableIndex();
+			subquery_preparer.SetNewTableIndex(data_chunk_index);
+
 #if CONVERT_DUCKDB_TO_IR
 			subquery_index++;
-			std::string new_temp_table_name = "temp" + std::to_string(subquery_index);
-			temp_table_map[new_temp_table_name] = planner.binder->GenerateTableIndex();
+			std::string intermediate_table_name = "temp" + std::to_string(subquery_index);
+			intermediate_table_map[data_chunk_index] = intermediate_table_name;
 			// create a table from data chunk
 			auto &default_entry = client_data->catalog_search_path->GetDefault();
 			auto current_catalog = default_entry.catalog;
 			auto current_schema = default_entry.schema;
 
-
 			auto &catalog = Catalog::GetCatalog(*this, current_catalog);
 			auto &types = subquery_result->Types();
-			auto info = make_uniq<CreateTableInfo>(current_catalog, current_schema, new_temp_table_name);
+			auto info = make_uniq<CreateTableInfo>(current_catalog, current_schema, intermediate_table_name);
 			info->temporary = false;
 			info->on_conflict = OnCreateConflict::ERROR_ON_CONFLICT;
 			// add column names and types
@@ -942,6 +941,27 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if TIME_BREAK_DOWN
 		if (execute_plan)
 			timer = chrono_tic();
+#endif
+
+#if CONVERT_DUCKDB_TO_IR
+		// export the final plan, aka the `plan`
+		Printer::Print("Exported final plan");
+		plan->Print();
+
+		Planner::VerifyPlan(optimizer.context, plan);
+		DuckToIRConverter duck_to_ir_converter(*planner.binder, *this);
+
+		auto simplest_ir = duck_to_ir_converter.ConstructSimplestStmt(plan.get(), intermediate_table_map);
+
+#if CONVERT_IR_TO_SQL
+		IRToSQLConverter ir_to_sql_converter;
+		std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(simplest_ir);
+		std::string sql_file_name =
+		    "/home/pei/Project/duckdb/measure/sub_plan_" + std::to_string(subquery_index) + ".sql";
+		std::ofstream sql_file(sql_file_name);
+		sql_file << sql_code;
+		sql_file.close();
+#endif
 #endif
 		plan = optimizer.PostOptimize(std::move(plan));
 		profiler.EndPhase();

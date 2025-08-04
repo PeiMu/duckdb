@@ -3,11 +3,9 @@
 namespace duckdb {
 
 unique_ptr<SimplestStmt> duckdb::DuckToIRConverter::ConstructSimplestStmt(
-    LogicalOperator *duckdb_plan_pointer,
-    std::unordered_map<std::string, unique_ptr<ColumnDataCollection>> &subquery_results,
-    const std::unordered_map<std::string, unsigned int> &temp_table_map) {
+    LogicalOperator *duckdb_plan_pointer, const std::unordered_map<unsigned int, std::string> &intermediate_table_map) {
 	std::function<unique_ptr<SimplestStmt>(LogicalOperator * duckdb_plan_pointer)> iterate_plan;
-	iterate_plan = [&iterate_plan, &subquery_results, temp_table_map,
+	iterate_plan = [&iterate_plan, intermediate_table_map,
 	                this](LogicalOperator *duckdb_plan_pointer) -> unique_ptr<SimplestStmt> {
 		unique_ptr<SimplestStmt> left_child, right_child;
 		if (duckdb_plan_pointer->children.size() > 0) {
@@ -40,8 +38,18 @@ unique_ptr<SimplestStmt> duckdb::DuckToIRConverter::ConstructSimplestStmt(
 			auto simplest_scan = ConstructSimplestScan(get_op);
 			return unique_ptr_cast<SimplestScan, SimplestStmt>(std::move(simplest_scan));
 		}
-		case LogicalOperatorType::LOGICAL_CHUNK_GET:
-			break;
+		case LogicalOperatorType::LOGICAL_CHUNK_GET: {
+			auto &column_data_get_op = duckdb_plan_pointer->Cast<LogicalColumnDataGet>();
+			auto find_intermediate_table = intermediate_table_map.find(column_data_get_op.table_index);
+			if (find_intermediate_table != intermediate_table_map.end()) {
+				auto simplest_scan = ConstructSimplestScan(column_data_get_op, find_intermediate_table->second);
+				return unique_ptr_cast<SimplestScan, SimplestStmt>(std::move(simplest_scan));
+			} else {
+				// it might be an `IN` clause
+				auto simplest_chunk = ConstructSimplestChunk(column_data_get_op);
+				return unique_ptr_cast<SimplestChunk, SimplestStmt>(std::move(simplest_chunk));
+			}
+		}
 		default:
 			Printer::Print(StringUtil::Format("Do not support yet, op->type:  %s",
 			                                  LogicalOperatorToString(duckdb_plan_pointer->type)));
@@ -100,6 +108,9 @@ unique_ptr<SimplestJoin> DuckToIRConverter::ConstructSimplestJoin(LogicalCompari
 	case JoinType::INNER:
 		join_type = SimplestJoinType::Inner;
 		break;
+	case JoinType::MARK:
+		join_type = SimplestJoinType::Mark;
+		break;
 	default:
 		Printer::Print(StringUtil::Format("Do not support yet, join_type:  %s", join_op.join_type));
 		join_type = SimplestJoinType::InvalidJoinType;
@@ -124,7 +135,9 @@ unique_ptr<SimplestJoin> DuckToIRConverter::ConstructSimplestJoin(LogicalCompari
 		auto right_expr_info = GetConstTableExpr(right_cond);
 		auto right_simplest_cond = make_uniq<SimplestAttr>(right_type, right_expr_info.table_idx,
 		                                                   right_expr_info.column_idx, right_expr_info.column_name);
-
+#ifdef DEBUG
+		D_ASSERT(left_type == right_type);
+#endif
 		auto simplest_cond =
 		    make_uniq<SimplestVarComparison>(comp_type, std::move(left_simplest_cond), std::move(right_simplest_cond));
 		join_conditions.emplace_back(std::move(simplest_cond));
@@ -164,6 +177,47 @@ unique_ptr<SimplestScan> DuckToIRConverter::ConstructSimplestScan(LogicalGet &ge
 	auto table_name = get_op.function.to_string(get_op.bind_data.get());
 	auto simplest_scan = make_uniq<SimplestScan>(std::move(base_stmt), table_index, table_name);
 	return simplest_scan;
+}
+
+unique_ptr<SimplestScan> DuckToIRConverter::ConstructSimplestScan(LogicalColumnDataGet &get_op,
+                                                                  std::string intermediate_table_name) {
+	// todo: add target list
+	std::vector<unique_ptr<SimplestAttr>> target_list;
+	// todo: add qual vec
+	std::vector<unique_ptr<SimplestExpr>> qual_vec;
+
+	auto base_stmt = make_uniq<SimplestStmt>(std::move(target_list), std::move(qual_vec), SimplestNodeType::ScanNode);
+
+	auto table_index = get_op.table_index;
+	auto simplest_scan = make_uniq<SimplestScan>(std::move(base_stmt), table_index, intermediate_table_name);
+	return simplest_scan;
+}
+
+unique_ptr<SimplestChunk> DuckToIRConverter::ConstructSimplestChunk(LogicalColumnDataGet &column_data_get_op) {
+	// fixme: might have other types
+	std::vector<std::string> chunk_contents;
+	DataChunk chunk;
+
+	column_data_get_op.collection->InitializeScanChunk(chunk);
+	ColumnDataScanState scan_state;
+	column_data_get_op.collection->InitializeScan(scan_state);
+	while (column_data_get_op.collection->Scan(scan_state, chunk)) {
+		for (idx_t i = 0; i < chunk.ColumnCount(); i++) {
+			for (idx_t j = 0; j < chunk.size(); j++) {
+				chunk_contents.emplace_back(chunk.data[i].GetValue(j).ToString());
+			}
+		}
+	}
+
+	// todo: add target list
+	std::vector<unique_ptr<SimplestAttr>> target_list;
+	// todo: add qual vec
+	std::vector<unique_ptr<SimplestExpr>> qual_vec;
+
+	auto base_stmt = make_uniq<SimplestStmt>(std::move(target_list), std::move(qual_vec), SimplestNodeType::ScanNode);
+	auto simplest_chunk =
+	    make_uniq<SimplestChunk>(std::move(base_stmt), column_data_get_op.table_index, chunk_contents);
+	return simplest_chunk;
 }
 
 SimplestExprType DuckToIRConverter::ConvertCompType(ExpressionType type) {
@@ -229,6 +283,14 @@ DuckToIRConverter::CollectQualVecExprs(const vector<unique_ptr<Expression>> &exp
 
 			qual_vec.emplace_back(std::move(simplest_var_const_comp));
 
+			break;
+		}
+		case ExpressionType::BOUND_COLUMN_REF: {
+			TableExpr table_expr = GetConstTableExpr(expr);
+			auto simplest_attr = make_uniq<SimplestAttr>(ConvertVarType(table_expr.return_type), table_expr.table_idx,
+			                                             table_expr.column_idx, table_expr.column_name);
+			auto simplest_attr_expr = make_uniq<SimplestSingleAttrExpr>(std::move(simplest_attr));
+			qual_vec.emplace_back(std::move(simplest_attr_expr));
 			break;
 		}
 		default:
