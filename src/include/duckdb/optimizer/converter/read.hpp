@@ -40,6 +40,13 @@ public:
 
 	std::deque<table_str> table_col_names;
 
+	unique_ptr<SimplestStmt> GenerateProjHead(unique_ptr<SimplestStmt> postgres_stmt, size_t sub_plan_id);
+	void Clear() {
+		table_col_names.clear();
+		index_conditions.clear();
+		agg_fns.clear();
+	}
+
 private:
 	const char *PG_strtok(int *length);
 	unique_ptr<SimplestNode> NodeRead(const char *token, int tok_len, bool return_vector = false,
@@ -93,7 +100,9 @@ private:
 	SimplestJoinType GetSimplestJoinType(unsigned int type_id);
 	SimplestExprType GetSimplestComparisonType(unsigned int type_id);
 	SimplestTextOrder GetSimplestTextOrderType(int type_id);
+	SimplestAggFnType GetSimplestAggFnType(unsigned int aggfnoid);
 
 	std::vector<unique_ptr<SimplestVarParamComparison>> index_conditions;
+	agg_fn_pair agg_fns;
 };
 } // namespace duckdb

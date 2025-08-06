@@ -18,6 +18,7 @@ enum SimplestVarType { InvalidVarType = 0, BoolVar, IntVar, FloatVar, StringVar,
 enum SimplestJoinType { InvalidJoinType = 0, Inner, Left, Full, Right, Mark, Semi, Anti, UniqueOuter, UniqueInner };
 enum SimplestLogicalOp { InvalidLogicalOp = 0, LogicalAnd, LogicalOr, LogicalNot };
 enum SimplestTextOrder { InvalidTextOrder = 0, DefaultTextOrder, UTF8, C };
+enum SimplestAggFnType { InvalidAggType = 0, Min, Max, Sum, Average };
 enum SimplestExprType {
 	InvalidExprType = 0,
 	Equal,
@@ -51,6 +52,7 @@ enum SimplestNodeType {
 	ProjectionNode,
 	AggregateNode,
 	JoinNode,
+	CrossProductNode,
 	FilterNode,
 	ScanNode,
 	ChunkNode,
@@ -270,6 +272,12 @@ private:
 	unsigned int table_index;
 	unsigned int column_index;
 	std::string column_name;
+};
+
+struct SimplestAttrHasher {
+	size_t operator()(const unique_ptr<SimplestAttr> &other) const {
+		return other->GetTableIndex() ^ other->GetColumnIndex();
+	}
 };
 
 class SimplestParam : public SimplestVar {
@@ -729,21 +737,44 @@ private:
 	unsigned int table_index;
 };
 
+using agg_fn_pair = std::vector<std::pair<unique_ptr<SimplestAttr>, SimplestAggFnType>>;
+
 class SimplestAggregate : public SimplestStmt {
 public:
-	SimplestAggregate(unique_ptr<SimplestStmt> base_stmt, std::vector<SimplestVarType> agg_types)
-	    : SimplestStmt(std::move(base_stmt), AggregateNode), agg_types(agg_types) {};
+	SimplestAggregate(unique_ptr<SimplestStmt> base_stmt, agg_fn_pair agg_fns)
+	    : SimplestStmt(std::move(base_stmt), AggregateNode), agg_fns(std::move(agg_fns)) {};
 	~SimplestAggregate() = default;
-
-	std::vector<SimplestVarType> GetAggTypes() {
-		return agg_types;
-	}
 
 	std::string Print(bool print = true) override {
 		std::string str = "\n";
+
+		std::string agg_fn_str = "\n";
+		for (const auto &agg_fn : agg_fns) {
+			switch (agg_fn.second) {
+			case SimplestAggFnType::InvalidAggType:
+				Printer::Print("Invalid expr Type!!!");
+				return str;
+			case SimplestAggFnType::Min:
+				agg_fn_str += "min(";
+				break;
+			case SimplestAggFnType::Max:
+				agg_fn_str += "min(";
+				break;
+			case SimplestAggFnType::Sum:
+				agg_fn_str += "min(";
+				break;
+			case SimplestAggFnType::Average:
+				agg_fn_str += "avg(";
+				break;
+			}
+
+			agg_fn_str += agg_fn.first->Print(false);
+			agg_fn_str += ")\n";
+		}
 		str += "╔══════════════════╗\n";
-		D_ASSERT(agg_types.size() == target_list.size());
-		str += "Aggregate:";
+
+		str += "Aggregate:\n";
+		str += agg_fn_str;
 
 		str += SimplestStmt::Print(false);
 
@@ -755,8 +786,7 @@ public:
 		return str;
 	}
 
-private:
-	std::vector<SimplestVarType> agg_types;
+	agg_fn_pair agg_fns;
 };
 
 class SimplestJoin : public SimplestStmt {
@@ -837,6 +867,28 @@ public:
 
 private:
 	SimplestJoinType join_type;
+};
+
+class SimplestCrossProduct : public SimplestStmt {
+public:
+	SimplestCrossProduct(unique_ptr<SimplestStmt> base_stmt) : SimplestStmt(std::move(base_stmt), CrossProductNode) {};
+	~SimplestCrossProduct() = default;
+
+	std::string Print(bool print = true) override {
+		std::string str = "\n";
+		str += "╔══════════════════╗\n";
+
+		str += "CrossProduct:\n";
+
+		str += SimplestStmt::Print(false);
+
+		str += "╚══════════════════╝\n";
+
+		if (print)
+			Printer::Print(str);
+
+		return str;
+	}
 };
 
 class SimplestFilter : public SimplestStmt {
@@ -981,6 +1033,7 @@ struct SimplestOrderStruct {
 	int sort_col_idx;
 };
 
+//! The `order by` clause
 class SimplestSort : public SimplestStmt {
 public:
 	SimplestSort(unique_ptr<SimplestStmt> base_stmt, std::vector<SimplestOrderStruct> order_struct_vec)

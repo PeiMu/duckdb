@@ -29,7 +29,7 @@
 #include "read.hpp"
 #include "simplest_ir.h"
 
-#define CONVERT_IR_TO_DUCKDB false
+#define CONVERT_IR_TO_DUCKDB true
 
 namespace duckdb {
 class IRToDuckConverter {
@@ -88,6 +88,7 @@ private:
 	void SetExprVecName(std::vector<unique_ptr<SimplestExpr>> &expr_vec, const std::deque<table_str> &table_col_names);
 	void SetExprVecName(std::vector<unique_ptr<SimplestVarComparison>> &comp_vec,
 	                    const std::deque<table_str> &table_col_names);
+	void SetExprVecName(agg_fn_pair &agg_fns, const std::deque<table_str> &table_col_names);
 
 	// <duckdb_table_index, duckdb's column_ids>
 	// in duckdb's column_ids, it convert table entry's id to binding id

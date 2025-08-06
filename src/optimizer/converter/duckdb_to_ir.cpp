@@ -19,15 +19,22 @@ unique_ptr<SimplestStmt> duckdb::DuckToIRConverter::ConstructSimplestStmt(
 			auto simplest_proj = ConstructSimplestProj(proj_op, std::move(left_child));
 			return unique_ptr_cast<SimplestProjection, SimplestStmt>(std::move(simplest_proj));
 		}
-		case LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY:
-			break;
+		case LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY: {
+			auto &agg_group_op = duckdb_plan_pointer->Cast<LogicalAggregate>();
+			auto simplest_agg_group = ConstructSimplestAggGroup(agg_group_op, std::move(left_child));
+			return unique_ptr_cast<SimplestAggregate, SimplestStmt>(std::move(simplest_agg_group));
+		}
 		case LogicalOperatorType::LOGICAL_FILTER: {
 			auto &filter_op = duckdb_plan_pointer->Cast<LogicalFilter>();
 			auto simplest_filter = ConstructSimplestFilter(filter_op, std::move(left_child));
 			return unique_ptr_cast<SimplestFilter, SimplestStmt>(std::move(simplest_filter));
 		}
-		case LogicalOperatorType::LOGICAL_CROSS_PRODUCT:
-			break;
+		case LogicalOperatorType::LOGICAL_CROSS_PRODUCT: {
+			auto &cross_product_op = duckdb_plan_pointer->Cast<LogicalCrossProduct>();
+			auto simplest_cross_product =
+			    ConstructSimplestCrossProduct(cross_product_op, std::move(left_child), std::move(right_child));
+			return unique_ptr_cast<SimplestCrossProduct, SimplestStmt>(std::move(simplest_cross_product));
+		}
 		case LogicalOperatorType::LOGICAL_COMPARISON_JOIN: {
 			auto &join_op = duckdb_plan_pointer->Cast<LogicalComparisonJoin>();
 			auto simplest_join = ConstructSimplestJoin(join_op, std::move(left_child), std::move(right_child));
@@ -73,7 +80,6 @@ unique_ptr<SimplestProjection> DuckToIRConverter::ConstructSimplestProj(LogicalP
 	std::vector<unique_ptr<SimplestStmt>> children;
 	children.emplace_back(std::move(child));
 
-	// todo: add target list
 	std::vector<unique_ptr<SimplestAttr>> target_list;
 	for (const auto &expr : proj_op.expressions) {
 		auto table_expr = GetConstTableExpr(expr);
@@ -87,6 +93,38 @@ unique_ptr<SimplestProjection> DuckToIRConverter::ConstructSimplestProj(LogicalP
 	auto simplest_projection = make_uniq<SimplestProjection>(std::move(base_stmt), table_index);
 
 	return simplest_projection;
+}
+
+unique_ptr<SimplestAggregate> DuckToIRConverter::ConstructSimplestAggGroup(LogicalAggregate &agg_group_op,
+                                                                           unique_ptr<SimplestStmt> child) {
+	std::vector<unique_ptr<SimplestStmt>> children;
+	children.emplace_back(std::move(child));
+
+	// todo: add target list
+	std::vector<unique_ptr<SimplestAttr>> target_list;
+
+	//	for (const auto &expr : proj_op.expressions) {
+	//		auto table_expr = GetConstTableExpr(expr);
+	//		auto simplest_target = make_uniq<SimplestAttr>(ConvertVarType(table_expr.return_type), table_expr.table_idx,
+	//		                                               table_expr.column_idx, table_expr.column_name);
+	//		target_list.emplace_back(std::move(simplest_target));
+	//	}
+	//	auto base_stmt =
+	//	    make_uniq<SimplestStmt>(std::move(children), std::move(target_list), SimplestNodeType::ProjectionNode);
+	//
+	//	std::vector<SimplestVarType> agg_types;
+	return unique_ptr<SimplestAggregate>();
+}
+
+unique_ptr<SimplestCrossProduct> DuckToIRConverter::ConstructSimplestCrossProduct(
+    LogicalCrossProduct &cross_product_op, unique_ptr<SimplestStmt> left_child, unique_ptr<SimplestStmt> right_child) {
+	std::vector<unique_ptr<SimplestStmt>> children;
+	children.emplace_back(std::move(left_child));
+	children.emplace_back(std::move(right_child));
+	auto base_stmt = make_uniq<SimplestStmt>(std::move(children), SimplestNodeType::CrossProductNode);
+	auto simplest_cross_product = make_uniq<SimplestCrossProduct>(std::move(base_stmt));
+
+	return simplest_cross_product;
 }
 
 unique_ptr<SimplestJoin> DuckToIRConverter::ConstructSimplestJoin(LogicalComparisonJoin &join_op,

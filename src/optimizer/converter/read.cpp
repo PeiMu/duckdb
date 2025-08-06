@@ -582,7 +582,7 @@ unique_ptr<SimplestAggregate> PlanReader::ReadAgg() {
 		// todo: need to check the order
 		agg_type_vec.emplace_back(target->GetType());
 	}
-	unique_ptr<SimplestAggregate> agg_stmt = make_uniq<SimplestAggregate>(std::move(common_stmt), agg_type_vec);
+	unique_ptr<SimplestAggregate> agg_stmt = make_uniq<SimplestAggregate>(std::move(common_stmt), std::move(agg_fns));
 
 	// AggStrategy
 	token = PG_strtok(&length);
@@ -628,6 +628,8 @@ unique_ptr<SimplestAttr> PlanReader::ReadAggref() {
 	// aggfnoid
 	token = PG_strtok(&length);
 	token = PG_strtok(&length);
+	unsigned int aggfnoid = atoi(token);
+	SimplestAggFnType agg_fn_type = GetSimplestAggFnType(aggfnoid);
 	// aggtype
 	token = PG_strtok(&length);
 	token = PG_strtok(&length);
@@ -655,6 +657,8 @@ unique_ptr<SimplestAttr> PlanReader::ReadAggref() {
 	(void)token;
 	auto args_node = NodeRead(NULL, 0);
 	unique_ptr<SimplestAttr> aggr_attr = unique_ptr_cast<SimplestNode, SimplestAttr>(std::move(args_node));
+	unique_ptr<SimplestAttr> aggr_attr_other = make_uniq<SimplestAttr>(*aggr_attr);
+	agg_fns.emplace_back(std::make_pair(std::move(aggr_attr_other), agg_fn_type));
 	// aggorder
 	token = PG_strtok(&length);
 	(void)token;
@@ -2002,6 +2006,26 @@ SimplestTextOrder PlanReader::GetSimplestTextOrderType(int type_id) {
 	return simplest_text_order;
 }
 
+SimplestAggFnType PlanReader::GetSimplestAggFnType(unsigned int aggfnoid) {
+	SimplestAggFnType simplest_agg_fn_type = SimplestAggFnType::InvalidAggType;
+	switch (aggfnoid) {
+	case 2145:
+		simplest_agg_fn_type = SimplestAggFnType::Min;
+		break;
+	case 2129:
+		simplest_agg_fn_type = SimplestAggFnType::Max;
+		break;
+	case 2108:
+		simplest_agg_fn_type = SimplestAggFnType::Sum;
+		break;
+	default:
+		Printer::Print("Doesn't support agg fn type " + std::to_string(aggfnoid) + " yet!");
+		exit(-1);
+	}
+
+	return simplest_agg_fn_type;
+}
+
 unique_ptr<SimplestNode> PlanReader::ParseNodeString() {
 	READ_TEMP_LOCALS();
 
@@ -2074,5 +2098,26 @@ unique_ptr<SimplestNode> PlanReader::ParseNodeString() {
 	}
 
 	return node;
+}
+
+unique_ptr<SimplestStmt> PlanReader::GenerateProjHead(unique_ptr<SimplestStmt> postgres_stmt, size_t sub_plan_id) {
+	auto table_index = UINT_MAX - sub_plan_id;
+
+	std::vector<unique_ptr<SimplestAttr>> target_list;
+	for (const auto &target : postgres_stmt->target_list) {
+		auto simplest_target = make_uniq<SimplestAttr>(target->GetType(), target->GetTableIndex(),
+		                                               target->GetColumnIndex(), target->GetColumnName());
+		target_list.emplace_back(std::move(simplest_target));
+	}
+
+	std::vector<unique_ptr<SimplestStmt>> children;
+	children.emplace_back(std::move(postgres_stmt));
+	auto base_stmt =
+	    make_uniq<SimplestStmt>(std::move(children), std::move(target_list), SimplestNodeType::ProjectionNode);
+
+	auto simplest_projection = make_uniq<SimplestProjection>(std::move(base_stmt), table_index);
+
+	return unique_ptr_cast<SimplestStmt, SimplestProjection>(std::move(simplest_projection));
+	;
 }
 } // namespace duckdb

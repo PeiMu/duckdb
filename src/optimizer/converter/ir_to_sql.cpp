@@ -15,21 +15,30 @@ std::string IRToSQLConverter::LogicalPlanToSQL(const unique_ptr<SimplestStmt> &p
 		select += ", ";
 		sql_code += select;
 	}
-	sql_code.erase(sql_code.size() - 2);
+	if (!select_field.empty())
+		sql_code.erase(sql_code.size() - 2);
 
 	sql_code += "\nFROM ";
 	for (auto table_name : table_names) {
 		table_name.second += ", ";
 		sql_code += table_name.second;
 	}
-	sql_code.erase(sql_code.size() - 2);
+	if (!table_names.empty())
+		sql_code.erase(sql_code.size() - 2);
 
 	sql_code += "\nWHERE ";
 	for (auto filter : filter_field) {
 		filter += " AND ";
 		sql_code += filter;
 	}
-	sql_code.erase(sql_code.size() - 5);
+	if (!filter_field.empty())
+		sql_code.erase(sql_code.size() - 5);
+	for (auto join : join_field) {
+		join += " AND ";
+		sql_code += join;
+	}
+	if (!join_field.empty())
+		sql_code.erase(sql_code.size() - 5);
 
 	sql_code += ";";
 #ifdef DEBUG
@@ -55,7 +64,20 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 		// `SELECT table_name.$target_list`
 		for (const auto &target : proj_op.target_list) {
 			auto table_name = table_names[target->GetTableIndex()];
-			select_field.emplace_back(table_name + "." + target->GetColumnName());
+			std::string select_str = table_name + "." + target->GetColumnName();
+			auto find_select_str = agg_field.find(target);
+			if (find_select_str != agg_field.end()) {
+				select_str = find_select_str->second + "(" + select_str + ")";
+			}
+			select_field.emplace_back(select_str);
+		}
+		break;
+	}
+	case SimplestNodeType::AggregateNode: {
+		auto &agg_op = op->Cast<SimplestAggregate>();
+		for (auto &agg_fn : agg_op.agg_fns) {
+			auto agg_fn_attr = make_uniq<SimplestAttr>(*agg_fn.first);
+			agg_field.emplace(std::make_pair(std::move(agg_fn_attr), TranslateSimplestAggFnType(agg_fn.second)));
 		}
 		break;
 	}
@@ -114,7 +136,17 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 		auto join_type = join_op.GetSimplestJoinType();
 		switch (join_type) {
 		case Inner: {
-			// todo
+			for (const auto &cond : conditions) {
+				auto &var_comp = cond->Cast<SimplestVarComparison>();
+				auto &left_var_attr = var_comp.left_attr;
+				auto left_table_name = table_names[left_var_attr->GetTableIndex()];
+				auto join_str = left_table_name + "." + left_var_attr->GetColumnName();
+				join_str += " = ";
+				auto &right_var_attr = var_comp.right_attr;
+				auto right_table_name = table_names[right_var_attr->GetTableIndex()];
+				join_str += right_table_name + "." + right_var_attr->GetColumnName();
+				join_field.emplace_back(join_str);
+			}
 			break;
 		}
 		case Mark: {
@@ -158,5 +190,29 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 		Printer::Print(StringUtil::Format("Do not support yet, op->type:  %d", op->GetNodeType()));
 		D_ASSERT(false);
 	}
+}
+
+std::string IRToSQLConverter::TranslateSimplestAggFnType(SimplestAggFnType agg_fn_type) {
+	std::string agg_fn_type_str;
+	switch (agg_fn_type) {
+	case SimplestAggFnType::InvalidAggType:
+		Printer::Print("Invalid expression type!");
+		D_ASSERT(false);
+		break;
+	case SimplestAggFnType::Min:
+		agg_fn_type_str = "min";
+		break;
+	case SimplestAggFnType::Max:
+		agg_fn_type_str = "max";
+		break;
+	case SimplestAggFnType::Sum:
+		agg_fn_type_str = "sum";
+		break;
+	case SimplestAggFnType::Average:
+		agg_fn_type_str = "avg";
+		break;
+	}
+
+	return agg_fn_type_str;
 }
 } // namespace duckdb

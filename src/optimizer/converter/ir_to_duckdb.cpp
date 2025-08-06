@@ -11,9 +11,10 @@ IRToDuckConverter::GetDuckdbTableMap(unique_ptr<LogicalOperator> &duckdb_plan,
 		for (auto &child : duckdb_plan->children) {
 			if (LogicalOperatorType::LOGICAL_GET == child->type) {
 				auto get = unique_ptr_cast<LogicalOperator, LogicalGet>(std::move(child));
-				// std::string table_name = get->function.to_string(get->bind_data.get());
 				auto table_index = get->table_index;
 				std::string table_name = table_alias_name.at(table_index);
+				if (table_name.empty())
+					table_name = get->function.to_string(get->bind_data.get());
 				table_map.emplace(table_name, std::move(get));
 			} else {
 				iterate_plan(child);
@@ -465,6 +466,12 @@ void IRToDuckConverter::SetExprVecName(std::vector<unique_ptr<SimplestVarCompari
 	}
 }
 
+void IRToDuckConverter::SetExprVecName(agg_fn_pair &agg_fns, const std::deque<table_str> &table_col_names) {
+	for (auto &agg_fn : agg_fns) {
+		SetAttrName(agg_fn.first, table_col_names);
+	}
+}
+
 unordered_map<int, int>
 IRToDuckConverter::MatchTableIndex(const unordered_map<std::string, unique_ptr<LogicalGet>> &table_map,
                                    const std::deque<table_str> &table_col_names,
@@ -521,6 +528,10 @@ void IRToDuckConverter::AddTableColumnName(unique_ptr<SimplestStmt> &simplest_st
 			// filter condition has attr
 			auto &filter_node = simplest_stmt->Cast<SimplestFilter>();
 			SetExprVecName(simplest_stmt->qual_vec, table_col_names);
+		} else if (AggregateNode == simplest_stmt->GetNodeType()) {
+			// agg_fns has attr
+			auto &agg_node = simplest_stmt->Cast<SimplestAggregate>();
+			SetExprVecName(agg_node.agg_fns, table_col_names);
 		}
 
 		for (auto &child : simplest_stmt->children) {

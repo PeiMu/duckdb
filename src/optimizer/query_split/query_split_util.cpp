@@ -91,7 +91,7 @@ const TableExpr GetConstTableExpr(const unique_ptr<Expression> &expr) {
 	case ExpressionType::BOUND_FUNCTION: {
 		auto &bound_func_expr = expr->Cast<BoundFunctionExpression>();
 #ifdef DEBUG
-		D_ASSERT(2 == bound_func_expr.children.size());
+//		D_ASSERT(2 == bound_func_expr.children.size());
 #endif
 		if (ExpressionType::VALUE_CONSTANT == bound_func_expr.children[0]->type) {
 			return GetConstTableExpr(bound_func_expr.children[1]);

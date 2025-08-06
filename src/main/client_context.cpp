@@ -522,7 +522,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			return false;
 		};
 
-		while (config.enable_dbshaker_query_split) {
+		while (config.enable_dbshaker_query_split && !CONVERT_IR_TO_DUCKDB) {
 			if (config.enable_dbshaker_split_jop) {
 #if ALWAYS_SPLIT
 				needToSplit = true;
@@ -672,7 +672,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			IRToSQLConverter ir_to_sql_converter;
 			std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(simplest_ir);
 			std::string sql_file_name =
-			    "/home/pei/Project/duckdb/measure/sub_plan_" + std::to_string(subquery_index) + ".sql";
+			    "/home/pei/Project/duckdb/measure/dd_sub_plan_" + std::to_string(subquery_index) + ".sql";
 			std::ofstream sql_file(sql_file_name);
 			sql_file << sql_code;
 			sql_file.close();
@@ -957,13 +957,14 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		IRToSQLConverter ir_to_sql_converter;
 		std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(simplest_ir);
 		std::string sql_file_name =
-		    "/home/pei/Project/duckdb/measure/sub_plan_" + std::to_string(subquery_index) + ".sql";
+		    "/home/pei/Project/duckdb/measure/dd_sub_plan_" + std::to_string(subquery_index) + ".sql";
 		std::ofstream sql_file(sql_file_name);
 		sql_file << sql_code;
 		sql_file.close();
 #endif
 #endif
-		plan = optimizer.PostOptimize(std::move(plan));
+		if (!CONVERT_IR_TO_DUCKDB)
+			plan = optimizer.PostOptimize(std::move(plan));
 		profiler.EndPhase();
 #if TIME_BREAK_DOWN
 		if (execute_plan)
@@ -1010,7 +1011,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	    (LogicalOperatorType::LOGICAL_PROJECTION == plan->type || LogicalOperatorType::LOGICAL_ORDER_BY == plan->type ||
 	     LogicalOperatorType::LOGICAL_LIMIT == plan->type)) {
 #ifdef ENABLE_DEBUG_PRINT
-		Printer::Print("original duckdb plan");
+		Printer::Print("original duckdb plan after pre-optimization");
 		plan->Print();
 #endif
 
@@ -1078,13 +1079,24 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if TIME_BREAK_DOWN
 			auto converter_timer = chrono_tic();
 #endif
+			plan_reader.Clear();
 			unique_ptr<SimplestNode> postgres_plan = plan_reader.StringToNode(query_string_vec[i].c_str());
 			unique_ptr<SimplestStmt> postgres_stmt =
 			    unique_ptr_cast<SimplestNode, SimplestStmt>(std::move(postgres_plan));
+			postgres_stmt = plan_reader.GenerateProjHead(std::move(postgres_stmt), i);
 			// add table/column name from plan_reader.table_col_names
 			ir_to_duck_converter.AddTableColumnName(postgres_stmt, plan_reader.table_col_names);
 #ifdef ENABLE_DEBUG_PRINT
 			postgres_stmt->Print();
+#endif
+#if CONVERT_IR_TO_SQL
+			IRToSQLConverter ir_to_sql_converter;
+			std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(postgres_stmt);
+			std::string sql_file_name =
+			    "/home/pei/Project/duckdb/measure/pg_sub_plan_" + std::to_string(subquery_index) + ".sql";
+			std::ofstream sql_file(sql_file_name);
+			sql_file << sql_code;
+			sql_file.close();
 #endif
 			auto postgres_plan_pointer = postgres_stmt.get();
 

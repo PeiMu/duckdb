@@ -21,8 +21,10 @@
 #include "duckdb/planner/expression/bound_constant_expression.hpp"
 #include "duckdb/planner/expression/bound_function_expression.hpp"
 #include "duckdb/planner/expression/bound_operator_expression.hpp"
+#include "duckdb/planner/operator/logical_aggregate.hpp"
 #include "duckdb/planner/operator/logical_column_data_get.hpp"
 #include "duckdb/planner/operator/logical_comparison_join.hpp"
+#include "duckdb/planner/operator/logical_cross_product.hpp"
 #include "duckdb/planner/operator/logical_filter.hpp"
 #include "duckdb/planner/operator/logical_get.hpp"
 #include "duckdb/planner/operator/logical_order.hpp"
@@ -30,7 +32,7 @@
 #include "read.hpp"
 #include "simplest_ir.h"
 
-#define CONVERT_DUCKDB_TO_IR true
+#define CONVERT_DUCKDB_TO_IR false
 
 namespace duckdb {
 class DuckToIRConverter {
@@ -58,6 +60,11 @@ private:
 
 	Binder &binder;
 	ClientContext &context;
+	unique_ptr<SimplestCrossProduct> ConstructSimplestCrossProduct(LogicalCrossProduct &cross_product_op,
+	                                                               unique_ptr<SimplestStmt> left_child,
+	                                                               unique_ptr<SimplestStmt> right_child);
+	unique_ptr<SimplestAggregate> ConstructSimplestAggGroup(LogicalAggregate &agg_group_op,
+	                                                        unique_ptr<SimplestStmt> child);
 };
 
 } // namespace duckdb
