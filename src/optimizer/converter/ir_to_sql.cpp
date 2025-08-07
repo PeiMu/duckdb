@@ -65,7 +65,7 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 		for (const auto &target : proj_op.target_list) {
 			auto table_name = table_names[target->GetTableIndex()];
 			std::string select_str = table_name + "." + target->GetColumnName();
-			auto find_select_str = agg_field.find(target);
+			auto find_select_str = agg_field.find(agg_field_key(target->GetTableIndex(), target->GetColumnIndex()));
 			if (find_select_str != agg_field.end()) {
 				select_str = find_select_str->second + "(" + select_str + ")";
 			}
@@ -75,9 +75,10 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 	}
 	case SimplestNodeType::AggregateNode: {
 		auto &agg_op = op->Cast<SimplestAggregate>();
-		for (auto &agg_fn : agg_op.agg_fns) {
-			auto agg_fn_attr = make_uniq<SimplestAttr>(*agg_fn.first);
-			agg_field.emplace(std::make_pair(std::move(agg_fn_attr), TranslateSimplestAggFnType(agg_fn.second)));
+		for (const auto &agg_fn : agg_op.agg_fns) {
+			agg_field.emplace(
+			    std::make_pair(agg_field_key(agg_fn.first->GetTableIndex(), agg_fn.first->GetColumnIndex()),
+			                   TranslateSimplestAggFnType(agg_fn.second)));
 		}
 		break;
 	}
@@ -186,6 +187,8 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 		chunk_contents[chunk_op.GetTableIndex()] = chunk_op.GetContents();
 		break;
 	}
+	case SimplestNodeType::HashNode:
+		break;
 	default:
 		Printer::Print(StringUtil::Format("Do not support yet, op->type:  %d", op->GetNodeType()));
 		D_ASSERT(false);

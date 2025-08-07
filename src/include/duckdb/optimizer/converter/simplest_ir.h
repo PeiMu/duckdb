@@ -276,7 +276,13 @@ private:
 
 struct SimplestAttrHasher {
 	size_t operator()(const unique_ptr<SimplestAttr> &other) const {
-		return other->GetTableIndex() ^ other->GetColumnIndex();
+		return std::hash<unsigned int>()(other->GetTableIndex()) ^ std::hash<unsigned int>()(other->GetColumnIndex());
+	}
+};
+
+struct SimplestAttrEqual {
+	bool operator()(const unique_ptr<SimplestAttr> &lhs, const unique_ptr<SimplestAttr> &rhs) const {
+		return lhs->GetTableIndex() == rhs->GetTableIndex() && lhs->GetColumnIndex() == rhs->GetColumnIndex();
 	}
 };
 
