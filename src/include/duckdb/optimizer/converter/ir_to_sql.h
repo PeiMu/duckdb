@@ -37,5 +37,6 @@ private:
 
 	std::unordered_map<unsigned int, std::string> table_names;
 	std::unordered_map<unsigned int, std::vector<std::string>> chunk_contents;
+	std::string CollectScanFilter(const unique_ptr<SimplestExpr> &qual_expr);
 };
 } // namespace duckdb

@@ -579,7 +579,6 @@ unique_ptr<SimplestAggregate> PlanReader::ReadAgg() {
 	unique_ptr<SimplestStmt> common_stmt = ReadCommonPlan();
 	std::vector<SimplestVarType> agg_type_vec;
 	for (const auto &target : common_stmt->target_list) {
-		// todo: need to check the order
 		agg_type_vec.emplace_back(target->GetType());
 	}
 	unique_ptr<SimplestAggregate> agg_stmt = make_uniq<SimplestAggregate>(std::move(common_stmt), std::move(agg_fns));

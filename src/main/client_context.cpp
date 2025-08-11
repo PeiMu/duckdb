@@ -660,8 +660,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 #if CONVERT_DUCKDB_TO_IR
 			// export the selected sub-plan, aka the `sub_plan`
+#ifdef ENABLE_DEBUG_PRINT
 			Printer::Print("Exported sub_plan");
 			sub_plan->Print();
+#endif
 
 			Planner::VerifyPlan(optimizer.context, sub_plan);
 			DuckToIRConverter duck_to_ir_converter(*planner.binder, *this);
@@ -786,10 +788,16 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			auto info = make_uniq<CreateTableInfo>(current_catalog, current_schema, intermediate_table_name);
 			info->temporary = false;
 			info->on_conflict = OnCreateConflict::ERROR_ON_CONFLICT;
+
 			// add column names and types
-			for (idx_t i = 0; i < types.size(); i++) {
-				info->columns.AddColumn(ColumnDefinition("col" + to_string(i), types[i]));
+			auto &simplest_proj = simplest_ir->Cast<SimplestProjection>();
+			for (idx_t i = 0; i < simplest_proj.target_list.size(); i++) {
+				auto column_name = simplest_proj.target_list[i]->GetColumnName();
+				info->columns.AddColumn(ColumnDefinition(column_name, types[i]));
 			}
+//			for (idx_t i = 0; i < types.size(); i++) {
+//				info->columns.AddColumn(ColumnDefinition("col" + to_string(i), types[i]));
+//			}
 			auto created_table = catalog.CreateTable(*this, std::move(info));
 			auto &table_entry = created_table->Cast<TableCatalogEntry>();
 			table_entry.GetStorage().LocalAppend(table_entry, *this, *subquery_result);
@@ -945,8 +953,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 #if CONVERT_DUCKDB_TO_IR
 		// export the final plan, aka the `plan`
+#ifdef ENABLE_DEBUG_PRINT
 		Printer::Print("Exported final plan");
 		plan->Print();
+#endif
 
 		Planner::VerifyPlan(optimizer.context, plan);
 		DuckToIRConverter duck_to_ir_converter(*planner.binder, *this);

@@ -14,6 +14,7 @@
 #include "duckdb/optimizer/query_split/split_algorithm.hpp"
 #include "duckdb/planner/binder.hpp"
 #include "duckdb/planner/bound_result_modifier.hpp"
+#include "duckdb/planner/expression/bound_aggregate_expression.hpp"
 #include "duckdb/planner/expression/bound_between_expression.hpp"
 #include "duckdb/planner/expression/bound_columnref_expression.hpp"
 #include "duckdb/planner/expression/bound_comparison_expression.hpp"
@@ -21,6 +22,8 @@
 #include "duckdb/planner/expression/bound_constant_expression.hpp"
 #include "duckdb/planner/expression/bound_function_expression.hpp"
 #include "duckdb/planner/expression/bound_operator_expression.hpp"
+#include "duckdb/planner/filter/conjunction_filter.hpp"
+#include "duckdb/planner/filter/constant_filter.hpp"
 #include "duckdb/planner/operator/logical_aggregate.hpp"
 #include "duckdb/planner/operator/logical_column_data_get.hpp"
 #include "duckdb/planner/operator/logical_comparison_join.hpp"
@@ -32,7 +35,7 @@
 #include "read.hpp"
 #include "simplest_ir.h"
 
-#define CONVERT_DUCKDB_TO_IR false
+#define CONVERT_DUCKDB_TO_IR true
 
 namespace duckdb {
 class DuckToIRConverter {
@@ -55,8 +58,11 @@ private:
 
 	SimplestExprType ConvertCompType(ExpressionType type);
 	SimplestVarType ConvertVarType(LogicalType type);
+	SimplestAggFnType ConvertAggFnType(std::string agg_fn_type);
 
 	std::vector<unique_ptr<SimplestExpr>> CollectQualVecExprs(const vector<unique_ptr<Expression>> &exprs);
+	unique_ptr<SimplestExpr> CollectScanFilter(const unique_ptr<TableFilter> &filter_cond,
+	                                           unique_ptr<SimplestAttr> var_attr);
 
 	Binder &binder;
 	ClientContext &context;

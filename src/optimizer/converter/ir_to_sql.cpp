@@ -62,14 +62,40 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 		D_ASSERT(!proj_op.target_list.empty());
 #endif
 		// `SELECT table_name.$target_list`
-		for (const auto &target : proj_op.target_list) {
-			auto table_name = table_names[target->GetTableIndex()];
-			std::string select_str = table_name + "." + target->GetColumnName();
-			auto find_select_str = agg_field.find(agg_field_key(target->GetTableIndex(), target->GetColumnIndex()));
-			if (find_select_str != agg_field.end()) {
-				select_str = find_select_str->second + "(" + select_str + ")";
+		for (size_t idx = 0; idx < proj_op.target_list.size(); idx++) {
+			auto &target = proj_op.target_list[idx];
+			auto target_table_index = target->GetTableIndex();
+			// for DuckDB with agg
+			if (table_names.find(target_table_index) == table_names.end()) {
+				auto &child_op = proj_op.children[0];
+				if (SimplestNodeType::AggregateNode == child_op->GetNodeType()) {
+					auto &agg_op = child_op->Cast<SimplestAggregate>();
+					if (target_table_index == agg_op.GetAggIndex()) {
+						std::string agg_fn_type = TranslateSimplestAggFnType(agg_op.agg_fns[idx].second);
+						auto table_name = table_names[agg_op.agg_fns[idx].first->GetTableIndex()];
+						std::string select_str = table_name + "." + agg_op.agg_fns[idx].first->GetColumnName();
+						select_str = agg_fn_type + "(" + select_str + ")";
+						select_field.emplace_back(select_str);
+					} else {
+						// todo
+						Printer::Print("TODO!");
+						D_ASSERT(false);
+					}
+				} else {
+					Printer::Print(
+					    StringUtil::Format("Do not support yet, child_op node type:  %s", child_op->GetNodeType()));
+					D_ASSERT(false);
+				}
+			} else {
+				// for the others
+				auto table_name = table_names[target_table_index];
+				std::string select_str = table_name + "." + target->GetColumnName();
+				auto find_select_str = agg_field.find(agg_field_key(target_table_index, target->GetColumnIndex()));
+				if (find_select_str != agg_field.end()) {
+					select_str = find_select_str->second + "(" + select_str + ")";
+				}
+				select_field.emplace_back(select_str);
 			}
-			select_field.emplace_back(select_str);
 		}
 		break;
 	}
@@ -180,6 +206,9 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 	case SimplestNodeType::ScanNode: {
 		auto &scan_op = op->Cast<SimplestScan>();
 		table_names.emplace(scan_op.GetTableIndex(), scan_op.GetTableName());
+		for (const auto &qual : scan_op.qual_vec) {
+			CollectScanFilter(qual);
+		}
 		break;
 	}
 	case SimplestNodeType::ChunkNode: {
@@ -188,6 +217,7 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 		break;
 	}
 	case SimplestNodeType::HashNode:
+	case SimplestNodeType::CrossProductNode:
 		break;
 	default:
 		Printer::Print(StringUtil::Format("Do not support yet, op->type:  %d", op->GetNodeType()));
@@ -217,5 +247,117 @@ std::string IRToSQLConverter::TranslateSimplestAggFnType(SimplestAggFnType agg_f
 	}
 
 	return agg_fn_type_str;
+}
+
+std::string IRToSQLConverter::CollectScanFilter(const unique_ptr<SimplestExpr> &qual_expr) {
+	std::string ret_str;
+	switch (qual_expr->GetNodeType()) {
+	case SimplestNodeType::VarConstComparisonNode: {
+		auto &var_const_comp = qual_expr->Cast<SimplestVarConstComparison>();
+		auto &var_attr = var_const_comp.attr;
+		auto table_name = table_names[var_attr->GetTableIndex()];
+		ret_str = table_name + "." + var_attr->GetColumnName();
+		std::string appendix_str = "";
+		switch (var_const_comp.GetSimplestExprType()) {
+		case SimplestExprType::LessThan:
+			ret_str += " < ";
+			break;
+		case SimplestExprType::LessEqual:
+			ret_str += " <= ";
+			break;
+		case SimplestExprType::GreaterThan:
+			ret_str += " > ";
+			break;
+		case SimplestExprType::GreaterEqual:
+			ret_str += " >= ";
+			break;
+		case SimplestExprType::TextLike:
+			ret_str += " LIKE '";
+			appendix_str = "'";
+			break;
+		case SimplestExprType::TEXT_Not_LIKE:
+			ret_str += " NOT LIKE '";
+			appendix_str = "'";
+			break;
+		default:
+			Printer::Print(StringUtil::Format("Do not support yet, var_const_comp->type:  %d",
+			                                  var_const_comp.GetSimplestExprType()));
+			D_ASSERT(false);
+		}
+		auto &const_attr = var_const_comp.const_var;
+		// todo: determine type
+		ret_str += const_attr->GetStringValue();
+		ret_str += appendix_str;
+		return ret_str;
+	}
+	case SimplestNodeType::LogicalExprNode: {
+		auto &logical_expr = qual_expr->Cast<SimplestLogicalExpr>();
+		std::string left_expr_str, right_expr_str;
+		if (SimplestLogicalOp::LogicalNot != logical_expr.GetLogicalOp()) {
+			auto &left_expr = logical_expr.left_expr;
+			left_expr_str = CollectScanFilter(left_expr);
+		}
+		auto &right_expr = logical_expr.right_expr;
+		right_expr_str = CollectScanFilter(right_expr);
+		ret_str = "(";
+		switch (logical_expr.GetLogicalOp()) {
+		case SimplestLogicalOp::InvalidLogicalOp:
+			Printer::Print("Invalid logical expr!");
+			D_ASSERT(false);
+			break;
+		case SimplestLogicalOp::LogicalAnd:
+			ret_str += left_expr_str;
+			ret_str += " AND ";
+			ret_str += right_expr_str;
+			ret_str += ")";
+			return ret_str;
+		case SimplestLogicalOp::LogicalOr:
+			ret_str += left_expr_str;
+			ret_str += " OR ";
+			ret_str += right_expr_str;
+			ret_str += ")";
+			return ret_str;
+		case SimplestLogicalOp::LogicalNot:
+			// todo
+			Printer::Print("Unimplemented LogicalNot yet!");
+			D_ASSERT(false);
+			break;
+		default:
+			Printer::Print(
+			    StringUtil::Format("Do not support yet, logical_expr->type:  %d", logical_expr.GetLogicalOp()));
+			D_ASSERT(false);
+			break;
+		}
+		break;
+	}
+	case SimplestNodeType::IsNullExprNode: {
+		auto &is_null_expr = qual_expr->Cast<SimplestIsNullExpr>();
+		auto &var_attr = is_null_expr.attr;
+		auto table_name = table_names[var_attr->GetTableIndex()];
+		ret_str = table_name + "." + var_attr->GetColumnName();
+		switch (is_null_expr.GetSimplestExprType()) {
+		case SimplestExprType::InvalidExprType:
+			Printer::Print("Invalid logical expr!");
+			D_ASSERT(false);
+			break;
+		case SimplestExprType::NullType:
+			ret_str += " IS NULL";
+			return ret_str;
+		case SimplestExprType::NonNullType:
+			ret_str += " IS NOT NULL";
+			return ret_str;
+		default:
+			Printer::Print(
+			    StringUtil::Format("Do not support yet, is_null_expr->type:  %d", is_null_expr.GetSimplestExprType()));
+			D_ASSERT(false);
+			break;
+		}
+		break;
+	}
+	default:
+		Printer::Print(StringUtil::Format("Do not support yet, qual_expr->type:  %d", qual_expr->GetNodeType()));
+		D_ASSERT(false);
+	}
+	return ret_str;
 }
 } // namespace duckdb

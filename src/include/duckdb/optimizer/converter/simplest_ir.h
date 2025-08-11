@@ -268,6 +268,10 @@ public:
 		return str;
 	}
 
+	bool operator==(const SimplestAttr &other) const {
+		return GetTableIndex() == other.GetTableIndex() && GetColumnIndex() == other.GetColumnIndex();
+	}
+
 private:
 	unsigned int table_index;
 	unsigned int column_index;
@@ -749,6 +753,10 @@ class SimplestAggregate : public SimplestStmt {
 public:
 	SimplestAggregate(unique_ptr<SimplestStmt> base_stmt, agg_fn_pair agg_fns)
 	    : SimplestStmt(std::move(base_stmt), AggregateNode), agg_fns(std::move(agg_fns)) {};
+	SimplestAggregate(unique_ptr<SimplestStmt> base_stmt, agg_fn_pair agg_fns, unsigned int agg_index,
+	                  unsigned int group_index)
+	    : SimplestStmt(std::move(base_stmt), AggregateNode), agg_fns(std::move(agg_fns)), agg_index(agg_index),
+	      group_index(group_index) {};
 	~SimplestAggregate() = default;
 
 	std::string Print(bool print = true) override {
@@ -792,7 +800,19 @@ public:
 		return str;
 	}
 
+	unsigned int GetAggIndex() {
+		return agg_index;
+	}
+	unsigned int GetGroupIndex() {
+		return group_index;
+	}
+
 	agg_fn_pair agg_fns;
+
+private:
+	//! these are only used for DuckDB
+	unsigned int agg_index;
+	unsigned int group_index;
 };
 
 class SimplestJoin : public SimplestStmt {

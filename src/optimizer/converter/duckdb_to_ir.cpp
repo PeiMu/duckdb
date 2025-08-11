@@ -67,8 +67,10 @@ unique_ptr<SimplestStmt> duckdb::DuckToIRConverter::ConstructSimplestStmt(
 
 	auto simplest_stmt = iterate_plan(duckdb_plan_pointer);
 
-	// debug
+#ifdef DEBUG
+	Printer::Print("constructed simplest stmt");
 	simplest_stmt->Print();
+#endif
 
 	return simplest_stmt;
 }
@@ -103,17 +105,43 @@ unique_ptr<SimplestAggregate> DuckToIRConverter::ConstructSimplestAggGroup(Logic
 	// todo: add target list
 	std::vector<unique_ptr<SimplestAttr>> target_list;
 
-	//	for (const auto &expr : proj_op.expressions) {
-	//		auto table_expr = GetConstTableExpr(expr);
-	//		auto simplest_target = make_uniq<SimplestAttr>(ConvertVarType(table_expr.return_type), table_expr.table_idx,
-	//		                                               table_expr.column_idx, table_expr.column_name);
-	//		target_list.emplace_back(std::move(simplest_target));
-	//	}
-	//	auto base_stmt =
-	//	    make_uniq<SimplestStmt>(std::move(children), std::move(target_list), SimplestNodeType::ProjectionNode);
-	//
-	//	std::vector<SimplestVarType> agg_types;
-	return unique_ptr<SimplestAggregate>();
+	// add table_expr of group by
+	for (const auto &group_expr : agg_group_op.groups) {
+		// todo
+	}
+
+	// set agg_index and group_index
+	unsigned int agg_index = agg_group_op.aggregate_index;
+	unsigned int group_index = agg_group_op.group_index;
+
+	agg_fn_pair agg_fns;
+
+	// add table_expr of aggregate op expression
+	for (const auto &agg_expr : agg_group_op.expressions) {
+#ifdef DEBUG
+		D_ASSERT(ExpressionType::BOUND_AGGREGATE == agg_expr->type);
+#endif
+		auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
+		std::string agg_fn_type = aggregate_expr.function.name;
+		unique_ptr<SimplestAttr> simplest_attr;
+		for (const auto &expr : aggregate_expr.children) {
+#ifdef DEBUG
+			D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
+#endif
+			auto &column_ref_expr = expr->Cast<BoundColumnRefExpression>();
+			simplest_attr = make_uniq<SimplestAttr>(ConvertVarType(column_ref_expr.return_type),
+			                                        column_ref_expr.binding.table_index,
+			                                        column_ref_expr.binding.column_index, column_ref_expr.alias);
+			agg_fns.emplace_back(std::make_pair(std::move(simplest_attr), ConvertAggFnType(agg_fn_type)));
+		}
+	}
+
+	auto base_stmt =
+	    make_uniq<SimplestStmt>(std::move(children), std::move(target_list), SimplestNodeType::AggregateNode);
+
+	auto simplest_aggregate =
+	    make_uniq<SimplestAggregate>(std::move(base_stmt), std::move(agg_fns), agg_index, group_index);
+	return simplest_aggregate;
 }
 
 unique_ptr<SimplestCrossProduct> DuckToIRConverter::ConstructSimplestCrossProduct(
@@ -204,14 +232,32 @@ unique_ptr<SimplestFilter> DuckToIRConverter::ConstructSimplestFilter(LogicalFil
 }
 
 unique_ptr<SimplestScan> DuckToIRConverter::ConstructSimplestScan(LogicalGet &get_op) {
-	// todo: add target list
+	auto table_index = get_op.table_index;
+
+	// add target list
 	std::vector<unique_ptr<SimplestAttr>> target_list;
-	// todo: add qual vec
+#ifdef DEBUG
+	get_op.names.size() == get_op.returned_types.size();
+#endif
+	for (size_t column_idx = 0; column_idx < get_op.names.size(); column_idx++) {
+		unique_ptr<SimplestAttr> simplest_attr = make_uniq<SimplestAttr>(
+		    ConvertVarType(get_op.returned_types[column_idx]), table_index, column_idx, get_op.names[column_idx]);
+		target_list.emplace_back(std::move(simplest_attr));
+	}
+
+	// add qual vec
 	std::vector<unique_ptr<SimplestExpr>> qual_vec;
+	for (const auto &filter : get_op.table_filters.filters) {
+		auto column_index = filter.first;
+		auto &filter_cond = filter.second;
+		auto simplest_var_attr = make_uniq<SimplestAttr>(ConvertVarType(get_op.returned_types[column_index]),
+		                                                 table_index, column_index, get_op.names[column_index]);
+		auto simplest_scan_filter_expr = CollectScanFilter(filter_cond, std::move(simplest_var_attr));
+		qual_vec.emplace_back(std::move(simplest_scan_filter_expr));
+	}
 
 	auto base_stmt = make_uniq<SimplestStmt>(std::move(target_list), std::move(qual_vec), SimplestNodeType::ScanNode);
 
-	auto table_index = get_op.table_index;
 	auto table_name = get_op.function.to_string(get_op.bind_data.get());
 	auto simplest_scan = make_uniq<SimplestScan>(std::move(base_stmt), table_index, table_name);
 	return simplest_scan;
@@ -298,6 +344,19 @@ SimplestVarType DuckToIRConverter::ConvertVarType(LogicalType type) {
 	}
 }
 
+SimplestAggFnType DuckToIRConverter::ConvertAggFnType(std::string agg_fn_type) {
+	if (agg_fn_type == "min")
+		return SimplestAggFnType::Min;
+	else if (agg_fn_type == "max")
+		return SimplestAggFnType::Max;
+	else if (agg_fn_type == "sum")
+		return SimplestAggFnType::Sum;
+	else if (agg_fn_type == "avg")
+		return SimplestAggFnType::Average;
+	else
+		return SimplestAggFnType::InvalidAggType;
+}
+
 std::vector<unique_ptr<SimplestExpr>>
 DuckToIRConverter::CollectQualVecExprs(const vector<unique_ptr<Expression>> &exprs) {
 	std::vector<unique_ptr<SimplestExpr>> qual_vec;
@@ -339,5 +398,56 @@ DuckToIRConverter::CollectQualVecExprs(const vector<unique_ptr<Expression>> &exp
 	}
 
 	return qual_vec;
+}
+
+unique_ptr<SimplestExpr> DuckToIRConverter::CollectScanFilter(const unique_ptr<TableFilter> &filter_cond,
+                                                              unique_ptr<SimplestAttr> var_attr) {
+	switch (filter_cond->filter_type) {
+	case TableFilterType::CONJUNCTION_AND: {
+		auto &conjunction_and = filter_cond->Cast<ConjunctionAndFilter>();
+#ifdef DEBUG
+		D_ASSERT(2 == conjunction_and.child_filters.size());
+#endif
+		auto left_filter = CollectScanFilter(conjunction_and.child_filters[0], make_uniq<SimplestAttr>(*var_attr));
+		auto right_filter = CollectScanFilter(conjunction_and.child_filters[1], make_uniq<SimplestAttr>(*var_attr));
+		auto simplest_conjunction_and = make_uniq<SimplestLogicalExpr>(SimplestLogicalOp::LogicalAnd,
+		                                                               std::move(left_filter), std::move(right_filter));
+		return unique_ptr_cast<SimplestLogicalExpr, SimplestExpr>(std::move(simplest_conjunction_and));
+	}
+	case TableFilterType::CONJUNCTION_OR: {
+		auto &conjunction_or = filter_cond->Cast<ConjunctionOrFilter>();
+#ifdef DEBUG
+		D_ASSERT(2 == conjunction_or.child_filters.size());
+#endif
+		auto left_filter = CollectScanFilter(conjunction_or.child_filters[0], make_uniq<SimplestAttr>(*var_attr));
+		auto right_filter = CollectScanFilter(conjunction_or.child_filters[1], make_uniq<SimplestAttr>(*var_attr));
+		auto simplest_conjunction_or = make_uniq<SimplestLogicalExpr>(SimplestLogicalOp::LogicalOr,
+		                                                              std::move(left_filter), std::move(right_filter));
+		return unique_ptr_cast<SimplestLogicalExpr, SimplestExpr>(std::move(simplest_conjunction_or));
+	}
+	case TableFilterType::CONSTANT_COMPARISON: {
+		auto &constant_filter = filter_cond->Cast<ConstantFilter>();
+		std::string constant_str = constant_filter.constant.ToString();
+		auto simplest_comp_type = ConvertCompType(constant_filter.comparison_type);
+		auto simplest_const_var = make_uniq<SimplestConstVar>(constant_str);
+		auto simplest_constant_comp = make_uniq<SimplestVarConstComparison>(
+		    simplest_comp_type, make_uniq<SimplestAttr>(*var_attr), std::move(simplest_const_var));
+		return unique_ptr_cast<SimplestVarConstComparison, SimplestExpr>(std::move(simplest_constant_comp));
+	}
+	case TableFilterType::IS_NOT_NULL: {
+		auto simplest_is_not_null =
+		    make_uniq<SimplestIsNullExpr>(SimplestExprType::NonNullType, make_uniq<SimplestAttr>(*var_attr));
+		return unique_ptr_cast<SimplestIsNullExpr, SimplestExpr>(std::move(simplest_is_not_null));
+	}
+	case TableFilterType::IS_NULL: {
+		auto simplest_is_null =
+		    make_uniq<SimplestIsNullExpr>(SimplestExprType::NullType, make_uniq<SimplestAttr>(*var_attr));
+		return unique_ptr_cast<SimplestIsNullExpr, SimplestExpr>(std::move(simplest_is_null));
+	}
+	case TableFilterType::STRUCT_EXTRACT: {
+		Printer::Print("Do not support yet: TableFilterType::STRUCT_EXTRACT");
+		D_ASSERT(false);
+	}
+	}
 }
 } // namespace duckdb
