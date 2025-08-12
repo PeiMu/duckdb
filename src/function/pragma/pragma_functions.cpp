@@ -2,6 +2,7 @@
 
 #include "duckdb/common/enums/output_type.hpp"
 #include "duckdb/common/operator/cast_operators.hpp"
+#include "duckdb/function/function_set.hpp"
 #include "duckdb/main/client_context.hpp"
 #include "duckdb/main/database.hpp"
 #include "duckdb/main/query_profiler.hpp"
@@ -10,7 +11,6 @@
 #include "duckdb/planner/expression_binder.hpp"
 #include "duckdb/storage/buffer_manager.hpp"
 #include "duckdb/storage/storage_manager.hpp"
-#include "duckdb/function/function_set.hpp"
 
 #include <cctype>
 
@@ -157,6 +157,30 @@ static void PragmaWholePlanManualExplainAnalyze(ClientContext &context, const Fu
 	ClientConfig::GetConfig(context).whole_plan_manual_explain_analyze = true;
 }
 
+static void PragmaEnableConvertIRToDuckDB(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).convert_ir_to_duckdb = true;
+}
+
+static void PragmaDisableConvertIRToDuckDB(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).convert_ir_to_duckdb = false;
+}
+
+static void PragmaEnableConvertDuckDBToIR(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).convert_duckdb_to_ir = true;
+}
+
+static void PragmaDisableConvertDuckDBToIR(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).convert_duckdb_to_ir = false;
+}
+
+static void PragmaEnableConvertIRToSQL(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).convert_ir_to_sql = true;
+}
+
+static void PragmaDisableConvertIRToSQL(ClientContext &context, const FunctionParameters &parameters) {
+	ClientConfig::GetConfig(context).convert_ir_to_sql = false;
+}
+
 void PragmaFunctions::RegisterFunction(BuiltinFunctions &set) {
 	RegisterEnableProfiling(set);
 
@@ -205,7 +229,15 @@ void PragmaFunctions::RegisterFunction(BuiltinFunctions &set) {
 	set.AddFunction(PragmaFunction::PragmaStatement("merge_back_plan", PragmaMergeBackPlan));
 	set.AddFunction(PragmaFunction::PragmaStatement("specify_estimated_card", PragmaSpecifyEstimatedCard));
 	set.AddFunction(PragmaFunction::PragmaStatement("manual_explain_analyze", PragmaManualExplainAnalyze));
-	set.AddFunction(PragmaFunction::PragmaStatement("whole_plan_manual_explain_analyze", PragmaWholePlanManualExplainAnalyze));
+	set.AddFunction(
+	    PragmaFunction::PragmaStatement("whole_plan_manual_explain_analyze", PragmaWholePlanManualExplainAnalyze));
+
+	set.AddFunction(PragmaFunction::PragmaStatement("convert_ir_to_duckdb", PragmaEnableConvertIRToDuckDB));
+	set.AddFunction(PragmaFunction::PragmaStatement("disable_convert_ir_to_duckdb", PragmaDisableConvertIRToDuckDB));
+	set.AddFunction(PragmaFunction::PragmaStatement("convert_duckdb_to_ir", PragmaEnableConvertDuckDBToIR));
+	set.AddFunction(PragmaFunction::PragmaStatement("disable_convert_duckdb_to_ir", PragmaDisableConvertDuckDBToIR));
+	set.AddFunction(PragmaFunction::PragmaStatement("convert_ir_to_sql", PragmaEnableConvertIRToSQL));
+	set.AddFunction(PragmaFunction::PragmaStatement("disable_convert_ir_to_sql", PragmaDisableConvertIRToSQL));
 }
 
 } // namespace duckdb

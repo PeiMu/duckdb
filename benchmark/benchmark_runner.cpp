@@ -287,6 +287,13 @@ void parse_arguments(const int arg_counter, char const *const *arg_values) {
 			instance.manual_explain_analyze = true;
 		} else if (arg == "--whole_plan_manual_explain_analyze") {
 			instance.whole_plan_manual_explain_analyze = true;
+		} else if (arg == "--enable_convert_ir_to_duckdb") {
+			// fixme: check by true or false
+			instance.convert_ir_to_duckdb = true;
+		} else if (arg == "--enable_convert_duckdb_to_ir") {
+			instance.convert_duckdb_to_ir = true;
+		} else if (arg == "--enable_convert_ir_to_sql") {
+			instance.convert_ir_to_sql = true;
 		} else if (arg == "--root-dir") {
 			// We've already handled this, skip it
 			arg_index++;

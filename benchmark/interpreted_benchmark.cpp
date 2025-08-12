@@ -2,12 +2,12 @@
 
 #include "benchmark_runner.hpp"
 #include "duckdb.hpp"
+#include "duckdb/common/helper.hpp"
 #include "duckdb/common/string_util.hpp"
 #include "duckdb/main/client_context.hpp"
 #include "duckdb/main/extension_helper.hpp"
 #include "duckdb/main/query_profiler.hpp"
 #include "test_helpers.hpp"
-#include "duckdb/common/helper.hpp"
 
 #include <fstream>
 #include <sstream>
@@ -69,6 +69,31 @@ struct InterpretedBenchmarkState : public BenchmarkState {
 		}
 		if (instance.whole_plan_manual_explain_analyze) {
 			res = con.Query("PRAGMA whole_plan_manual_explain_analyze");
+			D_ASSERT(!res->HasError());
+		}
+
+		if (instance.enable_convert_ir_to_duckdb) {
+			res = con.Query("PRAGMA enable_convert_ir_to_duckdb");
+			D_ASSERT(!res->HasError());
+		}
+		if (instance.disable_convert_ir_to_duckdb) {
+			res = con.Query("PRAGMA disable_convert_ir_to_duckdb");
+			D_ASSERT(!res->HasError());
+		}
+		if (instance.enable_convert_duckdb_to_ir) {
+			res = con.Query("PRAGMA enable_convert_duckdb_to_ir");
+			D_ASSERT(!res->HasError());
+		}
+		if (instance.disable_convert_duckdb_to_ir) {
+			res = con.Query("PRAGMA disable_convert_duckdb_to_ir");
+			D_ASSERT(!res->HasError());
+		}
+		if (instance.enable_convert_ir_to_sql) {
+			res = con.Query("PRAGMA enable_convert_ir_to_sql");
+			D_ASSERT(!res->HasError());
+		}
+		if (instance.disable_convert_ir_to_sql) {
+			res = con.Query("PRAGMA disable_convert_ir_to_sql");
 			D_ASSERT(!res->HasError());
 		}
 	}

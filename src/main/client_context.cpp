@@ -458,7 +458,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 
 	if (config.enable_optimizer && plan->RequireOptimizer() && StatementType::TRANSACTION_STATEMENT != statement_type &&
-	    StatementType::PRAGMA_STATEMENT != statement_type) {
+	    StatementType::PRAGMA_STATEMENT != statement_type && StatementType::DROP_STATEMENT != statement_type) {
 		profiler.StartPhase("optimizer");
 		Optimizer optimizer(*planner.binder, *this);
 		plan = optimizer.PreOptimize(std::move(plan));
@@ -501,12 +501,12 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		unique_ptr<LogicalOperator> whole_plan;
 #endif
 
-#if CONVERT_DUCKDB_TO_IR
+		// ENABLE_CONVERT_DUCKDB_TO_IR
 		std::unordered_map<std::string, unique_ptr<ColumnDataCollection>> subquery_results;
-		unsigned int subquery_index = 0;
+		unsigned int subquery_index = 1;
 		// <temp%, subquery_dd_index>
 		std::unordered_map<unsigned int, std::string> intermediate_table_map;
-#endif
+		unique_ptr<SimplestStmt> simplest_ir;
 
 		auto merge_child = [](LogicalOperator *subquery_pointer, unique_ptr<LogicalOperator> child_node) {
 			while (!subquery_pointer->children.empty()) {
@@ -522,7 +522,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			return false;
 		};
 
-		while (config.enable_dbshaker_query_split && !CONVERT_IR_TO_DUCKDB) {
+		while (config.enable_dbshaker_query_split && !config.convert_ir_to_duckdb) {
 			if (config.enable_dbshaker_split_jop) {
 #if ALWAYS_SPLIT
 				needToSplit = true;
@@ -658,28 +658,28 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			}
 #endif
 
-#if CONVERT_DUCKDB_TO_IR
-			// export the selected sub-plan, aka the `sub_plan`
-#ifdef ENABLE_DEBUG_PRINT
-			Printer::Print("Exported sub_plan");
-			sub_plan->Print();
+			if (config.convert_duckdb_to_ir) {
+				// export the selected sub-plan, aka the `sub_plan`
+#if ENABLE_DEBUG_PRINT
+				Printer::Print("Exported sub_plan");
+				sub_plan->Print();
 #endif
 
-			Planner::VerifyPlan(optimizer.context, sub_plan);
-			DuckToIRConverter duck_to_ir_converter(*planner.binder, *this);
+				Planner::VerifyPlan(optimizer.context, sub_plan);
+				DuckToIRConverter duck_to_ir_converter(*planner.binder, *this);
 
-			auto simplest_ir = duck_to_ir_converter.ConstructSimplestStmt(sub_plan.get(), intermediate_table_map);
+				simplest_ir = duck_to_ir_converter.ConstructSimplestStmt(sub_plan.get(), intermediate_table_map);
 
-#if CONVERT_IR_TO_SQL
-			IRToSQLConverter ir_to_sql_converter;
-			std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(simplest_ir);
-			std::string sql_file_name =
-			    "/home/pei/Project/duckdb/measure/dd_sub_plan_" + std::to_string(subquery_index) + ".sql";
-			std::ofstream sql_file(sql_file_name);
-			sql_file << sql_code;
-			sql_file.close();
-#endif
-#endif
+				if (config.convert_ir_to_sql) {
+					IRToSQLConverter ir_to_sql_converter;
+					std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(simplest_ir);
+					std::string sql_file_name =
+					    "/home/pei/Project/duckdb/measure/dd_sub_plan_" + std::to_string(subquery_index) + ".sql";
+					std::ofstream sql_file(sql_file_name);
+					sql_file << sql_code;
+					sql_file.close();
+				}
+			}
 
 			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
 #if TIME_BREAK_DOWN
@@ -774,35 +774,32 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			auto data_chunk_index = planner.binder->GenerateTableIndex();
 			subquery_preparer.SetNewTableIndex(data_chunk_index);
 
-#if CONVERT_DUCKDB_TO_IR
-			subquery_index++;
-			std::string intermediate_table_name = "temp" + std::to_string(subquery_index);
-			intermediate_table_map[data_chunk_index] = intermediate_table_name;
-			// create a table from data chunk
-			auto &default_entry = client_data->catalog_search_path->GetDefault();
-			auto current_catalog = default_entry.catalog;
-			auto current_schema = default_entry.schema;
+			if (config.convert_duckdb_to_ir) {
+				std::string intermediate_table_name = "temp" + std::to_string(subquery_index);
+				subquery_index++;
+				intermediate_table_map[data_chunk_index] = intermediate_table_name;
+				// create a table from data chunk
+				auto &default_entry = client_data->catalog_search_path->GetDefault();
+				auto current_catalog = default_entry.catalog;
+				auto current_schema = default_entry.schema;
 
-			auto &catalog = Catalog::GetCatalog(*this, current_catalog);
-			auto &types = subquery_result->Types();
-			auto info = make_uniq<CreateTableInfo>(current_catalog, current_schema, intermediate_table_name);
-			info->temporary = false;
-			info->on_conflict = OnCreateConflict::ERROR_ON_CONFLICT;
+				auto &catalog = Catalog::GetCatalog(*this, current_catalog);
+				auto &types = subquery_result->Types();
+				auto info = make_uniq<CreateTableInfo>(current_catalog, current_schema, intermediate_table_name);
+				info->temporary = false;
+				info->on_conflict = OnCreateConflict::ERROR_ON_CONFLICT;
 
-			// add column names and types
-			auto &simplest_proj = simplest_ir->Cast<SimplestProjection>();
-			for (idx_t i = 0; i < simplest_proj.target_list.size(); i++) {
-				auto column_name = simplest_proj.target_list[i]->GetColumnName();
-				info->columns.AddColumn(ColumnDefinition(column_name, types[i]));
+				// add column names and types
+				auto &simplest_proj = simplest_ir->Cast<SimplestProjection>();
+				for (idx_t i = 0; i < simplest_proj.target_list.size(); i++) {
+					auto column_name = simplest_proj.target_list[i]->GetColumnName();
+					info->columns.AddColumn(ColumnDefinition(column_name, types[i]));
+				}
+				auto created_table = catalog.CreateTable(*this, std::move(info));
+				auto &table_entry = created_table->Cast<TableCatalogEntry>();
+				table_entry.GetStorage().LocalAppend(table_entry, *this, *subquery_result);
+				result->catalog_version = catalog.GetCatalogVersion();
 			}
-//			for (idx_t i = 0; i < types.size(); i++) {
-//				info->columns.AddColumn(ColumnDefinition("col" + to_string(i), types[i]));
-//			}
-			auto created_table = catalog.CreateTable(*this, std::move(info));
-			auto &table_entry = created_table->Cast<TableCatalogEntry>();
-			table_entry.GetStorage().LocalAppend(table_entry, *this, *subquery_result);
-			result->catalog_version = catalog.GetCatalogVersion();
-#endif
 
 			previous_result_card =
 			    subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result), estimated_card);
@@ -951,29 +948,30 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			timer = chrono_tic();
 #endif
 
-#if CONVERT_DUCKDB_TO_IR
-		// export the final plan, aka the `plan`
-#ifdef ENABLE_DEBUG_PRINT
-		Printer::Print("Exported final plan");
-		plan->Print();
+		if (config.convert_duckdb_to_ir) {
+			// export the final plan, aka the `plan`
+#if ENABLE_DEBUG_PRINT
+			Printer::Print("Exported final plan");
+			plan->Print();
 #endif
 
-		Planner::VerifyPlan(optimizer.context, plan);
-		DuckToIRConverter duck_to_ir_converter(*planner.binder, *this);
+			Planner::VerifyPlan(optimizer.context, plan);
+			DuckToIRConverter duck_to_ir_converter(*planner.binder, *this);
 
-		auto simplest_ir = duck_to_ir_converter.ConstructSimplestStmt(plan.get(), intermediate_table_map);
+			simplest_ir = duck_to_ir_converter.ConstructSimplestStmt(plan.get(), intermediate_table_map);
 
-#if CONVERT_IR_TO_SQL
-		IRToSQLConverter ir_to_sql_converter;
-		std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(simplest_ir);
-		std::string sql_file_name =
-		    "/home/pei/Project/duckdb/measure/dd_sub_plan_" + std::to_string(subquery_index) + ".sql";
-		std::ofstream sql_file(sql_file_name);
-		sql_file << sql_code;
-		sql_file.close();
-#endif
-#endif
-		if (!CONVERT_IR_TO_DUCKDB)
+			if (config.convert_ir_to_sql) {
+				IRToSQLConverter ir_to_sql_converter;
+				std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(simplest_ir);
+				std::string sql_file_name =
+				    "/home/pei/Project/duckdb/measure/dd_sub_plan_" + std::to_string(subquery_index) + ".sql";
+				std::ofstream sql_file(sql_file_name);
+				sql_file << sql_code;
+				sql_file.close();
+			}
+		}
+
+		if (!config.convert_ir_to_duckdb)
 			plan = optimizer.PostOptimize(std::move(plan));
 		profiler.EndPhase();
 #if TIME_BREAK_DOWN
@@ -1017,10 +1015,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 	}
 
-	if (CONVERT_IR_TO_DUCKDB &&
+	if (config.convert_ir_to_duckdb &&
 	    (LogicalOperatorType::LOGICAL_PROJECTION == plan->type || LogicalOperatorType::LOGICAL_ORDER_BY == plan->type ||
 	     LogicalOperatorType::LOGICAL_LIMIT == plan->type)) {
-#ifdef ENABLE_DEBUG_PRINT
+#if ENABLE_DEBUG_PRINT
 		Printer::Print("original duckdb plan after pre-optimization");
 		plan->Print();
 #endif
@@ -1081,7 +1079,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 
 		std::unordered_map<std::string, unique_ptr<ColumnDataCollection>> subquery_results;
-		unsigned int subquery_index = 0;
+		unsigned int subquery_index = 1;
 		// <temp%, subquery_dd_index>
 		std::unordered_map<std::string, unsigned int> temp_table_map;
 		PlanReader plan_reader;
@@ -1096,18 +1094,18 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			postgres_stmt = plan_reader.GenerateProjHead(std::move(postgres_stmt), i);
 			// add table/column name from plan_reader.table_col_names
 			ir_to_duck_converter.AddTableColumnName(postgres_stmt, plan_reader.table_col_names);
-#ifdef ENABLE_DEBUG_PRINT
+#if ENABLE_DEBUG_PRINT
 			postgres_stmt->Print();
 #endif
-#if CONVERT_IR_TO_SQL
-			IRToSQLConverter ir_to_sql_converter;
-			std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(postgres_stmt);
-			std::string sql_file_name =
-			    "/home/pei/Project/duckdb/measure/pg_sub_plan_" + std::to_string(subquery_index) + ".sql";
-			std::ofstream sql_file(sql_file_name);
-			sql_file << sql_code;
-			sql_file.close();
-#endif
+			if (config.convert_ir_to_sql) {
+				IRToSQLConverter ir_to_sql_converter;
+				std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(postgres_stmt);
+				std::string sql_file_name =
+				    "/home/pei/Project/duckdb/measure/pg_sub_plan_" + std::to_string(subquery_index) + ".sql";
+				std::ofstream sql_file(sql_file_name);
+				sql_file << sql_code;
+				sql_file.close();
+			}
 			auto postgres_plan_pointer = postgres_stmt.get();
 
 			// start from JoinNode
@@ -1133,7 +1131,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				// 1. generate proj head based on the `target_list`
 				unique_ptr<LogicalOperator> new_sub_plan = ir_to_duck_converter.GenerateProjHead(
 				    plan, std::move(new_duckdb_plan), postgres_stmt, pg_duckdb_table_idx);
-#ifdef ENABLE_DEBUG_PRINT
+#if ENABLE_DEBUG_PRINT
 				Printer::Print("new duckdb subquery plan");
 				new_sub_plan->Print();
 #endif
@@ -1169,8 +1167,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				duckdb::vector<Value> bound_values;
 				auto subquery_result = prepared_stmt->ExecuteRow(lock, bound_values, false);
 				// from QuerySplit of Postgres
-				subquery_index++;
 				std::string new_temp_table_name = "temp" + std::to_string(subquery_index);
+				subquery_index++;
 				temp_table_map[new_temp_table_name] = planner.binder->GenerateTableIndex();
 				subquery_results[new_temp_table_name] = std::move(subquery_result);
 			} else {
@@ -1204,7 +1202,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		D_ASSERT(expr_vec.empty());
 #endif
 
-#ifdef ENABLE_DEBUG_PRINT
+#if ENABLE_DEBUG_PRINT
 		Printer::Print("new duckdb plan");
 		plan->Print();
 #endif

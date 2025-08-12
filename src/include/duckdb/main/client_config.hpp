@@ -12,8 +12,8 @@
 #include "duckdb/common/common.hpp"
 #include "duckdb/common/enums/output_type.hpp"
 #include "duckdb/common/enums/profiler_format.hpp"
-#include "duckdb/common/types/value.hpp"
 #include "duckdb/common/progress_bar/progress_bar.hpp"
+#include "duckdb/common/types/value.hpp"
 
 namespace duckdb {
 class ClientContext;
@@ -128,9 +128,37 @@ struct ClientConfig {
 	bool enable_dbshaker_split_jop = false;
 #endif
 
-	//! blow is unused yet
+#if ENABLE_MERGE_BACK_PLAN
+	bool merge_back_plan = true;
+#else
 	bool merge_back_plan = false;
+#endif
+
+#if ENABLE_SPECIFY_EST_STAT
+	bool specify_estimated_card = true;
+#else
 	bool specify_estimated_card = false;
+#endif
+
+#if ENABLE_CONVERT_IR_TO_DUCKDB
+	bool convert_ir_to_duckdb = true;
+#else
+	bool convert_ir_to_duckdb = false;
+#endif
+
+#if ENABLE_CONVERT_DUCKDB_TO_IR
+	bool convert_duckdb_to_ir = true;
+#else
+	bool convert_duckdb_to_ir = false;
+#endif
+
+#if ENABLE_CONVERT_IR_TO_SQL
+	bool convert_ir_to_sql = true;
+#else
+	bool convert_ir_to_sql = false;
+#endif
+
+	//! blow is unused yet
 	bool manual_explain_analyze = false;
 	bool whole_plan_manual_explain_analyze = false;
 

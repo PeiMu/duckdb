@@ -58,6 +58,9 @@ public:
 	bool specify_estimated_card = false;
 	bool manual_explain_analyze = false;
 	bool whole_plan_manual_explain_analyze = false;
+	bool convert_ir_to_duckdb = false;
+	bool convert_duckdb_to_ir = false;
+	bool convert_ir_to_sql = false;
 
 	uint32_t nruns = 5;
 };

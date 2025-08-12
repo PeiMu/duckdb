@@ -10,8 +10,6 @@
 
 #include "simplest_ir.h"
 
-#define CONVERT_IR_TO_SQL true
-
 namespace duckdb {
 class IRToSQLConverter {
 public:

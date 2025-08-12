@@ -35,8 +35,6 @@
 #include "read.hpp"
 #include "simplest_ir.h"
 
-#define CONVERT_DUCKDB_TO_IR false
-
 namespace duckdb {
 class DuckToIRConverter {
 public:
