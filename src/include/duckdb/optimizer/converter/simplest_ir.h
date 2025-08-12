@@ -148,14 +148,18 @@ public:
 	    : SimplestVar(SimplestVarType::StringVar, true, ConstVarNode), str_value(str_value) {};
 	SimplestConstVar(std::vector<std::string> str_vec_value)
 	    : SimplestVar(SimplestVarType::StringVarArr, true, ConstVarNode), str_vec_value(str_vec_value) {};
+
 	SimplestConstVar(const SimplestConstVar &other)
-	    : SimplestVar(other.GetType(), true, ConstVarNode), int_value(other.int_value), float_value(other.float_value),
-	      str_value(other.str_value) {};
+	    : SimplestVar(other.GetType(), true, ConstVarNode), bool_value(other.bool_value), int_value(other.int_value),
+	      float_value(other.float_value), str_value(other.str_value) {};
 	SimplestConstVar(unique_ptr<SimplestConstVar> other)
-	    : SimplestVar(other->GetType(), true, ConstVarNode), int_value(other->int_value),
+	    : SimplestVar(other->GetType(), true, ConstVarNode), bool_value(other->bool_value), int_value(other->int_value),
 	      float_value(other->float_value), str_value(other->str_value) {};
 	~SimplestConstVar() = default;
 
+	bool GetBoolValue() const {
+		return bool_value;
+	}
 	int GetIntValue() const {
 		return int_value;
 	}

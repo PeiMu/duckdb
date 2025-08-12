@@ -31,8 +31,9 @@ std::string IRToSQLConverter::LogicalPlanToSQL(const unique_ptr<SimplestStmt> &p
 		filter += " AND ";
 		sql_code += filter;
 	}
-	if (!filter_field.empty())
+	if (!filter_field.empty() && join_field.empty())
 		sql_code.erase(sql_code.size() - 5);
+
 	for (auto join : join_field) {
 		join += " AND ";
 		sql_code += join;
@@ -206,8 +207,10 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 	case SimplestNodeType::ScanNode: {
 		auto &scan_op = op->Cast<SimplestScan>();
 		table_names.emplace(scan_op.GetTableIndex(), scan_op.GetTableName());
+		std::string filter_str;
 		for (const auto &qual : scan_op.qual_vec) {
-			CollectScanFilter(qual);
+			filter_str = CollectScanFilter(qual);
+			filter_field.emplace_back(filter_str);
 		}
 		break;
 	}
@@ -257,8 +260,10 @@ std::string IRToSQLConverter::CollectScanFilter(const unique_ptr<SimplestExpr> &
 		auto &var_attr = var_const_comp.attr;
 		auto table_name = table_names[var_attr->GetTableIndex()];
 		ret_str = table_name + "." + var_attr->GetColumnName();
-		std::string appendix_str = "";
 		switch (var_const_comp.GetSimplestExprType()) {
+		case SimplestExprType::Equal:
+			ret_str += " IN ";
+			break;
 		case SimplestExprType::LessThan:
 			ret_str += " < ";
 			break;
@@ -272,12 +277,10 @@ std::string IRToSQLConverter::CollectScanFilter(const unique_ptr<SimplestExpr> &
 			ret_str += " >= ";
 			break;
 		case SimplestExprType::TextLike:
-			ret_str += " LIKE '";
-			appendix_str = "'";
+			ret_str += " LIKE ";
 			break;
 		case SimplestExprType::TEXT_Not_LIKE:
-			ret_str += " NOT LIKE '";
-			appendix_str = "'";
+			ret_str += " NOT LIKE ";
 			break;
 		default:
 			Printer::Print(StringUtil::Format("Do not support yet, var_const_comp->type:  %d",
@@ -285,9 +288,41 @@ std::string IRToSQLConverter::CollectScanFilter(const unique_ptr<SimplestExpr> &
 			D_ASSERT(false);
 		}
 		auto &const_attr = var_const_comp.const_var;
-		// todo: determine type
-		ret_str += const_attr->GetStringValue();
-		ret_str += appendix_str;
+		std::string const_attr_str;
+		switch (const_attr->GetType()) {
+		// InvalidVarType = 0, BoolVar, IntVar, FloatVar, StringVar, StringVarArr
+		case SimplestVarType::InvalidVarType:
+			Printer::Print("Invalid const_attr type!");
+			D_ASSERT(false);
+			break;
+		case SimplestVarType::BoolVar:
+			const_attr_str = std::to_string(const_attr->GetBoolValue());
+			break;
+		case SimplestVarType::IntVar:
+			const_attr_str = std::to_string(const_attr->GetIntValue());
+			break;
+		case SimplestVarType::FloatVar:
+			const_attr_str = std::to_string(const_attr->GetFloatValue());
+			break;
+		case SimplestVarType::StringVar:
+			const_attr_str = "'";
+			const_attr_str += const_attr->GetStringValue();
+			const_attr_str += "'";
+			break;
+		case SimplestVarType::StringVarArr: {
+			const_attr_str = "(";
+			auto string_var_arr = const_attr->GetStringVecValue();
+			for (const auto &str_var : string_var_arr) {
+				const_attr_str += "'";
+				const_attr_str += str_var;
+				const_attr_str += "', ";
+			}
+			const_attr_str.erase(const_attr_str.size() - 2);
+			const_attr_str += ")";
+			break;
+		}
+		}
+		ret_str += const_attr_str;
 		return ret_str;
 	}
 	case SimplestNodeType::LogicalExprNode: {
