@@ -10,9 +10,9 @@ log_name=duckdb_job_result.txt
 rm -rf ${log_name}
 rm -rf convert_job_sql/${log_name}
 
-## compile
-#echo "query_split with join_order_optimization after query_split" 2>&1|tee -a compile.log
-#cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWRITE=1 ENABLE_CONVERT_DUCKDB_TO_IR=1 ENABLE_CONVERT_IR_TO_SQL=1 VERBOSE=1 make >> compile.log 2>&1 && cd measure
+# compile
+echo "query_split with join_order_optimization after query_split" 2>&1|tee -a compile.log
+cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWRITE=1 ENABLE_CONVERT_DUCKDB_TO_IR=1 ENABLE_CONVERT_IR_TO_SQL=1 VERBOSE=1 make >> compile.log 2>&1 && cd measure
 
 
 #duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/6d.sql" imdb.db

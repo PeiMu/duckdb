@@ -188,16 +188,24 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 				auto &left_var_attr = var_comp.left_attr;
 				auto table_name = table_names[left_var_attr->GetTableIndex()];
 				auto filter_str = table_name + "." + left_var_attr->GetColumnName();
-				filter_str += " IN ";
-				filter_str += "(";
+
 				auto &right_var_attr = var_comp.right_attr;
 				auto chunk_contents_str = chunk_contents[right_var_attr->GetTableIndex()];
-				for (const auto &content : chunk_contents_str) {
-					std::string content_str = "'" + content + "', ";
-					filter_str += content_str;
+				if (chunk_contents_str.size() > 1) {
+					filter_str += " IN ";
+					filter_str += "(";
+					for (const auto &content : chunk_contents_str) {
+						std::string content_str = "'" + content + "', ";
+						filter_str += content_str;
+					}
+					filter_str.erase(filter_str.size() - 2);
+					filter_str += ")";
+				} else {
+					filter_str += " = '";
+					filter_str += chunk_contents_str[0];
+					filter_str += "'";
 				}
-				filter_str.erase(filter_str.size() - 2);
-				filter_str += ")";
+
 				filter_field.emplace_back(filter_str);
 			}
 			break;
@@ -264,9 +272,11 @@ std::string IRToSQLConverter::CollectScanFilter(const unique_ptr<SimplestExpr> &
 		auto &var_attr = var_const_comp.attr;
 		auto table_name = table_names[var_attr->GetTableIndex()];
 		ret_str = table_name + "." + var_attr->GetColumnName();
+		auto &const_attr = var_const_comp.const_var;
+
 		switch (var_const_comp.GetSimplestExprType()) {
 		case SimplestExprType::Equal:
-			ret_str += " IN ";
+			ret_str += SimplestVarType::StringVarArr == const_attr->GetType() ? " IN " : " = ";
 			break;
 		case SimplestExprType::LessThan:
 			ret_str += " < ";
@@ -291,7 +301,7 @@ std::string IRToSQLConverter::CollectScanFilter(const unique_ptr<SimplestExpr> &
 			                                  var_const_comp.GetSimplestExprType()));
 			D_ASSERT(false);
 		}
-		auto &const_attr = var_const_comp.const_var;
+
 		std::string const_attr_str;
 		switch (const_attr->GetType()) {
 		// InvalidVarType = 0, BoolVar, IntVar, FloatVar, StringVar, StringVarArr
