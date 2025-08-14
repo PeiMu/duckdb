@@ -12,6 +12,7 @@
 #include "duckdb/common/printer.hpp"
 #include "duckdb/common/types/column/column_data_collection.hpp"
 #include "duckdb/optimizer/query_split/split_algorithm.hpp"
+#include "duckdb/parser/expression/case_expression.hpp"
 #include "duckdb/planner/binder.hpp"
 #include "duckdb/planner/bound_result_modifier.hpp"
 #include "duckdb/planner/expression/bound_aggregate_expression.hpp"
@@ -24,6 +25,7 @@
 #include "duckdb/planner/expression/bound_operator_expression.hpp"
 #include "duckdb/planner/filter/conjunction_filter.hpp"
 #include "duckdb/planner/filter/constant_filter.hpp"
+#include "duckdb/planner/filter/struct_filter.hpp"
 #include "duckdb/planner/operator/logical_aggregate.hpp"
 #include "duckdb/planner/operator/logical_column_data_get.hpp"
 #include "duckdb/planner/operator/logical_comparison_join.hpp"
@@ -57,6 +59,7 @@ private:
 	SimplestExprType ConvertCompType(ExpressionType type);
 	SimplestVarType ConvertVarType(LogicalType type);
 	SimplestAggFnType ConvertAggFnType(std::string agg_fn_type);
+	unique_ptr<SimplestExpr> ConvertExpr(const unique_ptr<Expression> &expr);
 
 	std::vector<unique_ptr<SimplestExpr>> CollectQualVecExprs(const vector<unique_ptr<Expression>> &exprs);
 	unique_ptr<SimplestExpr> CollectScanFilter(const unique_ptr<TableFilter> &filter_cond,

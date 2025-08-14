@@ -322,6 +322,9 @@ SimplestExprType DuckToIRConverter::ConvertCompType(ExpressionType type) {
 		return SimplestExprType::TextLike;
 	case ExpressionType::COMPARE_NOT_IN:
 		return SimplestExprType::TEXT_Not_LIKE;
+	case ExpressionType::CONJUNCTION_AND:
+	case ExpressionType::CONJUNCTION_OR:
+		return SimplestExprType::LogicalOp;
 	default:
 		Printer::Print("Invalid comparison type!");
 		return SimplestExprType::InvalidExprType;
@@ -357,6 +360,9 @@ SimplestAggFnType DuckToIRConverter::ConvertAggFnType(std::string agg_fn_type) {
 		return SimplestAggFnType::InvalidAggType;
 }
 
+unique_ptr<SimplestExpr> DuckToIRConverter::ConvertExpr(const unique_ptr<Expression> &expr) {
+}
+
 std::vector<unique_ptr<SimplestExpr>>
 DuckToIRConverter::CollectQualVecExprs(const vector<unique_ptr<Expression>> &exprs) {
 	std::vector<unique_ptr<SimplestExpr>> qual_vec;
@@ -365,21 +371,78 @@ DuckToIRConverter::CollectQualVecExprs(const vector<unique_ptr<Expression>> &exp
 		switch (expr->type) {
 		case ExpressionType::BOUND_FUNCTION: {
 			auto &bound_func = expr->Cast<BoundFunctionExpression>();
-			// todo: determine the simplest_expr_type
-			auto simplest_expr_type = SimplestExprType::TextLike;
-			auto &left_expr = bound_func.children[0];
-			TableExpr left_table_expr = GetConstTableExpr(left_expr);
-			auto left_simplest_attr =
-			    make_uniq<SimplestAttr>(ConvertVarType(left_table_expr.return_type), left_table_expr.table_idx,
-			                            left_table_expr.column_idx, left_table_expr.column_name);
-			auto &right_expr = bound_func.children[1]->Cast<BoundConstantExpression>();
-			// todo: determine the type
-			auto right_simplest_attr = make_uniq<SimplestConstVar>(right_expr.value.ToString());
-			auto simplest_var_const_comp = make_uniq<SimplestVarConstComparison>(
-			    simplest_expr_type, std::move(left_simplest_attr), std::move(right_simplest_attr));
+			if (bound_func.function.name == "~~") {
+				auto simplest_expr_type = SimplestExprType::TextLike;
+				auto &left_expr = bound_func.children[0];
+				TableExpr left_table_expr = GetConstTableExpr(left_expr);
+				auto left_simplest_attr =
+				    make_uniq<SimplestAttr>(ConvertVarType(left_table_expr.return_type), left_table_expr.table_idx,
+				                            left_table_expr.column_idx, left_table_expr.column_name);
+				auto &right_expr = bound_func.children[1]->Cast<BoundConstantExpression>();
+				unique_ptr<SimplestConstVar> right_simplest_attr;
+				switch (right_expr.value.type().id()) {
+				case LogicalTypeId::VARCHAR:
+					right_simplest_attr = make_uniq<SimplestConstVar>(right_expr.value.ToString());
+					break;
+				default:
+					Printer::Print(StringUtil::Format("Do not support yet, right_expr.value.type:  %s",
+					                                  LogicalTypeIdToString(right_expr.value.type().id())));
+					D_ASSERT(false);
+					break;
+				}
 
-			qual_vec.emplace_back(std::move(simplest_var_const_comp));
+				auto simplest_var_const_comp = make_uniq<SimplestVarConstComparison>(
+				    simplest_expr_type, std::move(left_simplest_attr), std::move(right_simplest_attr));
 
+				qual_vec.emplace_back(std::move(simplest_var_const_comp));
+			} else {
+				Printer::Print("Unknown bound function type in CollectQualVecExprs");
+			}
+
+			break;
+		}
+		case ExpressionType::CASE_EXPR: {
+			auto &case_expr = expr->Cast<CaseExpression>();
+			for (auto &case_check : case_expr.case_checks) {
+				auto &when_expr = case_check.when_expr;
+				auto &then_expr = case_check.then_expr;
+			}
+			auto &else_expr = case_expr.else_expr;
+			Printer::Print("TODO: Need to implement CASE_EXPR in CollectQualVecExprs");
+			D_ASSERT(false);
+			break;
+		}
+		case ExpressionType::COMPARE_NOTEQUAL:
+		case ExpressionType::COMPARE_EQUAL:
+		case ExpressionType::COMPARE_GREATERTHAN:
+		case ExpressionType::COMPARE_LESSTHAN:
+		case ExpressionType::COMPARE_GREATERTHANOREQUALTO:
+		case ExpressionType::COMPARE_LESSTHANOREQUALTO: {
+			auto &comparison_expr = expr->Cast<BoundComparisonExpression>();
+			auto &left_expr = comparison_expr.left;
+			auto &right_expr = comparison_expr.right;
+			Printer::Print("TODO: Need to implement BoundComparisonExpression in CollectQualVecExprs");
+			D_ASSERT(false);
+			break;
+		}
+		case ExpressionType::CONJUNCTION_OR:
+		case ExpressionType::CONJUNCTION_AND: {
+			auto &conjunction_expr = expr->Cast<BoundConjunctionExpression>();
+			for (auto &child_expr : conjunction_expr.children) {
+			}
+			Printer::Print("TODO: Need to implement BoundConjunctionExpression in CollectQualVecExprs");
+			D_ASSERT(false);
+			break;
+		}
+		case ExpressionType::OPERATOR_IS_NULL:
+		case ExpressionType::OPERATOR_IS_NOT_NULL:
+		case ExpressionType::OPERATOR_NOT:
+		case ExpressionType::OPERATOR_COALESCE: {
+			auto &operator_expr = expr->Cast<BoundOperatorExpression>();
+			for (auto &child_expr : operator_expr.children) {
+			}
+			Printer::Print("TODO: Need to implement BoundOperatorExpression in CollectQualVecExprs");
+			D_ASSERT(false);
 			break;
 		}
 		case ExpressionType::BOUND_COLUMN_REF: {
@@ -406,24 +469,30 @@ unique_ptr<SimplestExpr> DuckToIRConverter::CollectScanFilter(const unique_ptr<T
 	case TableFilterType::CONJUNCTION_AND: {
 		auto &conjunction_and = filter_cond->Cast<ConjunctionAndFilter>();
 #ifdef DEBUG
-		D_ASSERT(2 == conjunction_and.child_filters.size());
+		D_ASSERT(2 <= conjunction_and.child_filters.size());
 #endif
 		auto left_filter = CollectScanFilter(conjunction_and.child_filters[0], make_uniq<SimplestAttr>(*var_attr));
-		auto right_filter = CollectScanFilter(conjunction_and.child_filters[1], make_uniq<SimplestAttr>(*var_attr));
-		auto simplest_conjunction_and = make_uniq<SimplestLogicalExpr>(SimplestLogicalOp::LogicalAnd,
-		                                                               std::move(left_filter), std::move(right_filter));
-		return unique_ptr_cast<SimplestLogicalExpr, SimplestExpr>(std::move(simplest_conjunction_and));
+		for (size_t idx = 1; idx < conjunction_and.child_filters.size(); idx++) {
+			auto right_filter =
+			    CollectScanFilter(conjunction_and.child_filters[idx], make_uniq<SimplestAttr>(*var_attr));
+			left_filter = make_uniq<SimplestLogicalExpr>(SimplestLogicalOp::LogicalAnd, std::move(left_filter),
+			                                             std::move(right_filter));
+		}
+		return left_filter;
 	}
 	case TableFilterType::CONJUNCTION_OR: {
 		auto &conjunction_or = filter_cond->Cast<ConjunctionOrFilter>();
 #ifdef DEBUG
-		D_ASSERT(2 == conjunction_or.child_filters.size());
+		D_ASSERT(2 <= conjunction_or.child_filters.size());
 #endif
 		auto left_filter = CollectScanFilter(conjunction_or.child_filters[0], make_uniq<SimplestAttr>(*var_attr));
-		auto right_filter = CollectScanFilter(conjunction_or.child_filters[1], make_uniq<SimplestAttr>(*var_attr));
-		auto simplest_conjunction_or = make_uniq<SimplestLogicalExpr>(SimplestLogicalOp::LogicalOr,
-		                                                              std::move(left_filter), std::move(right_filter));
-		return unique_ptr_cast<SimplestLogicalExpr, SimplestExpr>(std::move(simplest_conjunction_or));
+		for (size_t idx = 1; idx < conjunction_or.child_filters.size(); idx++) {
+			auto right_filter =
+			    CollectScanFilter(conjunction_or.child_filters[idx], make_uniq<SimplestAttr>(*var_attr));
+			left_filter = make_uniq<SimplestLogicalExpr>(SimplestLogicalOp::LogicalOr, std::move(left_filter),
+			                                             std::move(right_filter));
+		}
+		return left_filter;
 	}
 	case TableFilterType::CONSTANT_COMPARISON: {
 		auto &constant_filter = filter_cond->Cast<ConstantFilter>();
@@ -445,9 +514,11 @@ unique_ptr<SimplestExpr> DuckToIRConverter::CollectScanFilter(const unique_ptr<T
 		return unique_ptr_cast<SimplestIsNullExpr, SimplestExpr>(std::move(simplest_is_null));
 	}
 	case TableFilterType::STRUCT_EXTRACT: {
+		auto &struct_filter = filter_cond->Cast<StructFilter>();
 		Printer::Print("Do not support yet: TableFilterType::STRUCT_EXTRACT");
 		D_ASSERT(false);
 	}
 	}
+	return nullptr;
 }
 } // namespace duckdb
