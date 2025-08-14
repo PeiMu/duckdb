@@ -149,6 +149,11 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 #endif
 				break;
 			}
+			case LogicalOp: {
+				auto &logical_op = qual->Cast<SimplestLogicalOp>();
+				// TODO
+				break;
+			}
 			case InvalidExprType:
 				Printer::Print("Invalid expression type!");
 				D_ASSERT(false);

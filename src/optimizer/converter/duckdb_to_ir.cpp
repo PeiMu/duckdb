@@ -331,6 +331,20 @@ SimplestExprType DuckToIRConverter::ConvertCompType(ExpressionType type) {
 	}
 }
 
+SimplestLogicalOp DuckToIRConverter::ConvertLogicalType(ExpressionType type) {
+	switch (type) {
+	case ExpressionType::CONJUNCTION_AND:
+		return SimplestLogicalOp::LogicalAnd;
+	case ExpressionType::CONJUNCTION_OR:
+		return SimplestLogicalOp::LogicalOr;
+	case ExpressionType::OPERATOR_NOT:
+		return SimplestLogicalOp::LogicalNot;
+	default:
+		Printer::Print("Invalid logical op!");
+		return SimplestLogicalOp::InvalidLogicalOp;
+	}
+}
+
 SimplestVarType DuckToIRConverter::ConvertVarType(LogicalType type) {
 	switch (type.id()) {
 	case LogicalTypeId::BOOLEAN:
@@ -360,104 +374,128 @@ SimplestAggFnType DuckToIRConverter::ConvertAggFnType(std::string agg_fn_type) {
 		return SimplestAggFnType::InvalidAggType;
 }
 
+unique_ptr<SimplestAttr> DuckToIRConverter::ConvertAttr(const unique_ptr<Expression> &expr) {
+	TableExpr table_expr = GetConstTableExpr(expr);
+	auto simplest_attr = make_uniq<SimplestAttr>(ConvertVarType(table_expr.return_type), table_expr.table_idx,
+	                                             table_expr.column_idx, table_expr.column_name);
+	return simplest_attr;
+}
+
+unique_ptr<SimplestConstVar> DuckToIRConverter::ConvertConstVar(const BoundConstantExpression &expr) {
+	unique_ptr<SimplestConstVar> simplest_attr;
+	switch (expr.value.type().id()) {
+	case LogicalTypeId::VARCHAR:
+		simplest_attr = make_uniq<SimplestConstVar>(expr.value.ToString());
+		break;
+	default:
+		Printer::Print(StringUtil::Format("Do not support yet, right_expr.value.type:  %s",
+		                                  LogicalTypeIdToString(expr.value.type().id())));
+		D_ASSERT(false);
+		break;
+	}
+	return simplest_attr;
+}
+
 unique_ptr<SimplestExpr> DuckToIRConverter::ConvertExpr(const unique_ptr<Expression> &expr) {
+	switch (expr->type) {
+	case ExpressionType::BOUND_FUNCTION: {
+		auto &bound_func = expr->Cast<BoundFunctionExpression>();
+		if (bound_func.function.name == "~~" || bound_func.function.name == "contains") {
+			auto simplest_expr_type = SimplestExprType::TextLike;
+			auto &left_expr = bound_func.children[0];
+			auto left_simplest_attr = ConvertAttr(left_expr);
+#ifdef DEBUG
+			D_ASSERT(bound_func.children[1]->expression_class == ExpressionClass::BOUND_CONSTANT);
+#endif
+			auto &right_expr = bound_func.children[1]->Cast<BoundConstantExpression>();
+			auto right_simplest_attr = ConvertConstVar(right_expr);
+
+			auto simplest_var_const_comp = make_uniq<SimplestVarConstComparison>(
+			    simplest_expr_type, std::move(left_simplest_attr), std::move(right_simplest_attr));
+			return unique_ptr_cast<SimplestVarConstComparison, SimplestExpr>(std::move(simplest_var_const_comp));
+		} else {
+			Printer::Print("Unknown bound function type in CollectQualVecExprs");
+			D_ASSERT(false);
+		}
+
+		break;
+	}
+	case ExpressionType::CASE_EXPR: {
+		auto &case_expr = expr->Cast<CaseExpression>();
+		for (auto &case_check : case_expr.case_checks) {
+			auto &when_expr = case_check.when_expr;
+			auto &then_expr = case_check.then_expr;
+		}
+		auto &else_expr = case_expr.else_expr;
+		Printer::Print("TODO: Need to implement CASE_EXPR in CollectQualVecExprs");
+		D_ASSERT(false);
+		break;
+	}
+	case ExpressionType::COMPARE_NOTEQUAL:
+	case ExpressionType::COMPARE_EQUAL:
+	case ExpressionType::COMPARE_GREATERTHAN:
+	case ExpressionType::COMPARE_LESSTHAN:
+	case ExpressionType::COMPARE_GREATERTHANOREQUALTO:
+	case ExpressionType::COMPARE_LESSTHANOREQUALTO: {
+		auto &comparison_expr = expr->Cast<BoundComparisonExpression>();
+		auto &left_expr = comparison_expr.left;
+		auto left_simplest_attr = ConvertAttr(left_expr);
+#ifdef DEBUG
+		D_ASSERT(comparison_expr.right->expression_class == ExpressionClass::BOUND_CONSTANT);
+#endif
+		auto &right_expr = comparison_expr.right->Cast<BoundConstantExpression>();
+		auto right_simplest_attr = ConvertConstVar(right_expr);
+
+		auto simplest_var_const_comp = make_uniq<SimplestVarConstComparison>(
+		    ConvertCompType(expr->type), std::move(left_simplest_attr), std::move(right_simplest_attr));
+		return unique_ptr_cast<SimplestVarConstComparison, SimplestExpr>(std::move(simplest_var_const_comp));
+	}
+	case ExpressionType::CONJUNCTION_AND:
+	case ExpressionType::CONJUNCTION_OR: {
+		auto &conjunction_expr = expr->Cast<BoundConjunctionExpression>();
+#ifdef DEBUG
+		D_ASSERT(2 <= conjunction_expr.children.size());
+#endif
+		auto left_simplest_expr = ConvertExpr(conjunction_expr.children[0]);
+		for (size_t idx = 1; idx < conjunction_expr.children.size(); idx++) {
+			auto right_simplest_expr = ConvertExpr(conjunction_expr.children[idx]);
+			left_simplest_expr = make_uniq<SimplestLogicalExpr>(
+			    ConvertLogicalType(expr->type), std::move(left_simplest_expr), std::move(right_simplest_expr));
+		}
+		return left_simplest_expr;
+	}
+	case ExpressionType::OPERATOR_IS_NULL:
+	case ExpressionType::OPERATOR_IS_NOT_NULL:
+	case ExpressionType::OPERATOR_NOT:
+	case ExpressionType::OPERATOR_COALESCE: {
+		auto &operator_expr = expr->Cast<BoundOperatorExpression>();
+		for (auto &child_expr : operator_expr.children) {
+		}
+		Printer::Print("TODO: Need to implement BoundOperatorExpression in CollectQualVecExprs");
+		D_ASSERT(false);
+		break;
+	}
+	case ExpressionType::BOUND_COLUMN_REF: {
+		TableExpr table_expr = GetConstTableExpr(expr);
+		auto simplest_attr = make_uniq<SimplestAttr>(ConvertVarType(table_expr.return_type), table_expr.table_idx,
+		                                             table_expr.column_idx, table_expr.column_name);
+		auto simplest_attr_expr = make_uniq<SimplestSingleAttrExpr>(std::move(simplest_attr));
+		return unique_ptr_cast<SimplestSingleAttrExpr, SimplestExpr>(std::move(simplest_attr_expr));
+	}
+	default:
+		Printer::Print(StringUtil::Format("Do not support yet, expr->type:  %s", ExpressionTypeToString(expr->type)));
+		D_ASSERT(false);
+	}
+
+	return nullptr;
 }
 
 std::vector<unique_ptr<SimplestExpr>>
 DuckToIRConverter::CollectQualVecExprs(const vector<unique_ptr<Expression>> &exprs) {
 	std::vector<unique_ptr<SimplestExpr>> qual_vec;
 	for (const auto &expr : exprs) {
-		// fixme: refactor by visitor in query_split_util.h
-		switch (expr->type) {
-		case ExpressionType::BOUND_FUNCTION: {
-			auto &bound_func = expr->Cast<BoundFunctionExpression>();
-			if (bound_func.function.name == "~~") {
-				auto simplest_expr_type = SimplestExprType::TextLike;
-				auto &left_expr = bound_func.children[0];
-				TableExpr left_table_expr = GetConstTableExpr(left_expr);
-				auto left_simplest_attr =
-				    make_uniq<SimplestAttr>(ConvertVarType(left_table_expr.return_type), left_table_expr.table_idx,
-				                            left_table_expr.column_idx, left_table_expr.column_name);
-				auto &right_expr = bound_func.children[1]->Cast<BoundConstantExpression>();
-				unique_ptr<SimplestConstVar> right_simplest_attr;
-				switch (right_expr.value.type().id()) {
-				case LogicalTypeId::VARCHAR:
-					right_simplest_attr = make_uniq<SimplestConstVar>(right_expr.value.ToString());
-					break;
-				default:
-					Printer::Print(StringUtil::Format("Do not support yet, right_expr.value.type:  %s",
-					                                  LogicalTypeIdToString(right_expr.value.type().id())));
-					D_ASSERT(false);
-					break;
-				}
-
-				auto simplest_var_const_comp = make_uniq<SimplestVarConstComparison>(
-				    simplest_expr_type, std::move(left_simplest_attr), std::move(right_simplest_attr));
-
-				qual_vec.emplace_back(std::move(simplest_var_const_comp));
-			} else {
-				Printer::Print("Unknown bound function type in CollectQualVecExprs");
-			}
-
-			break;
-		}
-		case ExpressionType::CASE_EXPR: {
-			auto &case_expr = expr->Cast<CaseExpression>();
-			for (auto &case_check : case_expr.case_checks) {
-				auto &when_expr = case_check.when_expr;
-				auto &then_expr = case_check.then_expr;
-			}
-			auto &else_expr = case_expr.else_expr;
-			Printer::Print("TODO: Need to implement CASE_EXPR in CollectQualVecExprs");
-			D_ASSERT(false);
-			break;
-		}
-		case ExpressionType::COMPARE_NOTEQUAL:
-		case ExpressionType::COMPARE_EQUAL:
-		case ExpressionType::COMPARE_GREATERTHAN:
-		case ExpressionType::COMPARE_LESSTHAN:
-		case ExpressionType::COMPARE_GREATERTHANOREQUALTO:
-		case ExpressionType::COMPARE_LESSTHANOREQUALTO: {
-			auto &comparison_expr = expr->Cast<BoundComparisonExpression>();
-			auto &left_expr = comparison_expr.left;
-			auto &right_expr = comparison_expr.right;
-			Printer::Print("TODO: Need to implement BoundComparisonExpression in CollectQualVecExprs");
-			D_ASSERT(false);
-			break;
-		}
-		case ExpressionType::CONJUNCTION_OR:
-		case ExpressionType::CONJUNCTION_AND: {
-			auto &conjunction_expr = expr->Cast<BoundConjunctionExpression>();
-			for (auto &child_expr : conjunction_expr.children) {
-			}
-			Printer::Print("TODO: Need to implement BoundConjunctionExpression in CollectQualVecExprs");
-			D_ASSERT(false);
-			break;
-		}
-		case ExpressionType::OPERATOR_IS_NULL:
-		case ExpressionType::OPERATOR_IS_NOT_NULL:
-		case ExpressionType::OPERATOR_NOT:
-		case ExpressionType::OPERATOR_COALESCE: {
-			auto &operator_expr = expr->Cast<BoundOperatorExpression>();
-			for (auto &child_expr : operator_expr.children) {
-			}
-			Printer::Print("TODO: Need to implement BoundOperatorExpression in CollectQualVecExprs");
-			D_ASSERT(false);
-			break;
-		}
-		case ExpressionType::BOUND_COLUMN_REF: {
-			TableExpr table_expr = GetConstTableExpr(expr);
-			auto simplest_attr = make_uniq<SimplestAttr>(ConvertVarType(table_expr.return_type), table_expr.table_idx,
-			                                             table_expr.column_idx, table_expr.column_name);
-			auto simplest_attr_expr = make_uniq<SimplestSingleAttrExpr>(std::move(simplest_attr));
-			qual_vec.emplace_back(std::move(simplest_attr_expr));
-			break;
-		}
-		default:
-			Printer::Print(
-			    StringUtil::Format("Do not support yet, expr->type:  %s", ExpressionTypeToString(expr->type)));
-			D_ASSERT(false);
-		}
+		auto simplest_expr = ConvertExpr(expr);
+		qual_vec.emplace_back(std::move(simplest_expr));
 	}
 
 	return qual_vec;

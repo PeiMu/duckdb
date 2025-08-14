@@ -592,6 +592,7 @@ public:
 // if it's a logical not, let `left_expr` be nullptr
 class SimplestLogicalExpr : public SimplestExpr {
 public:
+	// todo: here might be more than two children?
 	SimplestLogicalExpr(SimplestLogicalOp logical_op, unique_ptr<SimplestExpr> left_expr,
 	                    unique_ptr<SimplestExpr> right_expr)
 	    : SimplestExpr(LogicalOp, LogicalExprNode), left_expr(std::move(left_expr)), right_expr(std::move(right_expr)),

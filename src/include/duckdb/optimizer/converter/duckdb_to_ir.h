@@ -59,6 +59,9 @@ private:
 	SimplestExprType ConvertCompType(ExpressionType type);
 	SimplestVarType ConvertVarType(LogicalType type);
 	SimplestAggFnType ConvertAggFnType(std::string agg_fn_type);
+	SimplestLogicalOp ConvertLogicalType(ExpressionType type);
+	unique_ptr<SimplestAttr> ConvertAttr(const unique_ptr<Expression> &expr);
+	unique_ptr<SimplestConstVar> ConvertConstVar(const BoundConstantExpression &expr);
 	unique_ptr<SimplestExpr> ConvertExpr(const unique_ptr<Expression> &expr);
 
 	std::vector<unique_ptr<SimplestExpr>> CollectQualVecExprs(const vector<unique_ptr<Expression>> &exprs);
