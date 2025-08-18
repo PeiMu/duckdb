@@ -678,6 +678,37 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					std::ofstream sql_file(sql_file_name);
 					sql_file << sql_code;
 					sql_file.close();
+
+					// read and parse the SQL, then continue the duckdb process
+					std::string sub_sql = ReadSQLFile(sql_file_name);
+					//					sub_plan = ExtractPlan(sub_sql);
+
+					auto statements = ParseStatementsInternal(lock, sub_sql);
+					if (statements.size() != 1) {
+						throw InvalidInputException("ExtractPlan can only prepare a single statement");
+					}
+
+					RunFunctionInTransactionInternal(lock, [&]() {
+						Planner planner(*this);
+						planner.CreatePlan(std::move(statements[0]));
+
+						sub_plan = std::move(planner.plan);
+
+						//						ColumnBindingResolver resolver;
+						//						resolver.Verify(*sub_plan);
+						//						resolver.VisitOperator(*sub_plan);
+						//
+						//						sub_plan->ResolveOperatorTypes();
+					});
+#if ENABLE_DEBUG_PRINT
+					// debug: print subquery
+					Printer::Print("Extracted Plan");
+					sub_plan->Print();
+
+					Planner::VerifyPlan(optimizer.context, sub_plan);
+#endif
+				} else {
+					// todo: convert IR to duckdb plan
 				}
 			}
 
@@ -774,7 +805,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			auto data_chunk_index = planner.binder->GenerateTableIndex();
 			subquery_preparer.SetNewTableIndex(data_chunk_index);
 
-			if (config.convert_duckdb_to_ir) {
+			if (config.convert_ir_to_sql) {
 				std::string intermediate_table_name = "temp" + std::to_string(subquery_index);
 				subquery_index++;
 				intermediate_table_map[data_chunk_index] = intermediate_table_name;
@@ -968,6 +999,30 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				std::ofstream sql_file(sql_file_name);
 				sql_file << sql_code;
 				sql_file.close();
+
+				// read and parse the SQL, then continue the duckdb process
+				std::string final_sub_sql = ReadSQLFile(sql_file_name);
+
+				auto statements = ParseStatementsInternal(lock, final_sub_sql);
+				if (statements.size() != 1) {
+					throw InvalidInputException("ExtractPlan can only prepare a single statement");
+				}
+
+				RunFunctionInTransactionInternal(lock, [&]() {
+					Planner planner(*this);
+					planner.CreatePlan(std::move(statements[0]));
+
+					plan = std::move(planner.plan);
+				});
+#if ENABLE_DEBUG_PRINT
+				// debug: print subquery
+				Printer::Print("Extracted Plan");
+				sub_plan->Print();
+
+				Planner::VerifyPlan(optimizer.context, sub_plan);
+#endif
+			} else {
+				// todo: convert IR to duckdb plan
 			}
 		}
 
@@ -2171,6 +2226,19 @@ bool ClientContext::ExecutionIsFinished() {
 		return false;
 	}
 	return active_query->executor->ExecutionIsFinished();
+}
+
+std::string ClientContext::ReadSQLFile(const std::string &sql_name) {
+	std::ifstream sql_file(sql_name);
+	if (!sql_file.is_open()) {
+		Printer::Print(StringUtil::Format("Cannot open SQL file: %s", sql_name));
+		D_ASSERT(false);
+	}
+
+	std::stringstream buffer;
+	buffer << sql_file.rdbuf();
+
+	return buffer.str();
 }
 
 } // namespace duckdb

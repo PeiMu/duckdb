@@ -247,7 +247,7 @@ private:
 	                                            bool continue_exec = false);
 
 	unique_ptr<ColumnDataCollection> FetchCollectionInternal(ClientContextLock &lock, PendingQueryResult &pending,
-	                                            bool continue_exec = false);
+	                                                         bool continue_exec = false);
 
 	unique_ptr<ClientContextLock> LockContext();
 
@@ -277,6 +277,8 @@ private:
 	shared_ptr<PreparedStatementData>
 	CreatePreparedStatementInternal(ClientContextLock &lock, const string &query, unique_ptr<SQLStatement> statement,
 	                                optional_ptr<case_insensitive_map_t<Value>> values);
+
+	std::string ReadSQLFile(const std::string &sql_name);
 
 private:
 	//! Lock on using the ClientContext in parallel

@@ -10,9 +10,9 @@ std::string IRToSQLConverter::LogicalPlanToSQL(const unique_ptr<SimplestStmt> &p
 
 	GenerateSQL(plan);
 
-	sql_code = "PRAGMA disable_dbshaker_query_split;\n";
-	sql_code += "PRAGMA disable_convert_duckdb_to_ir;\n";
-	sql_code += "PRAGMA disable_convert_ir_to_sql;\n";
+//	sql_code = "PRAGMA disable_dbshaker_query_split;\n";
+//	sql_code += "PRAGMA disable_convert_duckdb_to_ir;\n";
+//	sql_code += "PRAGMA disable_convert_ir_to_sql;\n";
 
 	sql_code += "SELECT ";
 	for (auto select : select_field) {
