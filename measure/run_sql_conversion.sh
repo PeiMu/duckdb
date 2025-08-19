@@ -17,7 +17,7 @@ cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWR
 
 #duckdb -c ".read /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/6d.sql" imdb.db
 
-for sql in "${dir}"/*; do
+for sql in "${dir}"/*.sql; do
   rm -f dd_sub_plan_*
 
 #  duckdb -c ".read ${sql}" imdb.db
