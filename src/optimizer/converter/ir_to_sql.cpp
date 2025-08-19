@@ -10,9 +10,9 @@ std::string IRToSQLConverter::LogicalPlanToSQL(const unique_ptr<SimplestStmt> &p
 
 	GenerateSQL(plan);
 
-//	sql_code = "PRAGMA disable_dbshaker_query_split;\n";
-//	sql_code += "PRAGMA disable_convert_duckdb_to_ir;\n";
-//	sql_code += "PRAGMA disable_convert_ir_to_sql;\n";
+	//	sql_code = "PRAGMA disable_dbshaker_query_split;\n";
+	//	sql_code += "PRAGMA disable_convert_duckdb_to_ir;\n";
+	//	sql_code += "PRAGMA disable_convert_ir_to_sql;\n";
 
 	sql_code += "SELECT ";
 	for (auto select : select_field) {
@@ -120,47 +120,16 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 #endif
 		// `WHERE `
 		for (const auto &qual : filter_op.qual_vec) {
-			auto &simplest_expr = qual->Cast<SimplestExpr>();
-			auto expr_type = simplest_expr.GetSimplestExprType();
-
-			switch (expr_type) {
-			case TextLike: {
-#ifdef DEBUG
-				D_ASSERT(SimplestNodeType::VarConstComparisonNode == qual->GetNodeType());
-#endif
-				auto &var_const_comp = qual->Cast<SimplestVarConstComparison>();
-				auto &var_attr = var_const_comp.attr;
-				auto table_name = table_names[var_attr->GetTableIndex()];
-				auto filter_str = table_name + "." + var_attr->GetColumnName();
-				filter_str += " LIKE '";
-				auto &const_attr = var_const_comp.const_var;
-				// todo: determine type
-				filter_str += const_attr->GetStringValue();
-				filter_str += "'";
-				filter_field.emplace_back(filter_str);
-				break;
-			}
-			case SingleAttr: {
+			if (SingleAttr == qual->GetSimplestExprType()) {
 				// the `filter_field` should be collected in the child MARK join node
 #ifdef DEBUG
 				D_ASSERT(SimplestNodeType::JoinNode == filter_op.children[0]->GetNodeType());
 				auto &join_child_op = filter_op.children[0]->Cast<SimplestJoin>();
 				D_ASSERT(SimplestJoinType::Mark == join_child_op.GetSimplestJoinType());
 #endif
-				break;
-			}
-			case LogicalOp: {
-				auto &logical_op = qual->Cast<SimplestLogicalOp>();
-				// TODO
-				break;
-			}
-			case InvalidExprType:
-				Printer::Print("Invalid expression type!");
-				D_ASSERT(false);
-				break;
-			default:
-				Printer::Print(StringUtil::Format("Do not support yet, expr->type:  %d", expr_type));
-				D_ASSERT(false);
+			} else {
+				std::string filter_str = CollectFilter(qual);
+				filter_field.emplace_back(filter_str);
 			}
 		}
 		break;
@@ -226,7 +195,7 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 		table_names.emplace(scan_op.GetTableIndex(), scan_op.GetTableName());
 		std::string filter_str;
 		for (const auto &qual : scan_op.qual_vec) {
-			filter_str = CollectScanFilter(qual);
+			filter_str = CollectFilter(qual);
 			filter_field.emplace_back(filter_str);
 		}
 		break;
@@ -269,7 +238,7 @@ std::string IRToSQLConverter::TranslateSimplestAggFnType(SimplestAggFnType agg_f
 	return agg_fn_type_str;
 }
 
-std::string IRToSQLConverter::CollectScanFilter(const unique_ptr<SimplestExpr> &qual_expr) {
+std::string IRToSQLConverter::CollectFilter(const unique_ptr<SimplestExpr> &qual_expr) {
 	std::string ret_str;
 	switch (qual_expr->GetNodeType()) {
 	case SimplestNodeType::VarConstComparisonNode: {
@@ -282,6 +251,9 @@ std::string IRToSQLConverter::CollectScanFilter(const unique_ptr<SimplestExpr> &
 		switch (var_const_comp.GetSimplestExprType()) {
 		case SimplestExprType::Equal:
 			ret_str += SimplestVarType::StringVarArr == const_attr->GetType() ? " IN " : " = ";
+			break;
+		case SimplestExprType::NotEqual:
+			ret_str += " != ";
 			break;
 		case SimplestExprType::LessThan:
 			ret_str += " < ";
@@ -349,33 +321,38 @@ std::string IRToSQLConverter::CollectScanFilter(const unique_ptr<SimplestExpr> &
 		std::string left_expr_str, right_expr_str;
 		if (SimplestLogicalOp::LogicalNot != logical_expr.GetLogicalOp()) {
 			auto &left_expr = logical_expr.left_expr;
-			left_expr_str = CollectScanFilter(left_expr);
+			left_expr_str = CollectFilter(left_expr);
 		}
 		auto &right_expr = logical_expr.right_expr;
-		right_expr_str = CollectScanFilter(right_expr);
-		ret_str = "(";
+		right_expr_str = CollectFilter(right_expr);
 		switch (logical_expr.GetLogicalOp()) {
 		case SimplestLogicalOp::InvalidLogicalOp:
 			Printer::Print("Invalid logical expr!");
 			D_ASSERT(false);
 			break;
 		case SimplestLogicalOp::LogicalAnd:
+			ret_str = "(";
 			ret_str += left_expr_str;
 			ret_str += " AND ";
 			ret_str += right_expr_str;
 			ret_str += ")";
 			return ret_str;
 		case SimplestLogicalOp::LogicalOr:
+			ret_str = "(";
 			ret_str += left_expr_str;
 			ret_str += " OR ";
 			ret_str += right_expr_str;
 			ret_str += ")";
 			return ret_str;
-		case SimplestLogicalOp::LogicalNot:
-			// todo
-			Printer::Print("Unimplemented LogicalNot yet!");
-			D_ASSERT(false);
-			break;
+		case SimplestLogicalOp::LogicalNot: {
+			auto found = right_expr_str.find(' ');
+#ifdef DEBUG
+			D_ASSERT(found != std::string::npos);
+#endif
+			ret_str = right_expr_str;
+			ret_str.insert(found + 1, "NOT ");
+			return ret_str;
+		}
 		default:
 			Printer::Print(
 			    StringUtil::Format("Do not support yet, logical_expr->type:  %d", logical_expr.GetLogicalOp()));

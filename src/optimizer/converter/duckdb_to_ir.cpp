@@ -381,12 +381,17 @@ unique_ptr<SimplestAttr> DuckToIRConverter::ConvertAttr(const unique_ptr<Express
 	return simplest_attr;
 }
 
-unique_ptr<SimplestConstVar> DuckToIRConverter::ConvertConstVar(const BoundConstantExpression &expr) {
+unique_ptr<SimplestConstVar> DuckToIRConverter::ConvertConstVar(const BoundConstantExpression &expr, std::string prefix,
+                                                                std::string appendix) {
 	unique_ptr<SimplestConstVar> simplest_attr;
 	switch (expr.value.type().id()) {
-	case LogicalTypeId::VARCHAR:
-		simplest_attr = make_uniq<SimplestConstVar>(expr.value.ToString());
+	case LogicalTypeId::VARCHAR: {
+		std::string str = prefix;
+		str += expr.value.ToString();
+		str += appendix;
+		simplest_attr = make_uniq<SimplestConstVar>(str);
 		break;
+	}
 	default:
 		Printer::Print(StringUtil::Format("Do not support yet, right_expr.value.type:  %s",
 		                                  LogicalTypeIdToString(expr.value.type().id())));
@@ -400,7 +405,8 @@ unique_ptr<SimplestExpr> DuckToIRConverter::ConvertExpr(const unique_ptr<Express
 	switch (expr->type) {
 	case ExpressionType::BOUND_FUNCTION: {
 		auto &bound_func = expr->Cast<BoundFunctionExpression>();
-		if (bound_func.function.name == "~~" || bound_func.function.name == "contains") {
+		if (bound_func.function.name == "~~" || bound_func.function.name == "contains" ||
+		    bound_func.function.name == "prefix" || bound_func.function.name == "suffix") {
 			auto simplest_expr_type = SimplestExprType::TextLike;
 			auto &left_expr = bound_func.children[0];
 			auto left_simplest_attr = ConvertAttr(left_expr);
@@ -408,7 +414,15 @@ unique_ptr<SimplestExpr> DuckToIRConverter::ConvertExpr(const unique_ptr<Express
 			D_ASSERT(bound_func.children[1]->expression_class == ExpressionClass::BOUND_CONSTANT);
 #endif
 			auto &right_expr = bound_func.children[1]->Cast<BoundConstantExpression>();
-			auto right_simplest_attr = ConvertConstVar(right_expr);
+			std::string prefix_str = "", appendix_str = "";
+			if ("contains" == bound_func.function.name) {
+				prefix_str = appendix_str = "%";
+			} else if ("prefix" == bound_func.function.name) {
+				appendix_str = "%";
+			} else if ("suffix" == bound_func.function.name) {
+				prefix_str = "%";
+			}
+			auto right_simplest_attr = ConvertConstVar(right_expr, prefix_str, appendix_str);
 
 			auto simplest_var_const_comp = make_uniq<SimplestVarConstComparison>(
 			    simplest_expr_type, std::move(left_simplest_attr), std::move(right_simplest_attr));
@@ -465,8 +479,28 @@ unique_ptr<SimplestExpr> DuckToIRConverter::ConvertExpr(const unique_ptr<Express
 		return left_simplest_expr;
 	}
 	case ExpressionType::OPERATOR_IS_NULL:
-	case ExpressionType::OPERATOR_IS_NOT_NULL:
-	case ExpressionType::OPERATOR_NOT:
+	case ExpressionType::OPERATOR_IS_NOT_NULL: {
+		auto &operator_expr = expr->Cast<BoundOperatorExpression>();
+#ifdef DEBUG
+		D_ASSERT(1 == operator_expr.children.size());
+		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == operator_expr.children[0]->GetExpressionType());
+#endif
+		auto simplest_expr = ConvertAttr(operator_expr.children[0]);
+		auto is_null =
+		    ExpressionType::OPERATOR_IS_NULL == expr->type ? SimplestExprType::NullType : SimplestExprType::NonNullType;
+		auto simplest_is_null = make_uniq<SimplestIsNullExpr>(is_null, std::move(simplest_expr));
+		return unique_ptr_cast<SimplestIsNullExpr, SimplestExpr>(std::move(simplest_is_null));
+	}
+	case ExpressionType::OPERATOR_NOT: {
+		auto &operator_expr = expr->Cast<BoundOperatorExpression>();
+#ifdef DEBUG
+		D_ASSERT(1 == operator_expr.children.size());
+#endif
+		auto simplest_expr = ConvertExpr(operator_expr.children[0]);
+		auto simplest_not_expr =
+		    make_uniq<SimplestLogicalExpr>(SimplestLogicalOp::LogicalNot, nullptr, std::move(simplest_expr));
+		return unique_ptr_cast<SimplestLogicalExpr, SimplestExpr>(std::move(simplest_not_expr));
+	}
 	case ExpressionType::OPERATOR_COALESCE: {
 		auto &operator_expr = expr->Cast<BoundOperatorExpression>();
 		for (auto &child_expr : operator_expr.children) {

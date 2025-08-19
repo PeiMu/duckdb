@@ -21,6 +21,8 @@ public:
 private:
 	void GenerateSQL(const unique_ptr<SimplestStmt> &op);
 	std::string TranslateSimplestAggFnType(SimplestAggFnType agg_fn_type);
+	std::string CollectFilter(const unique_ptr<SimplestExpr> &qual_expr);
+
 	unsigned int agg_field_key(unsigned int table_idx, unsigned int column_idx) {
 		return std::hash<unsigned int>()(table_idx) ^ std::hash<unsigned int>()(column_idx);
 	}
@@ -35,6 +37,5 @@ private:
 
 	std::unordered_map<unsigned int, std::string> table_names;
 	std::unordered_map<unsigned int, std::vector<std::string>> chunk_contents;
-	std::string CollectScanFilter(const unique_ptr<SimplestExpr> &qual_expr);
 };
 } // namespace duckdb

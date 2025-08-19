@@ -1017,9 +1017,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if ENABLE_DEBUG_PRINT
 				// debug: print subquery
 				Printer::Print("Extracted Plan");
-				sub_plan->Print();
+				plan->Print();
 
-				Planner::VerifyPlan(optimizer.context, sub_plan);
+				Planner::VerifyPlan(optimizer.context, plan);
 #endif
 			} else {
 				// todo: convert IR to duckdb plan
