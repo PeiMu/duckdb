@@ -1,0 +1,407 @@
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/10a.sql
+┌─────────────────────────────┬───────────────┐
+│ uncredited_voiced_character │ russian_movie │
+│           varchar           │    varchar    │
+├─────────────────────────────┼───────────────┤
+│ Actor                       │ 12 Rounds     │
+└─────────────────────────────┴───────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/10b.sql
+┌───────────┬─────────────────────────────────┐
+│ character │ russian_mov_with_actor_producer │
+│  varchar  │             varchar             │
+├───────────┼─────────────────────────────────┤
+│           │                                 │
+└───────────┴─────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/10c.sql
+┌───────────┬──────────────────────────────┐
+│ character │ movie_with_american_producer │
+│  varchar  │           varchar            │
+├───────────┼──────────────────────────────┤
+│ Himself   │ Evil Eyes: Behind the Scenes │
+└───────────┴──────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/11a.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/11b.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/11c.sql
+┌─────────────────────────────────────┬─────────────────────────────────────┬─────────────────────┐
+│            from_company             │           production_note           │ movie_based_on_book │
+│               varchar               │               varchar               │       varchar       │
+├─────────────────────────────────────┼─────────────────────────────────────┼─────────────────────┤
+│ 20th Century Fox Home Entertainment │ (1997-2002) (worldwide) (all media) │ 24                  │
+└─────────────────────────────────────┴─────────────────────────────────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/11d.sql
+┌──────────────┬──────────────────┬───────────────────────────────────────┐
+│ from_company │ production_note  │          movie_based_on_book          │
+│   varchar    │     varchar      │                varchar                │
+├──────────────┼──────────────────┼───────────────────────────────────────┤
+│ 13th Street  │ (1954) (UK) (TV) │ ...denn sie wissen nicht, was sie tun │
+└──────────────┴──────────────────┴───────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/12a.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/12b.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/12c.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/13a.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/13b.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/13c.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/13d.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/14a.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/14b.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/14c.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/15a.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/15b.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/15c.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/15d.sql
+Catalog Error: Column with name title already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/16a.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/16b.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/16c.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/16d.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/17a.sql
+Binder Error: Table "cast_info" does not have a column named "main"
+LINE 1: SELECT MIN(name.name) AS member_in_charnamed_american_movie,
+                                 ^
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/17b.sql
+Binder Error: Table "cast_info" does not have a column named "main"
+LINE 1: SELECT MIN(name.name) AS member_in_charnamed_movie,
+                                 ^
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/17c.sql
+Binder Error: Table "cast_info" does not have a column named "main"
+LINE 1: SELECT MIN(name.name) AS member_in_charnamed_movie,
+                                 ^
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/17d.sql
+┌───────────────────────────┐
+│ member_in_charnamed_movie │
+│          varchar          │
+├───────────────────────────┤
+│ Abrahamsson, Bertil       │
+└───────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/17e.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/17f.sql
+┌─────────────────────────────────┐
+│    member_in_charnamed_movie    │
+│             varchar             │
+├─────────────────────────────────┤
+│ 'El Galgo PornoStar', Blanquito │
+└─────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/18a.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/18b.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/18c.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/19a.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/19b.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/19c.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/19d.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/1a.sql
+┌────────────────────────────────────────────────────┬────────────────────┬────────────┐
+│                  production_note                   │    movie_title     │ movie_year │
+│                      varchar                       │      varchar       │   int32    │
+├────────────────────────────────────────────────────┼────────────────────┼────────────┤
+│ (A Warner Bros.-First National Picture) (presents) │ A Clockwork Orange │       1934 │
+└────────────────────────────────────────────────────┴────────────────────┴────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/1b.sql
+┌───────────────────────────────────────┬────────────────┬────────────┐
+│            production_note            │  movie_title   │ movie_year │
+│                varchar                │    varchar     │   int32    │
+├───────────────────────────────────────┼────────────────┼────────────┤
+│ (Set Decoration Rentals) (uncredited) │ Disaster Movie │       2008 │
+└───────────────────────────────────────┴────────────────┴────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/1c.sql
+┌─────────────────┬──────────────┬────────────┐
+│ production_note │ movie_title  │ movie_year │
+│     varchar     │   varchar    │   int32    │
+├─────────────────┼──────────────┼────────────┤
+│ (co-production) │ Intouchables │       2011 │
+└─────────────────┴──────────────┴────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/1d.sql
+┌───────────────────────────────────────┬────────────────┬────────────┐
+│            production_note            │  movie_title   │ movie_year │
+│                varchar                │    varchar     │   int32    │
+├───────────────────────────────────────┼────────────────┼────────────┤
+│ (Set Decoration Rentals) (uncredited) │ Disaster Movie │       2004 │
+└───────────────────────────────────────┴────────────────┴────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/20a.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/20b.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/20c.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/21a.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/21b.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/21c.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/22a.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/22b.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/22c.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/22d.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/23a.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/23b.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/23c.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/24a.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/24b.sql
+Catalog Error: Column with name movie_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/25a.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/25b.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/25c.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/26a.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/26b.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/26c.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/27a.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/27b.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/27c.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/28a.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/28b.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/28c.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/29a.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/29b.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/29c.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/2a.sql
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│ 'Doc'       │
+└─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/2b.sql
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│ 'Doc'       │
+└─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/2c.sql
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│             │
+└─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/2d.sql
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│ & Teller    │
+└─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/30a.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/30b.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/30c.sql
+Binder Error: Duplicate alias "comp_cast_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/31a.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/31b.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/31c.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/32a.sql
+INTERNAL Error: Failed to cast expression to type - expression type mismatch
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/32b.sql
+INTERNAL Error: Failed to cast expression to type - expression type mismatch
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/33a.sql
+INTERNAL Error: Failed to cast expression to type - expression type mismatch
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/33b.sql
+Binder Error: Duplicate alias "info_type" in query!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/33c.sql
+INTERNAL Error: Failed to cast expression to type - expression type mismatch
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/3a.sql
+┌────────────────────┐
+│    movie_title     │
+│      varchar       │
+├────────────────────┤
+│ 2 Days in New York │
+└────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/3b.sql
+┌────────────────────────┐
+│      movie_title       │
+│        varchar         │
+├────────────────────────┤
+│ 300: Rise of an Empire │
+└────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/3c.sql
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│ & Teller 2  │
+└─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/4a.sql
+┌─────────┬─────────────┐
+│ rating  │ movie_title │
+│ varchar │   varchar   │
+├─────────┼─────────────┤
+│ 5.1     │ & Teller 2  │
+└─────────┴─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/4b.sql
+┌─────────┬─────────────────────┐
+│ rating  │     movie_title     │
+│ varchar │       varchar       │
+├─────────┼─────────────────────┤
+│ 9.1     │ Batman: Arkham City │
+└─────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/4c.sql
+┌─────────┬─────────────┐
+│ rating  │ movie_title │
+│ varchar │   varchar   │
+├─────────┼─────────────┤
+│ 2.1     │ & Teller 2  │
+└─────────┴─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/5a.sql
+┌────────────────────────┐
+│ typical_european_movie │
+│        varchar         │
+├────────────────────────┤
+│                        │
+└────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/5b.sql
+┌────────────────────┐
+│ american_vhs_movie │
+│      varchar       │
+├────────────────────┤
+│                    │
+└────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/5c.sql
+┌────────────────┐
+│ american_movie │
+│    varchar     │
+├────────────────┤
+│ 11,830,420     │
+└────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/6a.sql
+┌───────────────────────────┬────────────────────┬──────────────┐
+│       movie_keyword       │     actor_name     │ marvel_movie │
+│          varchar          │      varchar       │   varchar    │
+├───────────────────────────┼────────────────────┼──────────────┤
+│ marvel-cinematic-universe │ Downey Jr., Robert │ Iron Man 3   │
+└───────────────────────────┴────────────────────┴──────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/6b.sql
+┌────────────────┬────────────────────┬────────────────┐
+│ movie_keyword  │     actor_name     │   hero_movie   │
+│    varchar     │      varchar       │    varchar     │
+├────────────────┼────────────────────┼────────────────┤
+│ based-on-comic │ Downey Jr., Robert │ The Avengers 2 │
+└────────────────┴────────────────────┴────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/6c.sql
+┌───────────────────────────┬────────────────────┬────────────────┐
+│       movie_keyword       │     actor_name     │  marvel_movie  │
+│          varchar          │      varchar       │    varchar     │
+├───────────────────────────┼────────────────────┼────────────────┤
+│ marvel-cinematic-universe │ Downey Jr., Robert │ The Avengers 2 │
+└───────────────────────────┴────────────────────┴────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/6d.sql
+┌────────────────┬────────────────────┬───────────────────────┐
+│ movie_keyword  │     actor_name     │      hero_movie       │
+│    varchar     │      varchar       │        varchar        │
+├────────────────┼────────────────────┼───────────────────────┤
+│ based-on-comic │ Downey Jr., Robert │ 2008 MTV Movie Awards │
+└────────────────┴────────────────────┴───────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/6e.sql
+┌───────────────────────────┬────────────────────┬──────────────┐
+│       movie_keyword       │     actor_name     │ marvel_movie │
+│          varchar          │      varchar       │   varchar    │
+├───────────────────────────┼────────────────────┼──────────────┤
+│ marvel-cinematic-universe │ Downey Jr., Robert │ Iron Man 3   │
+└───────────────────────────┴────────────────────┴──────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/6f.sql
+┌────────────────┬─────────────────────────────────┬────────────┐
+│ movie_keyword  │           actor_name            │ hero_movie │
+│    varchar     │             varchar             │  varchar   │
+├────────────────┼─────────────────────────────────┼────────────┤
+│ based-on-comic │ "Steff", Stefanie Oxmann Mcgaha │ & Teller 2 │
+└────────────────┴─────────────────────────────────┴────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/7a.sql
+Catalog Error: Column with name person_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/7b.sql
+Catalog Error: Column with name person_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/7c.sql
+Catalog Error: Column with name person_id already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/8a.sql
+┌───────────────────┬───────────────────────┐
+│ actress_pseudonym │ japanese_movie_dubbed │
+│      varchar      │        varchar        │
+├───────────────────┼───────────────────────┤
+│ Chambers, Linda   │ .hack//Quantum        │
+└───────────────────┴───────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/8b.sql
+┌──────────────────┬─────────────────────────────┐
+│ acress_pseudonym │    japanese_anime_movie     │
+│     varchar      │           varchar           │
+├──────────────────┼─────────────────────────────┤
+│ Chambers, Linda  │ Dragon Ball Z: Shin Budokai │
+└──────────────────┴─────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/8c.sql
+┌────────────────────┬─────────────────────┐
+│ writer_pseudo_name │     movie_title     │
+│      varchar       │       varchar       │
+├────────────────────┼─────────────────────┤
+│ "A.J."             │ #1 Cheerleader Camp │
+└────────────────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/8d.sql
+┌─────────────────────────┬─────────────────────┐
+│ costume_designer_pseudo │ movie_with_costumes │
+│         varchar         │       varchar       │
+├─────────────────────────┼─────────────────────┤
+│ "Jenny from the Block"  │ #1 Cheerleader Camp │
+└─────────────────────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/9a.sql
+┌──────────────────┬───────────────────┬──────────────┐
+│ alternative_name │  character_name   │    movie     │
+│     varchar      │      varchar      │   varchar    │
+├──────────────────┼───────────────────┼──────────────┤
+│ AJ               │ Airport Announcer │ Blue Harvest │
+└──────────────────┴───────────────────┴──────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/9b.sql
+Catalog Error: Column with name name already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/9c.sql
+Catalog Error: Column with name name already exists!
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS/9d.sql
+Catalog Error: Column with name name already exists!
