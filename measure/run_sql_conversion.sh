@@ -5,7 +5,7 @@ dir="/home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS"
 mkdir -p convert_job_sql/
 rm -rf compile.log
 
-log_name=duckdb_job_result.txt
+log_name=duckdb_job_sql_conversion_result.txt
 
 rm -rf ${log_name}
 rm -rf convert_job_sql/${log_name}

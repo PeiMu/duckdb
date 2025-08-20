@@ -681,7 +681,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 					// read and parse the SQL, then continue the duckdb process
 					std::string sub_sql = ReadSQLFile(sql_file_name);
-					//					sub_plan = ExtractPlan(sub_sql);
 
 					auto statements = ParseStatementsInternal(lock, sub_sql);
 					if (statements.size() != 1) {
@@ -693,13 +692,18 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 						planner.CreatePlan(std::move(statements[0]));
 
 						sub_plan = std::move(planner.plan);
-
-						//						ColumnBindingResolver resolver;
-						//						resolver.Verify(*sub_plan);
-						//						resolver.VisitOperator(*sub_plan);
-						//
-						//						sub_plan->ResolveOperatorTypes();
 					});
+#if ENABLE_MEASURE_EXE_TIME
+					if (execute_plan) {
+						auto execute_time = chrono_toc(&timer, "convert, read and parse SQL code time is\n", false);
+						// save time to a file
+						std::ofstream log_file;
+						log_file.open("time_log.csv", std::ios_base::app);
+						log_file << std::to_string(execute_time / 1000) + ", ";
+						log_file.close();
+					}
+#endif
+
 #if ENABLE_DEBUG_PRINT
 					// debug: print subquery
 					Printer::Print("Extracted Plan");
@@ -830,6 +834,17 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				auto &table_entry = created_table->Cast<TableCatalogEntry>();
 				table_entry.GetStorage().LocalAppend(table_entry, *this, *subquery_result);
 				result->catalog_version = catalog.GetCatalogVersion();
+
+#if ENABLE_MEASURE_EXE_TIME
+				if (execute_plan) {
+					auto execute_time = chrono_toc(&timer, "create temp table time is\n", false);
+					// save time to a file
+					std::ofstream log_file;
+					log_file.open("time_log.csv", std::ios_base::app);
+					log_file << std::to_string(execute_time / 1000) + ", ";
+					log_file.close();
+				}
+#endif
 			}
 
 			previous_result_card =
@@ -1014,6 +1029,17 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 					plan = std::move(planner.plan);
 				});
+#if ENABLE_MEASURE_EXE_TIME
+				if (execute_plan) {
+					auto execute_time = chrono_toc(&timer, "final convert, read and parse SQL code time is\n", false);
+					// save time to a file
+					std::ofstream log_file;
+					log_file.open("time_log.csv", std::ios_base::app);
+					log_file << std::to_string(execute_time / 1000) + ", ";
+					log_file.close();
+				}
+#endif
+
 #if ENABLE_DEBUG_PRINT
 				// debug: print subquery
 				Printer::Print("Extracted Plan");
