@@ -725,4 +725,11 @@ unique_ptr<QueryResult> Executor::GetResult() {
 	return result_collector.GetResult(*result_collector.sink_state);
 }
 
+unique_ptr<ColumnDataCollection> Executor::GetRowCollection() {
+	D_ASSERT(HasResultCollector());
+	auto &result_collector = physical_plan->Cast<PhysicalResultCollector>();
+	D_ASSERT(result_collector.sink_state);
+	return result_collector.GetRowCollection(*result_collector.sink_state);
+}
+
 } // namespace duckdb

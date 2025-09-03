@@ -2887,7 +2887,9 @@ const StringUtil::EnumStringLiteral *GetOptimizerTypeValues() {
 		{ static_cast<uint32_t>(OptimizerType::EXTENSION), "EXTENSION" },
 		{ static_cast<uint32_t>(OptimizerType::MATERIALIZED_CTE), "MATERIALIZED_CTE" },
 		{ static_cast<uint32_t>(OptimizerType::SUM_REWRITER), "SUM_REWRITER" },
-		{ static_cast<uint32_t>(OptimizerType::LATE_MATERIALIZATION), "LATE_MATERIALIZATION" }
+		{ static_cast<uint32_t>(OptimizerType::LATE_MATERIALIZATION), "LATE_MATERIALIZATION" },
+		{ static_cast<uint32_t>(OptimizerType::QUERY_SPLIT), "QUERY_SPLIT" },
+		{ static_cast<uint32_t>(OptimizerType::REORDER_GET), "REORDER_GET" },
 	};
 	return values;
 }

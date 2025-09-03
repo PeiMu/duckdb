@@ -14,11 +14,13 @@ namespace duckdb {
 void LogicalOperator::Serialize(Serializer &serializer) const {
 	serializer.WriteProperty<LogicalOperatorType>(100, "type", type);
 	serializer.WritePropertyWithDefault<vector<unique_ptr<LogicalOperator>>>(101, "children", children);
+	serializer.WriteProperty<int>(102, "split_index", split_index);
 }
 
 unique_ptr<LogicalOperator> LogicalOperator::Deserialize(Deserializer &deserializer) {
 	auto type = deserializer.ReadProperty<LogicalOperatorType>(100, "type");
 	auto children = deserializer.ReadPropertyWithDefault<vector<unique_ptr<LogicalOperator>>>(101, "children");
+	auto split_index = deserializer.ReadProperty<int>(102, "split_index");
 	deserializer.Set<LogicalOperatorType>(type);
 	unique_ptr<LogicalOperator> result;
 	switch (type) {
@@ -186,6 +188,7 @@ unique_ptr<LogicalOperator> LogicalOperator::Deserialize(Deserializer &deseriali
 	}
 	deserializer.Unset<LogicalOperatorType>();
 	result->children = std::move(children);
+	result->split_index = split_index;
 	return result;
 }
 

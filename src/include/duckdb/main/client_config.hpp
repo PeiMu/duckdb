@@ -159,6 +159,25 @@ struct ClientConfig {
 	//! (empty = output to the DuckDB logger)
 	string http_logging_output;
 
+	//! Enable DBShaker
+#if ENABLE_QUERY_SPLIT
+	bool enable_dbshaker_query_split = true;
+#if ENABLE_CROSS_PRODUCT_REWRITE
+	bool enable_dbshaker_split_jop = true;
+#else
+	bool enable_dbshaker_split_jop = false;
+#endif
+#else
+	bool enable_dbshaker_query_split = false;
+	bool enable_dbshaker_split_jop = false;
+#endif
+
+	//! blow is unused yet
+	bool merge_back_plan = false;
+	bool specify_estimated_card = false;
+	bool manual_explain_analyze = false;
+	bool whole_plan_manual_explain_analyze = false;
+
 public:
 	static ClientConfig &GetConfig(ClientContext &context);
 	static const ClientConfig &GetConfig(const ClientContext &context);

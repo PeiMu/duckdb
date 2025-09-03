@@ -27,11 +27,13 @@ TransactionContext::~TransactionContext() {
 
 void TransactionContext::BeginTransaction() {
 	if (current_transaction) {
-		throw TransactionException("cannot start a transaction within a transaction");
+		// todo: Might have bugs here - Pei
+		// throw TransactionException("cannot start a transaction within a transaction");
+	} else {
+		auto start_timestamp = Timestamp::GetCurrentTimestamp();
+		auto global_transaction_id = context.db->GetDatabaseManager().GetNewTransactionNumber();
+		current_transaction = make_uniq<MetaTransaction>(context, start_timestamp, global_transaction_id);
 	}
-	auto start_timestamp = Timestamp::GetCurrentTimestamp();
-	auto global_transaction_id = context.db->GetDatabaseManager().GetNewTransactionNumber();
-	current_transaction = make_uniq<MetaTransaction>(context, start_timestamp, global_transaction_id);
 
 	// Notify any registered state of transaction begin
 	for (auto &state : context.registered_state->States()) {

@@ -11,6 +11,7 @@
 #include "duckdb/planner/operator/logical_empty_result.hpp"
 #include "duckdb/planner/operator/logical_filter.hpp"
 #include "duckdb/planner/operator/logical_get.hpp"
+#include "duckdb/planner/operator/logical_column_data_get.hpp"
 #include "duckdb/planner/operator/logical_join.hpp"
 #include "duckdb/planner/operator/logical_order.hpp"
 #include "duckdb/planner/operator/logical_positional_join.hpp"
@@ -52,6 +53,9 @@ unique_ptr<NodeStatistics> StatisticsPropagator::PropagateStatistics(LogicalOper
 		break;
 	case LogicalOperatorType::LOGICAL_GET:
 		result = PropagateStatistics(node.Cast<LogicalGet>(), node_ptr);
+		break;
+	case LogicalOperatorType::LOGICAL_CHUNK_GET:
+		result = PropagateStatistics(node.Cast<LogicalColumnDataGet>(), node_ptr);
 		break;
 	case LogicalOperatorType::LOGICAL_PROJECTION:
 		result = PropagateStatistics(node.Cast<LogicalProjection>(), node_ptr);

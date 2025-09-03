@@ -52,6 +52,7 @@ public:
 	//! Extract Statistics from a LogicalGet.
 	static RelationStats ExtractGetStats(LogicalGet &get, ClientContext &context);
 	static RelationStats ExtractDelimGetStats(LogicalDelimGet &delim_get, ClientContext &context);
+	static RelationStats ExtractColumnDataGetStats(LogicalColumnDataGet &get, ClientContext &context);
 	//! Create the statistics for a projection using the statistics of the operator that sits underneath the
 	//! projection. Then also create statistics for any extra columns the projection creates.
 	static RelationStats ExtractDummyScanStats(LogicalDummyScan &dummy_scan, ClientContext &context);

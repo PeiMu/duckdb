@@ -43,6 +43,13 @@ public:
 	idx_t estimated_cardinality;
 	bool has_estimated_cardinality;
 
+	//! The node where need to be merged by another subquery, used by query_split
+	int split_index = 0;
+
+	// fixme: used for the very hack verification in top_down Split,
+	//  using it to check if this JOIN was a split point but reverted
+	bool reverted = false;
+
 public:
 	virtual vector<ColumnBinding> GetColumnBindings();
 	static string ColumnBindingsToString(const vector<ColumnBinding> &bindings);

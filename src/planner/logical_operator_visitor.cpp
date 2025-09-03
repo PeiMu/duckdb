@@ -16,6 +16,8 @@ void LogicalOperatorVisitor::VisitOperatorChildren(LogicalOperator &op) {
 		VisitOperatorWithProjectionMapChildren(op);
 	} else {
 		for (auto &child : op.children) {
+			if (nullptr == child.get())
+				continue;
 			VisitOperator(*child);
 		}
 	}

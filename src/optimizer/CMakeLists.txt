@@ -5,6 +5,7 @@ add_subdirectory(pullup)
 add_subdirectory(pushdown)
 add_subdirectory(rule)
 add_subdirectory(statistics)
+add_subdirectory(query_split)
 
 add_library_unity(
   duckdb_optimizer
@@ -35,7 +36,8 @@ add_library_unity(
   topn_optimizer.cpp
   unnest_rewriter.cpp
   sampling_pushdown.cpp
-  sum_rewriter.cpp)
+  sum_rewriter.cpp
+  reorder_get.cpp)
 set(ALL_OBJECT_FILES
     ${ALL_OBJECT_FILES} $<TARGET_OBJECTS:duckdb_optimizer>
     PARENT_SCOPE)

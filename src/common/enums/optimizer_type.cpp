@@ -39,6 +39,8 @@ static const DefaultOptimizerType internal_optimizer_types[] = {
     {"materialized_cte", OptimizerType::MATERIALIZED_CTE},
     {"sum_rewriter", OptimizerType::SUM_REWRITER},
     {"late_materialization", OptimizerType::LATE_MATERIALIZATION},
+	{"query_split", OptimizerType::QUERY_SPLIT},
+	{"reorder_get", OptimizerType::REORDER_GET},
     {nullptr, OptimizerType::INVALID}};
 
 string OptimizerTypeToString(OptimizerType type) {

@@ -9,6 +9,7 @@
 #include "duckdb/planner/filter/expression_filter.hpp"
 #include "duckdb/planner/filter/null_filter.hpp"
 #include "duckdb/planner/operator/logical_get.hpp"
+#include "duckdb/planner/operator/logical_column_data_get.hpp"
 #include "duckdb/planner/table_filter.hpp"
 #include "duckdb/function/scalar/generic_common.hpp"
 #include "duckdb/function/scalar/generic_functions.hpp"
@@ -180,6 +181,24 @@ unique_ptr<NodeStatistics> StatisticsPropagator::PropagateStatistics(LogicalGet 
 		}
 	}
 	return std::move(node_stats);
+}
+
+unique_ptr<NodeStatistics> StatisticsPropagator::PropagateStatistics(LogicalColumnDataGet &get,
+																	 unique_ptr<LogicalOperator> *node_ptr) {
+	auto data_chunk_card = get.EstimateCardinality(context);
+	// todo: add statistics
+	// order the data_chunk by GROUP_BY and insert the stats info
+	//	for (idx_t i = 0; i < get.GetColumnBindings().size(); i++) {
+	//		auto column_bind = get.GetColumnBindings()[i];
+	//		ColumnBinding binding(column_bind.table_index, column_bind.column_index);
+	//		auto result = NumericStats::CreateEmpty(get.chunk_types[i]);
+	//		auto min_val = get.collection->GetRows().GetValue(i, 0);
+	//		auto max_val = get.collection->GetRows().GetValue(i, data_chunk_card-1);
+	//		NumericStats::SetMin(result, min_val);
+	//		NumericStats::SetMax(result, max_val);
+	//		statistics_map.insert(make_pair(binding, result.ToUnique()));
+	//	}
+	return make_uniq<NodeStatistics>(data_chunk_card);
 }
 
 } // namespace duckdb

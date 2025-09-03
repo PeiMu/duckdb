@@ -95,6 +95,7 @@ static bool OperatorNeedsRelation(LogicalOperatorType op_type) {
 	case LogicalOperatorType::LOGICAL_GET:
 	case LogicalOperatorType::LOGICAL_UNNEST:
 	case LogicalOperatorType::LOGICAL_DELIM_GET:
+	case LogicalOperatorType::LOGICAL_CHUNK_GET:
 	case LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY:
 	case LogicalOperatorType::LOGICAL_WINDOW:
 	case LogicalOperatorType::LOGICAL_SAMPLE:
@@ -357,6 +358,12 @@ bool RelationManager::ExtractJoinRelations(JoinOrderOptimizer &optimizer, Logica
 			    (idx_t)MaxValue(double(stats.cardinality) * RelationStatisticsHelper::DEFAULT_SELECTIVITY, (double)1);
 		}
 		ModifyStatsIfLimit(limit_op.get(), stats);
+		AddRelation(input_op, parent, stats);
+		return true;
+	}
+	case LogicalOperatorType::LOGICAL_CHUNK_GET: {
+		auto &chunk_get = op->Cast<LogicalColumnDataGet>();
+		auto stats = RelationStatisticsHelper::ExtractColumnDataGetStats(chunk_get, context);
 		AddRelation(input_op, parent, stats);
 		return true;
 	}

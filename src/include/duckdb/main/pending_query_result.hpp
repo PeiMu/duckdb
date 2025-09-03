@@ -48,6 +48,8 @@ public:
 	//! Returns the result of the query as an actual query result.
 	//! This returns (mostly) instantly if ExecuteTask has been called until RESULT_READY was returned.
 	DUCKDB_API unique_ptr<QueryResult> Execute();
+	DUCKDB_API unique_ptr<QueryResult> Execute(ClientContextLock &lock);
+	DUCKDB_API unique_ptr<ColumnDataCollection> ExecuteRow(ClientContextLock &lock);
 
 	DUCKDB_API void Close();
 
@@ -63,7 +65,8 @@ private:
 	void CheckExecutableInternal(ClientContextLock &lock);
 
 	PendingExecutionResult ExecuteTaskInternal(ClientContextLock &lock);
-	unique_ptr<QueryResult> ExecuteInternal(ClientContextLock &lock);
+	unique_ptr<QueryResult> ExecuteInternal(ClientContextLock &lock, bool continue_exec = false);
+	unique_ptr<ColumnDataCollection> ExecuteRowInternal(ClientContextLock &lock, bool continue_exec = false);
 	unique_ptr<ClientContextLock> LockContext();
 };
 

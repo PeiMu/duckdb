@@ -41,7 +41,9 @@ enum class OptimizerType : uint32_t {
 	EXTENSION,
 	MATERIALIZED_CTE,
 	SUM_REWRITER,
-	LATE_MATERIALIZATION
+	LATE_MATERIALIZATION,
+	QUERY_SPLIT,
+	REORDER_GET
 };
 
 string OptimizerTypeToString(OptimizerType type);
