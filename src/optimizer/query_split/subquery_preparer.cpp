@@ -191,6 +191,10 @@ int64_t SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>
 
 	int64_t chunk_size = previous_result->Count();
 
+	if (context.config.convert_ir_to_sql) {
+		return chunk_size;
+	}
+
 	//	// generate an unused table index by the binder
 	//	new_table_idx = binder.GenerateTableIndex();
 

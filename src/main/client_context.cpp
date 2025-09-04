@@ -908,9 +908,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 #if ENABLE_DEBUG_PRINT
 			Printer::Print("after MergeDataChunk");
-			subqueries.front()[0]->Print();
-			if (subqueries.front().size() == 2) {
-				subqueries.front()[1]->Print();
+			if (config.convert_ir_to_sql) {
+				Printer::Print("We don't print the plan with SQL conversion mode.");
+			} else {
+				subqueries.front()[0]->Print();
+				if (subqueries.front().size() == 2) {
+					subqueries.front()[1]->Print();
+				}
 			}
 #endif
 			subquery_preparer.UpdateSubqueriesIndex(subqueries);
