@@ -184,7 +184,7 @@ unique_ptr<NodeStatistics> StatisticsPropagator::PropagateStatistics(LogicalGet 
 }
 
 unique_ptr<NodeStatistics> StatisticsPropagator::PropagateStatistics(LogicalColumnDataGet &get,
-																	 unique_ptr<LogicalOperator> *node_ptr) {
+																	 unique_ptr<LogicalOperator> &node_ptr) {
 	auto data_chunk_card = get.EstimateCardinality(context);
 	// todo: add statistics
 	// order the data_chunk by GROUP_BY and insert the stats info

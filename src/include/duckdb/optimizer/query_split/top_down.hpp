@@ -21,6 +21,7 @@
 #include "duckdb/planner/expression/bound_operator_expression.hpp"
 #include "duckdb/planner/filter/conjunction_filter.hpp"
 #include "duckdb/planner/operator/logical_cross_product.hpp"
+#include "duckdb/function/table_function.hpp"
 
 namespace duckdb {
 

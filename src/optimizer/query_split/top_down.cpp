@@ -30,8 +30,8 @@ unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan
 			// check if the children tables have the same name
 			if (nullptr != child_ptr->children[0] && LogicalOperatorType::LOGICAL_GET == child_ptr->children[0]->type) {
 				auto &get_op = child_ptr->children[0]->Cast<LogicalGet>();
-				// current_table_name = get_op.function.to_string(get_op.bind_data.get());
-				current_table_name = get_op.input_table_names[0];
+				auto param_str = get_op.ParamsToString();
+				current_table_name = param_str["Table"];
 				if (prev_table_name == current_table_name) {
 					has_same_table = true;
 					break;
@@ -41,8 +41,8 @@ unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan
 			}
 			if (nullptr != child_ptr->children[1] && LogicalOperatorType::LOGICAL_GET == child_ptr->children[1]->type) {
 				auto &get_op = child_ptr->children[1]->Cast<LogicalGet>();
-				// current_table_name = get_op.function.to_string(get_op.bind_data.get());
-				current_table_name = get_op.input_table_names[0];
+				auto param_str = get_op.ParamsToString();
+				current_table_name = param_str["Table"];
 				if (prev_table_name == current_table_name) {
 					has_same_table = true;
 					break;

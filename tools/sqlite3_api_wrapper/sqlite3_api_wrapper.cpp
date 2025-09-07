@@ -213,8 +213,8 @@ int sqlite3_prepare_v2(sqlite3 *db,           /* Database handle */
 		stmt->db = db;
 		stmt->query_string = query;
 
-		if (!statements.back()->named_param_map.empty()) {
-			// Use Prepare: there are parameters
+		if (!statements.back()->named_param_map.empty() || db->con->context->config.enable_dbshaker_query_split) {
+			// Use Prepare: there are parameters; Or using QuerySplit mode
 			auto prepared = db->con->Prepare(std::move(statements.back()));
 			if (prepared->HasError()) {
 				// failed to prepare: set the error message

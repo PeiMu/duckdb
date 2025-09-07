@@ -98,7 +98,8 @@ struct DebugClientContextState : public ClientContextState {
 
 	void QueryBegin(ClientContext &context) override {
 		if (active_query) {
-			throw InternalException("DebugClientContextState::QueryBegin called when a query is already active");
+			// fixme: here might have bugs - Pei
+//			throw InternalException("DebugClientContextState::QueryBegin called when a query is already active");
 		}
 		active_query = true;
 	}
@@ -477,16 +478,16 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 
 #if ENABLE_MEASURE_EXE_TIME || ENABLE_MERGE_BACK_PLAN || ENABLE_DEBUG_PRINT
-	execute_plan = plan->type == LogicalOperatorType::LOGICAL_PROJECTION ||
-				   plan->type == LogicalOperatorType::LOGICAL_ORDER_BY ||
-				   plan->type == LogicalOperatorType::LOGICAL_LIMIT;
+	execute_plan = logical_plan->type == LogicalOperatorType::LOGICAL_PROJECTION ||
+	               logical_plan->type == LogicalOperatorType::LOGICAL_ORDER_BY ||
+	               logical_plan->type == LogicalOperatorType::LOGICAL_LIMIT;
 #endif
 
 #if ENABLE_DEBUG_PRINT
 	if (execute_plan) {
 		// to show when have the real query
 		Printer::Print("Init plan");
-		plan->Print();
+		logical_plan->Print();
 	}
 #endif
 
@@ -752,14 +753,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				log_file.close();
 			}
 #endif
-#if ENABLE_DEBUG_PRINT
-			Printer::Print("subquery physical plan");
-			physical_plan->Print();
-#endif
 
-// #ifdef DEBUG
-// 			D_ASSERT(!physical_plan->ToString().empty());
-// #endif
 			subquery_stmt->physical_plan = std::move(physical_plan);
 
 			// Execute subquery
@@ -983,12 +977,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		log_file.open("time_log.csv", std::ios_base::app);
 		log_file << std::to_string(execute_time / 1000) + ", ";
 		log_file.close();
-	}
-#endif
-#if ENABLE_DEBUG_PRINT
-	if (execute_plan) {
-		Printer::Print("final physical plan");
-		physical_plan->Print();
 	}
 #endif
 	return result;

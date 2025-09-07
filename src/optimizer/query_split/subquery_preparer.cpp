@@ -751,10 +751,10 @@ bool SubqueryPreparer::BlockUsed(const unordered_set<idx_t> &left_cond_table_ind
 			// of use this JOIN block, ref: top_down.cpp, DSB query102_0.sql.
 			auto &left_get = join_op.children[0]->Cast<LogicalGet>();
 			auto &right_get = join_op.children[1]->Cast<LogicalGet>();
-			// auto left_table_name = left_get.function.to_string(left_get.bind_data.get());
-			// auto right_table_name = right_get.function.to_string(right_get.bind_data.get());
-			auto left_table_name = left_get.input_table_names[0];
-			auto right_table_name = right_get.input_table_names[0];
+			auto left_param_str = left_get.ParamsToString();
+			auto left_table_name = left_param_str["Table"];
+			auto right_param_str = right_get.ParamsToString();
+			auto right_table_name = right_param_str["Table"];
 			if (left_table_name == right_table_name) {
 				return left_cond_table_index.count(right_get.table_index) ||
 				       left_cond_table_index.count(left_get.table_index);
