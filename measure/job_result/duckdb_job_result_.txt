@@ -1,0 +1,3911 @@
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/10a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55890f5dbe36]
+duckdb(+0x576ef4) [0x55890f5dbef4]
+duckdb(+0x579ce1) [0x55890f5dece1]
+duckdb(+0x3a1d3c) [0x55890f406d3c]
+duckdb(+0x1b83aa) [0x55890f21d3aa]
+duckdb(+0x9f4a9b) [0x55890fa59a9b]
+duckdb(+0x7fed10) [0x55890f863d10]
+duckdb(+0x8011aa) [0x55890f8661aa]
+duckdb(+0x8017ac) [0x55890f8667ac]
+duckdb(+0x801c2d) [0x55890f866c2d]
+duckdb(+0x802d09) [0x55890f867d09]
+duckdb(+0x801e7a) [0x55890f866e7a]
+duckdb(+0x805fff) [0x55890f86afff]
+duckdb(+0x8060e3) [0x55890f86b0e3]
+duckdb(+0x80639e) [0x55890f86b39e]
+duckdb(+0x3c9d4d) [0x55890f42ed4d]
+duckdb(+0x3b7290) [0x55890f41c290]
+duckdb(+0x3b7f1a) [0x55890f41cf1a]
+duckdb(+0x3b8571) [0x55890f41d571]
+duckdb(+0x3b86e0) [0x55890f41d6e0]
+duckdb(+0x3b8796) [0x55890f41d796]
+duckdb(+0x3b5df1) [0x55890f41adf1]
+duckdb(+0x3b84ab) [0x55890f41d4ab]
+duckdb(+0x39ca86) [0x55890f401a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f05b704624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f05b7046305]
+duckdb(+0x3a01b1) [0x55890f4051b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/10b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x556cc4471e36]
+duckdb(+0x576ef4) [0x556cc4471ef4]
+duckdb(+0x579ce1) [0x556cc4474ce1]
+duckdb(+0x3a1d3c) [0x556cc429cd3c]
+duckdb(+0x1b83aa) [0x556cc40b33aa]
+duckdb(+0x9f4a9b) [0x556cc48efa9b]
+duckdb(+0x7fed10) [0x556cc46f9d10]
+duckdb(+0x8011aa) [0x556cc46fc1aa]
+duckdb(+0x8017ac) [0x556cc46fc7ac]
+duckdb(+0x801c2d) [0x556cc46fcc2d]
+duckdb(+0x802d09) [0x556cc46fdd09]
+duckdb(+0x801e7a) [0x556cc46fce7a]
+duckdb(+0x805fff) [0x556cc4700fff]
+duckdb(+0x8060e3) [0x556cc47010e3]
+duckdb(+0x80639e) [0x556cc470139e]
+duckdb(+0x3c9d4d) [0x556cc42c4d4d]
+duckdb(+0x3b7290) [0x556cc42b2290]
+duckdb(+0x3b7f1a) [0x556cc42b2f1a]
+duckdb(+0x3b8571) [0x556cc42b3571]
+duckdb(+0x3b86e0) [0x556cc42b36e0]
+duckdb(+0x3b8796) [0x556cc42b3796]
+duckdb(+0x3b5df1) [0x556cc42b0df1]
+duckdb(+0x3b84ab) [0x556cc42b34ab]
+duckdb(+0x39ca86) [0x556cc4297a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f470384624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f4703846305]
+duckdb(+0x3a01b1) [0x556cc429b1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/10c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55982f340e36]
+duckdb(+0x576ef4) [0x55982f340ef4]
+duckdb(+0x579ce1) [0x55982f343ce1]
+duckdb(+0x3a1d3c) [0x55982f16bd3c]
+duckdb(+0x1b83aa) [0x55982ef823aa]
+duckdb(+0x9f4a9b) [0x55982f7bea9b]
+duckdb(+0x7fed10) [0x55982f5c8d10]
+duckdb(+0x8011aa) [0x55982f5cb1aa]
+duckdb(+0x8017ac) [0x55982f5cb7ac]
+duckdb(+0x801c2d) [0x55982f5cbc2d]
+duckdb(+0x802d09) [0x55982f5ccd09]
+duckdb(+0x801e7a) [0x55982f5cbe7a]
+duckdb(+0x805fff) [0x55982f5cffff]
+duckdb(+0x8060e3) [0x55982f5d00e3]
+duckdb(+0x80639e) [0x55982f5d039e]
+duckdb(+0x3c9d4d) [0x55982f193d4d]
+duckdb(+0x3b7290) [0x55982f181290]
+duckdb(+0x3b7f1a) [0x55982f181f1a]
+duckdb(+0x3b8571) [0x55982f182571]
+duckdb(+0x3b86e0) [0x55982f1826e0]
+duckdb(+0x3b8796) [0x55982f182796]
+duckdb(+0x3b5df1) [0x55982f17fdf1]
+duckdb(+0x3b84ab) [0x55982f1824ab]
+duckdb(+0x39ca86) [0x55982f166a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f1f4356724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f1f43567305]
+duckdb(+0x3a01b1) [0x55982f16a1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55b3db8b6e36]
+duckdb(+0x576ef4) [0x55b3db8b6ef4]
+duckdb(+0x579ce1) [0x55b3db8b9ce1]
+duckdb(+0x3a1d3c) [0x55b3db6e1d3c]
+duckdb(+0x1b6eb8) [0x55b3db4f6eb8]
+duckdb(+0x9fe2e0) [0x55b3dbd3e2e0]
+duckdb(+0xa03c70) [0x55b3dbd43c70]
+duckdb(+0xa044d7) [0x55b3dbd444d7]
+duckdb(+0x7fec48) [0x55b3dbb3ec48]
+duckdb(+0x8011aa) [0x55b3dbb411aa]
+duckdb(+0x8017ac) [0x55b3dbb417ac]
+duckdb(+0x801c2d) [0x55b3dbb41c2d]
+duckdb(+0x802d09) [0x55b3dbb42d09]
+duckdb(+0x801e7a) [0x55b3dbb41e7a]
+duckdb(+0x805fff) [0x55b3dbb45fff]
+duckdb(+0x8060e3) [0x55b3dbb460e3]
+duckdb(+0x80639e) [0x55b3dbb4639e]
+duckdb(+0x3c9d4d) [0x55b3db709d4d]
+duckdb(+0x3b7290) [0x55b3db6f7290]
+duckdb(+0x3b7f1a) [0x55b3db6f7f1a]
+duckdb(+0x3b8571) [0x55b3db6f8571]
+duckdb(+0x3b86e0) [0x55b3db6f86e0]
+duckdb(+0x3b8796) [0x55b3db6f8796]
+duckdb(+0x3b5df1) [0x55b3db6f5df1]
+duckdb(+0x3b84ab) [0x55b3db6f84ab]
+duckdb(+0x39ca86) [0x55b3db6dca86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fafde04624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fafde046305]
+duckdb(+0x3a01b1) [0x55b3db6e01b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55f645dcfe36]
+duckdb(+0x576ef4) [0x55f645dcfef4]
+duckdb(+0x579ce1) [0x55f645dd2ce1]
+duckdb(+0x3a1d3c) [0x55f645bfad3c]
+duckdb(+0x1b6eb8) [0x55f645a0feb8]
+duckdb(+0x9fe2e0) [0x55f6462572e0]
+duckdb(+0xa03c70) [0x55f64625cc70]
+duckdb(+0xa044d7) [0x55f64625d4d7]
+duckdb(+0x7fec48) [0x55f646057c48]
+duckdb(+0x8011aa) [0x55f64605a1aa]
+duckdb(+0x8017ac) [0x55f64605a7ac]
+duckdb(+0x801c2d) [0x55f64605ac2d]
+duckdb(+0x802d09) [0x55f64605bd09]
+duckdb(+0x801e7a) [0x55f64605ae7a]
+duckdb(+0x805fff) [0x55f64605efff]
+duckdb(+0x8060e3) [0x55f64605f0e3]
+duckdb(+0x80639e) [0x55f64605f39e]
+duckdb(+0x3c9d4d) [0x55f645c22d4d]
+duckdb(+0x3b7290) [0x55f645c10290]
+duckdb(+0x3b7f1a) [0x55f645c10f1a]
+duckdb(+0x3b8571) [0x55f645c11571]
+duckdb(+0x3b86e0) [0x55f645c116e0]
+duckdb(+0x3b8796) [0x55f645c11796]
+duckdb(+0x3b5df1) [0x55f645c0edf1]
+duckdb(+0x3b84ab) [0x55f645c114ab]
+duckdb(+0x39ca86) [0x55f645bf5a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f891324624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f8913246305]
+duckdb(+0x3a01b1) [0x55f645bf91b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x561d83765e36]
+duckdb(+0x576ef4) [0x561d83765ef4]
+duckdb(+0x579ce1) [0x561d83768ce1]
+duckdb(+0x3a1d3c) [0x561d83590d3c]
+duckdb(+0x1b6eb8) [0x561d833a5eb8]
+duckdb(+0x9fe2e0) [0x561d83bed2e0]
+duckdb(+0xa03c70) [0x561d83bf2c70]
+duckdb(+0xa044d7) [0x561d83bf34d7]
+duckdb(+0x7fec48) [0x561d839edc48]
+duckdb(+0x8011aa) [0x561d839f01aa]
+duckdb(+0x8017ac) [0x561d839f07ac]
+duckdb(+0x801c2d) [0x561d839f0c2d]
+duckdb(+0x802d09) [0x561d839f1d09]
+duckdb(+0x801e7a) [0x561d839f0e7a]
+duckdb(+0x805fff) [0x561d839f4fff]
+duckdb(+0x8060e3) [0x561d839f50e3]
+duckdb(+0x80639e) [0x561d839f539e]
+duckdb(+0x3c9d4d) [0x561d835b8d4d]
+duckdb(+0x3b7290) [0x561d835a6290]
+duckdb(+0x3b7f1a) [0x561d835a6f1a]
+duckdb(+0x3b8571) [0x561d835a7571]
+duckdb(+0x3b86e0) [0x561d835a76e0]
+duckdb(+0x3b8796) [0x561d835a7796]
+duckdb(+0x3b5df1) [0x561d835a4df1]
+duckdb(+0x3b84ab) [0x561d835a74ab]
+duckdb(+0x39ca86) [0x561d8358ba86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f6e1d16724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f6e1d167305]
+duckdb(+0x3a01b1) [0x561d8358f1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11d.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x5561391e3e36]
+duckdb(+0x576ef4) [0x5561391e3ef4]
+duckdb(+0x579ce1) [0x5561391e6ce1]
+duckdb(+0x3a1d3c) [0x55613900ed3c]
+duckdb(+0x1b6eb8) [0x556138e23eb8]
+duckdb(+0x9fe2e0) [0x55613966b2e0]
+duckdb(+0xa03c70) [0x556139670c70]
+duckdb(+0xa044d7) [0x5561396714d7]
+duckdb(+0x7fec48) [0x55613946bc48]
+duckdb(+0x8011aa) [0x55613946e1aa]
+duckdb(+0x8017ac) [0x55613946e7ac]
+duckdb(+0x801c2d) [0x55613946ec2d]
+duckdb(+0x802d09) [0x55613946fd09]
+duckdb(+0x801e7a) [0x55613946ee7a]
+duckdb(+0x805fff) [0x556139472fff]
+duckdb(+0x8060e3) [0x5561394730e3]
+duckdb(+0x80639e) [0x55613947339e]
+duckdb(+0x3c9d4d) [0x556139036d4d]
+duckdb(+0x3b7290) [0x556139024290]
+duckdb(+0x3b7f1a) [0x556139024f1a]
+duckdb(+0x3b8571) [0x556139025571]
+duckdb(+0x3b86e0) [0x5561390256e0]
+duckdb(+0x3b8796) [0x556139025796]
+duckdb(+0x3b5df1) [0x556139022df1]
+duckdb(+0x3b84ab) [0x5561390254ab]
+duckdb(+0x39ca86) [0x556139009a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f48e744624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f48e7446305]
+duckdb(+0x3a01b1) [0x55613900d1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/12a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x560c7a281e36]
+duckdb(+0x576ef4) [0x560c7a281ef4]
+duckdb(+0x579ce1) [0x560c7a284ce1]
+duckdb(+0x3a1d3c) [0x560c7a0acd3c]
+duckdb(+0x1b6eb8) [0x560c79ec1eb8]
+duckdb(+0x9fe2e0) [0x560c7a7092e0]
+duckdb(+0xa03c70) [0x560c7a70ec70]
+duckdb(+0xa044d7) [0x560c7a70f4d7]
+duckdb(+0x7fec48) [0x560c7a509c48]
+duckdb(+0x8011aa) [0x560c7a50c1aa]
+duckdb(+0x8017ac) [0x560c7a50c7ac]
+duckdb(+0x801c2d) [0x560c7a50cc2d]
+duckdb(+0x802d09) [0x560c7a50dd09]
+duckdb(+0x801e7a) [0x560c7a50ce7a]
+duckdb(+0x805fff) [0x560c7a510fff]
+duckdb(+0x8060e3) [0x560c7a5110e3]
+duckdb(+0x80639e) [0x560c7a51139e]
+duckdb(+0x3c9d4d) [0x560c7a0d4d4d]
+duckdb(+0x3b7290) [0x560c7a0c2290]
+duckdb(+0x3b7f1a) [0x560c7a0c2f1a]
+duckdb(+0x3b8571) [0x560c7a0c3571]
+duckdb(+0x3b86e0) [0x560c7a0c36e0]
+duckdb(+0x3b8796) [0x560c7a0c3796]
+duckdb(+0x3b5df1) [0x560c7a0c0df1]
+duckdb(+0x3b84ab) [0x560c7a0c34ab]
+duckdb(+0x39ca86) [0x560c7a0a7a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f217804624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f2178046305]
+duckdb(+0x3a01b1) [0x560c7a0ab1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/12b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55afa456de36]
+duckdb(+0x576ef4) [0x55afa456def4]
+duckdb(+0x579ce1) [0x55afa4570ce1]
+duckdb(+0x3a1d3c) [0x55afa4398d3c]
+duckdb(+0x1b6eb8) [0x55afa41adeb8]
+duckdb(+0x9fe2e0) [0x55afa49f52e0]
+duckdb(+0xa03c70) [0x55afa49fac70]
+duckdb(+0xa044d7) [0x55afa49fb4d7]
+duckdb(+0x7fec48) [0x55afa47f5c48]
+duckdb(+0x8011aa) [0x55afa47f81aa]
+duckdb(+0x8017ac) [0x55afa47f87ac]
+duckdb(+0x801c2d) [0x55afa47f8c2d]
+duckdb(+0x802d09) [0x55afa47f9d09]
+duckdb(+0x801e7a) [0x55afa47f8e7a]
+duckdb(+0x805fff) [0x55afa47fcfff]
+duckdb(+0x8060e3) [0x55afa47fd0e3]
+duckdb(+0x80639e) [0x55afa47fd39e]
+duckdb(+0x3c9d4d) [0x55afa43c0d4d]
+duckdb(+0x3b7290) [0x55afa43ae290]
+duckdb(+0x3b7f1a) [0x55afa43aef1a]
+duckdb(+0x3b8571) [0x55afa43af571]
+duckdb(+0x3b86e0) [0x55afa43af6e0]
+duckdb(+0x3b8796) [0x55afa43af796]
+duckdb(+0x3b5df1) [0x55afa43acdf1]
+duckdb(+0x3b84ab) [0x55afa43af4ab]
+duckdb(+0x39ca86) [0x55afa4393a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fab4ab6724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fab4ab67305]
+duckdb(+0x3a01b1) [0x55afa43971b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/12c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55f3b4b90e36]
+duckdb(+0x576ef4) [0x55f3b4b90ef4]
+duckdb(+0x579ce1) [0x55f3b4b93ce1]
+duckdb(+0x3a1d3c) [0x55f3b49bbd3c]
+duckdb(+0x1b6eb8) [0x55f3b47d0eb8]
+duckdb(+0x9fe2e0) [0x55f3b50182e0]
+duckdb(+0xa03c70) [0x55f3b501dc70]
+duckdb(+0xa044d7) [0x55f3b501e4d7]
+duckdb(+0x7fec48) [0x55f3b4e18c48]
+duckdb(+0x8011aa) [0x55f3b4e1b1aa]
+duckdb(+0x8017ac) [0x55f3b4e1b7ac]
+duckdb(+0x801c2d) [0x55f3b4e1bc2d]
+duckdb(+0x802d09) [0x55f3b4e1cd09]
+duckdb(+0x801e7a) [0x55f3b4e1be7a]
+duckdb(+0x805fff) [0x55f3b4e1ffff]
+duckdb(+0x8060e3) [0x55f3b4e200e3]
+duckdb(+0x80639e) [0x55f3b4e2039e]
+duckdb(+0x3c9d4d) [0x55f3b49e3d4d]
+duckdb(+0x3b7290) [0x55f3b49d1290]
+duckdb(+0x3b7f1a) [0x55f3b49d1f1a]
+duckdb(+0x3b8571) [0x55f3b49d2571]
+duckdb(+0x3b86e0) [0x55f3b49d26e0]
+duckdb(+0x3b8796) [0x55f3b49d2796]
+duckdb(+0x3b5df1) [0x55f3b49cfdf1]
+duckdb(+0x3b84ab) [0x55f3b49d24ab]
+duckdb(+0x39ca86) [0x55f3b49b6a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f87c696724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f87c6967305]
+duckdb(+0x3a01b1) [0x55f3b49ba1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x555e7b579e36]
+duckdb(+0x576ef4) [0x555e7b579ef4]
+duckdb(+0x579ce1) [0x555e7b57cce1]
+duckdb(+0x3a1d3c) [0x555e7b3a4d3c]
+duckdb(+0x1b6eb8) [0x555e7b1b9eb8]
+duckdb(+0x9fe2e0) [0x555e7ba012e0]
+duckdb(+0xa03c70) [0x555e7ba06c70]
+duckdb(+0xa044d7) [0x555e7ba074d7]
+duckdb(+0x7fec48) [0x555e7b801c48]
+duckdb(+0x8011aa) [0x555e7b8041aa]
+duckdb(+0x8017ac) [0x555e7b8047ac]
+duckdb(+0x801c2d) [0x555e7b804c2d]
+duckdb(+0x802d09) [0x555e7b805d09]
+duckdb(+0x801e7a) [0x555e7b804e7a]
+duckdb(+0x805fff) [0x555e7b808fff]
+duckdb(+0x8060e3) [0x555e7b8090e3]
+duckdb(+0x80639e) [0x555e7b80939e]
+duckdb(+0x3c9d4d) [0x555e7b3ccd4d]
+duckdb(+0x3b7290) [0x555e7b3ba290]
+duckdb(+0x3b7f1a) [0x555e7b3baf1a]
+duckdb(+0x3b8571) [0x555e7b3bb571]
+duckdb(+0x3b86e0) [0x555e7b3bb6e0]
+duckdb(+0x3b8796) [0x555e7b3bb796]
+duckdb(+0x3b5df1) [0x555e7b3b8df1]
+duckdb(+0x3b84ab) [0x555e7b3bb4ab]
+duckdb(+0x39ca86) [0x555e7b39fa86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fd11b04624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fd11b046305]
+duckdb(+0x3a01b1) [0x555e7b3a31b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55ec99d05e36]
+duckdb(+0x576ef4) [0x55ec99d05ef4]
+duckdb(+0x579ce1) [0x55ec99d08ce1]
+duckdb(+0x3a1d3c) [0x55ec99b30d3c]
+duckdb(+0x1b6eb8) [0x55ec99945eb8]
+duckdb(+0x9fe2e0) [0x55ec9a18d2e0]
+duckdb(+0xa03c70) [0x55ec9a192c70]
+duckdb(+0xa044d7) [0x55ec9a1934d7]
+duckdb(+0x7fec48) [0x55ec99f8dc48]
+duckdb(+0x8011aa) [0x55ec99f901aa]
+duckdb(+0x8017ac) [0x55ec99f907ac]
+duckdb(+0x801c2d) [0x55ec99f90c2d]
+duckdb(+0x802d09) [0x55ec99f91d09]
+duckdb(+0x801e7a) [0x55ec99f90e7a]
+duckdb(+0x805fff) [0x55ec99f94fff]
+duckdb(+0x8060e3) [0x55ec99f950e3]
+duckdb(+0x80639e) [0x55ec99f9539e]
+duckdb(+0x3c9d4d) [0x55ec99b58d4d]
+duckdb(+0x3b7290) [0x55ec99b46290]
+duckdb(+0x3b7f1a) [0x55ec99b46f1a]
+duckdb(+0x3b8571) [0x55ec99b47571]
+duckdb(+0x3b86e0) [0x55ec99b476e0]
+duckdb(+0x3b8796) [0x55ec99b47796]
+duckdb(+0x3b5df1) [0x55ec99b44df1]
+duckdb(+0x3b84ab) [0x55ec99b474ab]
+duckdb(+0x39ca86) [0x55ec99b2ba86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fdcbb56724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fdcbb567305]
+duckdb(+0x3a01b1) [0x55ec99b2f1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x564b9256be36]
+duckdb(+0x576ef4) [0x564b9256bef4]
+duckdb(+0x579ce1) [0x564b9256ece1]
+duckdb(+0x3a1d3c) [0x564b92396d3c]
+duckdb(+0x1b6eb8) [0x564b921abeb8]
+duckdb(+0x9fe2e0) [0x564b929f32e0]
+duckdb(+0xa03c70) [0x564b929f8c70]
+duckdb(+0xa044d7) [0x564b929f94d7]
+duckdb(+0x7fec48) [0x564b927f3c48]
+duckdb(+0x8011aa) [0x564b927f61aa]
+duckdb(+0x8017ac) [0x564b927f67ac]
+duckdb(+0x801c2d) [0x564b927f6c2d]
+duckdb(+0x802d09) [0x564b927f7d09]
+duckdb(+0x801e7a) [0x564b927f6e7a]
+duckdb(+0x805fff) [0x564b927fafff]
+duckdb(+0x8060e3) [0x564b927fb0e3]
+duckdb(+0x80639e) [0x564b927fb39e]
+duckdb(+0x3c9d4d) [0x564b923bed4d]
+duckdb(+0x3b7290) [0x564b923ac290]
+duckdb(+0x3b7f1a) [0x564b923acf1a]
+duckdb(+0x3b8571) [0x564b923ad571]
+duckdb(+0x3b86e0) [0x564b923ad6e0]
+duckdb(+0x3b8796) [0x564b923ad796]
+duckdb(+0x3b5df1) [0x564b923aadf1]
+duckdb(+0x3b84ab) [0x564b923ad4ab]
+duckdb(+0x39ca86) [0x564b92391a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f2f5d96724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f2f5d967305]
+duckdb(+0x3a01b1) [0x564b923951b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13d.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x560655d4be36]
+duckdb(+0x576ef4) [0x560655d4bef4]
+duckdb(+0x579ce1) [0x560655d4ece1]
+duckdb(+0x3a1d3c) [0x560655b76d3c]
+duckdb(+0x1b6eb8) [0x56065598beb8]
+duckdb(+0x9fe2e0) [0x5606561d32e0]
+duckdb(+0xa03c70) [0x5606561d8c70]
+duckdb(+0xa044d7) [0x5606561d94d7]
+duckdb(+0x7fec48) [0x560655fd3c48]
+duckdb(+0x8011aa) [0x560655fd61aa]
+duckdb(+0x8017ac) [0x560655fd67ac]
+duckdb(+0x801c2d) [0x560655fd6c2d]
+duckdb(+0x802d09) [0x560655fd7d09]
+duckdb(+0x801e7a) [0x560655fd6e7a]
+duckdb(+0x805fff) [0x560655fdafff]
+duckdb(+0x8060e3) [0x560655fdb0e3]
+duckdb(+0x80639e) [0x560655fdb39e]
+duckdb(+0x3c9d4d) [0x560655b9ed4d]
+duckdb(+0x3b7290) [0x560655b8c290]
+duckdb(+0x3b7f1a) [0x560655b8cf1a]
+duckdb(+0x3b8571) [0x560655b8d571]
+duckdb(+0x3b86e0) [0x560655b8d6e0]
+duckdb(+0x3b8796) [0x560655b8d796]
+duckdb(+0x3b5df1) [0x560655b8adf1]
+duckdb(+0x3b84ab) [0x560655b8d4ab]
+duckdb(+0x39ca86) [0x560655b71a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f061de4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f061de46305]
+duckdb(+0x3a01b1) [0x560655b751b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x564f365c7e36]
+duckdb(+0x576ef4) [0x564f365c7ef4]
+duckdb(+0x579ce1) [0x564f365cace1]
+duckdb(+0x3a1d3c) [0x564f363f2d3c]
+duckdb(+0x1b6eb8) [0x564f36207eb8]
+duckdb(+0x9fe2e0) [0x564f36a4f2e0]
+duckdb(+0xa03c70) [0x564f36a54c70]
+duckdb(+0xa044d7) [0x564f36a554d7]
+duckdb(+0x7fec48) [0x564f3684fc48]
+duckdb(+0x8011aa) [0x564f368521aa]
+duckdb(+0x8017ac) [0x564f368527ac]
+duckdb(+0x801c2d) [0x564f36852c2d]
+duckdb(+0x802d09) [0x564f36853d09]
+duckdb(+0x801e7a) [0x564f36852e7a]
+duckdb(+0x805fff) [0x564f36856fff]
+duckdb(+0x8060e3) [0x564f368570e3]
+duckdb(+0x80639e) [0x564f3685739e]
+duckdb(+0x3c9d4d) [0x564f3641ad4d]
+duckdb(+0x3b7290) [0x564f36408290]
+duckdb(+0x3b7f1a) [0x564f36408f1a]
+duckdb(+0x3b8571) [0x564f36409571]
+duckdb(+0x3b86e0) [0x564f364096e0]
+duckdb(+0x3b8796) [0x564f36409796]
+duckdb(+0x3b5df1) [0x564f36406df1]
+duckdb(+0x3b84ab) [0x564f364094ab]
+duckdb(+0x39ca86) [0x564f363eda86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f6c1276724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f6c12767305]
+duckdb(+0x3a01b1) [0x564f363f11b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x559522abfe36]
+duckdb(+0x576ef4) [0x559522abfef4]
+duckdb(+0x579ce1) [0x559522ac2ce1]
+duckdb(+0x3a1d3c) [0x5595228ead3c]
+duckdb(+0x1b6eb8) [0x5595226ffeb8]
+duckdb(+0x9fe2e0) [0x559522f472e0]
+duckdb(+0xa03c70) [0x559522f4cc70]
+duckdb(+0xa044d7) [0x559522f4d4d7]
+duckdb(+0x7fec48) [0x559522d47c48]
+duckdb(+0x8011aa) [0x559522d4a1aa]
+duckdb(+0x8017ac) [0x559522d4a7ac]
+duckdb(+0x801c2d) [0x559522d4ac2d]
+duckdb(+0x802d09) [0x559522d4bd09]
+duckdb(+0x801e7a) [0x559522d4ae7a]
+duckdb(+0x805fff) [0x559522d4efff]
+duckdb(+0x8060e3) [0x559522d4f0e3]
+duckdb(+0x80639e) [0x559522d4f39e]
+duckdb(+0x3c9d4d) [0x559522912d4d]
+duckdb(+0x3b7290) [0x559522900290]
+duckdb(+0x3b7f1a) [0x559522900f1a]
+duckdb(+0x3b8571) [0x559522901571]
+duckdb(+0x3b86e0) [0x5595229016e0]
+duckdb(+0x3b8796) [0x559522901796]
+duckdb(+0x3b5df1) [0x5595228fedf1]
+duckdb(+0x3b84ab) [0x5595229014ab]
+duckdb(+0x39ca86) [0x5595228e5a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f0e0604624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f0e06046305]
+duckdb(+0x3a01b1) [0x5595228e91b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x564e477abe36]
+duckdb(+0x576ef4) [0x564e477abef4]
+duckdb(+0x579ce1) [0x564e477aece1]
+duckdb(+0x3a1d3c) [0x564e475d6d3c]
+duckdb(+0x1b6eb8) [0x564e473ebeb8]
+duckdb(+0x9fe2e0) [0x564e47c332e0]
+duckdb(+0xa03c70) [0x564e47c38c70]
+duckdb(+0xa044d7) [0x564e47c394d7]
+duckdb(+0x7fec48) [0x564e47a33c48]
+duckdb(+0x8011aa) [0x564e47a361aa]
+duckdb(+0x8017ac) [0x564e47a367ac]
+duckdb(+0x801c2d) [0x564e47a36c2d]
+duckdb(+0x802d09) [0x564e47a37d09]
+duckdb(+0x801e7a) [0x564e47a36e7a]
+duckdb(+0x805fff) [0x564e47a3afff]
+duckdb(+0x8060e3) [0x564e47a3b0e3]
+duckdb(+0x80639e) [0x564e47a3b39e]
+duckdb(+0x3c9d4d) [0x564e475fed4d]
+duckdb(+0x3b7290) [0x564e475ec290]
+duckdb(+0x3b7f1a) [0x564e475ecf1a]
+duckdb(+0x3b8571) [0x564e475ed571]
+duckdb(+0x3b86e0) [0x564e475ed6e0]
+duckdb(+0x3b8796) [0x564e475ed796]
+duckdb(+0x3b5df1) [0x564e475eadf1]
+duckdb(+0x3b84ab) [0x564e475ed4ab]
+duckdb(+0x39ca86) [0x564e475d1a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fc3ca56724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fc3ca567305]
+duckdb(+0x3a01b1) [0x564e475d51b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/15a.sql
+Parser Error: syntax error at or near "at"
+
+LINE 3: FROM aka_title AS at,
+                          ^
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/15b.sql
+Parser Error: syntax error at or near "at"
+
+LINE 3: FROM aka_title AS at,
+                          ^
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/15c.sql
+Parser Error: syntax error at or near "at"
+
+LINE 3: FROM aka_title AS at,
+                          ^
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/15d.sql
+Parser Error: syntax error at or near "."
+
+LINE 1: SELECT MIN(at.title) AS aka_title,
+                     ^
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55962542de36]
+duckdb(+0x576ef4) [0x55962542def4]
+duckdb(+0x579ce1) [0x559625430ce1]
+duckdb(+0x3a1d3c) [0x559625258d3c]
+duckdb(+0x1b83aa) [0x55962506f3aa]
+duckdb(+0x9f4a9b) [0x5596258aba9b]
+duckdb(+0x7fed10) [0x5596256b5d10]
+duckdb(+0x8011aa) [0x5596256b81aa]
+duckdb(+0x8017ac) [0x5596256b87ac]
+duckdb(+0x801c2d) [0x5596256b8c2d]
+duckdb(+0x802d09) [0x5596256b9d09]
+duckdb(+0x801e7a) [0x5596256b8e7a]
+duckdb(+0x805fff) [0x5596256bcfff]
+duckdb(+0x8060e3) [0x5596256bd0e3]
+duckdb(+0x80639e) [0x5596256bd39e]
+duckdb(+0x3c9d4d) [0x559625280d4d]
+duckdb(+0x3b7290) [0x55962526e290]
+duckdb(+0x3b7f1a) [0x55962526ef1a]
+duckdb(+0x3b8571) [0x55962526f571]
+duckdb(+0x3b86e0) [0x55962526f6e0]
+duckdb(+0x3b8796) [0x55962526f796]
+duckdb(+0x3b5df1) [0x55962526cdf1]
+duckdb(+0x3b84ab) [0x55962526f4ab]
+duckdb(+0x39ca86) [0x559625253a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f1bcd82624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f1bcd826305]
+duckdb(+0x3a01b1) [0x5596252571b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55e19b1a3e36]
+duckdb(+0x576ef4) [0x55e19b1a3ef4]
+duckdb(+0x579ce1) [0x55e19b1a6ce1]
+duckdb(+0x3a1d3c) [0x55e19afced3c]
+duckdb(+0x1b83aa) [0x55e19ade53aa]
+duckdb(+0x9f4a9b) [0x55e19b621a9b]
+duckdb(+0x7fed10) [0x55e19b42bd10]
+duckdb(+0x8011aa) [0x55e19b42e1aa]
+duckdb(+0x8017ac) [0x55e19b42e7ac]
+duckdb(+0x801c2d) [0x55e19b42ec2d]
+duckdb(+0x802d09) [0x55e19b42fd09]
+duckdb(+0x801e7a) [0x55e19b42ee7a]
+duckdb(+0x805fff) [0x55e19b432fff]
+duckdb(+0x8060e3) [0x55e19b4330e3]
+duckdb(+0x80639e) [0x55e19b43339e]
+duckdb(+0x3c9d4d) [0x55e19aff6d4d]
+duckdb(+0x3b7290) [0x55e19afe4290]
+duckdb(+0x3b7f1a) [0x55e19afe4f1a]
+duckdb(+0x3b8571) [0x55e19afe5571]
+duckdb(+0x3b86e0) [0x55e19afe56e0]
+duckdb(+0x3b8796) [0x55e19afe5796]
+duckdb(+0x3b5df1) [0x55e19afe2df1]
+duckdb(+0x3b84ab) [0x55e19afe54ab]
+duckdb(+0x39ca86) [0x55e19afc9a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f39e5f6724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f39e5f67305]
+duckdb(+0x3a01b1) [0x55e19afcd1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x561dc13fce36]
+duckdb(+0x576ef4) [0x561dc13fcef4]
+duckdb(+0x579ce1) [0x561dc13ffce1]
+duckdb(+0x3a1d3c) [0x561dc1227d3c]
+duckdb(+0x1b83aa) [0x561dc103e3aa]
+duckdb(+0x9f4a9b) [0x561dc187aa9b]
+duckdb(+0x7fed10) [0x561dc1684d10]
+duckdb(+0x8011aa) [0x561dc16871aa]
+duckdb(+0x8017ac) [0x561dc16877ac]
+duckdb(+0x801c2d) [0x561dc1687c2d]
+duckdb(+0x802d09) [0x561dc1688d09]
+duckdb(+0x801e7a) [0x561dc1687e7a]
+duckdb(+0x805fff) [0x561dc168bfff]
+duckdb(+0x8060e3) [0x561dc168c0e3]
+duckdb(+0x80639e) [0x561dc168c39e]
+duckdb(+0x3c9d4d) [0x561dc124fd4d]
+duckdb(+0x3b7290) [0x561dc123d290]
+duckdb(+0x3b7f1a) [0x561dc123df1a]
+duckdb(+0x3b8571) [0x561dc123e571]
+duckdb(+0x3b86e0) [0x561dc123e6e0]
+duckdb(+0x3b8796) [0x561dc123e796]
+duckdb(+0x3b5df1) [0x561dc123bdf1]
+duckdb(+0x3b84ab) [0x561dc123e4ab]
+duckdb(+0x39ca86) [0x561dc1222a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f54eb14724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f54eb147305]
+duckdb(+0x3a01b1) [0x561dc12261b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16d.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55aa76357e36]
+duckdb(+0x576ef4) [0x55aa76357ef4]
+duckdb(+0x579ce1) [0x55aa7635ace1]
+duckdb(+0x3a1d3c) [0x55aa76182d3c]
+duckdb(+0x1b83aa) [0x55aa75f993aa]
+duckdb(+0x9f4a9b) [0x55aa767d5a9b]
+duckdb(+0x7fed10) [0x55aa765dfd10]
+duckdb(+0x8011aa) [0x55aa765e21aa]
+duckdb(+0x8017ac) [0x55aa765e27ac]
+duckdb(+0x801c2d) [0x55aa765e2c2d]
+duckdb(+0x802d09) [0x55aa765e3d09]
+duckdb(+0x801e7a) [0x55aa765e2e7a]
+duckdb(+0x805fff) [0x55aa765e6fff]
+duckdb(+0x8060e3) [0x55aa765e70e3]
+duckdb(+0x80639e) [0x55aa765e739e]
+duckdb(+0x3c9d4d) [0x55aa761aad4d]
+duckdb(+0x3b7290) [0x55aa76198290]
+duckdb(+0x3b7f1a) [0x55aa76198f1a]
+duckdb(+0x3b8571) [0x55aa76199571]
+duckdb(+0x3b86e0) [0x55aa761996e0]
+duckdb(+0x3b8796) [0x55aa76199796]
+duckdb(+0x3b5df1) [0x55aa76196df1]
+duckdb(+0x3b84ab) [0x55aa761994ab]
+duckdb(+0x39ca86) [0x55aa7617da86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f954e14724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f954e147305]
+duckdb(+0x3a01b1) [0x55aa761811b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x555c8e5eee36]
+duckdb(+0x576ef4) [0x555c8e5eeef4]
+duckdb(+0x579ce1) [0x555c8e5f1ce1]
+duckdb(+0x3a1d3c) [0x555c8e419d3c]
+duckdb(+0x1b83aa) [0x555c8e2303aa]
+duckdb(+0x9f4a9b) [0x555c8ea6ca9b]
+duckdb(+0x7fed10) [0x555c8e876d10]
+duckdb(+0x8011aa) [0x555c8e8791aa]
+duckdb(+0x8017ac) [0x555c8e8797ac]
+duckdb(+0x801c2d) [0x555c8e879c2d]
+duckdb(+0x802d09) [0x555c8e87ad09]
+duckdb(+0x801e7a) [0x555c8e879e7a]
+duckdb(+0x805fff) [0x555c8e87dfff]
+duckdb(+0x8060e3) [0x555c8e87e0e3]
+duckdb(+0x80639e) [0x555c8e87e39e]
+duckdb(+0x3c9d4d) [0x555c8e441d4d]
+duckdb(+0x3b7290) [0x555c8e42f290]
+duckdb(+0x3b7f1a) [0x555c8e42ff1a]
+duckdb(+0x3b8571) [0x555c8e430571]
+duckdb(+0x3b86e0) [0x555c8e4306e0]
+duckdb(+0x3b8796) [0x555c8e430796]
+duckdb(+0x3b5df1) [0x555c8e42ddf1]
+duckdb(+0x3b84ab) [0x555c8e4304ab]
+duckdb(+0x39ca86) [0x555c8e414a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fc153c4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fc153c46305]
+duckdb(+0x3a01b1) [0x555c8e4181b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x560679faae36]
+duckdb(+0x576ef4) [0x560679faaef4]
+duckdb(+0x579ce1) [0x560679fadce1]
+duckdb(+0x3a1d3c) [0x560679dd5d3c]
+duckdb(+0x1b83aa) [0x560679bec3aa]
+duckdb(+0x9f4a9b) [0x56067a428a9b]
+duckdb(+0x7fed10) [0x56067a232d10]
+duckdb(+0x8011aa) [0x56067a2351aa]
+duckdb(+0x8017ac) [0x56067a2357ac]
+duckdb(+0x801c2d) [0x56067a235c2d]
+duckdb(+0x802d09) [0x56067a236d09]
+duckdb(+0x801e7a) [0x56067a235e7a]
+duckdb(+0x805fff) [0x56067a239fff]
+duckdb(+0x8060e3) [0x56067a23a0e3]
+duckdb(+0x80639e) [0x56067a23a39e]
+duckdb(+0x3c9d4d) [0x560679dfdd4d]
+duckdb(+0x3b7290) [0x560679deb290]
+duckdb(+0x3b7f1a) [0x560679debf1a]
+duckdb(+0x3b8571) [0x560679dec571]
+duckdb(+0x3b86e0) [0x560679dec6e0]
+duckdb(+0x3b8796) [0x560679dec796]
+duckdb(+0x3b5df1) [0x560679de9df1]
+duckdb(+0x3b84ab) [0x560679dec4ab]
+duckdb(+0x39ca86) [0x560679dd0a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f146176724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f1461767305]
+duckdb(+0x3a01b1) [0x560679dd41b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55ef64da9e36]
+duckdb(+0x576ef4) [0x55ef64da9ef4]
+duckdb(+0x579ce1) [0x55ef64dacce1]
+duckdb(+0x3a1d3c) [0x55ef64bd4d3c]
+duckdb(+0x1b83aa) [0x55ef649eb3aa]
+duckdb(+0x9f4a9b) [0x55ef65227a9b]
+duckdb(+0x7fed10) [0x55ef65031d10]
+duckdb(+0x8011aa) [0x55ef650341aa]
+duckdb(+0x8017ac) [0x55ef650347ac]
+duckdb(+0x801c2d) [0x55ef65034c2d]
+duckdb(+0x802d09) [0x55ef65035d09]
+duckdb(+0x801e7a) [0x55ef65034e7a]
+duckdb(+0x805fff) [0x55ef65038fff]
+duckdb(+0x8060e3) [0x55ef650390e3]
+duckdb(+0x80639e) [0x55ef6503939e]
+duckdb(+0x3c9d4d) [0x55ef64bfcd4d]
+duckdb(+0x3b7290) [0x55ef64bea290]
+duckdb(+0x3b7f1a) [0x55ef64beaf1a]
+duckdb(+0x3b8571) [0x55ef64beb571]
+duckdb(+0x3b86e0) [0x55ef64beb6e0]
+duckdb(+0x3b8796) [0x55ef64beb796]
+duckdb(+0x3b5df1) [0x55ef64be8df1]
+duckdb(+0x3b84ab) [0x55ef64beb4ab]
+duckdb(+0x39ca86) [0x55ef64bcfa86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fbad836724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fbad8367305]
+duckdb(+0x3a01b1) [0x55ef64bd31b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17d.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55ad7c9e3e36]
+duckdb(+0x576ef4) [0x55ad7c9e3ef4]
+duckdb(+0x579ce1) [0x55ad7c9e6ce1]
+duckdb(+0x3a1d3c) [0x55ad7c80ed3c]
+duckdb(+0x1b83aa) [0x55ad7c6253aa]
+duckdb(+0x9f4a9b) [0x55ad7ce61a9b]
+duckdb(+0x7fed10) [0x55ad7cc6bd10]
+duckdb(+0x8011aa) [0x55ad7cc6e1aa]
+duckdb(+0x8017ac) [0x55ad7cc6e7ac]
+duckdb(+0x801c2d) [0x55ad7cc6ec2d]
+duckdb(+0x802d09) [0x55ad7cc6fd09]
+duckdb(+0x801e7a) [0x55ad7cc6ee7a]
+duckdb(+0x805fff) [0x55ad7cc72fff]
+duckdb(+0x8060e3) [0x55ad7cc730e3]
+duckdb(+0x80639e) [0x55ad7cc7339e]
+duckdb(+0x3c9d4d) [0x55ad7c836d4d]
+duckdb(+0x3b7290) [0x55ad7c824290]
+duckdb(+0x3b7f1a) [0x55ad7c824f1a]
+duckdb(+0x3b8571) [0x55ad7c825571]
+duckdb(+0x3b86e0) [0x55ad7c8256e0]
+duckdb(+0x3b8796) [0x55ad7c825796]
+duckdb(+0x3b5df1) [0x55ad7c822df1]
+duckdb(+0x3b84ab) [0x55ad7c8254ab]
+duckdb(+0x39ca86) [0x55ad7c809a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f720ee4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f720ee46305]
+duckdb(+0x3a01b1) [0x55ad7c80d1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17e.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x564449794e36]
+duckdb(+0x576ef4) [0x564449794ef4]
+duckdb(+0x579ce1) [0x564449797ce1]
+duckdb(+0x3a1d3c) [0x5644495bfd3c]
+duckdb(+0x1b83aa) [0x5644493d63aa]
+duckdb(+0x9f4a9b) [0x564449c12a9b]
+duckdb(+0x7fed10) [0x564449a1cd10]
+duckdb(+0x8011aa) [0x564449a1f1aa]
+duckdb(+0x8017ac) [0x564449a1f7ac]
+duckdb(+0x801c2d) [0x564449a1fc2d]
+duckdb(+0x802d09) [0x564449a20d09]
+duckdb(+0x801e7a) [0x564449a1fe7a]
+duckdb(+0x805fff) [0x564449a23fff]
+duckdb(+0x8060e3) [0x564449a240e3]
+duckdb(+0x80639e) [0x564449a2439e]
+duckdb(+0x3c9d4d) [0x5644495e7d4d]
+duckdb(+0x3b7290) [0x5644495d5290]
+duckdb(+0x3b7f1a) [0x5644495d5f1a]
+duckdb(+0x3b8571) [0x5644495d6571]
+duckdb(+0x3b86e0) [0x5644495d66e0]
+duckdb(+0x3b8796) [0x5644495d6796]
+duckdb(+0x3b5df1) [0x5644495d3df1]
+duckdb(+0x3b84ab) [0x5644495d64ab]
+duckdb(+0x39ca86) [0x5644495baa86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fc7d396724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fc7d3967305]
+duckdb(+0x3a01b1) [0x5644495be1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17f.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55fb99742e36]
+duckdb(+0x576ef4) [0x55fb99742ef4]
+duckdb(+0x579ce1) [0x55fb99745ce1]
+duckdb(+0x3a1d3c) [0x55fb9956dd3c]
+duckdb(+0x1b83aa) [0x55fb993843aa]
+duckdb(+0x9f4a9b) [0x55fb99bc0a9b]
+duckdb(+0x7fed10) [0x55fb999cad10]
+duckdb(+0x8011aa) [0x55fb999cd1aa]
+duckdb(+0x8017ac) [0x55fb999cd7ac]
+duckdb(+0x801c2d) [0x55fb999cdc2d]
+duckdb(+0x802d09) [0x55fb999ced09]
+duckdb(+0x801e7a) [0x55fb999cde7a]
+duckdb(+0x805fff) [0x55fb999d1fff]
+duckdb(+0x8060e3) [0x55fb999d20e3]
+duckdb(+0x80639e) [0x55fb999d239e]
+duckdb(+0x3c9d4d) [0x55fb99595d4d]
+duckdb(+0x3b7290) [0x55fb99583290]
+duckdb(+0x3b7f1a) [0x55fb99583f1a]
+duckdb(+0x3b8571) [0x55fb99584571]
+duckdb(+0x3b86e0) [0x55fb995846e0]
+duckdb(+0x3b8796) [0x55fb99584796]
+duckdb(+0x3b5df1) [0x55fb99581df1]
+duckdb(+0x3b84ab) [0x55fb995844ab]
+duckdb(+0x39ca86) [0x55fb99568a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f286216724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f2862167305]
+duckdb(+0x3a01b1) [0x55fb9956c1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/18a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x563ba46d0e36]
+duckdb(+0x576ef4) [0x563ba46d0ef4]
+duckdb(+0x579ce1) [0x563ba46d3ce1]
+duckdb(+0x3a1d3c) [0x563ba44fbd3c]
+duckdb(+0x1b6eb8) [0x563ba4310eb8]
+duckdb(+0x9fe2e0) [0x563ba4b582e0]
+duckdb(+0xa03c70) [0x563ba4b5dc70]
+duckdb(+0xa044d7) [0x563ba4b5e4d7]
+duckdb(+0x7fec48) [0x563ba4958c48]
+duckdb(+0x8011aa) [0x563ba495b1aa]
+duckdb(+0x8017ac) [0x563ba495b7ac]
+duckdb(+0x801c2d) [0x563ba495bc2d]
+duckdb(+0x802d09) [0x563ba495cd09]
+duckdb(+0x801e7a) [0x563ba495be7a]
+duckdb(+0x805fff) [0x563ba495ffff]
+duckdb(+0x8060e3) [0x563ba49600e3]
+duckdb(+0x80639e) [0x563ba496039e]
+duckdb(+0x3c9d4d) [0x563ba4523d4d]
+duckdb(+0x3b7290) [0x563ba4511290]
+duckdb(+0x3b7f1a) [0x563ba4511f1a]
+duckdb(+0x3b8571) [0x563ba4512571]
+duckdb(+0x3b86e0) [0x563ba45126e0]
+duckdb(+0x3b8796) [0x563ba4512796]
+duckdb(+0x3b5df1) [0x563ba450fdf1]
+duckdb(+0x3b84ab) [0x563ba45124ab]
+duckdb(+0x39ca86) [0x563ba44f6a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f867644624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f8676446305]
+duckdb(+0x3a01b1) [0x563ba44fa1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/18b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55e2c9a9be36]
+duckdb(+0x576ef4) [0x55e2c9a9bef4]
+duckdb(+0x579ce1) [0x55e2c9a9ece1]
+duckdb(+0x3a1d3c) [0x55e2c98c6d3c]
+duckdb(+0x1b6eb8) [0x55e2c96dbeb8]
+duckdb(+0x9fe2e0) [0x55e2c9f232e0]
+duckdb(+0xa03c70) [0x55e2c9f28c70]
+duckdb(+0xa044d7) [0x55e2c9f294d7]
+duckdb(+0x7fec48) [0x55e2c9d23c48]
+duckdb(+0x8011aa) [0x55e2c9d261aa]
+duckdb(+0x8017ac) [0x55e2c9d267ac]
+duckdb(+0x801c2d) [0x55e2c9d26c2d]
+duckdb(+0x802d09) [0x55e2c9d27d09]
+duckdb(+0x801e7a) [0x55e2c9d26e7a]
+duckdb(+0x805fff) [0x55e2c9d2afff]
+duckdb(+0x8060e3) [0x55e2c9d2b0e3]
+duckdb(+0x80639e) [0x55e2c9d2b39e]
+duckdb(+0x3c9d4d) [0x55e2c98eed4d]
+duckdb(+0x3b7290) [0x55e2c98dc290]
+duckdb(+0x3b7f1a) [0x55e2c98dcf1a]
+duckdb(+0x3b8571) [0x55e2c98dd571]
+duckdb(+0x3b86e0) [0x55e2c98dd6e0]
+duckdb(+0x3b8796) [0x55e2c98dd796]
+duckdb(+0x3b5df1) [0x55e2c98dadf1]
+duckdb(+0x3b84ab) [0x55e2c98dd4ab]
+duckdb(+0x39ca86) [0x55e2c98c1a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fa6c6f4724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fa6c6f47305]
+duckdb(+0x3a01b1) [0x55e2c98c51b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/18c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x5621b1d91e36]
+duckdb(+0x576ef4) [0x5621b1d91ef4]
+duckdb(+0x579ce1) [0x5621b1d94ce1]
+duckdb(+0x3a1d3c) [0x5621b1bbcd3c]
+duckdb(+0x1b6eb8) [0x5621b19d1eb8]
+duckdb(+0x9fe2e0) [0x5621b22192e0]
+duckdb(+0xa03c70) [0x5621b221ec70]
+duckdb(+0xa044d7) [0x5621b221f4d7]
+duckdb(+0x7fec48) [0x5621b2019c48]
+duckdb(+0x8011aa) [0x5621b201c1aa]
+duckdb(+0x8017ac) [0x5621b201c7ac]
+duckdb(+0x801c2d) [0x5621b201cc2d]
+duckdb(+0x802d09) [0x5621b201dd09]
+duckdb(+0x801e7a) [0x5621b201ce7a]
+duckdb(+0x805fff) [0x5621b2020fff]
+duckdb(+0x8060e3) [0x5621b20210e3]
+duckdb(+0x80639e) [0x5621b202139e]
+duckdb(+0x3c9d4d) [0x5621b1be4d4d]
+duckdb(+0x3b7290) [0x5621b1bd2290]
+duckdb(+0x3b7f1a) [0x5621b1bd2f1a]
+duckdb(+0x3b8571) [0x5621b1bd3571]
+duckdb(+0x3b86e0) [0x5621b1bd36e0]
+duckdb(+0x3b8796) [0x5621b1bd3796]
+duckdb(+0x3b5df1) [0x5621b1bd0df1]
+duckdb(+0x3b84ab) [0x5621b1bd34ab]
+duckdb(+0x39ca86) [0x5621b1bb7a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f4d3196724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f4d31967305]
+duckdb(+0x3a01b1) [0x5621b1bbb1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55e35e423e36]
+duckdb(+0x576ef4) [0x55e35e423ef4]
+duckdb(+0x579ce1) [0x55e35e426ce1]
+duckdb(+0x3a1d3c) [0x55e35e24ed3c]
+duckdb(+0x1b83aa) [0x55e35e0653aa]
+duckdb(+0x9f4a9b) [0x55e35e8a1a9b]
+duckdb(+0x7fed10) [0x55e35e6abd10]
+duckdb(+0x8011aa) [0x55e35e6ae1aa]
+duckdb(+0x8017ac) [0x55e35e6ae7ac]
+duckdb(+0x801c2d) [0x55e35e6aec2d]
+duckdb(+0x802d09) [0x55e35e6afd09]
+duckdb(+0x801e7a) [0x55e35e6aee7a]
+duckdb(+0x805fff) [0x55e35e6b2fff]
+duckdb(+0x8060e3) [0x55e35e6b30e3]
+duckdb(+0x80639e) [0x55e35e6b339e]
+duckdb(+0x3c9d4d) [0x55e35e276d4d]
+duckdb(+0x3b7290) [0x55e35e264290]
+duckdb(+0x3b7f1a) [0x55e35e264f1a]
+duckdb(+0x3b8571) [0x55e35e265571]
+duckdb(+0x3b86e0) [0x55e35e2656e0]
+duckdb(+0x3b8796) [0x55e35e265796]
+duckdb(+0x3b5df1) [0x55e35e262df1]
+duckdb(+0x3b84ab) [0x55e35e2654ab]
+duckdb(+0x39ca86) [0x55e35e249a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f68bf56724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f68bf567305]
+duckdb(+0x3a01b1) [0x55e35e24d1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55b4c0808e36]
+duckdb(+0x576ef4) [0x55b4c0808ef4]
+duckdb(+0x579ce1) [0x55b4c080bce1]
+duckdb(+0x3a1d3c) [0x55b4c0633d3c]
+duckdb(+0x1b83aa) [0x55b4c044a3aa]
+duckdb(+0x9f4a9b) [0x55b4c0c86a9b]
+duckdb(+0x7fed10) [0x55b4c0a90d10]
+duckdb(+0x8011aa) [0x55b4c0a931aa]
+duckdb(+0x8017ac) [0x55b4c0a937ac]
+duckdb(+0x801c2d) [0x55b4c0a93c2d]
+duckdb(+0x802d09) [0x55b4c0a94d09]
+duckdb(+0x801e7a) [0x55b4c0a93e7a]
+duckdb(+0x805fff) [0x55b4c0a97fff]
+duckdb(+0x8060e3) [0x55b4c0a980e3]
+duckdb(+0x80639e) [0x55b4c0a9839e]
+duckdb(+0x3c9d4d) [0x55b4c065bd4d]
+duckdb(+0x3b7290) [0x55b4c0649290]
+duckdb(+0x3b7f1a) [0x55b4c0649f1a]
+duckdb(+0x3b8571) [0x55b4c064a571]
+duckdb(+0x3b86e0) [0x55b4c064a6e0]
+duckdb(+0x3b8796) [0x55b4c064a796]
+duckdb(+0x3b5df1) [0x55b4c0647df1]
+duckdb(+0x3b84ab) [0x55b4c064a4ab]
+duckdb(+0x39ca86) [0x55b4c062ea86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7ff624e4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7ff624e46305]
+duckdb(+0x3a01b1) [0x55b4c06321b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x562bde372e36]
+duckdb(+0x576ef4) [0x562bde372ef4]
+duckdb(+0x579ce1) [0x562bde375ce1]
+duckdb(+0x3a1d3c) [0x562bde19dd3c]
+duckdb(+0x1b83aa) [0x562bddfb43aa]
+duckdb(+0x9f4a9b) [0x562bde7f0a9b]
+duckdb(+0x7fed10) [0x562bde5fad10]
+duckdb(+0x8011aa) [0x562bde5fd1aa]
+duckdb(+0x8017ac) [0x562bde5fd7ac]
+duckdb(+0x801c2d) [0x562bde5fdc2d]
+duckdb(+0x802d09) [0x562bde5fed09]
+duckdb(+0x801e7a) [0x562bde5fde7a]
+duckdb(+0x805fff) [0x562bde601fff]
+duckdb(+0x8060e3) [0x562bde6020e3]
+duckdb(+0x80639e) [0x562bde60239e]
+duckdb(+0x3c9d4d) [0x562bde1c5d4d]
+duckdb(+0x3b7290) [0x562bde1b3290]
+duckdb(+0x3b7f1a) [0x562bde1b3f1a]
+duckdb(+0x3b8571) [0x562bde1b4571]
+duckdb(+0x3b86e0) [0x562bde1b46e0]
+duckdb(+0x3b8796) [0x562bde1b4796]
+duckdb(+0x3b5df1) [0x562bde1b1df1]
+duckdb(+0x3b84ab) [0x562bde1b44ab]
+duckdb(+0x39ca86) [0x562bde198a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fc1d654724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fc1d6547305]
+duckdb(+0x3a01b1) [0x562bde19c1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19d.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x5635c1e8ee36]
+duckdb(+0x576ef4) [0x5635c1e8eef4]
+duckdb(+0x579ce1) [0x5635c1e91ce1]
+duckdb(+0x3a1d3c) [0x5635c1cb9d3c]
+duckdb(+0x1b83aa) [0x5635c1ad03aa]
+duckdb(+0x9f4a9b) [0x5635c230ca9b]
+duckdb(+0x7fed10) [0x5635c2116d10]
+duckdb(+0x8011aa) [0x5635c21191aa]
+duckdb(+0x8017ac) [0x5635c21197ac]
+duckdb(+0x801c2d) [0x5635c2119c2d]
+duckdb(+0x802d09) [0x5635c211ad09]
+duckdb(+0x801e7a) [0x5635c2119e7a]
+duckdb(+0x805fff) [0x5635c211dfff]
+duckdb(+0x8060e3) [0x5635c211e0e3]
+duckdb(+0x80639e) [0x5635c211e39e]
+duckdb(+0x3c9d4d) [0x5635c1ce1d4d]
+duckdb(+0x3b7290) [0x5635c1ccf290]
+duckdb(+0x3b7f1a) [0x5635c1ccff1a]
+duckdb(+0x3b8571) [0x5635c1cd0571]
+duckdb(+0x3b86e0) [0x5635c1cd06e0]
+duckdb(+0x3b8796) [0x5635c1cd0796]
+duckdb(+0x3b5df1) [0x5635c1ccddf1]
+duckdb(+0x3b84ab) [0x5635c1cd04ab]
+duckdb(+0x39ca86) [0x5635c1cb4a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fde5b56724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fde5b567305]
+duckdb(+0x3a01b1) [0x5635c1cb81b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55d1e57f1e36]
+duckdb(+0x576ef4) [0x55d1e57f1ef4]
+duckdb(+0x579ce1) [0x55d1e57f4ce1]
+duckdb(+0x3a1d3c) [0x55d1e561cd3c]
+duckdb(+0x1b6eb8) [0x55d1e5431eb8]
+duckdb(+0x9fe2e0) [0x55d1e5c792e0]
+duckdb(+0xa03c70) [0x55d1e5c7ec70]
+duckdb(+0xa044d7) [0x55d1e5c7f4d7]
+duckdb(+0x7fec48) [0x55d1e5a79c48]
+duckdb(+0x8011aa) [0x55d1e5a7c1aa]
+duckdb(+0x8017ac) [0x55d1e5a7c7ac]
+duckdb(+0x801c2d) [0x55d1e5a7cc2d]
+duckdb(+0x802d09) [0x55d1e5a7dd09]
+duckdb(+0x801e7a) [0x55d1e5a7ce7a]
+duckdb(+0x805fff) [0x55d1e5a80fff]
+duckdb(+0x8060e3) [0x55d1e5a810e3]
+duckdb(+0x80639e) [0x55d1e5a8139e]
+duckdb(+0x3c9d4d) [0x55d1e5644d4d]
+duckdb(+0x3b7290) [0x55d1e5632290]
+duckdb(+0x3b7f1a) [0x55d1e5632f1a]
+duckdb(+0x3b8571) [0x55d1e5633571]
+duckdb(+0x3b86e0) [0x55d1e56336e0]
+duckdb(+0x3b8796) [0x55d1e5633796]
+duckdb(+0x3b5df1) [0x55d1e5630df1]
+duckdb(+0x3b84ab) [0x55d1e56334ab]
+duckdb(+0x39ca86) [0x55d1e5617a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fd703e4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fd703e46305]
+duckdb(+0x3a01b1) [0x55d1e561b1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55dfbd786e36]
+duckdb(+0x576ef4) [0x55dfbd786ef4]
+duckdb(+0x579ce1) [0x55dfbd789ce1]
+duckdb(+0x3a1d3c) [0x55dfbd5b1d3c]
+duckdb(+0x1b6eb8) [0x55dfbd3c6eb8]
+duckdb(+0x9fe2e0) [0x55dfbdc0e2e0]
+duckdb(+0xa03c70) [0x55dfbdc13c70]
+duckdb(+0xa044d7) [0x55dfbdc144d7]
+duckdb(+0x7fec48) [0x55dfbda0ec48]
+duckdb(+0x8011aa) [0x55dfbda111aa]
+duckdb(+0x8017ac) [0x55dfbda117ac]
+duckdb(+0x801c2d) [0x55dfbda11c2d]
+duckdb(+0x802d09) [0x55dfbda12d09]
+duckdb(+0x801e7a) [0x55dfbda11e7a]
+duckdb(+0x805fff) [0x55dfbda15fff]
+duckdb(+0x8060e3) [0x55dfbda160e3]
+duckdb(+0x80639e) [0x55dfbda1639e]
+duckdb(+0x3c9d4d) [0x55dfbd5d9d4d]
+duckdb(+0x3b7290) [0x55dfbd5c7290]
+duckdb(+0x3b7f1a) [0x55dfbd5c7f1a]
+duckdb(+0x3b8571) [0x55dfbd5c8571]
+duckdb(+0x3b86e0) [0x55dfbd5c86e0]
+duckdb(+0x3b8796) [0x55dfbd5c8796]
+duckdb(+0x3b5df1) [0x55dfbd5c5df1]
+duckdb(+0x3b84ab) [0x55dfbd5c84ab]
+duckdb(+0x39ca86) [0x55dfbd5aca86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f07b0c4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f07b0c46305]
+duckdb(+0x3a01b1) [0x55dfbd5b01b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55693fec8e36]
+duckdb(+0x576ef4) [0x55693fec8ef4]
+duckdb(+0x579ce1) [0x55693fecbce1]
+duckdb(+0x3a1d3c) [0x55693fcf3d3c]
+duckdb(+0x1b6eb8) [0x55693fb08eb8]
+duckdb(+0x9fe2e0) [0x5569403502e0]
+duckdb(+0xa03c70) [0x556940355c70]
+duckdb(+0xa044d7) [0x5569403564d7]
+duckdb(+0x7fec48) [0x556940150c48]
+duckdb(+0x8011aa) [0x5569401531aa]
+duckdb(+0x8017ac) [0x5569401537ac]
+duckdb(+0x801c2d) [0x556940153c2d]
+duckdb(+0x802d09) [0x556940154d09]
+duckdb(+0x801e7a) [0x556940153e7a]
+duckdb(+0x805fff) [0x556940157fff]
+duckdb(+0x8060e3) [0x5569401580e3]
+duckdb(+0x80639e) [0x55694015839e]
+duckdb(+0x3c9d4d) [0x55693fd1bd4d]
+duckdb(+0x3b7290) [0x55693fd09290]
+duckdb(+0x3b7f1a) [0x55693fd09f1a]
+duckdb(+0x3b8571) [0x55693fd0a571]
+duckdb(+0x3b86e0) [0x55693fd0a6e0]
+duckdb(+0x3b8796) [0x55693fd0a796]
+duckdb(+0x3b5df1) [0x55693fd07df1]
+duckdb(+0x3b84ab) [0x55693fd0a4ab]
+duckdb(+0x39ca86) [0x55693fceea86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f10dd02624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f10dd026305]
+duckdb(+0x3a01b1) [0x55693fcf21b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1d.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x56507c568e36]
+duckdb(+0x576ef4) [0x56507c568ef4]
+duckdb(+0x579ce1) [0x56507c56bce1]
+duckdb(+0x3a1d3c) [0x56507c393d3c]
+duckdb(+0x1b6eb8) [0x56507c1a8eb8]
+duckdb(+0x9fe2e0) [0x56507c9f02e0]
+duckdb(+0xa03c70) [0x56507c9f5c70]
+duckdb(+0xa044d7) [0x56507c9f64d7]
+duckdb(+0x7fec48) [0x56507c7f0c48]
+duckdb(+0x8011aa) [0x56507c7f31aa]
+duckdb(+0x8017ac) [0x56507c7f37ac]
+duckdb(+0x801c2d) [0x56507c7f3c2d]
+duckdb(+0x802d09) [0x56507c7f4d09]
+duckdb(+0x801e7a) [0x56507c7f3e7a]
+duckdb(+0x805fff) [0x56507c7f7fff]
+duckdb(+0x8060e3) [0x56507c7f80e3]
+duckdb(+0x80639e) [0x56507c7f839e]
+duckdb(+0x3c9d4d) [0x56507c3bbd4d]
+duckdb(+0x3b7290) [0x56507c3a9290]
+duckdb(+0x3b7f1a) [0x56507c3a9f1a]
+duckdb(+0x3b8571) [0x56507c3aa571]
+duckdb(+0x3b86e0) [0x56507c3aa6e0]
+duckdb(+0x3b8796) [0x56507c3aa796]
+duckdb(+0x3b5df1) [0x56507c3a7df1]
+duckdb(+0x3b84ab) [0x56507c3aa4ab]
+duckdb(+0x39ca86) [0x56507c38ea86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f1ae5e4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f1ae5e46305]
+duckdb(+0x3a01b1) [0x56507c3921b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/20a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x5619194c4e36]
+duckdb(+0x576ef4) [0x5619194c4ef4]
+duckdb(+0x579ce1) [0x5619194c7ce1]
+duckdb(+0x3a1d3c) [0x5619192efd3c]
+duckdb(+0x1b83aa) [0x5619191063aa]
+duckdb(+0x9f4a9b) [0x561919942a9b]
+duckdb(+0x7fed10) [0x56191974cd10]
+duckdb(+0x8011aa) [0x56191974f1aa]
+duckdb(+0x8017ac) [0x56191974f7ac]
+duckdb(+0x801c2d) [0x56191974fc2d]
+duckdb(+0x802d09) [0x561919750d09]
+duckdb(+0x801e7a) [0x56191974fe7a]
+duckdb(+0x805fff) [0x561919753fff]
+duckdb(+0x8060e3) [0x5619197540e3]
+duckdb(+0x80639e) [0x56191975439e]
+duckdb(+0x3c9d4d) [0x561919317d4d]
+duckdb(+0x3b7290) [0x561919305290]
+duckdb(+0x3b7f1a) [0x561919305f1a]
+duckdb(+0x3b8571) [0x561919306571]
+duckdb(+0x3b86e0) [0x5619193066e0]
+duckdb(+0x3b8796) [0x561919306796]
+duckdb(+0x3b5df1) [0x561919303df1]
+duckdb(+0x3b84ab) [0x5619193064ab]
+duckdb(+0x39ca86) [0x5619192eaa86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f161e96724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f161e967305]
+duckdb(+0x3a01b1) [0x5619192ee1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/20b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x558f6416ae36]
+duckdb(+0x576ef4) [0x558f6416aef4]
+duckdb(+0x579ce1) [0x558f6416dce1]
+duckdb(+0x3a1d3c) [0x558f63f95d3c]
+duckdb(+0x1b83aa) [0x558f63dac3aa]
+duckdb(+0x9f4a9b) [0x558f645e8a9b]
+duckdb(+0x7fed10) [0x558f643f2d10]
+duckdb(+0x8011aa) [0x558f643f51aa]
+duckdb(+0x8017ac) [0x558f643f57ac]
+duckdb(+0x801c2d) [0x558f643f5c2d]
+duckdb(+0x802d09) [0x558f643f6d09]
+duckdb(+0x801e7a) [0x558f643f5e7a]
+duckdb(+0x805fff) [0x558f643f9fff]
+duckdb(+0x8060e3) [0x558f643fa0e3]
+duckdb(+0x80639e) [0x558f643fa39e]
+duckdb(+0x3c9d4d) [0x558f63fbdd4d]
+duckdb(+0x3b7290) [0x558f63fab290]
+duckdb(+0x3b7f1a) [0x558f63fabf1a]
+duckdb(+0x3b8571) [0x558f63fac571]
+duckdb(+0x3b86e0) [0x558f63fac6e0]
+duckdb(+0x3b8796) [0x558f63fac796]
+duckdb(+0x3b5df1) [0x558f63fa9df1]
+duckdb(+0x3b84ab) [0x558f63fac4ab]
+duckdb(+0x39ca86) [0x558f63f90a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f3fc616724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f3fc6167305]
+duckdb(+0x3a01b1) [0x558f63f941b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/20c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x5618070fae36]
+duckdb(+0x576ef4) [0x5618070faef4]
+duckdb(+0x579ce1) [0x5618070fdce1]
+duckdb(+0x3a1d3c) [0x561806f25d3c]
+duckdb(+0x1b83aa) [0x561806d3c3aa]
+duckdb(+0x9f4a9b) [0x561807578a9b]
+duckdb(+0x7fed10) [0x561807382d10]
+duckdb(+0x8011aa) [0x5618073851aa]
+duckdb(+0x8017ac) [0x5618073857ac]
+duckdb(+0x801c2d) [0x561807385c2d]
+duckdb(+0x802d09) [0x561807386d09]
+duckdb(+0x801e7a) [0x561807385e7a]
+duckdb(+0x805fff) [0x561807389fff]
+duckdb(+0x8060e3) [0x56180738a0e3]
+duckdb(+0x80639e) [0x56180738a39e]
+duckdb(+0x3c9d4d) [0x561806f4dd4d]
+duckdb(+0x3b7290) [0x561806f3b290]
+duckdb(+0x3b7f1a) [0x561806f3bf1a]
+duckdb(+0x3b8571) [0x561806f3c571]
+duckdb(+0x3b86e0) [0x561806f3c6e0]
+duckdb(+0x3b8796) [0x561806f3c796]
+duckdb(+0x3b5df1) [0x561806f39df1]
+duckdb(+0x3b84ab) [0x561806f3c4ab]
+duckdb(+0x39ca86) [0x561806f20a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f8fee62624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f8fee626305]
+duckdb(+0x3a01b1) [0x561806f241b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55fe5e761e36]
+duckdb(+0x576ef4) [0x55fe5e761ef4]
+duckdb(+0x579ce1) [0x55fe5e764ce1]
+duckdb(+0x3a1d3c) [0x55fe5e58cd3c]
+duckdb(+0x1b6eb8) [0x55fe5e3a1eb8]
+duckdb(+0x9fe2e0) [0x55fe5ebe92e0]
+duckdb(+0xa03c70) [0x55fe5ebeec70]
+duckdb(+0xa044d7) [0x55fe5ebef4d7]
+duckdb(+0x7fec48) [0x55fe5e9e9c48]
+duckdb(+0x8011aa) [0x55fe5e9ec1aa]
+duckdb(+0x8017ac) [0x55fe5e9ec7ac]
+duckdb(+0x801c2d) [0x55fe5e9ecc2d]
+duckdb(+0x802d09) [0x55fe5e9edd09]
+duckdb(+0x801e7a) [0x55fe5e9ece7a]
+duckdb(+0x805fff) [0x55fe5e9f0fff]
+duckdb(+0x8060e3) [0x55fe5e9f10e3]
+duckdb(+0x80639e) [0x55fe5e9f139e]
+duckdb(+0x3c9d4d) [0x55fe5e5b4d4d]
+duckdb(+0x3b7290) [0x55fe5e5a2290]
+duckdb(+0x3b7f1a) [0x55fe5e5a2f1a]
+duckdb(+0x3b8571) [0x55fe5e5a3571]
+duckdb(+0x3b86e0) [0x55fe5e5a36e0]
+duckdb(+0x3b8796) [0x55fe5e5a3796]
+duckdb(+0x3b5df1) [0x55fe5e5a0df1]
+duckdb(+0x3b84ab) [0x55fe5e5a34ab]
+duckdb(+0x39ca86) [0x55fe5e587a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f9a5524624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f9a55246305]
+duckdb(+0x3a01b1) [0x55fe5e58b1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55d60fc7ce36]
+duckdb(+0x576ef4) [0x55d60fc7cef4]
+duckdb(+0x579ce1) [0x55d60fc7fce1]
+duckdb(+0x3a1d3c) [0x55d60faa7d3c]
+duckdb(+0x1b6eb8) [0x55d60f8bceb8]
+duckdb(+0x9fe2e0) [0x55d6101042e0]
+duckdb(+0xa03c70) [0x55d610109c70]
+duckdb(+0xa044d7) [0x55d61010a4d7]
+duckdb(+0x7fec48) [0x55d60ff04c48]
+duckdb(+0x8011aa) [0x55d60ff071aa]
+duckdb(+0x8017ac) [0x55d60ff077ac]
+duckdb(+0x801c2d) [0x55d60ff07c2d]
+duckdb(+0x802d09) [0x55d60ff08d09]
+duckdb(+0x801e7a) [0x55d60ff07e7a]
+duckdb(+0x805fff) [0x55d60ff0bfff]
+duckdb(+0x8060e3) [0x55d60ff0c0e3]
+duckdb(+0x80639e) [0x55d60ff0c39e]
+duckdb(+0x3c9d4d) [0x55d60facfd4d]
+duckdb(+0x3b7290) [0x55d60fabd290]
+duckdb(+0x3b7f1a) [0x55d60fabdf1a]
+duckdb(+0x3b8571) [0x55d60fabe571]
+duckdb(+0x3b86e0) [0x55d60fabe6e0]
+duckdb(+0x3b8796) [0x55d60fabe796]
+duckdb(+0x3b5df1) [0x55d60fabbdf1]
+duckdb(+0x3b84ab) [0x55d60fabe4ab]
+duckdb(+0x39ca86) [0x55d60faa2a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7efc12b6724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7efc12b67305]
+duckdb(+0x3a01b1) [0x55d60faa61b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55c3b3ccfe36]
+duckdb(+0x576ef4) [0x55c3b3ccfef4]
+duckdb(+0x579ce1) [0x55c3b3cd2ce1]
+duckdb(+0x3a1d3c) [0x55c3b3afad3c]
+duckdb(+0x1b6eb8) [0x55c3b390feb8]
+duckdb(+0x9fe2e0) [0x55c3b41572e0]
+duckdb(+0xa03c70) [0x55c3b415cc70]
+duckdb(+0xa044d7) [0x55c3b415d4d7]
+duckdb(+0x7fec48) [0x55c3b3f57c48]
+duckdb(+0x8011aa) [0x55c3b3f5a1aa]
+duckdb(+0x8017ac) [0x55c3b3f5a7ac]
+duckdb(+0x801c2d) [0x55c3b3f5ac2d]
+duckdb(+0x802d09) [0x55c3b3f5bd09]
+duckdb(+0x801e7a) [0x55c3b3f5ae7a]
+duckdb(+0x805fff) [0x55c3b3f5efff]
+duckdb(+0x8060e3) [0x55c3b3f5f0e3]
+duckdb(+0x80639e) [0x55c3b3f5f39e]
+duckdb(+0x3c9d4d) [0x55c3b3b22d4d]
+duckdb(+0x3b7290) [0x55c3b3b10290]
+duckdb(+0x3b7f1a) [0x55c3b3b10f1a]
+duckdb(+0x3b8571) [0x55c3b3b11571]
+duckdb(+0x3b86e0) [0x55c3b3b116e0]
+duckdb(+0x3b8796) [0x55c3b3b11796]
+duckdb(+0x3b5df1) [0x55c3b3b0edf1]
+duckdb(+0x3b84ab) [0x55c3b3b114ab]
+duckdb(+0x39ca86) [0x55c3b3af5a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f8fe8c4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f8fe8c46305]
+duckdb(+0x3a01b1) [0x55c3b3af91b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x56432f718e36]
+duckdb(+0x576ef4) [0x56432f718ef4]
+duckdb(+0x579ce1) [0x56432f71bce1]
+duckdb(+0x3a1d3c) [0x56432f543d3c]
+duckdb(+0x1b6eb8) [0x56432f358eb8]
+duckdb(+0x9fe2e0) [0x56432fba02e0]
+duckdb(+0xa03c70) [0x56432fba5c70]
+duckdb(+0xa044d7) [0x56432fba64d7]
+duckdb(+0x7fec48) [0x56432f9a0c48]
+duckdb(+0x8011aa) [0x56432f9a31aa]
+duckdb(+0x8017ac) [0x56432f9a37ac]
+duckdb(+0x801c2d) [0x56432f9a3c2d]
+duckdb(+0x802d09) [0x56432f9a4d09]
+duckdb(+0x801e7a) [0x56432f9a3e7a]
+duckdb(+0x805fff) [0x56432f9a7fff]
+duckdb(+0x8060e3) [0x56432f9a80e3]
+duckdb(+0x80639e) [0x56432f9a839e]
+duckdb(+0x3c9d4d) [0x56432f56bd4d]
+duckdb(+0x3b7290) [0x56432f559290]
+duckdb(+0x3b7f1a) [0x56432f559f1a]
+duckdb(+0x3b8571) [0x56432f55a571]
+duckdb(+0x3b86e0) [0x56432f55a6e0]
+duckdb(+0x3b8796) [0x56432f55a796]
+duckdb(+0x3b5df1) [0x56432f557df1]
+duckdb(+0x3b84ab) [0x56432f55a4ab]
+duckdb(+0x39ca86) [0x56432f53ea86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f0a8be4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f0a8be46305]
+duckdb(+0x3a01b1) [0x56432f5421b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x561ef5f7de36]
+duckdb(+0x576ef4) [0x561ef5f7def4]
+duckdb(+0x579ce1) [0x561ef5f80ce1]
+duckdb(+0x3a1d3c) [0x561ef5da8d3c]
+duckdb(+0x1b6eb8) [0x561ef5bbdeb8]
+duckdb(+0x9fe2e0) [0x561ef64052e0]
+duckdb(+0xa03c70) [0x561ef640ac70]
+duckdb(+0xa044d7) [0x561ef640b4d7]
+duckdb(+0x7fec48) [0x561ef6205c48]
+duckdb(+0x8011aa) [0x561ef62081aa]
+duckdb(+0x8017ac) [0x561ef62087ac]
+duckdb(+0x801c2d) [0x561ef6208c2d]
+duckdb(+0x802d09) [0x561ef6209d09]
+duckdb(+0x801e7a) [0x561ef6208e7a]
+duckdb(+0x805fff) [0x561ef620cfff]
+duckdb(+0x8060e3) [0x561ef620d0e3]
+duckdb(+0x80639e) [0x561ef620d39e]
+duckdb(+0x3c9d4d) [0x561ef5dd0d4d]
+duckdb(+0x3b7290) [0x561ef5dbe290]
+duckdb(+0x3b7f1a) [0x561ef5dbef1a]
+duckdb(+0x3b8571) [0x561ef5dbf571]
+duckdb(+0x3b86e0) [0x561ef5dbf6e0]
+duckdb(+0x3b8796) [0x561ef5dbf796]
+duckdb(+0x3b5df1) [0x561ef5dbcdf1]
+duckdb(+0x3b84ab) [0x561ef5dbf4ab]
+duckdb(+0x39ca86) [0x561ef5da3a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f0b1476724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f0b14767305]
+duckdb(+0x3a01b1) [0x561ef5da71b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x556463ce1e36]
+duckdb(+0x576ef4) [0x556463ce1ef4]
+duckdb(+0x579ce1) [0x556463ce4ce1]
+duckdb(+0x3a1d3c) [0x556463b0cd3c]
+duckdb(+0x1b6eb8) [0x556463921eb8]
+duckdb(+0x9fe2e0) [0x5564641692e0]
+duckdb(+0xa03c70) [0x55646416ec70]
+duckdb(+0xa044d7) [0x55646416f4d7]
+duckdb(+0x7fec48) [0x556463f69c48]
+duckdb(+0x8011aa) [0x556463f6c1aa]
+duckdb(+0x8017ac) [0x556463f6c7ac]
+duckdb(+0x801c2d) [0x556463f6cc2d]
+duckdb(+0x802d09) [0x556463f6dd09]
+duckdb(+0x801e7a) [0x556463f6ce7a]
+duckdb(+0x805fff) [0x556463f70fff]
+duckdb(+0x8060e3) [0x556463f710e3]
+duckdb(+0x80639e) [0x556463f7139e]
+duckdb(+0x3c9d4d) [0x556463b34d4d]
+duckdb(+0x3b7290) [0x556463b22290]
+duckdb(+0x3b7f1a) [0x556463b22f1a]
+duckdb(+0x3b8571) [0x556463b23571]
+duckdb(+0x3b86e0) [0x556463b236e0]
+duckdb(+0x3b8796) [0x556463b23796]
+duckdb(+0x3b5df1) [0x556463b20df1]
+duckdb(+0x3b84ab) [0x556463b234ab]
+duckdb(+0x39ca86) [0x556463b07a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fda0904624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fda09046305]
+duckdb(+0x3a01b1) [0x556463b0b1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22d.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x559f60089e36]
+duckdb(+0x576ef4) [0x559f60089ef4]
+duckdb(+0x579ce1) [0x559f6008cce1]
+duckdb(+0x3a1d3c) [0x559f5feb4d3c]
+duckdb(+0x1b6eb8) [0x559f5fcc9eb8]
+duckdb(+0x9fe2e0) [0x559f605112e0]
+duckdb(+0xa03c70) [0x559f60516c70]
+duckdb(+0xa044d7) [0x559f605174d7]
+duckdb(+0x7fec48) [0x559f60311c48]
+duckdb(+0x8011aa) [0x559f603141aa]
+duckdb(+0x8017ac) [0x559f603147ac]
+duckdb(+0x801c2d) [0x559f60314c2d]
+duckdb(+0x802d09) [0x559f60315d09]
+duckdb(+0x801e7a) [0x559f60314e7a]
+duckdb(+0x805fff) [0x559f60318fff]
+duckdb(+0x8060e3) [0x559f603190e3]
+duckdb(+0x80639e) [0x559f6031939e]
+duckdb(+0x3c9d4d) [0x559f5fedcd4d]
+duckdb(+0x3b7290) [0x559f5feca290]
+duckdb(+0x3b7f1a) [0x559f5fecaf1a]
+duckdb(+0x3b8571) [0x559f5fecb571]
+duckdb(+0x3b86e0) [0x559f5fecb6e0]
+duckdb(+0x3b8796) [0x559f5fecb796]
+duckdb(+0x3b5df1) [0x559f5fec8df1]
+duckdb(+0x3b84ab) [0x559f5fecb4ab]
+duckdb(+0x39ca86) [0x559f5feafa86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f2a4976724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f2a49767305]
+duckdb(+0x3a01b1) [0x559f5feb31b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/23a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x565431384e36]
+duckdb(+0x576ef4) [0x565431384ef4]
+duckdb(+0x579ce1) [0x565431387ce1]
+duckdb(+0x3a1d3c) [0x5654311afd3c]
+duckdb(+0x1b6eb8) [0x565430fc4eb8]
+duckdb(+0x9fe2e0) [0x56543180c2e0]
+duckdb(+0xa03c70) [0x565431811c70]
+duckdb(+0xa044d7) [0x5654318124d7]
+duckdb(+0x7fec48) [0x56543160cc48]
+duckdb(+0x8011aa) [0x56543160f1aa]
+duckdb(+0x8017ac) [0x56543160f7ac]
+duckdb(+0x801c2d) [0x56543160fc2d]
+duckdb(+0x802d09) [0x565431610d09]
+duckdb(+0x801e7a) [0x56543160fe7a]
+duckdb(+0x805fff) [0x565431613fff]
+duckdb(+0x8060e3) [0x5654316140e3]
+duckdb(+0x80639e) [0x56543161439e]
+duckdb(+0x3c9d4d) [0x5654311d7d4d]
+duckdb(+0x3b7290) [0x5654311c5290]
+duckdb(+0x3b7f1a) [0x5654311c5f1a]
+duckdb(+0x3b8571) [0x5654311c6571]
+duckdb(+0x3b86e0) [0x5654311c66e0]
+duckdb(+0x3b8796) [0x5654311c6796]
+duckdb(+0x3b5df1) [0x5654311c3df1]
+duckdb(+0x3b84ab) [0x5654311c64ab]
+duckdb(+0x39ca86) [0x5654311aaa86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f0d5016724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f0d50167305]
+duckdb(+0x3a01b1) [0x5654311ae1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/23b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55bb3153ee36]
+duckdb(+0x576ef4) [0x55bb3153eef4]
+duckdb(+0x579ce1) [0x55bb31541ce1]
+duckdb(+0x3a1d3c) [0x55bb31369d3c]
+duckdb(+0x1b6eb8) [0x55bb3117eeb8]
+duckdb(+0x9fe2e0) [0x55bb319c62e0]
+duckdb(+0xa03c70) [0x55bb319cbc70]
+duckdb(+0xa044d7) [0x55bb319cc4d7]
+duckdb(+0x7fec48) [0x55bb317c6c48]
+duckdb(+0x8011aa) [0x55bb317c91aa]
+duckdb(+0x8017ac) [0x55bb317c97ac]
+duckdb(+0x801c2d) [0x55bb317c9c2d]
+duckdb(+0x802d09) [0x55bb317cad09]
+duckdb(+0x801e7a) [0x55bb317c9e7a]
+duckdb(+0x805fff) [0x55bb317cdfff]
+duckdb(+0x8060e3) [0x55bb317ce0e3]
+duckdb(+0x80639e) [0x55bb317ce39e]
+duckdb(+0x3c9d4d) [0x55bb31391d4d]
+duckdb(+0x3b7290) [0x55bb3137f290]
+duckdb(+0x3b7f1a) [0x55bb3137ff1a]
+duckdb(+0x3b8571) [0x55bb31380571]
+duckdb(+0x3b86e0) [0x55bb313806e0]
+duckdb(+0x3b8796) [0x55bb31380796]
+duckdb(+0x3b5df1) [0x55bb3137ddf1]
+duckdb(+0x3b84ab) [0x55bb313804ab]
+duckdb(+0x39ca86) [0x55bb31364a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fc6f0a4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fc6f0a46305]
+duckdb(+0x3a01b1) [0x55bb313681b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/23c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x557879a03e36]
+duckdb(+0x576ef4) [0x557879a03ef4]
+duckdb(+0x579ce1) [0x557879a06ce1]
+duckdb(+0x3a1d3c) [0x55787982ed3c]
+duckdb(+0x1b6eb8) [0x557879643eb8]
+duckdb(+0x9fe2e0) [0x557879e8b2e0]
+duckdb(+0xa03c70) [0x557879e90c70]
+duckdb(+0xa044d7) [0x557879e914d7]
+duckdb(+0x7fec48) [0x557879c8bc48]
+duckdb(+0x8011aa) [0x557879c8e1aa]
+duckdb(+0x8017ac) [0x557879c8e7ac]
+duckdb(+0x801c2d) [0x557879c8ec2d]
+duckdb(+0x802d09) [0x557879c8fd09]
+duckdb(+0x801e7a) [0x557879c8ee7a]
+duckdb(+0x805fff) [0x557879c92fff]
+duckdb(+0x8060e3) [0x557879c930e3]
+duckdb(+0x80639e) [0x557879c9339e]
+duckdb(+0x3c9d4d) [0x557879856d4d]
+duckdb(+0x3b7290) [0x557879844290]
+duckdb(+0x3b7f1a) [0x557879844f1a]
+duckdb(+0x3b8571) [0x557879845571]
+duckdb(+0x3b86e0) [0x5578798456e0]
+duckdb(+0x3b8796) [0x557879845796]
+duckdb(+0x3b5df1) [0x557879842df1]
+duckdb(+0x3b84ab) [0x5578798454ab]
+duckdb(+0x39ca86) [0x557879829a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fb84ee4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fb84ee46305]
+duckdb(+0x3a01b1) [0x55787982d1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/24a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55b59814ce36]
+duckdb(+0x576ef4) [0x55b59814cef4]
+duckdb(+0x579ce1) [0x55b59814fce1]
+duckdb(+0x3a1d3c) [0x55b597f77d3c]
+duckdb(+0x1b83aa) [0x55b597d8e3aa]
+duckdb(+0x9f4a9b) [0x55b5985caa9b]
+duckdb(+0x7fed10) [0x55b5983d4d10]
+duckdb(+0x8011aa) [0x55b5983d71aa]
+duckdb(+0x8017ac) [0x55b5983d77ac]
+duckdb(+0x801c2d) [0x55b5983d7c2d]
+duckdb(+0x802d09) [0x55b5983d8d09]
+duckdb(+0x801e7a) [0x55b5983d7e7a]
+duckdb(+0x805fff) [0x55b5983dbfff]
+duckdb(+0x8060e3) [0x55b5983dc0e3]
+duckdb(+0x80639e) [0x55b5983dc39e]
+duckdb(+0x3c9d4d) [0x55b597f9fd4d]
+duckdb(+0x3b7290) [0x55b597f8d290]
+duckdb(+0x3b7f1a) [0x55b597f8df1a]
+duckdb(+0x3b8571) [0x55b597f8e571]
+duckdb(+0x3b86e0) [0x55b597f8e6e0]
+duckdb(+0x3b8796) [0x55b597f8e796]
+duckdb(+0x3b5df1) [0x55b597f8bdf1]
+duckdb(+0x3b84ab) [0x55b597f8e4ab]
+duckdb(+0x39ca86) [0x55b597f72a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f8ad984624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f8ad9846305]
+duckdb(+0x3a01b1) [0x55b597f761b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/24b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x5560a2202e36]
+duckdb(+0x576ef4) [0x5560a2202ef4]
+duckdb(+0x579ce1) [0x5560a2205ce1]
+duckdb(+0x3a1d3c) [0x5560a202dd3c]
+duckdb(+0x1b83aa) [0x5560a1e443aa]
+duckdb(+0x9f4a9b) [0x5560a2680a9b]
+duckdb(+0x7fed10) [0x5560a248ad10]
+duckdb(+0x8011aa) [0x5560a248d1aa]
+duckdb(+0x8017ac) [0x5560a248d7ac]
+duckdb(+0x801c2d) [0x5560a248dc2d]
+duckdb(+0x802d09) [0x5560a248ed09]
+duckdb(+0x801e7a) [0x5560a248de7a]
+duckdb(+0x805fff) [0x5560a2491fff]
+duckdb(+0x8060e3) [0x5560a24920e3]
+duckdb(+0x80639e) [0x5560a249239e]
+duckdb(+0x3c9d4d) [0x5560a2055d4d]
+duckdb(+0x3b7290) [0x5560a2043290]
+duckdb(+0x3b7f1a) [0x5560a2043f1a]
+duckdb(+0x3b8571) [0x5560a2044571]
+duckdb(+0x3b86e0) [0x5560a20446e0]
+duckdb(+0x3b8796) [0x5560a2044796]
+duckdb(+0x3b5df1) [0x5560a2041df1]
+duckdb(+0x3b84ab) [0x5560a20444ab]
+duckdb(+0x39ca86) [0x5560a2028a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fd70f84624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fd70f846305]
+duckdb(+0x3a01b1) [0x5560a202c1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/25a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x556f992eee36]
+duckdb(+0x576ef4) [0x556f992eeef4]
+duckdb(+0x579ce1) [0x556f992f1ce1]
+duckdb(+0x3a1d3c) [0x556f99119d3c]
+duckdb(+0x1b6eb8) [0x556f98f2eeb8]
+duckdb(+0x9fe2e0) [0x556f997762e0]
+duckdb(+0xa03c70) [0x556f9977bc70]
+duckdb(+0xa044d7) [0x556f9977c4d7]
+duckdb(+0x7fec48) [0x556f99576c48]
+duckdb(+0x8011aa) [0x556f995791aa]
+duckdb(+0x8017ac) [0x556f995797ac]
+duckdb(+0x801c2d) [0x556f99579c2d]
+duckdb(+0x802d09) [0x556f9957ad09]
+duckdb(+0x801e7a) [0x556f99579e7a]
+duckdb(+0x805fff) [0x556f9957dfff]
+duckdb(+0x8060e3) [0x556f9957e0e3]
+duckdb(+0x80639e) [0x556f9957e39e]
+duckdb(+0x3c9d4d) [0x556f99141d4d]
+duckdb(+0x3b7290) [0x556f9912f290]
+duckdb(+0x3b7f1a) [0x556f9912ff1a]
+duckdb(+0x3b8571) [0x556f99130571]
+duckdb(+0x3b86e0) [0x556f991306e0]
+duckdb(+0x3b8796) [0x556f99130796]
+duckdb(+0x3b5df1) [0x556f9912ddf1]
+duckdb(+0x3b84ab) [0x556f991304ab]
+duckdb(+0x39ca86) [0x556f99114a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f318504624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f3185046305]
+duckdb(+0x3a01b1) [0x556f991181b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/25b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55952b1d7e36]
+duckdb(+0x576ef4) [0x55952b1d7ef4]
+duckdb(+0x579ce1) [0x55952b1dace1]
+duckdb(+0x3a1d3c) [0x55952b002d3c]
+duckdb(+0x1b6eb8) [0x55952ae17eb8]
+duckdb(+0x9fe2e0) [0x55952b65f2e0]
+duckdb(+0xa03c70) [0x55952b664c70]
+duckdb(+0xa044d7) [0x55952b6654d7]
+duckdb(+0x7fec48) [0x55952b45fc48]
+duckdb(+0x8011aa) [0x55952b4621aa]
+duckdb(+0x8017ac) [0x55952b4627ac]
+duckdb(+0x801c2d) [0x55952b462c2d]
+duckdb(+0x802d09) [0x55952b463d09]
+duckdb(+0x801e7a) [0x55952b462e7a]
+duckdb(+0x805fff) [0x55952b466fff]
+duckdb(+0x8060e3) [0x55952b4670e3]
+duckdb(+0x80639e) [0x55952b46739e]
+duckdb(+0x3c9d4d) [0x55952b02ad4d]
+duckdb(+0x3b7290) [0x55952b018290]
+duckdb(+0x3b7f1a) [0x55952b018f1a]
+duckdb(+0x3b8571) [0x55952b019571]
+duckdb(+0x3b86e0) [0x55952b0196e0]
+duckdb(+0x3b8796) [0x55952b019796]
+duckdb(+0x3b5df1) [0x55952b016df1]
+duckdb(+0x3b84ab) [0x55952b0194ab]
+duckdb(+0x39ca86) [0x55952affda86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f0e7e76724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f0e7e767305]
+duckdb(+0x3a01b1) [0x55952b0011b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/25c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55b6fab37e36]
+duckdb(+0x576ef4) [0x55b6fab37ef4]
+duckdb(+0x579ce1) [0x55b6fab3ace1]
+duckdb(+0x3a1d3c) [0x55b6fa962d3c]
+duckdb(+0x1b6eb8) [0x55b6fa777eb8]
+duckdb(+0x9fe2e0) [0x55b6fafbf2e0]
+duckdb(+0xa03c70) [0x55b6fafc4c70]
+duckdb(+0xa044d7) [0x55b6fafc54d7]
+duckdb(+0x7fec48) [0x55b6fadbfc48]
+duckdb(+0x8011aa) [0x55b6fadc21aa]
+duckdb(+0x8017ac) [0x55b6fadc27ac]
+duckdb(+0x801c2d) [0x55b6fadc2c2d]
+duckdb(+0x802d09) [0x55b6fadc3d09]
+duckdb(+0x801e7a) [0x55b6fadc2e7a]
+duckdb(+0x805fff) [0x55b6fadc6fff]
+duckdb(+0x8060e3) [0x55b6fadc70e3]
+duckdb(+0x80639e) [0x55b6fadc739e]
+duckdb(+0x3c9d4d) [0x55b6fa98ad4d]
+duckdb(+0x3b7290) [0x55b6fa978290]
+duckdb(+0x3b7f1a) [0x55b6fa978f1a]
+duckdb(+0x3b8571) [0x55b6fa979571]
+duckdb(+0x3b86e0) [0x55b6fa9796e0]
+duckdb(+0x3b8796) [0x55b6fa979796]
+duckdb(+0x3b5df1) [0x55b6fa976df1]
+duckdb(+0x3b84ab) [0x55b6fa9794ab]
+duckdb(+0x39ca86) [0x55b6fa95da86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f4c9042624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f4c90426305]
+duckdb(+0x3a01b1) [0x55b6fa9611b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x5651049a6e36]
+duckdb(+0x576ef4) [0x5651049a6ef4]
+duckdb(+0x579ce1) [0x5651049a9ce1]
+duckdb(+0x3a1d3c) [0x5651047d1d3c]
+duckdb(+0x1b83aa) [0x5651045e83aa]
+duckdb(+0x9f4a9b) [0x565104e24a9b]
+duckdb(+0x7fed10) [0x565104c2ed10]
+duckdb(+0x8011aa) [0x565104c311aa]
+duckdb(+0x8017ac) [0x565104c317ac]
+duckdb(+0x801c2d) [0x565104c31c2d]
+duckdb(+0x802d09) [0x565104c32d09]
+duckdb(+0x801e7a) [0x565104c31e7a]
+duckdb(+0x805fff) [0x565104c35fff]
+duckdb(+0x8060e3) [0x565104c360e3]
+duckdb(+0x80639e) [0x565104c3639e]
+duckdb(+0x3c9d4d) [0x5651047f9d4d]
+duckdb(+0x3b7290) [0x5651047e7290]
+duckdb(+0x3b7f1a) [0x5651047e7f1a]
+duckdb(+0x3b8571) [0x5651047e8571]
+duckdb(+0x3b86e0) [0x5651047e86e0]
+duckdb(+0x3b8796) [0x5651047e8796]
+duckdb(+0x3b5df1) [0x5651047e5df1]
+duckdb(+0x3b84ab) [0x5651047e84ab]
+duckdb(+0x39ca86) [0x5651047cca86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f573f24624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f573f246305]
+duckdb(+0x3a01b1) [0x5651047d01b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x5634a6918e36]
+duckdb(+0x576ef4) [0x5634a6918ef4]
+duckdb(+0x579ce1) [0x5634a691bce1]
+duckdb(+0x3a1d3c) [0x5634a6743d3c]
+duckdb(+0x1b83aa) [0x5634a655a3aa]
+duckdb(+0x9f4a9b) [0x5634a6d96a9b]
+duckdb(+0x7fed10) [0x5634a6ba0d10]
+duckdb(+0x8011aa) [0x5634a6ba31aa]
+duckdb(+0x8017ac) [0x5634a6ba37ac]
+duckdb(+0x801c2d) [0x5634a6ba3c2d]
+duckdb(+0x802d09) [0x5634a6ba4d09]
+duckdb(+0x801e7a) [0x5634a6ba3e7a]
+duckdb(+0x805fff) [0x5634a6ba7fff]
+duckdb(+0x8060e3) [0x5634a6ba80e3]
+duckdb(+0x80639e) [0x5634a6ba839e]
+duckdb(+0x3c9d4d) [0x5634a676bd4d]
+duckdb(+0x3b7290) [0x5634a6759290]
+duckdb(+0x3b7f1a) [0x5634a6759f1a]
+duckdb(+0x3b8571) [0x5634a675a571]
+duckdb(+0x3b86e0) [0x5634a675a6e0]
+duckdb(+0x3b8796) [0x5634a675a796]
+duckdb(+0x3b5df1) [0x5634a6757df1]
+duckdb(+0x3b84ab) [0x5634a675a4ab]
+duckdb(+0x39ca86) [0x5634a673ea86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fec66a4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fec66a46305]
+duckdb(+0x3a01b1) [0x5634a67421b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55f4fc7e2e36]
+duckdb(+0x576ef4) [0x55f4fc7e2ef4]
+duckdb(+0x579ce1) [0x55f4fc7e5ce1]
+duckdb(+0x3a1d3c) [0x55f4fc60dd3c]
+duckdb(+0x1b83aa) [0x55f4fc4243aa]
+duckdb(+0x9f4a9b) [0x55f4fcc60a9b]
+duckdb(+0x7fed10) [0x55f4fca6ad10]
+duckdb(+0x8011aa) [0x55f4fca6d1aa]
+duckdb(+0x8017ac) [0x55f4fca6d7ac]
+duckdb(+0x801c2d) [0x55f4fca6dc2d]
+duckdb(+0x802d09) [0x55f4fca6ed09]
+duckdb(+0x801e7a) [0x55f4fca6de7a]
+duckdb(+0x805fff) [0x55f4fca71fff]
+duckdb(+0x8060e3) [0x55f4fca720e3]
+duckdb(+0x80639e) [0x55f4fca7239e]
+duckdb(+0x3c9d4d) [0x55f4fc635d4d]
+duckdb(+0x3b7290) [0x55f4fc623290]
+duckdb(+0x3b7f1a) [0x55f4fc623f1a]
+duckdb(+0x3b8571) [0x55f4fc624571]
+duckdb(+0x3b86e0) [0x55f4fc6246e0]
+duckdb(+0x3b8796) [0x55f4fc624796]
+duckdb(+0x3b5df1) [0x55f4fc621df1]
+duckdb(+0x3b84ab) [0x55f4fc6244ab]
+duckdb(+0x39ca86) [0x55f4fc608a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f08dde4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f08dde46305]
+duckdb(+0x3a01b1) [0x55f4fc60c1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/27a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x5562b4742e36]
+duckdb(+0x576ef4) [0x5562b4742ef4]
+duckdb(+0x579ce1) [0x5562b4745ce1]
+duckdb(+0x3a1d3c) [0x5562b456dd3c]
+duckdb(+0x1b6eb8) [0x5562b4382eb8]
+duckdb(+0x9fe2e0) [0x5562b4bca2e0]
+duckdb(+0xa03c70) [0x5562b4bcfc70]
+duckdb(+0xa044d7) [0x5562b4bd04d7]
+duckdb(+0x7fec48) [0x5562b49cac48]
+duckdb(+0x8011aa) [0x5562b49cd1aa]
+duckdb(+0x8017ac) [0x5562b49cd7ac]
+duckdb(+0x801c2d) [0x5562b49cdc2d]
+duckdb(+0x802d09) [0x5562b49ced09]
+duckdb(+0x801e7a) [0x5562b49cde7a]
+duckdb(+0x805fff) [0x5562b49d1fff]
+duckdb(+0x8060e3) [0x5562b49d20e3]
+duckdb(+0x80639e) [0x5562b49d239e]
+duckdb(+0x3c9d4d) [0x5562b4595d4d]
+duckdb(+0x3b7290) [0x5562b4583290]
+duckdb(+0x3b7f1a) [0x5562b4583f1a]
+duckdb(+0x3b8571) [0x5562b4584571]
+duckdb(+0x3b86e0) [0x5562b45846e0]
+duckdb(+0x3b8796) [0x5562b4584796]
+duckdb(+0x3b5df1) [0x5562b4581df1]
+duckdb(+0x3b84ab) [0x5562b45844ab]
+duckdb(+0x39ca86) [0x5562b4568a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7ffb26c4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7ffb26c46305]
+duckdb(+0x3a01b1) [0x5562b456c1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/27b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55f2f3328e36]
+duckdb(+0x576ef4) [0x55f2f3328ef4]
+duckdb(+0x579ce1) [0x55f2f332bce1]
+duckdb(+0x3a1d3c) [0x55f2f3153d3c]
+duckdb(+0x1b6eb8) [0x55f2f2f68eb8]
+duckdb(+0x9fe2e0) [0x55f2f37b02e0]
+duckdb(+0xa03c70) [0x55f2f37b5c70]
+duckdb(+0xa044d7) [0x55f2f37b64d7]
+duckdb(+0x7fec48) [0x55f2f35b0c48]
+duckdb(+0x8011aa) [0x55f2f35b31aa]
+duckdb(+0x8017ac) [0x55f2f35b37ac]
+duckdb(+0x801c2d) [0x55f2f35b3c2d]
+duckdb(+0x802d09) [0x55f2f35b4d09]
+duckdb(+0x801e7a) [0x55f2f35b3e7a]
+duckdb(+0x805fff) [0x55f2f35b7fff]
+duckdb(+0x8060e3) [0x55f2f35b80e3]
+duckdb(+0x80639e) [0x55f2f35b839e]
+duckdb(+0x3c9d4d) [0x55f2f317bd4d]
+duckdb(+0x3b7290) [0x55f2f3169290]
+duckdb(+0x3b7f1a) [0x55f2f3169f1a]
+duckdb(+0x3b8571) [0x55f2f316a571]
+duckdb(+0x3b86e0) [0x55f2f316a6e0]
+duckdb(+0x3b8796) [0x55f2f316a796]
+duckdb(+0x3b5df1) [0x55f2f3167df1]
+duckdb(+0x3b84ab) [0x55f2f316a4ab]
+duckdb(+0x39ca86) [0x55f2f314ea86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fcc4496724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fcc44967305]
+duckdb(+0x3a01b1) [0x55f2f31521b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/27c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55664132ce36]
+duckdb(+0x576ef4) [0x55664132cef4]
+duckdb(+0x579ce1) [0x55664132fce1]
+duckdb(+0x3a1d3c) [0x556641157d3c]
+duckdb(+0x1b6eb8) [0x556640f6ceb8]
+duckdb(+0x9fe2e0) [0x5566417b42e0]
+duckdb(+0xa03c70) [0x5566417b9c70]
+duckdb(+0xa044d7) [0x5566417ba4d7]
+duckdb(+0x7fec48) [0x5566415b4c48]
+duckdb(+0x8011aa) [0x5566415b71aa]
+duckdb(+0x8017ac) [0x5566415b77ac]
+duckdb(+0x801c2d) [0x5566415b7c2d]
+duckdb(+0x802d09) [0x5566415b8d09]
+duckdb(+0x801e7a) [0x5566415b7e7a]
+duckdb(+0x805fff) [0x5566415bbfff]
+duckdb(+0x8060e3) [0x5566415bc0e3]
+duckdb(+0x80639e) [0x5566415bc39e]
+duckdb(+0x3c9d4d) [0x55664117fd4d]
+duckdb(+0x3b7290) [0x55664116d290]
+duckdb(+0x3b7f1a) [0x55664116df1a]
+duckdb(+0x3b8571) [0x55664116e571]
+duckdb(+0x3b86e0) [0x55664116e6e0]
+duckdb(+0x3b8796) [0x55664116e796]
+duckdb(+0x3b5df1) [0x55664116bdf1]
+duckdb(+0x3b84ab) [0x55664116e4ab]
+duckdb(+0x39ca86) [0x556641152a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fdb79c4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fdb79c46305]
+duckdb(+0x3a01b1) [0x5566411561b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/28a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55d9c4689e36]
+duckdb(+0x576ef4) [0x55d9c4689ef4]
+duckdb(+0x579ce1) [0x55d9c468cce1]
+duckdb(+0x3a1d3c) [0x55d9c44b4d3c]
+duckdb(+0x1b83aa) [0x55d9c42cb3aa]
+duckdb(+0x9f4a9b) [0x55d9c4b07a9b]
+duckdb(+0x7fed10) [0x55d9c4911d10]
+duckdb(+0x8011aa) [0x55d9c49141aa]
+duckdb(+0x8017ac) [0x55d9c49147ac]
+duckdb(+0x801c2d) [0x55d9c4914c2d]
+duckdb(+0x802d09) [0x55d9c4915d09]
+duckdb(+0x801e7a) [0x55d9c4914e7a]
+duckdb(+0x805fff) [0x55d9c4918fff]
+duckdb(+0x8060e3) [0x55d9c49190e3]
+duckdb(+0x80639e) [0x55d9c491939e]
+duckdb(+0x3c9d4d) [0x55d9c44dcd4d]
+duckdb(+0x3b7290) [0x55d9c44ca290]
+duckdb(+0x3b7f1a) [0x55d9c44caf1a]
+duckdb(+0x3b8571) [0x55d9c44cb571]
+duckdb(+0x3b86e0) [0x55d9c44cb6e0]
+duckdb(+0x3b8796) [0x55d9c44cb796]
+duckdb(+0x3b5df1) [0x55d9c44c8df1]
+duckdb(+0x3b84ab) [0x55d9c44cb4ab]
+duckdb(+0x39ca86) [0x55d9c44afa86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f469176724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f4691767305]
+duckdb(+0x3a01b1) [0x55d9c44b31b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/28b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55be2101fe36]
+duckdb(+0x576ef4) [0x55be2101fef4]
+duckdb(+0x579ce1) [0x55be21022ce1]
+duckdb(+0x3a1d3c) [0x55be20e4ad3c]
+duckdb(+0x1b83aa) [0x55be20c613aa]
+duckdb(+0x9f4a9b) [0x55be2149da9b]
+duckdb(+0x7fed10) [0x55be212a7d10]
+duckdb(+0x8011aa) [0x55be212aa1aa]
+duckdb(+0x8017ac) [0x55be212aa7ac]
+duckdb(+0x801c2d) [0x55be212aac2d]
+duckdb(+0x802d09) [0x55be212abd09]
+duckdb(+0x801e7a) [0x55be212aae7a]
+duckdb(+0x805fff) [0x55be212aefff]
+duckdb(+0x8060e3) [0x55be212af0e3]
+duckdb(+0x80639e) [0x55be212af39e]
+duckdb(+0x3c9d4d) [0x55be20e72d4d]
+duckdb(+0x3b7290) [0x55be20e60290]
+duckdb(+0x3b7f1a) [0x55be20e60f1a]
+duckdb(+0x3b8571) [0x55be20e61571]
+duckdb(+0x3b86e0) [0x55be20e616e0]
+duckdb(+0x3b8796) [0x55be20e61796]
+duckdb(+0x3b5df1) [0x55be20e5edf1]
+duckdb(+0x3b84ab) [0x55be20e614ab]
+duckdb(+0x39ca86) [0x55be20e45a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7faea164624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7faea1646305]
+duckdb(+0x3a01b1) [0x55be20e491b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/28c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x56068e0afe36]
+duckdb(+0x576ef4) [0x56068e0afef4]
+duckdb(+0x579ce1) [0x56068e0b2ce1]
+duckdb(+0x3a1d3c) [0x56068dedad3c]
+duckdb(+0x1b83aa) [0x56068dcf13aa]
+duckdb(+0x9f4a9b) [0x56068e52da9b]
+duckdb(+0x7fed10) [0x56068e337d10]
+duckdb(+0x8011aa) [0x56068e33a1aa]
+duckdb(+0x8017ac) [0x56068e33a7ac]
+duckdb(+0x801c2d) [0x56068e33ac2d]
+duckdb(+0x802d09) [0x56068e33bd09]
+duckdb(+0x801e7a) [0x56068e33ae7a]
+duckdb(+0x805fff) [0x56068e33efff]
+duckdb(+0x8060e3) [0x56068e33f0e3]
+duckdb(+0x80639e) [0x56068e33f39e]
+duckdb(+0x3c9d4d) [0x56068df02d4d]
+duckdb(+0x3b7290) [0x56068def0290]
+duckdb(+0x3b7f1a) [0x56068def0f1a]
+duckdb(+0x3b8571) [0x56068def1571]
+duckdb(+0x3b86e0) [0x56068def16e0]
+duckdb(+0x3b8796) [0x56068def1796]
+duckdb(+0x3b5df1) [0x56068deeedf1]
+duckdb(+0x3b84ab) [0x56068def14ab]
+duckdb(+0x39ca86) [0x56068ded5a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f044a24624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f044a246305]
+duckdb(+0x3a01b1) [0x56068ded91b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x5629efaaee36]
+duckdb(+0x576ef4) [0x5629efaaeef4]
+duckdb(+0x579ce1) [0x5629efab1ce1]
+duckdb(+0x3a1d3c) [0x5629ef8d9d3c]
+duckdb(+0x1b83aa) [0x5629ef6f03aa]
+duckdb(+0x9f4a9b) [0x5629eff2ca9b]
+duckdb(+0x7fed10) [0x5629efd36d10]
+duckdb(+0x8011aa) [0x5629efd391aa]
+duckdb(+0x8017ac) [0x5629efd397ac]
+duckdb(+0x801c2d) [0x5629efd39c2d]
+duckdb(+0x802d09) [0x5629efd3ad09]
+duckdb(+0x801e7a) [0x5629efd39e7a]
+duckdb(+0x805fff) [0x5629efd3dfff]
+duckdb(+0x8060e3) [0x5629efd3e0e3]
+duckdb(+0x80639e) [0x5629efd3e39e]
+duckdb(+0x3c9d4d) [0x5629ef901d4d]
+duckdb(+0x3b7290) [0x5629ef8ef290]
+duckdb(+0x3b7f1a) [0x5629ef8eff1a]
+duckdb(+0x3b8571) [0x5629ef8f0571]
+duckdb(+0x3b86e0) [0x5629ef8f06e0]
+duckdb(+0x3b8796) [0x5629ef8f0796]
+duckdb(+0x3b5df1) [0x5629ef8eddf1]
+duckdb(+0x3b84ab) [0x5629ef8f04ab]
+duckdb(+0x39ca86) [0x5629ef8d4a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fddf016724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fddf0167305]
+duckdb(+0x3a01b1) [0x5629ef8d81b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x564edfbb5e36]
+duckdb(+0x576ef4) [0x564edfbb5ef4]
+duckdb(+0x579ce1) [0x564edfbb8ce1]
+duckdb(+0x3a1d3c) [0x564edf9e0d3c]
+duckdb(+0x1b83aa) [0x564edf7f73aa]
+duckdb(+0x9f4a9b) [0x564ee0033a9b]
+duckdb(+0x7fed10) [0x564edfe3dd10]
+duckdb(+0x8011aa) [0x564edfe401aa]
+duckdb(+0x8017ac) [0x564edfe407ac]
+duckdb(+0x801c2d) [0x564edfe40c2d]
+duckdb(+0x802d09) [0x564edfe41d09]
+duckdb(+0x801e7a) [0x564edfe40e7a]
+duckdb(+0x805fff) [0x564edfe44fff]
+duckdb(+0x8060e3) [0x564edfe450e3]
+duckdb(+0x80639e) [0x564edfe4539e]
+duckdb(+0x3c9d4d) [0x564edfa08d4d]
+duckdb(+0x3b7290) [0x564edf9f6290]
+duckdb(+0x3b7f1a) [0x564edf9f6f1a]
+duckdb(+0x3b8571) [0x564edf9f7571]
+duckdb(+0x3b86e0) [0x564edf9f76e0]
+duckdb(+0x3b8796) [0x564edf9f7796]
+duckdb(+0x3b5df1) [0x564edf9f4df1]
+duckdb(+0x3b84ab) [0x564edf9f74ab]
+duckdb(+0x39ca86) [0x564edf9dba86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fafdb84624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fafdb846305]
+duckdb(+0x3a01b1) [0x564edf9df1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x564ea6475e36]
+duckdb(+0x576ef4) [0x564ea6475ef4]
+duckdb(+0x579ce1) [0x564ea6478ce1]
+duckdb(+0x3a1d3c) [0x564ea62a0d3c]
+duckdb(+0x1b83aa) [0x564ea60b73aa]
+duckdb(+0x9f4a9b) [0x564ea68f3a9b]
+duckdb(+0x7fed10) [0x564ea66fdd10]
+duckdb(+0x8011aa) [0x564ea67001aa]
+duckdb(+0x8017ac) [0x564ea67007ac]
+duckdb(+0x801c2d) [0x564ea6700c2d]
+duckdb(+0x802d09) [0x564ea6701d09]
+duckdb(+0x801e7a) [0x564ea6700e7a]
+duckdb(+0x805fff) [0x564ea6704fff]
+duckdb(+0x8060e3) [0x564ea67050e3]
+duckdb(+0x80639e) [0x564ea670539e]
+duckdb(+0x3c9d4d) [0x564ea62c8d4d]
+duckdb(+0x3b7290) [0x564ea62b6290]
+duckdb(+0x3b7f1a) [0x564ea62b6f1a]
+duckdb(+0x3b8571) [0x564ea62b7571]
+duckdb(+0x3b86e0) [0x564ea62b76e0]
+duckdb(+0x3b8796) [0x564ea62b7796]
+duckdb(+0x3b5df1) [0x564ea62b4df1]
+duckdb(+0x3b84ab) [0x564ea62b74ab]
+duckdb(+0x39ca86) [0x564ea629ba86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7ff05a64624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7ff05a646305]
+duckdb(+0x3a01b1) [0x564ea629f1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x56031f4fae36]
+duckdb(+0x576ef4) [0x56031f4faef4]
+duckdb(+0x579ce1) [0x56031f4fdce1]
+duckdb(+0x3a1d3c) [0x56031f325d3c]
+duckdb(+0x1b83aa) [0x56031f13c3aa]
+duckdb(+0x9f4a9b) [0x56031f978a9b]
+duckdb(+0x7fed10) [0x56031f782d10]
+duckdb(+0x8011aa) [0x56031f7851aa]
+duckdb(+0x8017ac) [0x56031f7857ac]
+duckdb(+0x801c2d) [0x56031f785c2d]
+duckdb(+0x802d09) [0x56031f786d09]
+duckdb(+0x801e7a) [0x56031f785e7a]
+duckdb(+0x805fff) [0x56031f789fff]
+duckdb(+0x8060e3) [0x56031f78a0e3]
+duckdb(+0x80639e) [0x56031f78a39e]
+duckdb(+0x3c9d4d) [0x56031f34dd4d]
+duckdb(+0x3b7290) [0x56031f33b290]
+duckdb(+0x3b7f1a) [0x56031f33bf1a]
+duckdb(+0x3b8571) [0x56031f33c571]
+duckdb(+0x3b86e0) [0x56031f33c6e0]
+duckdb(+0x3b8796) [0x56031f33c796]
+duckdb(+0x3b5df1) [0x56031f339df1]
+duckdb(+0x3b84ab) [0x56031f33c4ab]
+duckdb(+0x39ca86) [0x56031f320a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f0bda82624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f0bda826305]
+duckdb(+0x3a01b1) [0x56031f3241b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x56189f827e36]
+duckdb(+0x576ef4) [0x56189f827ef4]
+duckdb(+0x579ce1) [0x56189f82ace1]
+duckdb(+0x3a1d3c) [0x56189f652d3c]
+duckdb(+0x1b83aa) [0x56189f4693aa]
+duckdb(+0x9f4a9b) [0x56189fca5a9b]
+duckdb(+0x7fed10) [0x56189faafd10]
+duckdb(+0x8011aa) [0x56189fab21aa]
+duckdb(+0x8017ac) [0x56189fab27ac]
+duckdb(+0x801c2d) [0x56189fab2c2d]
+duckdb(+0x802d09) [0x56189fab3d09]
+duckdb(+0x801e7a) [0x56189fab2e7a]
+duckdb(+0x805fff) [0x56189fab6fff]
+duckdb(+0x8060e3) [0x56189fab70e3]
+duckdb(+0x80639e) [0x56189fab739e]
+duckdb(+0x3c9d4d) [0x56189f67ad4d]
+duckdb(+0x3b7290) [0x56189f668290]
+duckdb(+0x3b7f1a) [0x56189f668f1a]
+duckdb(+0x3b8571) [0x56189f669571]
+duckdb(+0x3b86e0) [0x56189f6696e0]
+duckdb(+0x3b8796) [0x56189f669796]
+duckdb(+0x3b5df1) [0x56189f666df1]
+duckdb(+0x3b84ab) [0x56189f6694ab]
+duckdb(+0x39ca86) [0x56189f64da86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fa5f184624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fa5f1846305]
+duckdb(+0x3a01b1) [0x56189f6511b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55b2305bbe36]
+duckdb(+0x576ef4) [0x55b2305bbef4]
+duckdb(+0x579ce1) [0x55b2305bece1]
+duckdb(+0x3a1d3c) [0x55b2303e6d3c]
+duckdb(+0x1b83aa) [0x55b2301fd3aa]
+duckdb(+0x9f4a9b) [0x55b230a39a9b]
+duckdb(+0x7fed10) [0x55b230843d10]
+duckdb(+0x8011aa) [0x55b2308461aa]
+duckdb(+0x8017ac) [0x55b2308467ac]
+duckdb(+0x801c2d) [0x55b230846c2d]
+duckdb(+0x802d09) [0x55b230847d09]
+duckdb(+0x801e7a) [0x55b230846e7a]
+duckdb(+0x805fff) [0x55b23084afff]
+duckdb(+0x8060e3) [0x55b23084b0e3]
+duckdb(+0x80639e) [0x55b23084b39e]
+duckdb(+0x3c9d4d) [0x55b23040ed4d]
+duckdb(+0x3b7290) [0x55b2303fc290]
+duckdb(+0x3b7f1a) [0x55b2303fcf1a]
+duckdb(+0x3b8571) [0x55b2303fd571]
+duckdb(+0x3b86e0) [0x55b2303fd6e0]
+duckdb(+0x3b8796) [0x55b2303fd796]
+duckdb(+0x3b5df1) [0x55b2303fadf1]
+duckdb(+0x3b84ab) [0x55b2303fd4ab]
+duckdb(+0x39ca86) [0x55b2303e1a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f201bb6724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f201bb67305]
+duckdb(+0x3a01b1) [0x55b2303e51b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2d.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55779e907e36]
+duckdb(+0x576ef4) [0x55779e907ef4]
+duckdb(+0x579ce1) [0x55779e90ace1]
+duckdb(+0x3a1d3c) [0x55779e732d3c]
+duckdb(+0x1b83aa) [0x55779e5493aa]
+duckdb(+0x9f4a9b) [0x55779ed85a9b]
+duckdb(+0x7fed10) [0x55779eb8fd10]
+duckdb(+0x8011aa) [0x55779eb921aa]
+duckdb(+0x8017ac) [0x55779eb927ac]
+duckdb(+0x801c2d) [0x55779eb92c2d]
+duckdb(+0x802d09) [0x55779eb93d09]
+duckdb(+0x801e7a) [0x55779eb92e7a]
+duckdb(+0x805fff) [0x55779eb96fff]
+duckdb(+0x8060e3) [0x55779eb970e3]
+duckdb(+0x80639e) [0x55779eb9739e]
+duckdb(+0x3c9d4d) [0x55779e75ad4d]
+duckdb(+0x3b7290) [0x55779e748290]
+duckdb(+0x3b7f1a) [0x55779e748f1a]
+duckdb(+0x3b8571) [0x55779e749571]
+duckdb(+0x3b86e0) [0x55779e7496e0]
+duckdb(+0x3b8796) [0x55779e749796]
+duckdb(+0x3b5df1) [0x55779e746df1]
+duckdb(+0x3b84ab) [0x55779e7494ab]
+duckdb(+0x39ca86) [0x55779e72da86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f3514e2624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f3514e26305]
+duckdb(+0x3a01b1) [0x55779e7311b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30a.sql
+INTERNAL Error: Attempted to dereference unique_ptr that is NULL!
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x5644b2743e36]
+duckdb(+0x576ef4) [0x5644b2743ef4]
+duckdb(+0x579ce1) [0x5644b2746ce1]
+duckdb(+0x81a966) [0x5644b29e7966]
+duckdb(+0x7f9b41) [0x5644b29c6b41]
+duckdb(+0x801cb9) [0x5644b29cecb9]
+duckdb(+0x802d09) [0x5644b29cfd09]
+duckdb(+0x801e7a) [0x5644b29cee7a]
+duckdb(+0x805fff) [0x5644b29d2fff]
+duckdb(+0x8060e3) [0x5644b29d30e3]
+duckdb(+0x80639e) [0x5644b29d339e]
+duckdb(+0x3c9d4d) [0x5644b2596d4d]
+duckdb(+0x3b7290) [0x5644b2584290]
+duckdb(+0x3b7f1a) [0x5644b2584f1a]
+duckdb(+0x3b8571) [0x5644b2585571]
+duckdb(+0x3b86e0) [0x5644b25856e0]
+duckdb(+0x3b8796) [0x5644b2585796]
+duckdb(+0x3b5df1) [0x5644b2582df1]
+duckdb(+0x3b84ab) [0x5644b25854ab]
+duckdb(+0x39ca86) [0x5644b2569a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fc71fe4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fc71fe46305]
+duckdb(+0x3a01b1) [0x5644b256d1b1]
+
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30b.sql
+INTERNAL Error: Attempted to dereference unique_ptr that is NULL!
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55baae80ae36]
+duckdb(+0x576ef4) [0x55baae80aef4]
+duckdb(+0x579ce1) [0x55baae80dce1]
+duckdb(+0x81a966) [0x55baaeaae966]
+duckdb(+0x7f9b41) [0x55baaea8db41]
+duckdb(+0x801cb9) [0x55baaea95cb9]
+duckdb(+0x802d09) [0x55baaea96d09]
+duckdb(+0x801e7a) [0x55baaea95e7a]
+duckdb(+0x805fff) [0x55baaea99fff]
+duckdb(+0x8060e3) [0x55baaea9a0e3]
+duckdb(+0x80639e) [0x55baaea9a39e]
+duckdb(+0x3c9d4d) [0x55baae65dd4d]
+duckdb(+0x3b7290) [0x55baae64b290]
+duckdb(+0x3b7f1a) [0x55baae64bf1a]
+duckdb(+0x3b8571) [0x55baae64c571]
+duckdb(+0x3b86e0) [0x55baae64c6e0]
+duckdb(+0x3b8796) [0x55baae64c796]
+duckdb(+0x3b5df1) [0x55baae649df1]
+duckdb(+0x3b84ab) [0x55baae64c4ab]
+duckdb(+0x39ca86) [0x55baae630a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fdc3636724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fdc36367305]
+duckdb(+0x3a01b1) [0x55baae6341b1]
+
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x558e83fa8e36]
+duckdb(+0x576ef4) [0x558e83fa8ef4]
+duckdb(+0x579ce1) [0x558e83fabce1]
+duckdb(+0x3a1d3c) [0x558e83dd3d3c]
+duckdb(+0x1b83aa) [0x558e83bea3aa]
+duckdb(+0x9f4a9b) [0x558e84426a9b]
+duckdb(+0x7fed10) [0x558e84230d10]
+duckdb(+0x8011aa) [0x558e842331aa]
+duckdb(+0x8017ac) [0x558e842337ac]
+duckdb(+0x801c2d) [0x558e84233c2d]
+duckdb(+0x802d09) [0x558e84234d09]
+duckdb(+0x801e7a) [0x558e84233e7a]
+duckdb(+0x805fff) [0x558e84237fff]
+duckdb(+0x8060e3) [0x558e842380e3]
+duckdb(+0x80639e) [0x558e8423839e]
+duckdb(+0x3c9d4d) [0x558e83dfbd4d]
+duckdb(+0x3b7290) [0x558e83de9290]
+duckdb(+0x3b7f1a) [0x558e83de9f1a]
+duckdb(+0x3b8571) [0x558e83dea571]
+duckdb(+0x3b86e0) [0x558e83dea6e0]
+duckdb(+0x3b8796) [0x558e83dea796]
+duckdb(+0x3b5df1) [0x558e83de7df1]
+duckdb(+0x3b84ab) [0x558e83dea4ab]
+duckdb(+0x39ca86) [0x558e83dcea86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fa64044624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fa640446305]
+duckdb(+0x3a01b1) [0x558e83dd21b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55941c57ce36]
+duckdb(+0x576ef4) [0x55941c57cef4]
+duckdb(+0x579ce1) [0x55941c57fce1]
+duckdb(+0x3a1d3c) [0x55941c3a7d3c]
+duckdb(+0x1b6eb8) [0x55941c1bceb8]
+duckdb(+0x9fe2e0) [0x55941ca042e0]
+duckdb(+0xa03c70) [0x55941ca09c70]
+duckdb(+0xa044d7) [0x55941ca0a4d7]
+duckdb(+0x7fec48) [0x55941c804c48]
+duckdb(+0x8011aa) [0x55941c8071aa]
+duckdb(+0x8017ac) [0x55941c8077ac]
+duckdb(+0x801c2d) [0x55941c807c2d]
+duckdb(+0x802d09) [0x55941c808d09]
+duckdb(+0x801e7a) [0x55941c807e7a]
+duckdb(+0x805fff) [0x55941c80bfff]
+duckdb(+0x8060e3) [0x55941c80c0e3]
+duckdb(+0x80639e) [0x55941c80c39e]
+duckdb(+0x3c9d4d) [0x55941c3cfd4d]
+duckdb(+0x3b7290) [0x55941c3bd290]
+duckdb(+0x3b7f1a) [0x55941c3bdf1a]
+duckdb(+0x3b8571) [0x55941c3be571]
+duckdb(+0x3b86e0) [0x55941c3be6e0]
+duckdb(+0x3b8796) [0x55941c3be796]
+duckdb(+0x3b5df1) [0x55941c3bbdf1]
+duckdb(+0x3b84ab) [0x55941c3be4ab]
+duckdb(+0x39ca86) [0x55941c3a2a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fc0ac44624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fc0ac446305]
+duckdb(+0x3a01b1) [0x55941c3a61b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55ca58dc0e36]
+duckdb(+0x576ef4) [0x55ca58dc0ef4]
+duckdb(+0x579ce1) [0x55ca58dc3ce1]
+duckdb(+0x3a1d3c) [0x55ca58bebd3c]
+duckdb(+0x1b6eb8) [0x55ca58a00eb8]
+duckdb(+0x9fe2e0) [0x55ca592482e0]
+duckdb(+0xa03c70) [0x55ca5924dc70]
+duckdb(+0xa044d7) [0x55ca5924e4d7]
+duckdb(+0x7fec48) [0x55ca59048c48]
+duckdb(+0x8011aa) [0x55ca5904b1aa]
+duckdb(+0x8017ac) [0x55ca5904b7ac]
+duckdb(+0x801c2d) [0x55ca5904bc2d]
+duckdb(+0x802d09) [0x55ca5904cd09]
+duckdb(+0x801e7a) [0x55ca5904be7a]
+duckdb(+0x805fff) [0x55ca5904ffff]
+duckdb(+0x8060e3) [0x55ca590500e3]
+duckdb(+0x80639e) [0x55ca5905039e]
+duckdb(+0x3c9d4d) [0x55ca58c13d4d]
+duckdb(+0x3b7290) [0x55ca58c01290]
+duckdb(+0x3b7f1a) [0x55ca58c01f1a]
+duckdb(+0x3b8571) [0x55ca58c02571]
+duckdb(+0x3b86e0) [0x55ca58c026e0]
+duckdb(+0x3b8796) [0x55ca58c02796]
+duckdb(+0x3b5df1) [0x55ca58bffdf1]
+duckdb(+0x3b84ab) [0x55ca58c024ab]
+duckdb(+0x39ca86) [0x55ca58be6a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fd7e896724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fd7e8967305]
+duckdb(+0x3a01b1) [0x55ca58bea1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x563455251e36]
+duckdb(+0x576ef4) [0x563455251ef4]
+duckdb(+0x579ce1) [0x563455254ce1]
+duckdb(+0x3a1d3c) [0x56345507cd3c]
+duckdb(+0x1b6eb8) [0x563454e91eb8]
+duckdb(+0x9fe2e0) [0x5634556d92e0]
+duckdb(+0xa03c70) [0x5634556dec70]
+duckdb(+0xa044d7) [0x5634556df4d7]
+duckdb(+0x7fec48) [0x5634554d9c48]
+duckdb(+0x8011aa) [0x5634554dc1aa]
+duckdb(+0x8017ac) [0x5634554dc7ac]
+duckdb(+0x801c2d) [0x5634554dcc2d]
+duckdb(+0x802d09) [0x5634554ddd09]
+duckdb(+0x801e7a) [0x5634554dce7a]
+duckdb(+0x805fff) [0x5634554e0fff]
+duckdb(+0x8060e3) [0x5634554e10e3]
+duckdb(+0x80639e) [0x5634554e139e]
+duckdb(+0x3c9d4d) [0x5634550a4d4d]
+duckdb(+0x3b7290) [0x563455092290]
+duckdb(+0x3b7f1a) [0x563455092f1a]
+duckdb(+0x3b8571) [0x563455093571]
+duckdb(+0x3b86e0) [0x5634550936e0]
+duckdb(+0x3b8796) [0x563455093796]
+duckdb(+0x3b5df1) [0x563455090df1]
+duckdb(+0x3b84ab) [0x5634550934ab]
+duckdb(+0x39ca86) [0x563455077a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f625ca4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f625ca46305]
+duckdb(+0x3a01b1) [0x56345507b1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/32a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x561d07f6ae36]
+duckdb(+0x576ef4) [0x561d07f6aef4]
+duckdb(+0x579ce1) [0x561d07f6dce1]
+duckdb(+0x3a1d3c) [0x561d07d95d3c]
+duckdb(+0x1b6eb8) [0x561d07baaeb8]
+duckdb(+0x9fe2e0) [0x561d083f22e0]
+duckdb(+0xa03c70) [0x561d083f7c70]
+duckdb(+0xa044d7) [0x561d083f84d7]
+duckdb(+0x7fec48) [0x561d081f2c48]
+duckdb(+0x8011aa) [0x561d081f51aa]
+duckdb(+0x8017ac) [0x561d081f57ac]
+duckdb(+0x801c2d) [0x561d081f5c2d]
+duckdb(+0x802d09) [0x561d081f6d09]
+duckdb(+0x801e7a) [0x561d081f5e7a]
+duckdb(+0x805fff) [0x561d081f9fff]
+duckdb(+0x8060e3) [0x561d081fa0e3]
+duckdb(+0x80639e) [0x561d081fa39e]
+duckdb(+0x3c9d4d) [0x561d07dbdd4d]
+duckdb(+0x3b7290) [0x561d07dab290]
+duckdb(+0x3b7f1a) [0x561d07dabf1a]
+duckdb(+0x3b8571) [0x561d07dac571]
+duckdb(+0x3b86e0) [0x561d07dac6e0]
+duckdb(+0x3b8796) [0x561d07dac796]
+duckdb(+0x3b5df1) [0x561d07da9df1]
+duckdb(+0x3b84ab) [0x561d07dac4ab]
+duckdb(+0x39ca86) [0x561d07d90a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fc45f56724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fc45f567305]
+duckdb(+0x3a01b1) [0x561d07d941b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/32b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55789b0b0e36]
+duckdb(+0x576ef4) [0x55789b0b0ef4]
+duckdb(+0x579ce1) [0x55789b0b3ce1]
+duckdb(+0x3a1d3c) [0x55789aedbd3c]
+duckdb(+0x1b6eb8) [0x55789acf0eb8]
+duckdb(+0x9fe2e0) [0x55789b5382e0]
+duckdb(+0xa03c70) [0x55789b53dc70]
+duckdb(+0xa044d7) [0x55789b53e4d7]
+duckdb(+0x7fec48) [0x55789b338c48]
+duckdb(+0x8011aa) [0x55789b33b1aa]
+duckdb(+0x8017ac) [0x55789b33b7ac]
+duckdb(+0x801c2d) [0x55789b33bc2d]
+duckdb(+0x802d09) [0x55789b33cd09]
+duckdb(+0x801e7a) [0x55789b33be7a]
+duckdb(+0x805fff) [0x55789b33ffff]
+duckdb(+0x8060e3) [0x55789b3400e3]
+duckdb(+0x80639e) [0x55789b34039e]
+duckdb(+0x3c9d4d) [0x55789af03d4d]
+duckdb(+0x3b7290) [0x55789aef1290]
+duckdb(+0x3b7f1a) [0x55789aef1f1a]
+duckdb(+0x3b8571) [0x55789aef2571]
+duckdb(+0x3b86e0) [0x55789aef26e0]
+duckdb(+0x3b8796) [0x55789aef2796]
+duckdb(+0x3b5df1) [0x55789aeefdf1]
+duckdb(+0x3b84ab) [0x55789aef24ab]
+duckdb(+0x39ca86) [0x55789aed6a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f317256724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f3172567305]
+duckdb(+0x3a01b1) [0x55789aeda1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/33a.sql
+INTERNAL Error: Attempted to dereference unique_ptr that is NULL!
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55a1f142be36]
+duckdb(+0x576ef4) [0x55a1f142bef4]
+duckdb(+0x579ce1) [0x55a1f142ece1]
+duckdb(+0x81a966) [0x55a1f16cf966]
+duckdb(+0x7f9b41) [0x55a1f16aeb41]
+duckdb(+0x801cb9) [0x55a1f16b6cb9]
+duckdb(+0x802d09) [0x55a1f16b7d09]
+duckdb(+0x801e7a) [0x55a1f16b6e7a]
+duckdb(+0x805fff) [0x55a1f16bafff]
+duckdb(+0x8060e3) [0x55a1f16bb0e3]
+duckdb(+0x80639e) [0x55a1f16bb39e]
+duckdb(+0x3c9d4d) [0x55a1f127ed4d]
+duckdb(+0x3b7290) [0x55a1f126c290]
+duckdb(+0x3b7f1a) [0x55a1f126cf1a]
+duckdb(+0x3b8571) [0x55a1f126d571]
+duckdb(+0x3b86e0) [0x55a1f126d6e0]
+duckdb(+0x3b8796) [0x55a1f126d796]
+duckdb(+0x3b5df1) [0x55a1f126adf1]
+duckdb(+0x3b84ab) [0x55a1f126d4ab]
+duckdb(+0x39ca86) [0x55a1f1251a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f94a022624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f94a0226305]
+duckdb(+0x3a01b1) [0x55a1f12551b1]
+
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/33b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55975360de36]
+duckdb(+0x576ef4) [0x55975360def4]
+duckdb(+0x579ce1) [0x559753610ce1]
+duckdb(+0x3a1d3c) [0x559753438d3c]
+duckdb(+0x1b6eb8) [0x55975324deb8]
+duckdb(+0x9fe2e0) [0x559753a952e0]
+duckdb(+0xa03c70) [0x559753a9ac70]
+duckdb(+0xa044d7) [0x559753a9b4d7]
+duckdb(+0x7fec48) [0x559753895c48]
+duckdb(+0x8011aa) [0x5597538981aa]
+duckdb(+0x8017ac) [0x5597538987ac]
+duckdb(+0x801c2d) [0x559753898c2d]
+duckdb(+0x802d09) [0x559753899d09]
+duckdb(+0x801e7a) [0x559753898e7a]
+duckdb(+0x805fff) [0x55975389cfff]
+duckdb(+0x8060e3) [0x55975389d0e3]
+duckdb(+0x80639e) [0x55975389d39e]
+duckdb(+0x3c9d4d) [0x559753460d4d]
+duckdb(+0x3b7290) [0x55975344e290]
+duckdb(+0x3b7f1a) [0x55975344ef1a]
+duckdb(+0x3b8571) [0x55975344f571]
+duckdb(+0x3b86e0) [0x55975344f6e0]
+duckdb(+0x3b8796) [0x55975344f796]
+duckdb(+0x3b5df1) [0x55975344cdf1]
+duckdb(+0x3b84ab) [0x55975344f4ab]
+duckdb(+0x39ca86) [0x559753433a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fc4b954724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fc4b9547305]
+duckdb(+0x3a01b1) [0x5597534371b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/33c.sql
+INTERNAL Error: Attempted to dereference unique_ptr that is NULL!
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55a6d954be36]
+duckdb(+0x576ef4) [0x55a6d954bef4]
+duckdb(+0x579ce1) [0x55a6d954ece1]
+duckdb(+0x81a966) [0x55a6d97ef966]
+duckdb(+0x7f9b41) [0x55a6d97ceb41]
+duckdb(+0x801cb9) [0x55a6d97d6cb9]
+duckdb(+0x802d09) [0x55a6d97d7d09]
+duckdb(+0x801e7a) [0x55a6d97d6e7a]
+duckdb(+0x805fff) [0x55a6d97dafff]
+duckdb(+0x8060e3) [0x55a6d97db0e3]
+duckdb(+0x80639e) [0x55a6d97db39e]
+duckdb(+0x3c9d4d) [0x55a6d939ed4d]
+duckdb(+0x3b7290) [0x55a6d938c290]
+duckdb(+0x3b7f1a) [0x55a6d938cf1a]
+duckdb(+0x3b8571) [0x55a6d938d571]
+duckdb(+0x3b86e0) [0x55a6d938d6e0]
+duckdb(+0x3b8796) [0x55a6d938d796]
+duckdb(+0x3b5df1) [0x55a6d938adf1]
+duckdb(+0x3b84ab) [0x55a6d938d4ab]
+duckdb(+0x39ca86) [0x55a6d9371a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f50ffa4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f50ffa46305]
+duckdb(+0x3a01b1) [0x55a6d93751b1]
+
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/3a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55ccba183e36]
+duckdb(+0x576ef4) [0x55ccba183ef4]
+duckdb(+0x579ce1) [0x55ccba186ce1]
+duckdb(+0x3a1d3c) [0x55ccb9faed3c]
+duckdb(+0x1b85bc) [0x55ccb9dc55bc]
+duckdb(+0x9f4a9b) [0x55ccba601a9b]
+duckdb(+0x7fed10) [0x55ccba40bd10]
+duckdb(+0x8011aa) [0x55ccba40e1aa]
+duckdb(+0x8017ac) [0x55ccba40e7ac]
+duckdb(+0x801c2d) [0x55ccba40ec2d]
+duckdb(+0x802d09) [0x55ccba40fd09]
+duckdb(+0x801e7a) [0x55ccba40ee7a]
+duckdb(+0x805fff) [0x55ccba412fff]
+duckdb(+0x8060e3) [0x55ccba4130e3]
+duckdb(+0x80639e) [0x55ccba41339e]
+duckdb(+0x3c9d4d) [0x55ccb9fd6d4d]
+duckdb(+0x3b7290) [0x55ccb9fc4290]
+duckdb(+0x3b7f1a) [0x55ccb9fc4f1a]
+duckdb(+0x3b8571) [0x55ccb9fc5571]
+duckdb(+0x3b86e0) [0x55ccb9fc56e0]
+duckdb(+0x3b8796) [0x55ccb9fc5796]
+duckdb(+0x3b5df1) [0x55ccb9fc2df1]
+duckdb(+0x3b84ab) [0x55ccb9fc54ab]
+duckdb(+0x39ca86) [0x55ccb9fa9a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f3906c2624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f3906c26305]
+duckdb(+0x3a01b1) [0x55ccb9fad1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/3b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55749b036e36]
+duckdb(+0x576ef4) [0x55749b036ef4]
+duckdb(+0x579ce1) [0x55749b039ce1]
+duckdb(+0x3a1d3c) [0x55749ae61d3c]
+duckdb(+0x1b83aa) [0x55749ac783aa]
+duckdb(+0x9f4a9b) [0x55749b4b4a9b]
+duckdb(+0x7fed10) [0x55749b2bed10]
+duckdb(+0x8011aa) [0x55749b2c11aa]
+duckdb(+0x8017ac) [0x55749b2c17ac]
+duckdb(+0x801c2d) [0x55749b2c1c2d]
+duckdb(+0x802d09) [0x55749b2c2d09]
+duckdb(+0x801e7a) [0x55749b2c1e7a]
+duckdb(+0x805fff) [0x55749b2c5fff]
+duckdb(+0x8060e3) [0x55749b2c60e3]
+duckdb(+0x80639e) [0x55749b2c639e]
+duckdb(+0x3c9d4d) [0x55749ae89d4d]
+duckdb(+0x3b7290) [0x55749ae77290]
+duckdb(+0x3b7f1a) [0x55749ae77f1a]
+duckdb(+0x3b8571) [0x55749ae78571]
+duckdb(+0x3b86e0) [0x55749ae786e0]
+duckdb(+0x3b8796) [0x55749ae78796]
+duckdb(+0x3b5df1) [0x55749ae75df1]
+duckdb(+0x3b84ab) [0x55749ae784ab]
+duckdb(+0x39ca86) [0x55749ae5ca86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f097f42624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f097f426305]
+duckdb(+0x3a01b1) [0x55749ae601b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/3c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x5598a646ce36]
+duckdb(+0x576ef4) [0x5598a646cef4]
+duckdb(+0x579ce1) [0x5598a646fce1]
+duckdb(+0x3a1d3c) [0x5598a6297d3c]
+duckdb(+0x1b85bc) [0x5598a60ae5bc]
+duckdb(+0x9f4a9b) [0x5598a68eaa9b]
+duckdb(+0x7fed10) [0x5598a66f4d10]
+duckdb(+0x8011aa) [0x5598a66f71aa]
+duckdb(+0x8017ac) [0x5598a66f77ac]
+duckdb(+0x801c2d) [0x5598a66f7c2d]
+duckdb(+0x802d09) [0x5598a66f8d09]
+duckdb(+0x801e7a) [0x5598a66f7e7a]
+duckdb(+0x805fff) [0x5598a66fbfff]
+duckdb(+0x8060e3) [0x5598a66fc0e3]
+duckdb(+0x80639e) [0x5598a66fc39e]
+duckdb(+0x3c9d4d) [0x5598a62bfd4d]
+duckdb(+0x3b7290) [0x5598a62ad290]
+duckdb(+0x3b7f1a) [0x5598a62adf1a]
+duckdb(+0x3b8571) [0x5598a62ae571]
+duckdb(+0x3b86e0) [0x5598a62ae6e0]
+duckdb(+0x3b8796) [0x5598a62ae796]
+duckdb(+0x3b5df1) [0x5598a62abdf1]
+duckdb(+0x3b84ab) [0x5598a62ae4ab]
+duckdb(+0x39ca86) [0x5598a6292a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7ff39776724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7ff397767305]
+duckdb(+0x3a01b1) [0x5598a62961b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/4a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x56050c96be36]
+duckdb(+0x576ef4) [0x56050c96bef4]
+duckdb(+0x579ce1) [0x56050c96ece1]
+duckdb(+0x3a1d3c) [0x56050c796d3c]
+duckdb(+0x1b6eb8) [0x56050c5abeb8]
+duckdb(+0x9fe2e0) [0x56050cdf32e0]
+duckdb(+0xa03c70) [0x56050cdf8c70]
+duckdb(+0xa044d7) [0x56050cdf94d7]
+duckdb(+0x7fec48) [0x56050cbf3c48]
+duckdb(+0x8011aa) [0x56050cbf61aa]
+duckdb(+0x8017ac) [0x56050cbf67ac]
+duckdb(+0x801c2d) [0x56050cbf6c2d]
+duckdb(+0x802d09) [0x56050cbf7d09]
+duckdb(+0x801e7a) [0x56050cbf6e7a]
+duckdb(+0x805fff) [0x56050cbfafff]
+duckdb(+0x8060e3) [0x56050cbfb0e3]
+duckdb(+0x80639e) [0x56050cbfb39e]
+duckdb(+0x3c9d4d) [0x56050c7bed4d]
+duckdb(+0x3b7290) [0x56050c7ac290]
+duckdb(+0x3b7f1a) [0x56050c7acf1a]
+duckdb(+0x3b8571) [0x56050c7ad571]
+duckdb(+0x3b86e0) [0x56050c7ad6e0]
+duckdb(+0x3b8796) [0x56050c7ad796]
+duckdb(+0x3b5df1) [0x56050c7aadf1]
+duckdb(+0x3b84ab) [0x56050c7ad4ab]
+duckdb(+0x39ca86) [0x56050c791a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fbfd736724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fbfd7367305]
+duckdb(+0x3a01b1) [0x56050c7951b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/4b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x5591a1335e36]
+duckdb(+0x576ef4) [0x5591a1335ef4]
+duckdb(+0x579ce1) [0x5591a1338ce1]
+duckdb(+0x3a1d3c) [0x5591a1160d3c]
+duckdb(+0x1b6eb8) [0x5591a0f75eb8]
+duckdb(+0x9fe2e0) [0x5591a17bd2e0]
+duckdb(+0xa03c70) [0x5591a17c2c70]
+duckdb(+0xa044d7) [0x5591a17c34d7]
+duckdb(+0x7fec48) [0x5591a15bdc48]
+duckdb(+0x8011aa) [0x5591a15c01aa]
+duckdb(+0x8017ac) [0x5591a15c07ac]
+duckdb(+0x801c2d) [0x5591a15c0c2d]
+duckdb(+0x802d09) [0x5591a15c1d09]
+duckdb(+0x801e7a) [0x5591a15c0e7a]
+duckdb(+0x805fff) [0x5591a15c4fff]
+duckdb(+0x8060e3) [0x5591a15c50e3]
+duckdb(+0x80639e) [0x5591a15c539e]
+duckdb(+0x3c9d4d) [0x5591a1188d4d]
+duckdb(+0x3b7290) [0x5591a1176290]
+duckdb(+0x3b7f1a) [0x5591a1176f1a]
+duckdb(+0x3b8571) [0x5591a1177571]
+duckdb(+0x3b86e0) [0x5591a11776e0]
+duckdb(+0x3b8796) [0x5591a1177796]
+duckdb(+0x3b5df1) [0x5591a1174df1]
+duckdb(+0x3b84ab) [0x5591a11774ab]
+duckdb(+0x39ca86) [0x5591a115ba86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f4e2024624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f4e20246305]
+duckdb(+0x3a01b1) [0x5591a115f1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/4c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x564630314e36]
+duckdb(+0x576ef4) [0x564630314ef4]
+duckdb(+0x579ce1) [0x564630317ce1]
+duckdb(+0x3a1d3c) [0x56463013fd3c]
+duckdb(+0x1b6eb8) [0x56462ff54eb8]
+duckdb(+0x9fe2e0) [0x56463079c2e0]
+duckdb(+0xa03c70) [0x5646307a1c70]
+duckdb(+0xa044d7) [0x5646307a24d7]
+duckdb(+0x7fec48) [0x56463059cc48]
+duckdb(+0x8011aa) [0x56463059f1aa]
+duckdb(+0x8017ac) [0x56463059f7ac]
+duckdb(+0x801c2d) [0x56463059fc2d]
+duckdb(+0x802d09) [0x5646305a0d09]
+duckdb(+0x801e7a) [0x56463059fe7a]
+duckdb(+0x805fff) [0x5646305a3fff]
+duckdb(+0x8060e3) [0x5646305a40e3]
+duckdb(+0x80639e) [0x5646305a439e]
+duckdb(+0x3c9d4d) [0x564630167d4d]
+duckdb(+0x3b7290) [0x564630155290]
+duckdb(+0x3b7f1a) [0x564630155f1a]
+duckdb(+0x3b8571) [0x564630156571]
+duckdb(+0x3b86e0) [0x5646301566e0]
+duckdb(+0x3b8796) [0x564630156796]
+duckdb(+0x3b5df1) [0x564630153df1]
+duckdb(+0x3b84ab) [0x5646301564ab]
+duckdb(+0x39ca86) [0x56463013aa86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fe55dd6724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fe55dd67305]
+duckdb(+0x3a01b1) [0x56463013e1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/5a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x559be17fae36]
+duckdb(+0x576ef4) [0x559be17faef4]
+duckdb(+0x579ce1) [0x559be17fdce1]
+duckdb(+0x3a1d3c) [0x559be1625d3c]
+duckdb(+0x1b83aa) [0x559be143c3aa]
+duckdb(+0x9f4a9b) [0x559be1c78a9b]
+duckdb(+0x7fed10) [0x559be1a82d10]
+duckdb(+0x8011aa) [0x559be1a851aa]
+duckdb(+0x8017ac) [0x559be1a857ac]
+duckdb(+0x801c2d) [0x559be1a85c2d]
+duckdb(+0x802d09) [0x559be1a86d09]
+duckdb(+0x801e7a) [0x559be1a85e7a]
+duckdb(+0x805fff) [0x559be1a89fff]
+duckdb(+0x8060e3) [0x559be1a8a0e3]
+duckdb(+0x80639e) [0x559be1a8a39e]
+duckdb(+0x3c9d4d) [0x559be164dd4d]
+duckdb(+0x3b7290) [0x559be163b290]
+duckdb(+0x3b7f1a) [0x559be163bf1a]
+duckdb(+0x3b8571) [0x559be163c571]
+duckdb(+0x3b86e0) [0x559be163c6e0]
+duckdb(+0x3b8796) [0x559be163c796]
+duckdb(+0x3b5df1) [0x559be1639df1]
+duckdb(+0x3b84ab) [0x559be163c4ab]
+duckdb(+0x39ca86) [0x559be1620a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f2fbbe4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f2fbbe46305]
+duckdb(+0x3a01b1) [0x559be16241b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/5b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x5584ab0a5e36]
+duckdb(+0x576ef4) [0x5584ab0a5ef4]
+duckdb(+0x579ce1) [0x5584ab0a8ce1]
+duckdb(+0x3a1d3c) [0x5584aaed0d3c]
+duckdb(+0x1b83aa) [0x5584aace73aa]
+duckdb(+0x9f4a9b) [0x5584ab523a9b]
+duckdb(+0x7fed10) [0x5584ab32dd10]
+duckdb(+0x8011aa) [0x5584ab3301aa]
+duckdb(+0x8017ac) [0x5584ab3307ac]
+duckdb(+0x801c2d) [0x5584ab330c2d]
+duckdb(+0x802d09) [0x5584ab331d09]
+duckdb(+0x801e7a) [0x5584ab330e7a]
+duckdb(+0x805fff) [0x5584ab334fff]
+duckdb(+0x8060e3) [0x5584ab3350e3]
+duckdb(+0x80639e) [0x5584ab33539e]
+duckdb(+0x3c9d4d) [0x5584aaef8d4d]
+duckdb(+0x3b7290) [0x5584aaee6290]
+duckdb(+0x3b7f1a) [0x5584aaee6f1a]
+duckdb(+0x3b8571) [0x5584aaee7571]
+duckdb(+0x3b86e0) [0x5584aaee76e0]
+duckdb(+0x3b8796) [0x5584aaee7796]
+duckdb(+0x3b5df1) [0x5584aaee4df1]
+duckdb(+0x3b84ab) [0x5584aaee74ab]
+duckdb(+0x39ca86) [0x5584aaecba86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fc510f6724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fc510f67305]
+duckdb(+0x3a01b1) [0x5584aaecf1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/5c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x562f05c4ee36]
+duckdb(+0x576ef4) [0x562f05c4eef4]
+duckdb(+0x579ce1) [0x562f05c51ce1]
+duckdb(+0x3a1d3c) [0x562f05a79d3c]
+duckdb(+0x1b83aa) [0x562f058903aa]
+duckdb(+0x9f4a9b) [0x562f060cca9b]
+duckdb(+0x7fed10) [0x562f05ed6d10]
+duckdb(+0x8011aa) [0x562f05ed91aa]
+duckdb(+0x8017ac) [0x562f05ed97ac]
+duckdb(+0x801c2d) [0x562f05ed9c2d]
+duckdb(+0x802d09) [0x562f05edad09]
+duckdb(+0x801e7a) [0x562f05ed9e7a]
+duckdb(+0x805fff) [0x562f05eddfff]
+duckdb(+0x8060e3) [0x562f05ede0e3]
+duckdb(+0x80639e) [0x562f05ede39e]
+duckdb(+0x3c9d4d) [0x562f05aa1d4d]
+duckdb(+0x3b7290) [0x562f05a8f290]
+duckdb(+0x3b7f1a) [0x562f05a8ff1a]
+duckdb(+0x3b8571) [0x562f05a90571]
+duckdb(+0x3b86e0) [0x562f05a906e0]
+duckdb(+0x3b8796) [0x562f05a90796]
+duckdb(+0x3b5df1) [0x562f05a8ddf1]
+duckdb(+0x3b84ab) [0x562f05a904ab]
+duckdb(+0x39ca86) [0x562f05a74a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fb9fde4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fb9fde46305]
+duckdb(+0x3a01b1) [0x562f05a781b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55cf3e01fe36]
+duckdb(+0x576ef4) [0x55cf3e01fef4]
+duckdb(+0x579ce1) [0x55cf3e022ce1]
+duckdb(+0x3a1d3c) [0x55cf3de4ad3c]
+duckdb(+0x1b83aa) [0x55cf3dc613aa]
+duckdb(+0x9f4a9b) [0x55cf3e49da9b]
+duckdb(+0x7fed10) [0x55cf3e2a7d10]
+duckdb(+0x8011aa) [0x55cf3e2aa1aa]
+duckdb(+0x8017ac) [0x55cf3e2aa7ac]
+duckdb(+0x801c2d) [0x55cf3e2aac2d]
+duckdb(+0x802d09) [0x55cf3e2abd09]
+duckdb(+0x801e7a) [0x55cf3e2aae7a]
+duckdb(+0x805fff) [0x55cf3e2aefff]
+duckdb(+0x8060e3) [0x55cf3e2af0e3]
+duckdb(+0x80639e) [0x55cf3e2af39e]
+duckdb(+0x3c9d4d) [0x55cf3de72d4d]
+duckdb(+0x3b7290) [0x55cf3de60290]
+duckdb(+0x3b7f1a) [0x55cf3de60f1a]
+duckdb(+0x3b8571) [0x55cf3de61571]
+duckdb(+0x3b86e0) [0x55cf3de616e0]
+duckdb(+0x3b8796) [0x55cf3de61796]
+duckdb(+0x3b5df1) [0x55cf3de5edf1]
+duckdb(+0x3b84ab) [0x55cf3de614ab]
+duckdb(+0x39ca86) [0x55cf3de45a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f1eee64624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f1eee646305]
+duckdb(+0x3a01b1) [0x55cf3de491b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x560014fdae36]
+duckdb(+0x576ef4) [0x560014fdaef4]
+duckdb(+0x579ce1) [0x560014fddce1]
+duckdb(+0x3a1d3c) [0x560014e05d3c]
+duckdb(+0x1b85bc) [0x560014c1c5bc]
+duckdb(+0x9f4a9b) [0x560015458a9b]
+duckdb(+0x7fed10) [0x560015262d10]
+duckdb(+0x8011aa) [0x5600152651aa]
+duckdb(+0x8017ac) [0x5600152657ac]
+duckdb(+0x801c2d) [0x560015265c2d]
+duckdb(+0x802d09) [0x560015266d09]
+duckdb(+0x801e7a) [0x560015265e7a]
+duckdb(+0x805fff) [0x560015269fff]
+duckdb(+0x8060e3) [0x56001526a0e3]
+duckdb(+0x80639e) [0x56001526a39e]
+duckdb(+0x3c9d4d) [0x560014e2dd4d]
+duckdb(+0x3b7290) [0x560014e1b290]
+duckdb(+0x3b7f1a) [0x560014e1bf1a]
+duckdb(+0x3b8571) [0x560014e1c571]
+duckdb(+0x3b86e0) [0x560014e1c6e0]
+duckdb(+0x3b8796) [0x560014e1c796]
+duckdb(+0x3b5df1) [0x560014e19df1]
+duckdb(+0x3b84ab) [0x560014e1c4ab]
+duckdb(+0x39ca86) [0x560014e00a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fde7576724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fde75767305]
+duckdb(+0x3a01b1) [0x560014e041b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55f19bac9e36]
+duckdb(+0x576ef4) [0x55f19bac9ef4]
+duckdb(+0x579ce1) [0x55f19baccce1]
+duckdb(+0x3a1d3c) [0x55f19b8f4d3c]
+duckdb(+0x1b83aa) [0x55f19b70b3aa]
+duckdb(+0x9f4a9b) [0x55f19bf47a9b]
+duckdb(+0x7fed10) [0x55f19bd51d10]
+duckdb(+0x8011aa) [0x55f19bd541aa]
+duckdb(+0x8017ac) [0x55f19bd547ac]
+duckdb(+0x801c2d) [0x55f19bd54c2d]
+duckdb(+0x802d09) [0x55f19bd55d09]
+duckdb(+0x801e7a) [0x55f19bd54e7a]
+duckdb(+0x805fff) [0x55f19bd58fff]
+duckdb(+0x8060e3) [0x55f19bd590e3]
+duckdb(+0x80639e) [0x55f19bd5939e]
+duckdb(+0x3c9d4d) [0x55f19b91cd4d]
+duckdb(+0x3b7290) [0x55f19b90a290]
+duckdb(+0x3b7f1a) [0x55f19b90af1a]
+duckdb(+0x3b8571) [0x55f19b90b571]
+duckdb(+0x3b86e0) [0x55f19b90b6e0]
+duckdb(+0x3b8796) [0x55f19b90b796]
+duckdb(+0x3b5df1) [0x55f19b908df1]
+duckdb(+0x3b84ab) [0x55f19b90b4ab]
+duckdb(+0x39ca86) [0x55f19b8efa86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f549344624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f5493446305]
+duckdb(+0x3a01b1) [0x55f19b8f31b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6d.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x564ce2bfde36]
+duckdb(+0x576ef4) [0x564ce2bfdef4]
+duckdb(+0x579ce1) [0x564ce2c00ce1]
+duckdb(+0x3a1d3c) [0x564ce2a28d3c]
+duckdb(+0x1b85bc) [0x564ce283f5bc]
+duckdb(+0x9f4a9b) [0x564ce307ba9b]
+duckdb(+0x7fed10) [0x564ce2e85d10]
+duckdb(+0x8011aa) [0x564ce2e881aa]
+duckdb(+0x8017ac) [0x564ce2e887ac]
+duckdb(+0x801c2d) [0x564ce2e88c2d]
+duckdb(+0x802d09) [0x564ce2e89d09]
+duckdb(+0x801e7a) [0x564ce2e88e7a]
+duckdb(+0x805fff) [0x564ce2e8cfff]
+duckdb(+0x8060e3) [0x564ce2e8d0e3]
+duckdb(+0x80639e) [0x564ce2e8d39e]
+duckdb(+0x3c9d4d) [0x564ce2a50d4d]
+duckdb(+0x3b7290) [0x564ce2a3e290]
+duckdb(+0x3b7f1a) [0x564ce2a3ef1a]
+duckdb(+0x3b8571) [0x564ce2a3f571]
+duckdb(+0x3b86e0) [0x564ce2a3f6e0]
+duckdb(+0x3b8796) [0x564ce2a3f796]
+duckdb(+0x3b5df1) [0x564ce2a3cdf1]
+duckdb(+0x3b84ab) [0x564ce2a3f4ab]
+duckdb(+0x39ca86) [0x564ce2a23a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7faf0504624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7faf05046305]
+duckdb(+0x3a01b1) [0x564ce2a271b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6e.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55a3ec974e36]
+duckdb(+0x576ef4) [0x55a3ec974ef4]
+duckdb(+0x579ce1) [0x55a3ec977ce1]
+duckdb(+0x3a1d3c) [0x55a3ec79fd3c]
+duckdb(+0x1b83aa) [0x55a3ec5b63aa]
+duckdb(+0x9f4a9b) [0x55a3ecdf2a9b]
+duckdb(+0x7fed10) [0x55a3ecbfcd10]
+duckdb(+0x8011aa) [0x55a3ecbff1aa]
+duckdb(+0x8017ac) [0x55a3ecbff7ac]
+duckdb(+0x801c2d) [0x55a3ecbffc2d]
+duckdb(+0x802d09) [0x55a3ecc00d09]
+duckdb(+0x801e7a) [0x55a3ecbffe7a]
+duckdb(+0x805fff) [0x55a3ecc03fff]
+duckdb(+0x8060e3) [0x55a3ecc040e3]
+duckdb(+0x80639e) [0x55a3ecc0439e]
+duckdb(+0x3c9d4d) [0x55a3ec7c7d4d]
+duckdb(+0x3b7290) [0x55a3ec7b5290]
+duckdb(+0x3b7f1a) [0x55a3ec7b5f1a]
+duckdb(+0x3b8571) [0x55a3ec7b6571]
+duckdb(+0x3b86e0) [0x55a3ec7b66e0]
+duckdb(+0x3b8796) [0x55a3ec7b6796]
+duckdb(+0x3b5df1) [0x55a3ec7b3df1]
+duckdb(+0x3b84ab) [0x55a3ec7b64ab]
+duckdb(+0x39ca86) [0x55a3ec79aa86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f697324624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f6973246305]
+duckdb(+0x3a01b1) [0x55a3ec79e1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6f.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x564872191e36]
+duckdb(+0x576ef4) [0x564872191ef4]
+duckdb(+0x579ce1) [0x564872194ce1]
+duckdb(+0x3a1d3c) [0x564871fbcd3c]
+duckdb(+0x1b85bc) [0x564871dd35bc]
+duckdb(+0x9f4a9b) [0x56487260fa9b]
+duckdb(+0x7fed10) [0x564872419d10]
+duckdb(+0x8011aa) [0x56487241c1aa]
+duckdb(+0x8017ac) [0x56487241c7ac]
+duckdb(+0x801c2d) [0x56487241cc2d]
+duckdb(+0x802d09) [0x56487241dd09]
+duckdb(+0x801e7a) [0x56487241ce7a]
+duckdb(+0x805fff) [0x564872420fff]
+duckdb(+0x8060e3) [0x5648724210e3]
+duckdb(+0x80639e) [0x56487242139e]
+duckdb(+0x3c9d4d) [0x564871fe4d4d]
+duckdb(+0x3b7290) [0x564871fd2290]
+duckdb(+0x3b7f1a) [0x564871fd2f1a]
+duckdb(+0x3b8571) [0x564871fd3571]
+duckdb(+0x3b86e0) [0x564871fd36e0]
+duckdb(+0x3b8796) [0x564871fd3796]
+duckdb(+0x3b5df1) [0x564871fd0df1]
+duckdb(+0x3b84ab) [0x564871fd34ab]
+duckdb(+0x39ca86) [0x564871fb7a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7ff43d36724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7ff43d367305]
+duckdb(+0x3a01b1) [0x564871fbb1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/7a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55d3488e3e36]
+duckdb(+0x576ef4) [0x55d3488e3ef4]
+duckdb(+0x579ce1) [0x55d3488e6ce1]
+duckdb(+0x3a1d3c) [0x55d34870ed3c]
+duckdb(+0x1b6eb8) [0x55d348523eb8]
+duckdb(+0x9fe2e0) [0x55d348d6b2e0]
+duckdb(+0xa03c70) [0x55d348d70c70]
+duckdb(+0xa044d7) [0x55d348d714d7]
+duckdb(+0x7fec48) [0x55d348b6bc48]
+duckdb(+0x8011aa) [0x55d348b6e1aa]
+duckdb(+0x8017ac) [0x55d348b6e7ac]
+duckdb(+0x801c2d) [0x55d348b6ec2d]
+duckdb(+0x802d09) [0x55d348b6fd09]
+duckdb(+0x801e7a) [0x55d348b6ee7a]
+duckdb(+0x805fff) [0x55d348b72fff]
+duckdb(+0x8060e3) [0x55d348b730e3]
+duckdb(+0x80639e) [0x55d348b7339e]
+duckdb(+0x3c9d4d) [0x55d348736d4d]
+duckdb(+0x3b7290) [0x55d348724290]
+duckdb(+0x3b7f1a) [0x55d348724f1a]
+duckdb(+0x3b8571) [0x55d348725571]
+duckdb(+0x3b86e0) [0x55d3487256e0]
+duckdb(+0x3b8796) [0x55d348725796]
+duckdb(+0x3b5df1) [0x55d348722df1]
+duckdb(+0x3b84ab) [0x55d3487254ab]
+duckdb(+0x39ca86) [0x55d348709a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f04b164624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f04b1646305]
+duckdb(+0x3a01b1) [0x55d34870d1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/7b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55a8bf00de36]
+duckdb(+0x576ef4) [0x55a8bf00def4]
+duckdb(+0x579ce1) [0x55a8bf010ce1]
+duckdb(+0x3a1d3c) [0x55a8bee38d3c]
+duckdb(+0x1b6eb8) [0x55a8bec4deb8]
+duckdb(+0x9fe2e0) [0x55a8bf4952e0]
+duckdb(+0xa03c70) [0x55a8bf49ac70]
+duckdb(+0xa044d7) [0x55a8bf49b4d7]
+duckdb(+0x7fec48) [0x55a8bf295c48]
+duckdb(+0x8011aa) [0x55a8bf2981aa]
+duckdb(+0x8017ac) [0x55a8bf2987ac]
+duckdb(+0x801c2d) [0x55a8bf298c2d]
+duckdb(+0x802d09) [0x55a8bf299d09]
+duckdb(+0x801e7a) [0x55a8bf298e7a]
+duckdb(+0x805fff) [0x55a8bf29cfff]
+duckdb(+0x8060e3) [0x55a8bf29d0e3]
+duckdb(+0x80639e) [0x55a8bf29d39e]
+duckdb(+0x3c9d4d) [0x55a8bee60d4d]
+duckdb(+0x3b7290) [0x55a8bee4e290]
+duckdb(+0x3b7f1a) [0x55a8bee4ef1a]
+duckdb(+0x3b8571) [0x55a8bee4f571]
+duckdb(+0x3b86e0) [0x55a8bee4f6e0]
+duckdb(+0x3b8796) [0x55a8bee4f796]
+duckdb(+0x3b5df1) [0x55a8bee4cdf1]
+duckdb(+0x3b84ab) [0x55a8bee4f4ab]
+duckdb(+0x39ca86) [0x55a8bee33a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f618ad4724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f618ad47305]
+duckdb(+0x3a01b1) [0x55a8bee371b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/7c.sql
+INTERNAL Error: Attempted to dereference unique_ptr that is NULL!
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55c2adfd6e36]
+duckdb(+0x576ef4) [0x55c2adfd6ef4]
+duckdb(+0x579ce1) [0x55c2adfd9ce1]
+duckdb(+0x81a966) [0x55c2ae27a966]
+duckdb(+0x7f9b41) [0x55c2ae259b41]
+duckdb(+0x801cb9) [0x55c2ae261cb9]
+duckdb(+0x802d09) [0x55c2ae262d09]
+duckdb(+0x801e7a) [0x55c2ae261e7a]
+duckdb(+0x805fff) [0x55c2ae265fff]
+duckdb(+0x8060e3) [0x55c2ae2660e3]
+duckdb(+0x80639e) [0x55c2ae26639e]
+duckdb(+0x3c9d4d) [0x55c2ade29d4d]
+duckdb(+0x3b7290) [0x55c2ade17290]
+duckdb(+0x3b7f1a) [0x55c2ade17f1a]
+duckdb(+0x3b8571) [0x55c2ade18571]
+duckdb(+0x3b86e0) [0x55c2ade186e0]
+duckdb(+0x3b8796) [0x55c2ade18796]
+duckdb(+0x3b5df1) [0x55c2ade15df1]
+duckdb(+0x3b84ab) [0x55c2ade184ab]
+duckdb(+0x39ca86) [0x55c2addfca86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f96ef64624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f96ef646305]
+duckdb(+0x3a01b1) [0x55c2ade001b1]
+
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55acd8516e36]
+duckdb(+0x576ef4) [0x55acd8516ef4]
+duckdb(+0x579ce1) [0x55acd8519ce1]
+duckdb(+0x3a1d3c) [0x55acd8341d3c]
+duckdb(+0x1b83aa) [0x55acd81583aa]
+duckdb(+0x9f4a9b) [0x55acd8994a9b]
+duckdb(+0x7fed10) [0x55acd879ed10]
+duckdb(+0x8011aa) [0x55acd87a11aa]
+duckdb(+0x8017ac) [0x55acd87a17ac]
+duckdb(+0x801c2d) [0x55acd87a1c2d]
+duckdb(+0x802d09) [0x55acd87a2d09]
+duckdb(+0x801e7a) [0x55acd87a1e7a]
+duckdb(+0x805fff) [0x55acd87a5fff]
+duckdb(+0x8060e3) [0x55acd87a60e3]
+duckdb(+0x80639e) [0x55acd87a639e]
+duckdb(+0x3c9d4d) [0x55acd8369d4d]
+duckdb(+0x3b7290) [0x55acd8357290]
+duckdb(+0x3b7f1a) [0x55acd8357f1a]
+duckdb(+0x3b8571) [0x55acd8358571]
+duckdb(+0x3b86e0) [0x55acd83586e0]
+duckdb(+0x3b8796) [0x55acd8358796]
+duckdb(+0x3b5df1) [0x55acd8355df1]
+duckdb(+0x3b84ab) [0x55acd83584ab]
+duckdb(+0x39ca86) [0x55acd833ca86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fd4b744624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fd4b7446305]
+duckdb(+0x3a01b1) [0x55acd83401b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x56253c119e36]
+duckdb(+0x576ef4) [0x56253c119ef4]
+duckdb(+0x579ce1) [0x56253c11cce1]
+duckdb(+0x3a1d3c) [0x56253bf44d3c]
+duckdb(+0x1b83aa) [0x56253bd5b3aa]
+duckdb(+0x9f4a9b) [0x56253c597a9b]
+duckdb(+0x7fed10) [0x56253c3a1d10]
+duckdb(+0x8011aa) [0x56253c3a41aa]
+duckdb(+0x8017ac) [0x56253c3a47ac]
+duckdb(+0x801c2d) [0x56253c3a4c2d]
+duckdb(+0x802d09) [0x56253c3a5d09]
+duckdb(+0x801e7a) [0x56253c3a4e7a]
+duckdb(+0x805fff) [0x56253c3a8fff]
+duckdb(+0x8060e3) [0x56253c3a90e3]
+duckdb(+0x80639e) [0x56253c3a939e]
+duckdb(+0x3c9d4d) [0x56253bf6cd4d]
+duckdb(+0x3b7290) [0x56253bf5a290]
+duckdb(+0x3b7f1a) [0x56253bf5af1a]
+duckdb(+0x3b8571) [0x56253bf5b571]
+duckdb(+0x3b86e0) [0x56253bf5b6e0]
+duckdb(+0x3b8796) [0x56253bf5b796]
+duckdb(+0x3b5df1) [0x56253bf58df1]
+duckdb(+0x3b84ab) [0x56253bf5b4ab]
+duckdb(+0x39ca86) [0x56253bf3fa86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fd82104624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fd821046305]
+duckdb(+0x3a01b1) [0x56253bf431b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x563baf40be36]
+duckdb(+0x576ef4) [0x563baf40bef4]
+duckdb(+0x579ce1) [0x563baf40ece1]
+duckdb(+0x3a1d3c) [0x563baf236d3c]
+duckdb(+0x1b83aa) [0x563baf04d3aa]
+duckdb(+0x9f4a9b) [0x563baf889a9b]
+duckdb(+0x7fed10) [0x563baf693d10]
+duckdb(+0x8011aa) [0x563baf6961aa]
+duckdb(+0x8017ac) [0x563baf6967ac]
+duckdb(+0x801c2d) [0x563baf696c2d]
+duckdb(+0x802d09) [0x563baf697d09]
+duckdb(+0x801e7a) [0x563baf696e7a]
+duckdb(+0x805fff) [0x563baf69afff]
+duckdb(+0x8060e3) [0x563baf69b0e3]
+duckdb(+0x80639e) [0x563baf69b39e]
+duckdb(+0x3c9d4d) [0x563baf25ed4d]
+duckdb(+0x3b7290) [0x563baf24c290]
+duckdb(+0x3b7f1a) [0x563baf24cf1a]
+duckdb(+0x3b8571) [0x563baf24d571]
+duckdb(+0x3b86e0) [0x563baf24d6e0]
+duckdb(+0x3b8796) [0x563baf24d796]
+duckdb(+0x3b5df1) [0x563baf24adf1]
+duckdb(+0x3b84ab) [0x563baf24d4ab]
+duckdb(+0x39ca86) [0x563baf231a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f1f1c04624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f1f1c046305]
+duckdb(+0x3a01b1) [0x563baf2351b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8d.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55a9cf786e36]
+duckdb(+0x576ef4) [0x55a9cf786ef4]
+duckdb(+0x579ce1) [0x55a9cf789ce1]
+duckdb(+0x3a1d3c) [0x55a9cf5b1d3c]
+duckdb(+0x1b83aa) [0x55a9cf3c83aa]
+duckdb(+0x9f4a9b) [0x55a9cfc04a9b]
+duckdb(+0x7fed10) [0x55a9cfa0ed10]
+duckdb(+0x8011aa) [0x55a9cfa111aa]
+duckdb(+0x8017ac) [0x55a9cfa117ac]
+duckdb(+0x801c2d) [0x55a9cfa11c2d]
+duckdb(+0x802d09) [0x55a9cfa12d09]
+duckdb(+0x801e7a) [0x55a9cfa11e7a]
+duckdb(+0x805fff) [0x55a9cfa15fff]
+duckdb(+0x8060e3) [0x55a9cfa160e3]
+duckdb(+0x80639e) [0x55a9cfa1639e]
+duckdb(+0x3c9d4d) [0x55a9cf5d9d4d]
+duckdb(+0x3b7290) [0x55a9cf5c7290]
+duckdb(+0x3b7f1a) [0x55a9cf5c7f1a]
+duckdb(+0x3b8571) [0x55a9cf5c8571]
+duckdb(+0x3b86e0) [0x55a9cf5c86e0]
+duckdb(+0x3b8796) [0x55a9cf5c8796]
+duckdb(+0x3b5df1) [0x55a9cf5c5df1]
+duckdb(+0x3b84ab) [0x55a9cf5c84ab]
+duckdb(+0x39ca86) [0x55a9cf5aca86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7febd6e4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7febd6e46305]
+duckdb(+0x3a01b1) [0x55a9cf5b01b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9a.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55a71ddcee36]
+duckdb(+0x576ef4) [0x55a71ddceef4]
+duckdb(+0x579ce1) [0x55a71ddd1ce1]
+duckdb(+0x3a1d3c) [0x55a71dbf9d3c]
+duckdb(+0x1b83aa) [0x55a71da103aa]
+duckdb(+0x9f4a9b) [0x55a71e24ca9b]
+duckdb(+0x7fed10) [0x55a71e056d10]
+duckdb(+0x8011aa) [0x55a71e0591aa]
+duckdb(+0x8017ac) [0x55a71e0597ac]
+duckdb(+0x801c2d) [0x55a71e059c2d]
+duckdb(+0x802d09) [0x55a71e05ad09]
+duckdb(+0x801e7a) [0x55a71e059e7a]
+duckdb(+0x805fff) [0x55a71e05dfff]
+duckdb(+0x8060e3) [0x55a71e05e0e3]
+duckdb(+0x80639e) [0x55a71e05e39e]
+duckdb(+0x3c9d4d) [0x55a71dc21d4d]
+duckdb(+0x3b7290) [0x55a71dc0f290]
+duckdb(+0x3b7f1a) [0x55a71dc0ff1a]
+duckdb(+0x3b8571) [0x55a71dc10571]
+duckdb(+0x3b86e0) [0x55a71dc106e0]
+duckdb(+0x3b8796) [0x55a71dc10796]
+duckdb(+0x3b5df1) [0x55a71dc0ddf1]
+duckdb(+0x3b84ab) [0x55a71dc104ab]
+duckdb(+0x39ca86) [0x55a71dbf4a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f78d482624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f78d4826305]
+duckdb(+0x3a01b1) [0x55a71dbf81b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9b.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x557fd67c5e36]
+duckdb(+0x576ef4) [0x557fd67c5ef4]
+duckdb(+0x579ce1) [0x557fd67c8ce1]
+duckdb(+0x3a1d3c) [0x557fd65f0d3c]
+duckdb(+0x1b83aa) [0x557fd64073aa]
+duckdb(+0x9f4a9b) [0x557fd6c43a9b]
+duckdb(+0x7fed10) [0x557fd6a4dd10]
+duckdb(+0x8011aa) [0x557fd6a501aa]
+duckdb(+0x8017ac) [0x557fd6a507ac]
+duckdb(+0x801c2d) [0x557fd6a50c2d]
+duckdb(+0x802d09) [0x557fd6a51d09]
+duckdb(+0x801e7a) [0x557fd6a50e7a]
+duckdb(+0x805fff) [0x557fd6a54fff]
+duckdb(+0x8060e3) [0x557fd6a550e3]
+duckdb(+0x80639e) [0x557fd6a5539e]
+duckdb(+0x3c9d4d) [0x557fd6618d4d]
+duckdb(+0x3b7290) [0x557fd6606290]
+duckdb(+0x3b7f1a) [0x557fd6606f1a]
+duckdb(+0x3b8571) [0x557fd6607571]
+duckdb(+0x3b86e0) [0x557fd66076e0]
+duckdb(+0x3b8796) [0x557fd6607796]
+duckdb(+0x3b5df1) [0x557fd6604df1]
+duckdb(+0x3b84ab) [0x557fd66074ab]
+duckdb(+0x39ca86) [0x557fd65eba86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f6b03b6724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f6b03b67305]
+duckdb(+0x3a01b1) [0x557fd65ef1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9c.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x55725f93ce36]
+duckdb(+0x576ef4) [0x55725f93cef4]
+duckdb(+0x579ce1) [0x55725f93fce1]
+duckdb(+0x3a1d3c) [0x55725f767d3c]
+duckdb(+0x1b83aa) [0x55725f57e3aa]
+duckdb(+0x9f4a9b) [0x55725fdbaa9b]
+duckdb(+0x7fed10) [0x55725fbc4d10]
+duckdb(+0x8011aa) [0x55725fbc71aa]
+duckdb(+0x8017ac) [0x55725fbc77ac]
+duckdb(+0x801c2d) [0x55725fbc7c2d]
+duckdb(+0x802d09) [0x55725fbc8d09]
+duckdb(+0x801e7a) [0x55725fbc7e7a]
+duckdb(+0x805fff) [0x55725fbcbfff]
+duckdb(+0x8060e3) [0x55725fbcc0e3]
+duckdb(+0x80639e) [0x55725fbcc39e]
+duckdb(+0x3c9d4d) [0x55725f78fd4d]
+duckdb(+0x3b7290) [0x55725f77d290]
+duckdb(+0x3b7f1a) [0x55725f77df1a]
+duckdb(+0x3b8571) [0x55725f77e571]
+duckdb(+0x3b86e0) [0x55725f77e6e0]
+duckdb(+0x3b8796) [0x55725f77e796]
+duckdb(+0x3b5df1) [0x55725f77bdf1]
+duckdb(+0x3b84ab) [0x55725f77e4ab]
+duckdb(+0x39ca86) [0x55725f762a86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fa81e04624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fa81e046305]
+duckdb(+0x3a01b1) [0x55725f7661b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9d.sql
+INTERNAL Error: Attempted to access index 0 within vector of size 0
+
+Stack Trace:
+
+duckdb(+0x576e36) [0x558248745e36]
+duckdb(+0x576ef4) [0x558248745ef4]
+duckdb(+0x579ce1) [0x558248748ce1]
+duckdb(+0x3a1d3c) [0x558248570d3c]
+duckdb(+0x1b83aa) [0x5582483873aa]
+duckdb(+0x9f4a9b) [0x558248bc3a9b]
+duckdb(+0x7fed10) [0x5582489cdd10]
+duckdb(+0x8011aa) [0x5582489d01aa]
+duckdb(+0x8017ac) [0x5582489d07ac]
+duckdb(+0x801c2d) [0x5582489d0c2d]
+duckdb(+0x802d09) [0x5582489d1d09]
+duckdb(+0x801e7a) [0x5582489d0e7a]
+duckdb(+0x805fff) [0x5582489d4fff]
+duckdb(+0x8060e3) [0x5582489d50e3]
+duckdb(+0x80639e) [0x5582489d539e]
+duckdb(+0x3c9d4d) [0x558248598d4d]
+duckdb(+0x3b7290) [0x558248586290]
+duckdb(+0x3b7f1a) [0x558248586f1a]
+duckdb(+0x3b8571) [0x558248587571]
+duckdb(+0x3b86e0) [0x5582485876e0]
+duckdb(+0x3b8796) [0x558248587796]
+duckdb(+0x3b5df1) [0x558248584df1]
+duckdb(+0x3b84ab) [0x5582485874ab]
+duckdb(+0x39ca86) [0x55824856ba86]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f786eb6724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f786eb67305]
+duckdb(+0x3a01b1) [0x55824856f1b1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors

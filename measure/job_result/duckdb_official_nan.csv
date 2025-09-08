@@ -1,0 +1,218 @@
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/10a.sql"" ./imdb.db",0.46471940842,0.002861551086000344,0.46531110592,0.4212122,0.043472620000000003,0.45853537042000003,0.46840476042
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/10b.sql"" ./imdb.db",0.34785895966,0.003872454940750934,0.34697285376000003,0.30805382000000003,0.03968811999999999,0.34478307676000003,0.35823082376000004
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/10c.sql"" ./imdb.db",1.06766188334,0.009613330534692585,1.06727857734,0.99852664,0.06900764000000001,1.05491414034,1.0868825233400001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/11a.sql"" ./imdb.db",0.04639413428,0.0012523509120047833,0.04588527968,0.03558537999999999,0.010697799999999999,0.04544971518,0.04895602418
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/11b.sql"" ./imdb.db",0.04962785502000001,0.0007227334611464781,0.049752252920000004,0.04230491999999999,0.007232012,0.048350592920000005,0.050561718920000005
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/11c.sql"" ./imdb.db",0.12318415096000002,0.000998970462968616,0.12319591176000001,0.10208089999999999,0.02098536,0.12192510776000001,0.12514558176
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/11d.sql"" ./imdb.db",0.31762752714000003,0.0018487513761097178,0.31778987944,0.26565014,0.05186445999999999,0.31429363144,0.32004708644
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/12a.sql"" ./imdb.db",0.15045886538000003,0.0007592146042696151,0.15022980298,0.12807522,0.02228552,0.14962605998,0.15215042298
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/12b.sql"" ./imdb.db",0.21430592092000006,0.004321640215517445,0.21309928402000003,0.18983107999999999,0.02435958,0.21114120102000003,0.22602847802000003
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/12c.sql"" ./imdb.db",0.20445356896,0.001441503017331673,0.20391706506,0.18027874,0.024074420000000003,0.20325497506,0.20779838606
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/13a.sql"" ./imdb.db",0.15058653402,0.0008701055863019047,0.15055285522,0.13105624,0.01941426,0.14887995372,0.15197384872
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/13b.sql"" ./imdb.db",0.21409420763999995,0.0019283652783991922,0.21403283704,0.1855418,0.02843326,0.21174879104,0.21781309004
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/13c.sql"" ./imdb.db",0.19194667914000002,0.002122890028489666,0.19137786444000002,0.15993145999999997,0.03191948,0.18938148494,0.19567456694000002
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/13d.sql"" ./imdb.db",0.19721019832,0.002258834763793774,0.19728249852000002,0.17740052000000003,0.01971084,0.19391510252000002,0.20199245452
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/14a.sql"" ./imdb.db",0.15210056787999998,0.0009898421139921255,0.15235247718,0.12781547999999998,0.02417374,0.14992713168000002,0.15333438168000002
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/14b.sql"" ./imdb.db",0.12416634160000002,0.0006108059261440662,0.12421831700000002,0.11249508000000001,0.011557439999999999,0.123228263,0.125372985
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/14c.sql"" ./imdb.db",0.2759431047600001,0.0021361020227490747,0.27574526566,0.25268569999999996,0.023152919999999997,0.27321202916000004,0.27993830116
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/16a.sql"" ./imdb.db",0.41742796715999997,0.002356364799254948,0.41741003956,0.36161582,0.055724959999999976,0.41391984056000003,0.42179032956
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/16b.sql"" ./imdb.db",1.4141986447400001,0.010693593249807669,1.40892999224,1.32207498,0.09199623999999999,1.40275386974,1.4329068817400001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/16c.sql"" ./imdb.db",0.5898524859400001,0.0024593001049600695,0.5898695090400001,0.5262188,0.06349252,0.58598074154,0.5929730795400001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/16d.sql"" ./imdb.db",0.5765091933400001,0.0021542277475168183,0.5758854198400001,0.5174715000000001,0.058937300000000005,0.5738264538400001,0.5801524678400001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/17a.sql"" ./imdb.db",0.76106879224,0.003307334374389954,0.7605322033400002,0.6975134,0.06344202,0.7551531963400001,0.7660234503400001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/17b.sql"" ./imdb.db",1.0119601018400002,0.013666152039563232,1.0081652865400001,0.93108744,0.08079502,1.00249441704,1.04866286704
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/17c.sql"" ./imdb.db",1.0135452573400001,0.009933049771180879,1.01057034884,0.9348596200000001,0.07855869999999998,1.00315674134,1.03487747634
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/17d.sql"" ./imdb.db",1.0837565687,0.0204483052696117,1.0806740019,1.0076502800000002,0.07596269999999998,1.0589945519,1.1363792799
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/17e.sql"" ./imdb.db",0.8866548749400002,0.007399415866469869,0.88512356004,0.8174373199999998,0.06910836000000001,0.87967422454,0.90388972954
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/17f.sql"" ./imdb.db",1.20271692792,0.009450998816007607,1.20122269472,1.1147082400000001,0.087865,1.19092161572,1.22498525472
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/18a.sql"" ./imdb.db",1.06140252906,0.010176611249795508,1.0582550183600001,0.99081204,0.07047748000000001,1.0493579153600001,1.08029248836
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/18b.sql"" ./imdb.db",1.0273689204800003,0.010454242364688353,1.0219236357800001,0.9616554999999998,0.06560997999999998,1.0171976492800001,1.04412027028
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/18c.sql"" ./imdb.db",1.11734595672,0.010718128570263323,1.11381696132,1.0509657000000001,0.06624659999999999,1.10788882682,1.14482169482
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/19a.sql"" ./imdb.db",0.76994983202,0.008184750591729448,0.77023731212,0.7009671199999999,0.06887425999999999,0.75817349712,0.78399630812
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/19b.sql"" ./imdb.db",0.7080492977599999,0.007097393798523156,0.70629512476,0.59169818,0.11621328,0.70248266876,0.72748345276
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/19c.sql"" ./imdb.db",0.7910585349800001,0.0062801655058969666,0.79093828058,0.7209354200000001,0.06999382,0.7830587130800001,0.8003385030800001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/19d.sql"" ./imdb.db",0.76972192976,0.002321758776071643,0.76966552706,0.71591752,0.0536721,0.76679551556,0.77407731656
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/1a.sql"" ./imdb.db",0.08055818458,0.0005313764819007415,0.08055399498000002,0.0691556,0.011295040000000001,0.07973163448000001,0.08184204648
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/1b.sql"" ./imdb.db",0.060297563740000004,0.000559087274678263,0.060387944740000005,0.04801128,0.012188679999999999,0.05947876824,0.06091023324
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/1c.sql"" ./imdb.db",0.05818763442000001,0.00031565016123346376,0.05805977582,0.04684348,0.01126282,0.05778953282,0.058789572820000004
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/1d.sql"" ./imdb.db",0.06473414093999999,0.0010654969616251616,0.06477295223999999,0.05245331999999999,0.012198567999999998,0.06301279724,0.06656024424
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/20a.sql"" ./imdb.db",0.78867184986,0.014669850710520708,0.78096979736,0.7209063399999999,0.06763188,0.7770073088600001,0.8107069598600001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/20b.sql"" ./imdb.db",0.66738446986,0.001865854193440644,0.6677125029600002,0.60169204,0.06558562,0.6639278919600001,0.66994198796
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/20c.sql"" ./imdb.db",0.72471975436,0.0031994989468585935,0.7246628125600001,0.65151162,0.0730828,0.7193595190600001,0.72955335106
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/21a.sql"" ./imdb.db",0.09357213701999999,0.0028256277002970186,0.09291031142,0.06726828,0.026216279999999998,0.09098698842000001,0.10122876342
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/21b.sql"" ./imdb.db",0.06507340211999998,0.0006737813473590589,0.06506374052,0.055456059999999995,0.00954312,0.06408280702,0.06598208702
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/21c.sql"" ./imdb.db",0.09600595428,0.0006819551281923422,0.09613015028,0.07266438,0.0232519,0.09498493578,0.09714395478
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/22a.sql"" ./imdb.db",0.36050932674,0.009519211771342068,0.35796415254,0.33441064000000004,0.025975380000000003,0.35351710854,0.38628563154
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/22b.sql"" ./imdb.db",0.31771795970000005,0.0037238031514616383,0.3165352401,0.29389687999999997,0.023721,0.3136198531,0.32615184810000003
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/22c.sql"" ./imdb.db",0.5885119161400001,0.008154926589052498,0.58505662694,0.5323931799999999,0.05599721999999999,0.58286020194,0.60949809194
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/22d.sql"" ./imdb.db",0.7296201995,0.009795475201267946,0.7263053673000001,0.6554953400000001,0.07399482000000002,0.7219422938000001,0.7551065648
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/23a.sql"" ./imdb.db",0.33499511220000006,0.006420941489224673,0.3345181902,0.28696298000000003,0.047928319999999996,0.3294759542,0.3516117872
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/23b.sql"" ./imdb.db",0.2716739516200001,0.0038706629895911386,0.26997570882000005,0.22802892,0.043531799999999995,0.26807287832000004,0.27895490232000003
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/23c.sql"" ./imdb.db",0.37807483840000006,0.003950840624795675,0.37832915060000005,0.32520885999999993,0.05275447999999999,0.37252033460000006,0.3847917786
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/24a.sql"" ./imdb.db",0.8431000459800002,0.007807538785347162,0.8438842901800001,0.76930104,0.07368271999999998,0.8321353021800001,0.85516859718
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/24b.sql"" ./imdb.db",0.42796501000000003,0.007436959452166599,0.42883166790000005,0.34817498,0.07969401999999999,0.41730317940000006,0.4424606454
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/25a.sql"" ./imdb.db",1.15128524652,0.002551901043199405,1.1510455409200002,1.08991944,0.061230799999999995,1.14792033792,1.1564232299200001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/25b.sql"" ./imdb.db",0.36829270908,0.001557214621484291,0.36826352858,0.28969024,0.07848933999999999,0.36680276208,0.37176693108000003
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/25c.sql"" ./imdb.db",1.3161800752,0.008265517272787971,1.3150979474,1.23719422,0.07881096,1.3083179949,1.3356233169
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/26a.sql"" ./imdb.db",0.7074770853800001,0.002580751406009368,0.70723049868,0.6266327,0.08072157999999999,0.7030593296800001,0.7115151186800001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/26b.sql"" ./imdb.db",0.57507394558,0.005638272565959698,0.5723397825800001,0.50249392,0.07246042,0.5701292210800001,0.58780964408
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/26c.sql"" ./imdb.db",0.69848495666,0.007605882256478353,0.69558860186,0.6290867999999998,0.0692868,0.6913984688600001,0.7142325538600001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/27a.sql"" ./imdb.db",0.09233575122000001,0.000728952136194141,0.09252573322000002,0.07112147999999999,0.02110168,0.09115218022,0.09316816022
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/27b.sql"" ./imdb.db",0.06026115477999998,0.0008736066372036482,0.060388544880000006,0.0483778,0.01179356,0.05865528638,0.06188294538
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/27c.sql"" ./imdb.db",0.0957698457,0.0006517577401203025,0.0957797547,0.06926339999999999,0.026390859999999995,0.0948167292,0.0966816102
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/28a.sql"" ./imdb.db",0.9373694130600002,0.0039297523202997614,0.93591092846,0.7987680199999999,0.13847804,0.93311247046,0.9445014324600001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/28b.sql"" ./imdb.db",0.7717083169600001,0.0026866056963390423,0.77144693096,0.65321772,0.11837642,0.76808263596,0.7762348169600001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/28c.sql"" ./imdb.db",0.9500492942800001,0.00800350323717969,0.9476477589800001,0.8208732999999999,0.12900662,0.9387317774800001,0.9617750794800001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/29a.sql"" ./imdb.db",0.6527487792600001,0.015649129904783964,0.6466561258600001,0.5083434,0.14429463999999997,0.6441663413600001,0.6953991113600001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/29b.sql"" ./imdb.db",0.6433199541800001,0.007341169737304357,0.64098796648,0.4992425799999999,0.14397727999999996,0.63525054698,0.65768527298
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/29c.sql"" ./imdb.db",1.5755511500400003,0.02123227432804125,1.5752476674400002,1.39596378,0.17946932000000002,1.5323816199400002,1.61903026394
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/2a.sql"" ./imdb.db",0.17461836666000002,0.0007837699656128188,0.17449643806,0.15841386000000002,0.01608934,0.17354284106,0.17576620406000001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/2b.sql"" ./imdb.db",0.16979851655999997,0.0014775374896635015,0.16940673326,0.14898782,0.020699580000000002,0.16770002426000002,0.17282270026000002
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/2c.sql"" ./imdb.db",0.07598349257999999,0.00044665210919790155,0.07593437718,0.06412158,0.01176508,0.07540997718,0.07681448418
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/2d.sql"" ./imdb.db",0.17514622170000002,0.0005725912059592116,0.17513770509999999,0.16112590000000002,0.01392756,0.17434767810000001,0.17597961110000002
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/30a.sql"" ./imdb.db",1.0298638646800002,0.008839043574023294,1.0255555476800002,0.9518739199999999,0.07787786,1.02228229918,1.04880639318
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/30b.sql"" ./imdb.db",0.78244665462,0.002552860800970801,0.7818613568199999,0.7087270400000001,0.07358076,0.77931926882,0.78779049882
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/30c.sql"" ./imdb.db",1.23003825738,0.01607240589962976,1.22418786318,1.1564035800000003,0.0734916,1.21843944118,1.2727003001800001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/31a.sql"" ./imdb.db",0.9280250601000001,0.00723514488298749,0.9267969505,0.8602831200000001,0.06762475999999999,0.9187379165,0.9409897315000001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/31b.sql"" ./imdb.db",0.4710826505200001,0.0024648912595077164,0.47165270922,0.39294717999999995,0.07801021999999999,0.46578272872000004,0.47356729872000003
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/31c.sql"" ./imdb.db",1.1266247811399999,0.008120938148658663,1.1241595485399998,1.0490012199999998,0.077445,1.11933803604,1.14689210404
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/32a.sql"" ./imdb.db",0.01840248854,0.00009400239808578207,0.01840150644,0.01341726,0.004907826,0.018275421440000002,0.018540487440000003
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/32b.sql"" ./imdb.db",0.12641627220000004,0.0005305386936580588,0.12622855190000004,0.10916842,0.017137,0.1256865514,0.12724465340000002
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/33a.sql"" ./imdb.db",0.08291010566000001,0.0013738868429324638,0.08258845706000001,0.06563066,0.0171731,0.08099269506000001,0.08478235006000001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/33b.sql"" ./imdb.db",0.10392527494,0.0008465711491078518,0.10370917824,0.08205322,0.02175636,0.10301201824,0.10597340724
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/33c.sql"" ./imdb.db",0.12229128906,0.0010818280783034926,0.12211674006,0.10397892,0.018189959999999998,0.12076345156000001,0.12463908756
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/3a.sql"" ./imdb.db",0.6726061001800001,0.004455261388782977,0.67159477128,0.5611128599999999,0.11137662,0.6652954867800001,0.68064209578
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/3b.sql"" ./imdb.db",0.41998865486000003,0.0036220872913874944,0.41969068776,0.29999477999999996,0.11988607999999998,0.41538740376,0.42939006676
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/3c.sql"" ./imdb.db",0.7741642502,0.004502959063155378,0.7726456539000001,0.65817876,0.11588163999999998,0.7698362284,0.7845160024000001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/4a.sql"" ./imdb.db",0.22704076010000002,0.0018071046355400862,0.22668389090000002,0.2030637,0.023887580000000002,0.22462111640000001,0.23032595040000003
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/4b.sql"" ./imdb.db",0.11127497952000003,0.002228890304628516,0.11061594162,0.09545266,0.015730139999999997,0.10939601462000001,0.11741642462000002
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/4c.sql"" ./imdb.db",0.36681070807999994,0.0027693551296880193,0.36671682878,0.32828601999999996,0.03840672,0.36195480178,0.37294096078
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/5a.sql"" ./imdb.db",0.17708839046000002,0.0015686735093776785,0.17667023776000002,0.16002635999999998,0.01695426,0.17593571426000001,0.18127990926
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/5b.sql"" ./imdb.db",0.15173627416000002,0.0014249520149838394,0.15135941166,0.13673452,0.01488804,0.15016060866,0.15512934466
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/5c.sql"" ./imdb.db",0.7894079091800001,0.008223556619213106,0.7866505210800001,0.6694496600000001,0.11980074,0.7829880745800001,0.8112977455800001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/6a.sql"" ./imdb.db",0.5291067232400002,0.0018677284818463373,0.5294574937400001,0.4730068,0.05593488,0.5250501122400001,0.5320815912400001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/6b.sql"" ./imdb.db",0.24068290659999997,0.0010355748558231593,0.24101412600000002,0.21382705999999993,0.026769319999999996,0.23810988600000002,0.241633062
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/6c.sql"" ./imdb.db",0.3393422366600001,0.003230517483346497,0.33940258606,0.28817651999999994,0.05102975999999999,0.33527222056000006,0.34643085356000003
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/6d.sql"" ./imdb.db",0.37024227296000006,0.00406168767093492,0.36914184006,0.33452252,0.035628780000000006,0.36671697156,0.38139892656
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/6e.sql"" ./imdb.db",0.54220122762,0.0023425457744409416,0.54306807872,0.48725036,0.054781579999999996,0.5384586987200001,0.54542994672
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/6f.sql"" ./imdb.db",1.16976597692,0.005131633399940613,1.17012540262,1.0849798199999998,0.08459107999999999,1.16293064912,1.17994761412
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/7a.sql"" ./imdb.db",0.28983420166000007,0.002368866124811389,0.28949579826000005,0.24764616,0.0420774,0.28646230826,0.29324505026000003
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/7b.sql"" ./imdb.db",0.13342307668,0.00227868648124036,0.13277168138,0.11072431999999999,0.02259612,0.13103764637999998,0.13789372038
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/7c.sql"" ./imdb.db",1.2784873297600003,0.020639260300235687,1.27470175606,0.8360871999999999,0.44225909999999996,1.26190934856,1.33389792956
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/8a.sql"" ./imdb.db",0.40420424668,0.002109655342609941,0.40481538788,0.36885086,0.03520604,0.40047589638,0.40649945938
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/8b.sql"" ./imdb.db",0.37429880016,0.004096818403733037,0.37299326206,0.33734714000000005,0.03684423999999999,0.37112955406000003,0.38397987906000003
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/8c.sql"" ./imdb.db",0.7675726745200001,0.003300565297060553,0.7681291084199999,0.71624722,0.051211539999999986,0.76122583242,0.77263838642
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/8d.sql"" ./imdb.db",0.31034812418,0.004287643162622908,0.31160038358000003,0.28856172,0.02168586,0.30369650808000004,0.31671880408
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/9a.sql"" ./imdb.db",0.6626572097800001,0.004060712580464505,0.6610043032800001,0.61386812,0.04862103999999999,0.65943317178,0.6724016727800001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/9b.sql"" ./imdb.db",0.4609616310000001,0.0038490780210763856,0.46045673620000005,0.42334062,0.03751962,0.45662268070000006,0.47027921770000003
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/9c.sql"" ./imdb.db",0.6216191146600002,0.0031347110693927967,0.6206983391600001,0.57725786,0.04423989999999999,0.6191995931600001,0.6301434011600001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/imdb_job-postgres/queries/9d.sql"" ./imdb.db",0.7511503366,0.006099161762817096,0.7503584711,0.69979956,0.05122702,0.7432199561,0.7642905311
