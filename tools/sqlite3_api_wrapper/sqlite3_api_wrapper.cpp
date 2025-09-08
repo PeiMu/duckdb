@@ -213,7 +213,7 @@ int sqlite3_prepare_v2(sqlite3 *db,           /* Database handle */
 		stmt->db = db;
 		stmt->query_string = query;
 
-		if (!statements.back()->named_param_map.empty() || db->con->context->config.enable_dbshaker_query_split) {
+		//if (!statements.back()->named_param_map.empty() || db->con->context->config.enable_dbshaker_query_split) {
 			// Use Prepare: there are parameters; Or using QuerySplit mode
 			auto prepared = db->con->Prepare(std::move(statements.back()));
 			if (prepared->HasError()) {
@@ -222,16 +222,17 @@ int sqlite3_prepare_v2(sqlite3 *db,           /* Database handle */
 				return SQLITE_ERROR;
 			}
 			stmt->prepared = std::move(prepared);
-		} else {
-			// Use eager execution: there are no parameters so we can safely create a PendingQuery here
-			auto pending = db->con->PendingQuery(std::move(statements.back()), false);
-			if (pending->HasError()) {
-				// failed to prepare: set the error message
-				db->last_error = pending->GetErrorObject();
-				return SQLITE_ERROR;
-			}
-			stmt->pending = std::move(pending);
-		}
+		// eager execution has bugs with repeated running
+		//} else {
+		//	// Use eager execution: there are no parameters so we can safely create a PendingQuery here
+		//	auto pending = db->con->PendingQuery(std::move(statements.back()), false);
+		//	if (pending->HasError()) {
+		//		// failed to prepare: set the error message
+		//		db->last_error = pending->GetErrorObject();
+		//		return SQLITE_ERROR;
+		//	}
+		//	stmt->pending = std::move(pending);
+		//}
 
 		stmt->current_row = -1;
 
