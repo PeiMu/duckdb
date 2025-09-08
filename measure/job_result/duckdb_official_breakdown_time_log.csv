@@ -1,116 +1,1810 @@
 PreOptimize, final-PostOptimize, final-CreatePlan, Execute
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/10a.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/10a.sql"
+0, 0, 0, 442
+0, 0, 0, 443
+0, 0, 0, 437
+0, 0, 0, 433
+0, 0, 0, 434
+0, 0, 0, 431
+0, 0, 0, 437
+0, 0, 0, 433
+0, 0, 0, 441
+0, 0, 0, 431
+0, 0, 0, 433
+0, 0, 0, 446
+0, 0, 0, 438
+0, 0, 0, 436
+0, 0, 0, 444
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/10a.sql"
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/10b.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/10c.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11a.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11b.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11c.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11d.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/12a.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/12b.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/12c.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13a.sql
-2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13b.sql
-2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13c.sql
-2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13d.sql
-2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14a.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14b.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14c.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/15a.sql
+0, 0, 0, 327
+0, 0, 0, 325
+0, 0, 0, 329
+0, 0, 0, 328
+0, 0, 0, 327
+0, 0, 0, 334
+0, 0, 0, 334
+0, 0, 0, 328
+0, 0, 0, 326
+0, 0, 0, 328
+0, 0, 0, 328
+0, 0, 0, 329
+0, 0, 0, 328
+0, 0, 0, 327
+0, 0, 0, 337
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/10c.sql
+0, 0, 0, 1020
+0, 0, 0, 1017
+0, 0, 0, 1021
+0, 0, 0, 1039
+0, 0, 0, 1020
+0, 0, 0, 1019
+0, 0, 0, 1040
+0, 0, 0, 1021
+0, 0, 0, 1036
+0, 0, 0, 1020
+0, 0, 0, 1020
+0, 0, 0, 1040
+0, 0, 0, 1019
+0, 0, 0, 1019
+0, 0, 0, 1035
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11a.sql
+1, 0, 0, 31
+1, 0, 0, 30
+1, 0, 0, 30
+1, 0, 0, 30
+1, 0, 0, 31
+1, 0, 0, 30
+1, 0, 0, 30
+1, 0, 0, 31
+1, 0, 0, 30
+1, 0, 0, 31
+1, 0, 0, 32
+1, 0, 0, 30
+1, 0, 0, 30
+1, 0, 0, 31
+1, 0, 0, 31
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11b.sql
+1, 0, 0, 34
+1, 0, 0, 33
+1, 0, 0, 33
+1, 0, 0, 34
+1, 0, 0, 33
+1, 0, 0, 34
+1, 0, 0, 33
+1, 0, 0, 34
+1, 0, 0, 33
+1, 0, 0, 33
+1, 0, 0, 33
+1, 0, 0, 33
+1, 0, 0, 33
+1, 0, 0, 33
+1, 0, 0, 33
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11c.sql
+1, 0, 0, 107
+1, 0, 0, 109
+1, 0, 0, 109
+1, 0, 0, 107
+1, 0, 0, 110
+1, 0, 0, 106
+1, 0, 0, 116
+1, 0, 0, 116
+1, 0, 0, 117
+1, 0, 0, 106
+1, 0, 0, 107
+1, 0, 0, 107
+1, 0, 0, 108
+1, 0, 0, 108
+1, 0, 0, 107
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11d.sql
+1, 0, 0, 304
+1, 0, 0, 307
+1, 0, 0, 309
+1, 0, 0, 306
+1, 0, 0, 308
+1, 0, 0, 304
+1, 0, 0, 307
+1, 0, 0, 305
+1, 0, 0, 304
+1, 0, 0, 305
+1, 0, 0, 304
+1, 0, 0, 308
+1, 0, 0, 305
+1, 0, 0, 304
+1, 0, 0, 300
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/12a.sql
+1, 0, 0, 129
+1, 0, 0, 129
+1, 0, 0, 130
+1, 0, 0, 129
+1, 0, 0, 129
+1, 0, 0, 130
+1, 0, 0, 134
+1, 0, 0, 130
+1, 0, 0, 132
+1, 0, 0, 130
+1, 0, 0, 130
+1, 0, 0, 130
+1, 0, 0, 130
+1, 0, 0, 130
+1, 0, 0, 131
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/12b.sql
+1, 0, 0, 195
+1, 0, 0, 196
+1, 0, 0, 202
+1, 0, 0, 205
+1, 0, 0, 196
+1, 0, 0, 196
+1, 0, 0, 198
+1, 0, 0, 195
+1, 0, 0, 195
+1, 0, 0, 205
+1, 0, 0, 202
+1, 0, 0, 195
+1, 0, 0, 208
+1, 0, 0, 197
+1, 0, 0, 197
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/12c.sql
+1, 0, 0, 183
+1, 0, 0, 181
+1, 0, 0, 184
+1, 0, 0, 181
+1, 0, 0, 184
+1, 0, 0, 184
+1, 0, 0, 182
+1, 0, 0, 184
+1, 0, 0, 182
+1, 0, 0, 183
+1, 0, 0, 186
+1, 0, 0, 181
+1, 0, 0, 184
+1, 0, 0, 181
+1, 0, 0, 180
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13a.sql
+2, 0, 0, 131
+2, 0, 0, 132
+2, 0, 0, 134
+2, 0, 0, 134
+2, 0, 0, 133
+2, 0, 0, 136
+2, 0, 0, 131
+2, 0, 0, 134
+2, 0, 0, 133
+2, 0, 0, 132
+2, 0, 0, 134
+2, 0, 0, 133
+2, 0, 0, 133
+2, 0, 0, 134
+2, 0, 0, 134
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13b.sql
+2, 0, 0, 201
+2, 0, 0, 196
+2, 0, 0, 196
+2, 0, 0, 195
+2, 0, 0, 201
+2, 0, 0, 196
+2, 0, 0, 195
+2, 0, 0, 195
+2, 0, 0, 192
+2, 0, 0, 196
+2, 0, 0, 198
+2, 0, 0, 196
+2, 0, 0, 194
+2, 0, 0, 196
+2, 0, 0, 194
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13c.sql
+2, 0, 0, 172
+2, 0, 0, 174
+2, 0, 0, 172
+2, 0, 0, 173
+2, 0, 0, 177
+2, 0, 0, 173
+2, 0, 0, 173
+2, 0, 0, 173
+2, 0, 0, 172
+2, 0, 0, 177
+2, 0, 0, 172
+2, 0, 0, 178
+2, 0, 0, 173
+2, 0, 0, 173
+2, 0, 0, 172
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13d.sql
+2, 0, 0, 179
+2, 0, 0, 178
+2, 0, 0, 184
+2, 0, 0, 179
+2, 0, 0, 180
+2, 0, 0, 182
+2, 0, 0, 183
+2, 0, 0, 182
+2, 0, 0, 183
+2, 0, 0, 180
+2, 0, 0, 181
+2, 0, 0, 180
+2, 0, 0, 178
+2, 0, 0, 179
+2, 0, 0, 179
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14a.sql
+1, 0, 0, 135
+1, 0, 0, 135
+1, 0, 0, 134
+1, 0, 0, 132
+1, 0, 0, 133
+1, 0, 0, 133
+1, 0, 0, 132
+1, 0, 0, 134
+1, 0, 0, 131
+1, 0, 0, 136
+1, 0, 0, 135
+1, 0, 0, 132
+1, 0, 0, 135
+1, 0, 0, 132
+1, 0, 0, 132
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14b.sql
+1, 0, 0, 107
+1, 0, 0, 108
+1, 0, 0, 107
+1, 0, 0, 108
+1, 0, 0, 108
+1, 0, 0, 107
+1, 0, 0, 108
+1, 0, 0, 108
+1, 0, 0, 107
+1, 0, 0, 109
+1, 0, 0, 108
+1, 0, 0, 109
+1, 0, 0, 109
+1, 0, 0, 110
+1, 0, 0, 110
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14c.sql
+1, 0, 0, 259
+1, 0, 0, 252
+1, 0, 0, 251
+1, 0, 0, 252
+1, 0, 0, 253
+1, 0, 0, 250
+1, 0, 0, 256
+1, 0, 0, 253
+1, 0, 0, 251
+1, 0, 0, 252
+1, 0, 0, 251
+1, 0, 0, 250
+1, 0, 0, 248
+1, 0, 0, 254
+1, 0, 0, 254
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/15a.sql
+3, 0, 0, 399
+3, 0, 0, 400
+3, 0, 0, 413
+3, 0, 0, 411
+3, 0, 0, 404
+3, 0, 0, 398
+3, 0, 0, 406
+3, 0, 0, 407
+3, 0, 0, 404
+3, 0, 0, 402
+3, 0, 0, 410
+3, 0, 0, 403
+3, 0, 0, 409
+3, 0, 0, 412
+3, 0, 0, 411
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/15b.sql
+3, 0, 0, 585
+3, 0, 0, 583
+3, 0, 0, 567
+3, 0, 0, 602
+3, 0, 0, 571
+3, 0, 0, 574
+3, 0, 0, 604
+3, 0, 0, 594
+3, 0, 0, 598
+3, 0, 0, 582
+3, 0, 0, 577
+3, 0, 0, 577
+3, 0, 0, 583
+3, 0, 0, 574
+3, 0, 0, 590
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/15c.sql
+3, 0, 0, 438
+3, 0, 0, 436
+3, 0, 0, 438
+3, 0, 0, 434
+3, 0, 0, 434
+3, 0, 0, 438
+3, 0, 0, 430
+3, 0, 0, 426
+3, 0, 0, 432
+3, 0, 0, 434
+3, 0, 0, 431
+3, 0, 0, 430
+3, 0, 0, 433
+3, 0, 0, 434
+3, 0, 0, 435
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/15d.sql
+3, 0, 0, 349
+3, 0, 0, 344
+3, 0, 0, 343
+3, 0, 0, 356
+3, 0, 0, 345
+3, 0, 0, 346
+3, 0, 0, 351
+3, 0, 0, 351
+3, 0, 0, 344
+3, 0, 0, 349
+3, 0, 0, 347
+3, 0, 0, 347
+3, 0, 0, 351
+3, 0, 0, 341
+3, 0, 0, 353
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16a.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16b.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16c.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16d.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17a.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17b.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17c.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17d.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17e.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17f.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/18a.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/18b.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/18c.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19a.sql
-5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19b.sql
-5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19c.sql
-5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19d.sql
-5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, 5, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1a.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1b.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1c.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1d.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/20a.sql
-3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/20b.sql
-3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/20c.sql
-3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21a.sql
-3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21b.sql
-3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21c.sql
-3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22a.sql
-9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22b.sql
-9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 10, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22c.sql
-9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22d.sql
-9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/23a.sql
-9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/23b.sql
-9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/23c.sql
-9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, 9, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/24a.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/24b.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/25a.sql
-3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 2, 0, 0, 3, 0, 0, 2, 0, 0, 3, 0, 0, 2, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/25b.sql
-3, 0, 0, 2, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/25c.sql
-3, 0, 0, 3, 0, 0, 2, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 2, 0, 0, 2, 0, 0, 3, 0, 0, 3, 0, 0, 3, 0, 0, 2, 0, 0, 2, 0, 0, 3, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26a.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26b.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26c.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/27a.sql
-0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/27b.sql
-0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/27c.sql
-1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/28a.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/28b.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/28c.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29a.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29b.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29c.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2a.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2b.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2c.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2d.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30a.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30b.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30c.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31a.sql
-14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31b.sql
-14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31c.sql
-15, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, 14, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/32a.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/32b.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/33a.sql
-0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/33b.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/33c.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/3a.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/3b.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/3c.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/4a.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/4b.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/4c.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/5a.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/5b.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/5c.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6a.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6b.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6c.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6d.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6e.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6f.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/7a.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/7b.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/7c.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8a.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8b.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8c.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8d.sql
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9a.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9b.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9c.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9d.sql
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 
+1, 0, 0, 392
+1, 0, 0, 392
+1, 0, 0, 394
+1, 0, 0, 391
+1, 0, 0, 390
+1, 0, 0, 388
+1, 0, 0, 389
+1, 0, 0, 392
+1, 0, 0, 394
+1, 0, 0, 395
+1, 0, 0, 402
+1, 0, 0, 387
+1, 0, 0, 390
+1, 0, 0, 389
+1, 0, 0, 394
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16b.sql
+1, 0, 0, 1377
+1, 0, 0, 1379
+1, 0, 0, 1376
+1, 0, 0, 1383
+1, 0, 0, 1366
+1, 0, 0, 1369
+1, 0, 0, 1374
+1, 0, 0, 1371
+1, 0, 0, 1358
+1, 0, 0, 1392
+1, 0, 0, 1375
+1, 0, 0, 1373
+1, 0, 0, 1362
+1, 0, 0, 1372
+1, 0, 0, 1368
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16c.sql
+1, 0, 0, 563
+1, 0, 0, 554
+1, 0, 0, 551
+1, 0, 0, 551
+1, 0, 0, 552
+1, 0, 0, 561
+1, 0, 0, 561
+1, 0, 0, 555
+1, 0, 0, 562
+1, 0, 0, 563
+1, 0, 0, 559
+1, 0, 0, 554
+1, 0, 0, 560
+1, 0, 0, 549
+1, 0, 0, 560
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16d.sql
+1, 0, 0, 540
+1, 0, 0, 546
+1, 0, 0, 540
+1, 0, 0, 545
+1, 0, 0, 544
+1, 0, 0, 541
+1, 0, 0, 538
+1, 0, 0, 539
+1, 0, 0, 539
+1, 0, 0, 541
+1, 0, 0, 540
+1, 0, 0, 542
+1, 0, 0, 543
+1, 0, 0, 542
+1, 0, 0, 550
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17a.sql
+0, 0, 0, 725
+0, 0, 0, 723
+0, 0, 0, 738
+0, 0, 0, 733
+0, 0, 0, 757
+0, 0, 0, 736
+0, 0, 0, 730
+0, 0, 0, 728
+0, 0, 0, 722
+0, 0, 0, 723
+0, 0, 0, 733
+0, 0, 0, 718
+0, 0, 0, 722
+0, 0, 0, 726
+0, 0, 0, 746
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17b.sql
+0, 0, 0, 985
+0, 0, 0, 980
+0, 0, 0, 1003
+0, 0, 0, 978
+0, 0, 0, 993
+0, 0, 0, 997
+0, 0, 0, 991
+0, 0, 0, 973
+0, 0, 0, 960
+0, 0, 0, 977
+0, 0, 0, 1000
+0, 0, 0, 976
+0, 0, 0, 989
+0, 0, 0, 996
+0, 0, 0, 994
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17c.sql
+0, 0, 0, 978
+0, 0, 0, 978
+0, 0, 0, 966
+0, 0, 0, 971
+0, 0, 0, 981
+0, 0, 0, 979
+0, 0, 0, 972
+0, 0, 0, 984
+0, 0, 0, 987
+0, 0, 0, 973
+0, 0, 0, 972
+0, 0, 0, 991
+0, 0, 0, 978
+0, 0, 0, 1028
+0, 0, 0, 974
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17d.sql
+0, 0, 0, 1042
+0, 0, 0, 1068
+0, 0, 0, 1037
+0, 0, 0, 1021
+0, 0, 0, 1054
+0, 0, 0, 1032
+0, 0, 0, 1077
+0, 0, 0, 1036
+0, 0, 0, 1050
+0, 0, 0, 1059
+0, 0, 0, 1057
+0, 0, 0, 1043
+0, 0, 0, 1037
+0, 0, 0, 1052
+0, 0, 0, 1045
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17e.sql
+0, 0, 0, 848
+0, 0, 0, 838
+0, 0, 0, 864
+0, 0, 0, 850
+0, 0, 0, 854
+0, 0, 0, 843
+0, 0, 0, 853
+0, 0, 0, 843
+0, 0, 0, 844
+0, 0, 0, 852
+0, 0, 0, 850
+0, 0, 0, 836
+0, 0, 0, 842
+0, 0, 0, 863
+0, 0, 0, 852
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17f.sql
+0, 0, 0, 1177
+0, 0, 0, 1174
+0, 0, 0, 1178
+0, 0, 0, 1158
+0, 0, 0, 1150
+0, 0, 0, 1185
+0, 0, 0, 1177
+0, 0, 0, 1171
+0, 0, 0, 1158
+0, 0, 0, 1161
+0, 0, 0, 1158
+0, 0, 0, 1169
+0, 0, 0, 1195
+0, 0, 0, 1188
+0, 0, 0, 1156
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/18a.sql
+0, 0, 0, 1035
+0, 0, 0, 1034
+0, 0, 0, 1056
+0, 0, 0, 1053
+0, 0, 0, 1027
+0, 0, 0, 1053
+0, 0, 0, 1023
+0, 0, 0, 1050
+0, 0, 0, 1020
+0, 0, 0, 1044
+0, 0, 0, 1027
+0, 0, 0, 1028
+0, 0, 0, 1035
+0, 0, 0, 1033
+0, 0, 0, 1047
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/18b.sql
+0, 0, 0, 1007
+0, 0, 0, 1003
+0, 0, 0, 1018
+0, 0, 0, 1003
+0, 0, 0, 1006
+0, 0, 0, 1000
+0, 0, 0, 1021
+0, 0, 0, 1001
+0, 0, 0, 997
+0, 0, 0, 1007
+0, 0, 0, 1009
+0, 0, 0, 1007
+0, 0, 0, 1017
+0, 0, 0, 1003
+0, 0, 0, 1007
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/18c.sql
+0, 0, 0, 1090
+0, 0, 0, 1101
+0, 0, 0, 1089
+0, 0, 0, 1099
+0, 0, 0, 1115
+0, 0, 0, 1091
+0, 0, 0, 1091
+0, 0, 0, 1092
+0, 0, 0, 1095
+0, 0, 0, 1103
+0, 0, 0, 1092
+0, 0, 0, 1118
+0, 0, 0, 1092
+0, 0, 0, 1090
+1, 0, 0, 1098
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19a.sql
+5, 0, 0, 740
+5, 0, 0, 736
+5, 0, 0, 743
+5, 0, 0, 742
+5, 0, 0, 732
+5, 0, 0, 733
+5, 0, 0, 733
+5, 0, 0, 739
+5, 0, 0, 741
+5, 0, 0, 757
+5, 0, 0, 730
+5, 0, 0, 736
+5, 0, 0, 734
+5, 0, 0, 751
+5, 0, 0, 739
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19b.sql
+5, 0, 0, 670
+5, 0, 0, 676
+5, 0, 0, 673
+5, 0, 0, 674
+5, 0, 0, 678
+5, 0, 0, 675
+5, 0, 0, 690
+5, 0, 0, 679
+5, 0, 0, 682
+5, 0, 0, 674
+5, 0, 0, 677
+5, 0, 0, 682
+5, 0, 0, 677
+5, 0, 0, 687
+5, 0, 0, 676
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19c.sql
+5, 0, 0, 755
+5, 0, 0, 749
+5, 0, 0, 755
+5, 0, 0, 753
+5, 0, 0, 758
+5, 0, 0, 754
+5, 0, 0, 755
+5, 0, 0, 745
+5, 0, 0, 749
+5, 0, 0, 744
+5, 0, 0, 749
+5, 0, 0, 758
+5, 0, 0, 753
+5, 0, 0, 744
+5, 0, 0, 751
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19d.sql
+5, 0, 0, 760
+5, 0, 0, 741
+5, 0, 0, 740
+5, 0, 0, 744
+5, 0, 0, 744
+5, 0, 0, 733
+5, 0, 0, 740
+5, 0, 0, 738
+5, 0, 0, 741
+4, 0, 0, 735
+5, 0, 0, 739
+5, 0, 0, 734
+5, 0, 0, 731
+4, 0, 0, 736
+5, 0, 0, 730
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1a.sql
+0, 0, 0, 66
+0, 0, 0, 64
+0, 0, 0, 64
+0, 0, 0, 64
+0, 0, 0, 64
+0, 0, 0, 65
+0, 0, 0, 65
+0, 0, 0, 65
+0, 0, 0, 68
+0, 0, 0, 65
+0, 0, 0, 65
+0, 0, 0, 66
+0, 0, 0, 65
+0, 0, 0, 64
+0, 0, 0, 64
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1b.sql
+0, 0, 0, 44
+0, 0, 0, 45
+0, 0, 0, 47
+0, 0, 0, 47
+0, 0, 0, 46
+0, 0, 0, 45
+0, 0, 0, 47
+0, 0, 0, 45
+0, 0, 0, 46
+0, 0, 0, 45
+0, 0, 0, 46
+0, 0, 0, 46
+0, 0, 0, 45
+0, 0, 0, 46
+0, 0, 0, 47
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1c.sql
+0, 0, 0, 46
+0, 0, 0, 44
+0, 0, 0, 44
+0, 0, 0, 45
+0, 0, 0, 44
+0, 0, 0, 45
+0, 0, 0, 45
+0, 0, 0, 44
+0, 0, 0, 43
+0, 0, 0, 46
+0, 0, 0, 45
+0, 0, 0, 45
+0, 0, 0, 46
+0, 0, 0, 45
+0, 0, 0, 45
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1d.sql
+0, 0, 0, 53
+0, 0, 0, 51
+0, 0, 0, 51
+0, 0, 0, 50
+0, 0, 0, 51
+0, 0, 0, 51
+0, 0, 0, 51
+0, 0, 0, 51
+0, 0, 0, 50
+0, 0, 0, 53
+0, 0, 0, 51
+0, 0, 0, 52
+0, 0, 0, 50
+0, 0, 0, 51
+0, 0, 0, 52
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/20a.sql
+3, 0, 0, 741
+3, 0, 0, 734
+3, 0, 0, 741
+3, 0, 0, 744
+3, 0, 0, 742
+3, 0, 0, 744
+3, 0, 0, 745
+3, 0, 0, 746
+3, 0, 0, 768
+3, 0, 0, 740
+3, 0, 0, 743
+3, 0, 0, 737
+3, 0, 0, 740
+3, 0, 0, 741
+3, 0, 0, 745
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/20b.sql
+3, 0, 0, 637
+3, 0, 0, 641
+3, 0, 0, 640
+3, 0, 0, 640
+3, 0, 0, 637
+3, 0, 0, 644
+3, 0, 0, 640
+3, 0, 0, 635
+3, 0, 0, 641
+3, 0, 0, 637
+3, 0, 0, 639
+3, 0, 0, 644
+3, 0, 0, 637
+3, 0, 0, 640
+3, 0, 0, 644
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/20c.sql
+3, 0, 0, 683
+3, 0, 0, 696
+3, 0, 0, 691
+3, 0, 0, 693
+3, 0, 0, 692
+3, 0, 0, 687
+3, 0, 0, 702
+3, 0, 0, 686
+3, 0, 0, 693
+3, 0, 0, 689
+3, 0, 0, 699
+3, 0, 0, 691
+3, 0, 0, 698
+3, 0, 0, 689
+3, 0, 0, 691
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21a.sql
+3, 0, 0, 77
+3, 0, 0, 77
+3, 0, 0, 76
+3, 0, 0, 76
+3, 0, 0, 76
+3, 0, 0, 76
+3, 0, 0, 76
+3, 0, 0, 77
+3, 0, 0, 78
+3, 0, 0, 75
+3, 0, 0, 76
+3, 0, 0, 77
+3, 0, 0, 77
+3, 0, 0, 77
+3, 0, 0, 76
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21b.sql
+3, 0, 0, 47
+3, 0, 0, 47
+3, 0, 0, 48
+3, 0, 0, 46
+3, 0, 0, 48
+3, 0, 0, 48
+3, 0, 0, 47
+3, 0, 0, 48
+3, 0, 0, 46
+3, 0, 0, 48
+3, 0, 0, 47
+3, 0, 0, 48
+3, 0, 0, 48
+3, 0, 0, 48
+3, 0, 0, 48
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21c.sql
+3, 0, 0, 76
+3, 0, 0, 78
+3, 0, 0, 78
+3, 0, 0, 78
+3, 0, 0, 79
+3, 0, 0, 80
+3, 0, 0, 77
+3, 0, 0, 77
+3, 0, 0, 77
+3, 0, 0, 78
+3, 0, 0, 75
+3, 0, 0, 76
+3, 0, 0, 76
+3, 0, 0, 76
+3, 0, 0, 76
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22a.sql
+9, 0, 0, 324
+9, 0, 0, 324
+9, 0, 0, 327
+9, 0, 0, 329
+9, 0, 0, 330
+9, 0, 0, 323
+9, 0, 0, 322
+9, 0, 0, 322
+9, 0, 0, 332
+9, 0, 0, 330
+9, 0, 0, 327
+9, 0, 0, 330
+9, 0, 0, 328
+9, 0, 0, 327
+9, 0, 0, 330
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22b.sql
+9, 0, 0, 284
+9, 0, 0, 285
+9, 0, 0, 284
+9, 0, 0, 284
+9, 0, 0, 283
+9, 0, 0, 282
+9, 0, 0, 288
+9, 0, 0, 281
+9, 0, 0, 281
+9, 0, 0, 284
+9, 0, 0, 284
+9, 0, 0, 285
+9, 0, 0, 288
+17, 0, 0, 289
+9, 0, 0, 285
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22c.sql
+9, 0, 0, 556
+9, 0, 0, 553
+9, 0, 0, 557
+9, 0, 0, 553
+9, 0, 0, 553
+9, 0, 0, 552
+9, 0, 0, 552
+9, 0, 0, 548
+9, 0, 0, 554
+9, 0, 0, 555
+9, 0, 0, 572
+9, 0, 0, 553
+9, 0, 0, 554
+9, 0, 0, 551
+9, 0, 0, 556
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22d.sql
+9, 0, 0, 703
+9, 0, 0, 695
+9, 0, 0, 703
+9, 0, 0, 699
+9, 0, 0, 693
+9, 0, 0, 697
+9, 0, 0, 698
+9, 0, 0, 695
+9, 0, 0, 705
+9, 0, 0, 741
+9, 0, 0, 698
+9, 0, 0, 690
+9, 0, 0, 703
+9, 0, 0, 702
+9, 0, 0, 700
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/23a.sql
+9, 0, 0, 305
+9, 0, 0, 312
+9, 0, 0, 308
+9, 0, 0, 310
+9, 0, 0, 308
+9, 0, 0, 305
+9, 0, 0, 306
+9, 0, 0, 302
+9, 0, 0, 303
+9, 0, 0, 304
+9, 0, 0, 308
+9, 0, 0, 314
+9, 0, 0, 307
+9, 0, 0, 306
+9, 0, 0, 301
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/23b.sql
+9, 0, 0, 243
+9, 0, 0, 237
+9, 0, 0, 238
+9, 0, 0, 238
+9, 0, 0, 246
+9, 0, 0, 240
+9, 0, 0, 238
+9, 0, 0, 241
+9, 0, 0, 243
+9, 0, 0, 240
+9, 0, 0, 243
+9, 0, 0, 240
+9, 0, 0, 239
+9, 0, 0, 248
+9, 0, 0, 248
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/23c.sql
+9, 0, 0, 350
+9, 0, 0, 343
+9, 0, 0, 344
+9, 0, 0, 352
+9, 0, 0, 344
+9, 0, 0, 343
+9, 0, 0, 346
+9, 0, 0, 347
+9, 0, 0, 347
+9, 0, 0, 348
+9, 0, 0, 341
+9, 0, 0, 350
+9, 0, 0, 347
+9, 0, 0, 348
+9, 0, 0, 346
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/24a.sql
+0, 0, 0, 805
+0, 0, 0, 816
+0, 0, 0, 811
+0, 0, 0, 815
+0, 0, 0, 808
+0, 0, 0, 806
+0, 0, 0, 815
+0, 0, 0, 824
+0, 0, 0, 813
+0, 0, 0, 810
+0, 0, 0, 815
+0, 0, 0, 815
+0, 0, 0, 805
+0, 0, 0, 809
+0, 0, 0, 797
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/24b.sql
+0, 0, 0, 403
+0, 0, 0, 419
+0, 0, 0, 400
+0, 0, 0, 411
+0, 0, 0, 413
+0, 0, 0, 406
+0, 0, 0, 413
+0, 0, 0, 408
+0, 0, 0, 413
+0, 0, 0, 404
+0, 0, 0, 401
+0, 0, 0, 402
+0, 0, 0, 408
+0, 0, 0, 402
+0, 0, 0, 411
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/25a.sql
+2, 0, 0, 1119
+3, 0, 0, 1151
+2, 0, 0, 1122
+2, 0, 0, 1127
+3, 0, 0, 1151
+3, 0, 0, 1121
+3, 0, 0, 1129
+3, 0, 0, 1130
+3, 0, 0, 1130
+2, 0, 0, 1123
+3, 0, 0, 1124
+3, 0, 0, 1133
+3, 0, 0, 1124
+2, 0, 0, 1129
+3, 0, 0, 1123
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/25b.sql
+3, 0, 0, 359
+3, 0, 0, 351
+3, 0, 0, 349
+3, 0, 0, 360
+3, 0, 0, 358
+3, 0, 0, 349
+3, 0, 0, 349
+3, 0, 0, 352
+2, 0, 0, 350
+2, 0, 0, 352
+3, 0, 0, 350
+2, 0, 0, 350
+3, 0, 0, 350
+3, 0, 0, 350
+3, 0, 0, 349
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/25c.sql
+3, 0, 0, 1291
+3, 0, 0, 1279
+3, 0, 0, 1288
+3, 0, 0, 1285
+3, 0, 0, 1281
+3, 0, 0, 1282
+2, 0, 0, 1286
+3, 0, 0, 1275
+3, 0, 0, 1282
+3, 0, 0, 1275
+2, 0, 0, 1290
+3, 0, 0, 1282
+2, 0, 0, 1286
+3, 0, 0, 1287
+3, 0, 0, 1320
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26a.sql
+0, 0, 0, 685
+0, 0, 0, 684
+0, 0, 0, 682
+0, 0, 0, 681
+0, 0, 0, 683
+0, 0, 0, 692
+0, 0, 0, 682
+0, 0, 0, 682
+0, 0, 0, 683
+0, 0, 0, 680
+0, 0, 0, 684
+0, 0, 0, 677
+0, 0, 0, 681
+0, 0, 0, 691
+0, 0, 0, 689
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26b.sql
+0, 0, 0, 550
+0, 0, 0, 550
+0, 0, 0, 551
+0, 0, 0, 550
+0, 0, 0, 550
+0, 0, 0, 552
+0, 0, 0, 551
+0, 0, 0, 550
+0, 0, 0, 554
+0, 0, 0, 551
+0, 0, 0, 551
+0, 0, 0, 551
+0, 0, 0, 555
+0, 0, 0, 547
+0, 0, 0, 549
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26c.sql
+0, 0, 0, 668
+0, 0, 0, 669
+0, 0, 0, 664
+0, 0, 0, 669
+0, 0, 0, 665
+0, 0, 0, 666
+0, 0, 0, 671
+0, 0, 0, 664
+0, 0, 0, 660
+0, 0, 0, 674
+0, 0, 0, 662
+0, 0, 0, 668
+0, 0, 0, 670
+0, 0, 0, 667
+0, 0, 0, 669
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/27a.sql
+0, 0, 0, 75
+0, 0, 0, 76
+0, 0, 0, 75
+0, 0, 0, 78
+0, 0, 0, 75
+0, 0, 0, 75
+1, 0, 0, 78
+1, 0, 0, 74
+0, 0, 0, 74
+1, 0, 0, 77
+0, 0, 0, 75
+0, 0, 0, 75
+0, 0, 0, 76
+1, 0, 0, 75
+0, 0, 0, 75
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/27b.sql
+0, 0, 0, 44
+1, 0, 0, 45
+0, 0, 0, 44
+0, 0, 0, 45
+1, 0, 0, 44
+0, 0, 0, 45
+0, 0, 0, 44
+1, 0, 0, 44
+0, 0, 0, 44
+0, 0, 0, 45
+0, 0, 0, 43
+0, 0, 0, 44
+1, 0, 0, 44
+0, 0, 0, 45
+0, 0, 0, 43
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/27c.sql
+1, 0, 0, 82
+1, 0, 0, 79
+0, 0, 0, 80
+1, 0, 0, 78
+1, 0, 0, 78
+1, 0, 0, 78
+1, 0, 0, 82
+1, 0, 0, 80
+1, 0, 0, 78
+1, 0, 0, 79
+1, 0, 0, 78
+1, 0, 0, 79
+0, 0, 0, 79
+1, 0, 0, 80
+1, 0, 0, 78
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/28a.sql
+1, 0, 0, 920
+1, 0, 0, 924
+1, 0, 0, 915
+1, 0, 0, 920
+1, 0, 0, 927
+1, 0, 0, 915
+1, 0, 0, 918
+1, 0, 0, 923
+1, 0, 0, 920
+1, 0, 0, 915
+1, 0, 0, 922
+1, 0, 0, 935
+1, 0, 0, 918
+1, 0, 0, 922
+1, 0, 0, 912
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/28b.sql
+1, 0, 0, 735
+1, 0, 0, 741
+1, 0, 0, 732
+1, 0, 0, 734
+1, 0, 0, 740
+1, 0, 0, 746
+1, 0, 0, 733
+1, 0, 0, 733
+1, 0, 0, 738
+1, 0, 0, 732
+1, 0, 0, 735
+1, 0, 0, 749
+1, 0, 0, 738
+1, 0, 0, 743
+1, 0, 0, 737
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/28c.sql
+1, 0, 0, 956
+1, 0, 0, 927
+1, 0, 0, 935
+1, 0, 0, 933
+1, 0, 0, 930
+1, 0, 0, 941
+1, 0, 0, 922
+1, 0, 0, 925
+1, 0, 0, 943
+1, 0, 0, 943
+1, 0, 0, 924
+1, 0, 0, 938
+1, 0, 0, 933
+1, 0, 0, 928
+1, 0, 0, 923
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29a.sql
+1, 0, 0, 619
+1, 0, 0, 623
+1, 0, 0, 632
+1, 0, 0, 620
+1, 0, 0, 623
+1, 0, 0, 621
+1, 0, 0, 626
+1, 0, 0, 624
+1, 0, 0, 634
+1, 0, 0, 632
+1, 0, 0, 622
+1, 0, 0, 628
+1, 0, 0, 617
+1, 0, 0, 622
+1, 0, 0, 620
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29b.sql
+1, 0, 0, 614
+1, 0, 0, 614
+1, 0, 0, 610
+1, 0, 0, 613
+1, 0, 0, 611
+1, 0, 0, 615
+1, 0, 0, 615
+1, 0, 0, 612
+1, 0, 0, 611
+1, 0, 0, 618
+1, 0, 0, 615
+1, 0, 0, 616
+1, 0, 0, 613
+1, 0, 0, 616
+1, 0, 0, 612
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29c.sql
+1, 0, 0, 1503
+1, 0, 0, 1538
+1, 0, 0, 1542
+1, 0, 0, 1511
+1, 0, 0, 1544
+1, 0, 0, 1535
+1, 0, 0, 1571
+1, 0, 0, 1513
+1, 0, 0, 1503
+1, 0, 0, 1510
+1, 0, 0, 1547
+1, 0, 0, 1537
+1, 0, 0, 1503
+1, 0, 0, 1543
+1, 0, 0, 1498
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2a.sql
+0, 0, 0, 156
+0, 0, 0, 156
+0, 0, 0, 156
+0, 0, 0, 155
+0, 0, 0, 154
+0, 0, 0, 154
+0, 0, 0, 154
+0, 0, 0, 155
+0, 0, 0, 154
+0, 0, 0, 156
+0, 0, 0, 154
+0, 0, 0, 154
+0, 0, 0, 157
+0, 0, 0, 154
+0, 0, 0, 155
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2b.sql
+0, 0, 0, 150
+0, 0, 0, 149
+0, 0, 0, 150
+0, 0, 0, 152
+0, 0, 0, 150
+0, 0, 0, 151
+0, 0, 0, 148
+0, 0, 0, 148
+0, 0, 0, 148
+0, 0, 0, 149
+0, 0, 0, 149
+0, 0, 0, 148
+0, 0, 0, 148
+0, 0, 0, 150
+0, 0, 0, 149
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2c.sql
+0, 0, 0, 60
+0, 0, 0, 60
+0, 0, 0, 61
+0, 0, 0, 61
+0, 0, 0, 60
+0, 0, 0, 60
+0, 0, 0, 60
+0, 0, 0, 60
+0, 0, 0, 60
+0, 0, 0, 60
+0, 0, 0, 60
+0, 0, 0, 60
+0, 0, 0, 60
+0, 0, 0, 61
+0, 0, 0, 60
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2d.sql
+0, 0, 0, 156
+0, 0, 0, 154
+0, 0, 0, 157
+0, 0, 0, 155
+0, 0, 0, 156
+0, 0, 0, 157
+0, 0, 0, 156
+0, 0, 0, 156
+0, 0, 0, 155
+0, 0, 0, 154
+0, 0, 0, 157
+0, 0, 0, 154
+0, 0, 0, 157
+0, 0, 0, 155
+0, 0, 0, 157
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30a.sql
+1, 0, 0, 1010
+1, 0, 0, 1008
+1, 0, 0, 1022
+1, 0, 0, 1011
+1, 0, 0, 1008
+1, 0, 0, 1011
+1, 0, 0, 1010
+1, 0, 0, 1011
+1, 0, 0, 1006
+1, 0, 0, 1008
+1, 0, 0, 1009
+1, 0, 0, 1011
+1, 0, 0, 1010
+1, 0, 0, 1002
+1, 0, 0, 1002
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30b.sql
+1, 0, 0, 770
+1, 0, 0, 773
+1, 0, 0, 764
+1, 0, 0, 767
+1, 0, 0, 769
+1, 0, 0, 767
+1, 0, 0, 774
+1, 0, 0, 762
+1, 0, 0, 763
+1, 0, 0, 766
+1, 0, 0, 765
+1, 0, 0, 768
+1, 0, 0, 766
+1, 0, 0, 765
+1, 0, 0, 770
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30c.sql
+1, 0, 0, 1199
+1, 0, 0, 1205
+1, 0, 0, 1205
+1, 0, 0, 1200
+1, 0, 0, 1205
+1, 0, 0, 1202
+1, 0, 0, 1205
+1, 0, 0, 1207
+1, 0, 0, 1202
+1, 0, 0, 1202
+1, 0, 0, 1208
+1, 0, 0, 1234
+1, 0, 0, 1204
+1, 0, 0, 1228
+1, 0, 0, 1201
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31a.sql
+14, 0, 0, 894
+14, 0, 0, 887
+14, 0, 0, 889
+14, 0, 0, 893
+14, 0, 0, 882
+14, 0, 0, 886
+14, 0, 0, 891
+14, 0, 0, 916
+16, 0, 0, 885
+14, 0, 0, 914
+14, 0, 0, 891
+14, 0, 0, 884
+14, 0, 0, 893
+14, 0, 0, 889
+14, 0, 0, 886
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31b.sql
+14, 0, 0, 436
+14, 0, 0, 434
+14, 0, 0, 448
+14, 0, 0, 442
+14, 0, 0, 433
+14, 0, 0, 444
+14, 0, 0, 439
+14, 0, 0, 439
+14, 0, 0, 438
+14, 0, 0, 439
+14, 0, 0, 445
+14, 0, 0, 437
+14, 0, 0, 435
+14, 0, 0, 438
+14, 0, 0, 435
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31c.sql
+14, 0, 0, 1075
+14, 0, 0, 1095
+14, 0, 0, 1094
+14, 0, 0, 1087
+14, 0, 0, 1082
+14, 0, 0, 1074
+14, 0, 0, 1092
+14, 0, 0, 1072
+14, 0, 0, 1079
+14, 0, 0, 1089
+14, 0, 0, 1077
+14, 0, 0, 1077
+14, 0, 0, 1083
+14, 0, 0, 1079
+15, 0, 0, 1083
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/32a.sql
+0, 0, 0, 5
+0, 0, 0, 5
+0, 0, 0, 5
+0, 0, 0, 5
+0, 0, 0, 5
+0, 0, 0, 5
+0, 0, 0, 5
+0, 0, 0, 5
+0, 0, 0, 5
+0, 0, 0, 5
+0, 0, 0, 5
+0, 0, 0, 5
+0, 0, 0, 5
+0, 0, 0, 5
+0, 0, 0, 5
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/32b.sql
+0, 0, 0, 108
+0, 0, 0, 107
+0, 0, 0, 106
+0, 0, 0, 107
+0, 0, 0, 108
+0, 0, 0, 107
+0, 0, 0, 109
+0, 0, 0, 107
+0, 0, 0, 107
+0, 0, 0, 108
+0, 0, 0, 107
+0, 0, 0, 106
+0, 0, 0, 106
+0, 0, 0, 106
+0, 0, 0, 107
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/33a.sql
+1, 0, 0, 67
+1, 0, 0, 66
+0, 0, 0, 69
+1, 0, 0, 66
+1, 0, 0, 67
+1, 0, 0, 67
+1, 0, 0, 68
+1, 0, 0, 68
+1, 0, 0, 69
+1, 0, 0, 68
+0, 0, 0, 67
+1, 0, 0, 69
+1, 0, 0, 67
+1, 0, 0, 70
+1, 0, 0, 68
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/33b.sql
+1, 0, 0, 88
+1, 0, 0, 87
+1, 0, 0, 88
+1, 0, 0, 87
+1, 0, 0, 88
+1, 0, 0, 88
+1, 0, 0, 88
+1, 0, 0, 87
+1, 0, 0, 90
+1, 0, 0, 88
+0, 0, 0, 86
+1, 0, 0, 88
+1, 0, 0, 87
+1, 0, 0, 87
+0, 0, 0, 87
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/33c.sql
+1, 0, 0, 105
+1, 0, 0, 106
+1, 0, 0, 106
+1, 0, 0, 107
+1, 0, 0, 105
+1, 0, 0, 108
+1, 0, 0, 107
+1, 0, 0, 106
+1, 0, 0, 105
+1, 0, 0, 105
+1, 0, 0, 105
+1, 0, 0, 107
+1, 0, 0, 105
+1, 0, 0, 104
+1, 0, 0, 107
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/3a.sql
+0, 0, 0, 661
+0, 0, 0, 662
+0, 0, 0, 668
+0, 0, 0, 667
+0, 0, 0, 664
+0, 0, 0, 663
+0, 0, 0, 670
+0, 0, 0, 667
+0, 0, 0, 662
+0, 0, 0, 670
+0, 0, 0, 668
+0, 0, 0, 665
+0, 0, 0, 665
+0, 0, 0, 665
+0, 0, 0, 663
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/3b.sql
+0, 0, 0, 397
+0, 0, 0, 389
+0, 0, 0, 390
+0, 0, 0, 393
+0, 0, 0, 390
+0, 0, 0, 387
+0, 0, 0, 391
+0, 0, 0, 386
+0, 0, 0, 396
+0, 0, 0, 396
+0, 0, 0, 389
+0, 0, 0, 393
+0, 0, 0, 393
+0, 0, 0, 391
+0, 0, 0, 391
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/3c.sql
+0, 0, 0, 769
+0, 0, 0, 771
+0, 0, 0, 763
+0, 0, 0, 770
+0, 0, 0, 761
+0, 0, 0, 755
+0, 0, 0, 776
+0, 0, 0, 762
+0, 0, 0, 764
+0, 0, 0, 765
+0, 0, 0, 766
+0, 0, 0, 764
+0, 0, 0, 760
+0, 0, 0, 767
+0, 0, 0, 761
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/4a.sql
+0, 0, 0, 208
+0, 0, 0, 207
+0, 0, 0, 206
+0, 0, 0, 204
+0, 0, 0, 205
+0, 0, 0, 206
+0, 0, 0, 207
+0, 0, 0, 205
+0, 0, 0, 208
+0, 0, 0, 205
+0, 0, 0, 205
+0, 0, 0, 208
+0, 0, 0, 208
+0, 0, 0, 205
+0, 0, 0, 206
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/4b.sql
+0, 0, 0, 93
+0, 0, 0, 94
+0, 0, 0, 93
+0, 0, 0, 94
+0, 0, 0, 93
+0, 0, 0, 95
+0, 0, 0, 93
+0, 0, 0, 93
+0, 0, 0, 94
+0, 0, 0, 93
+0, 0, 0, 94
+0, 0, 0, 93
+0, 0, 0, 95
+0, 0, 0, 94
+0, 0, 0, 93
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/4c.sql
+0, 0, 0, 340
+0, 0, 0, 339
+0, 0, 0, 343
+0, 0, 0, 339
+0, 0, 0, 341
+0, 0, 0, 339
+0, 0, 0, 342
+0, 0, 0, 339
+0, 0, 0, 338
+0, 0, 0, 342
+0, 0, 0, 339
+0, 0, 0, 352
+0, 0, 0, 339
+0, 0, 0, 339
+0, 0, 0, 338
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/5a.sql
+0, 0, 0, 159
+0, 0, 0, 159
+0, 0, 0, 156
+0, 0, 0, 158
+0, 0, 0, 157
+0, 0, 0, 158
+0, 0, 0, 156
+0, 0, 0, 160
+0, 0, 0, 159
+0, 0, 0, 158
+0, 0, 0, 157
+0, 0, 0, 157
+0, 0, 0, 157
+0, 0, 0, 157
+0, 0, 0, 157
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/5b.sql
+0, 0, 0, 137
+0, 0, 0, 135
+0, 0, 0, 137
+0, 0, 0, 136
+0, 0, 0, 135
+0, 0, 0, 134
+0, 0, 0, 136
+0, 0, 0, 135
+0, 0, 0, 135
+0, 0, 0, 135
+0, 0, 0, 137
+0, 0, 0, 135
+0, 0, 0, 137
+0, 0, 0, 135
+0, 0, 0, 134
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/5c.sql
+0, 0, 0, 774
+0, 0, 0, 773
+0, 0, 0, 780
+0, 0, 0, 769
+0, 0, 0, 779
+0, 0, 0, 770
+0, 0, 0, 766
+0, 0, 0, 774
+0, 0, 0, 772
+0, 0, 0, 782
+0, 0, 0, 771
+0, 0, 0, 770
+0, 0, 0, 787
+0, 0, 0, 778
+0, 0, 0, 772
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6a.sql
+0, 0, 0, 507
+0, 0, 0, 501
+0, 0, 0, 503
+0, 0, 0, 505
+0, 0, 0, 501
+0, 0, 0, 502
+0, 0, 0, 504
+0, 0, 0, 505
+0, 0, 0, 511
+0, 0, 0, 502
+0, 0, 0, 501
+0, 0, 0, 502
+0, 0, 0, 494
+0, 0, 0, 508
+0, 0, 0, 497
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6b.sql
+0, 0, 0, 224
+0, 0, 0, 225
+0, 0, 0, 223
+0, 0, 0, 223
+0, 0, 0, 222
+0, 0, 0, 225
+0, 0, 0, 226
+0, 0, 0, 222
+0, 0, 0, 223
+0, 0, 0, 222
+0, 0, 0, 223
+0, 0, 0, 224
+0, 0, 0, 224
+0, 0, 0, 223
+0, 0, 0, 223
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6c.sql
+0, 0, 0, 329
+0, 0, 0, 326
+0, 0, 0, 330
+0, 0, 0, 326
+0, 0, 0, 328
+0, 0, 0, 329
+0, 0, 0, 332
+0, 0, 0, 327
+0, 0, 0, 325
+0, 0, 0, 325
+0, 0, 0, 325
+0, 0, 0, 336
+0, 0, 0, 326
+0, 0, 0, 328
+0, 0, 0, 327
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6d.sql
+0, 0, 0, 357
+0, 0, 0, 350
+0, 0, 0, 352
+0, 0, 0, 350
+0, 0, 0, 351
+0, 0, 0, 352
+0, 0, 0, 352
+0, 0, 0, 350
+0, 0, 0, 352
+0, 0, 0, 349
+0, 0, 0, 351
+0, 0, 0, 348
+0, 0, 0, 349
+0, 0, 0, 351
+0, 0, 0, 351
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6e.sql
+0, 0, 0, 516
+0, 0, 0, 513
+0, 0, 0, 516
+0, 0, 0, 526
+0, 0, 0, 519
+0, 0, 0, 515
+0, 0, 0, 512
+0, 0, 0, 510
+0, 0, 0, 514
+0, 0, 0, 517
+0, 0, 0, 516
+0, 0, 0, 515
+0, 0, 0, 513
+0, 0, 0, 512
+0, 0, 0, 512
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6f.sql
+0, 0, 0, 1111
+0, 0, 0, 1116
+0, 0, 0, 1110
+0, 0, 0, 1115
+0, 0, 0, 1111
+0, 0, 0, 1111
+0, 0, 0, 1104
+0, 0, 0, 1117
+0, 0, 0, 1115
+0, 0, 0, 1114
+0, 0, 0, 1112
+0, 0, 0, 1124
+0, 0, 0, 1112
+0, 0, 0, 1118
+0, 0, 0, 1103
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/7a.sql
+1, 0, 0, 269
+1, 0, 0, 267
+1, 0, 0, 270
+1, 0, 0, 273
+1, 0, 0, 275
+1, 0, 0, 268
+1, 0, 0, 268
+1, 0, 0, 266
+1, 0, 0, 269
+1, 0, 0, 267
+1, 0, 0, 268
+1, 0, 0, 267
+1, 0, 0, 266
+1, 0, 0, 268
+1, 0, 0, 267
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/7b.sql
+1, 0, 0, 117
+1, 0, 0, 116
+1, 0, 0, 117
+1, 0, 0, 116
+1, 0, 0, 115
+1, 0, 0, 115
+1, 0, 0, 119
+1, 0, 0, 116
+1, 0, 0, 115
+1, 0, 0, 115
+1, 0, 0, 118
+1, 0, 0, 117
+1, 0, 0, 116
+1, 0, 0, 117
+1, 0, 0, 115
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/7c.sql
+1, 0, 0, 1245
+1, 0, 0, 1206
+1, 0, 0, 1220
+1, 0, 0, 1207
+1, 0, 0, 1228
+1, 0, 0, 1222
+1, 0, 0, 1208
+1, 0, 0, 1230
+1, 0, 0, 1205
+1, 0, 0, 1254
+1, 0, 0, 1206
+1, 0, 0, 1239
+1, 0, 0, 1217
+1, 0, 0, 1228
+1, 0, 0, 1222
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8a.sql
+0, 0, 0, 391
+0, 0, 0, 381
+0, 0, 0, 380
+0, 0, 0, 380
+0, 0, 0, 381
+0, 0, 0, 383
+0, 0, 0, 378
+0, 0, 0, 379
+0, 0, 0, 382
+0, 0, 0, 380
+0, 0, 0, 381
+0, 0, 0, 386
+0, 0, 0, 380
+0, 0, 0, 387
+0, 0, 0, 378
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8b.sql
+0, 0, 0, 351
+0, 0, 0, 348
+0, 0, 0, 354
+0, 0, 0, 348
+0, 0, 0, 354
+0, 0, 0, 349
+0, 0, 0, 348
+0, 0, 0, 358
+0, 0, 0, 348
+0, 0, 0, 349
+0, 0, 0, 355
+0, 0, 0, 352
+0, 0, 0, 348
+0, 0, 0, 347
+0, 0, 0, 352
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8c.sql
+0, 0, 0, 741
+0, 0, 0, 746
+0, 0, 0, 755
+0, 0, 0, 742
+0, 0, 0, 737
+0, 0, 0, 755
+0, 0, 0, 737
+0, 0, 0, 743
+0, 0, 0, 740
+0, 0, 0, 742
+0, 0, 0, 741
+0, 0, 0, 757
+0, 0, 0, 740
+0, 0, 0, 739
+0, 0, 0, 738
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8d.sql
+0, 0, 0, 287
+0, 0, 0, 292
+0, 0, 0, 288
+0, 0, 0, 290
+0, 0, 0, 289
+0, 0, 0, 287
+0, 0, 0, 288
+0, 0, 0, 287
+0, 0, 0, 288
+0, 0, 0, 289
+0, 0, 0, 289
+0, 0, 0, 287
+0, 0, 0, 290
+0, 0, 0, 288
+0, 0, 0, 288
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9a.sql
+1, 0, 0, 627
+1, 0, 0, 636
+1, 0, 0, 632
+1, 0, 0, 632
+1, 0, 0, 632
+1, 0, 0, 629
+1, 0, 0, 643
+1, 0, 0, 633
+1, 0, 0, 631
+1, 0, 0, 635
+1, 0, 0, 632
+1, 0, 0, 630
+1, 0, 0, 632
+1, 0, 0, 631
+1, 0, 0, 641
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9b.sql
+1, 0, 0, 437
+1, 0, 0, 441
+1, 0, 0, 433
+1, 0, 0, 437
+1, 0, 0, 434
+1, 0, 0, 436
+1, 0, 0, 433
+1, 0, 0, 436
+1, 0, 0, 438
+1, 0, 0, 436
+1, 0, 0, 435
+1, 0, 0, 434
+1, 0, 0, 440
+1, 0, 0, 435
+1, 0, 0, 445
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9c.sql
+1, 0, 0, 593
+1, 0, 0, 589
+1, 0, 0, 593
+1, 0, 0, 591
+1, 0, 0, 592
+1, 0, 0, 588
+1, 0, 0, 602
+1, 0, 0, 587
+1, 0, 0, 591
+1, 0, 0, 589
+1, 0, 0, 595
+1, 0, 0, 590
+1, 0, 0, 589
+1, 0, 0, 589
+1, 0, 0, 593
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9d.sql
+1, 0, 0, 730
+1, 0, 0, 712
+1, 0, 0, 727
+1, 0, 0, 720
+1, 0, 0, 722
+1, 0, 0, 732
+1, 0, 0, 731
+1, 0, 0, 731
+1, 0, 0, 714
+1, 0, 0, 720
+1, 0, 0, 732
+1, 0, 0, 711
+1, 0, 0, 714
+1, 0, 0, 725
+1, 0, 0, 707
