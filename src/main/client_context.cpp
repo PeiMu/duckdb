@@ -52,6 +52,7 @@
 #include "duckdb/storage/data_table.hpp"
 #include "duckdb/transaction/meta_transaction.hpp"
 #include "duckdb/transaction/transaction_manager.hpp"
+#include <unistd.h>
 
 namespace duckdb {
 
@@ -959,8 +960,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		new_plan->children.clear();
 
 		// get the postgres node string
-		std::ifstream input_stream("/home/pei/Project/duckdb/measure/postgres_plan/postgres_plan",
-		                           std::ios_base::binary);
+		char cwd[PATH_MAX];
+		if (getcwd(cwd, sizeof(cwd)) == NULL) {
+			Printer::Print("Error! Cannot get current path!!!");
+			exit(-1);
+		}
+		auto postgres_plan_path = std::string(cwd) + "/postgres_plan/postgres_plan";
+		std::ifstream input_stream(postgres_plan_path, std::ios_base::binary);
 		if (input_stream.fail()) {
 			Printer::Print("Error! Failed to open file!!!");
 			exit(-1);
