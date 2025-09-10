@@ -25,7 +25,7 @@ TransactionContext::~TransactionContext() {
 
 void TransactionContext::BeginTransaction() {
 	if (current_transaction) {
-		// todo: Might have bugs here - Pei
+		// todo: Might have bugs here
 		// throw TransactionException("cannot start a transaction within a transaction");
 	} else {
 		auto start_timestamp = Timestamp::GetCurrentTimestamp();

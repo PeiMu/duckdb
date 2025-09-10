@@ -107,7 +107,7 @@ struct DebugClientContextState : public ClientContextState {
 	}
 	void TransactionBegin(MetaTransaction &transaction, ClientContext &context) override {
 		if (active_transaction) {
-			// todo: Might have bugs here - Pei
+			// todo: Might have bugs here
 			// throw InternalException(
 			// "DebugClientContextState::TransactionBegin called when a transaction is already active");
 		}
