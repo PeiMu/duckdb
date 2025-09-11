@@ -575,11 +575,17 @@ void Optimizer::RunBuiltInPostOptimizers() {
 		plan = expression_heuristics.Rewrite(std::move(plan));
 	});
 
-	// perform join filter pushdown after the dust has settled
-	RunOptimizer(OptimizerType::JOIN_FILTER_PUSHDOWN, [&]() {
-		JoinFilterPushdownOptimizer join_filter_pushdown(*this);
-		join_filter_pushdown.VisitOperator(*plan);
-	});
+//	Printer::Print("plan before JOIN_FILTER_PUSHDOWN");
+//	plan->Print();
+
+//	// perform join filter pushdown after the dust has settled
+//	RunOptimizer(OptimizerType::JOIN_FILTER_PUSHDOWN, [&]() {
+//		JoinFilterPushdownOptimizer join_filter_pushdown(*this);
+//		join_filter_pushdown.VisitOperator(*plan);
+//	});
+//
+//	Printer::Print("plan after JOIN_FILTER_PUSHDOWN");
+//	plan->Print();
 }
 
 unique_ptr<LogicalOperator> Optimizer::Optimize(unique_ptr<LogicalOperator> plan_p) {

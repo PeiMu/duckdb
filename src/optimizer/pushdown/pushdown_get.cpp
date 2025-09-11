@@ -56,31 +56,31 @@ unique_ptr<LogicalOperator> FilterPushdown::PushdownGet(unique_ptr<LogicalOperat
 
 	GenerateFilters();
 
-	for (idx_t i = pushdown_results.size(); i < filters.size(); ++i) {
-		// any generated filters have not been pushed down yet
-		pushdown_results.push_back(FilterPushdownResult::NO_PUSHDOWN);
-	}
-	// for any filters we did not manage to push into specialized table filters - try to push them as a generic
-	// expression
-	for (idx_t i = 0; i < filters.size(); ++i) {
-		// get the previous pushdown result
-		auto pushdown_result = pushdown_results[i];
-		if (pushdown_result != FilterPushdownResult::NO_PUSHDOWN) {
-			// this has already been (partially) pushed down - skip
-			continue;
-		}
-		auto &expr = *filters[i]->filter;
-		if (expr.IsVolatile() || expr.CanThrow()) {
-			// we cannot push down volatile or throwing expressions
-			continue;
-		}
-		pushdown_result = combiner.TryPushdownGenericExpression(get, expr);
-		if (pushdown_result == FilterPushdownResult::PUSHED_DOWN_FULLY) {
-			filters.erase_at(i);
-			pushdown_results.erase_at(i);
-			i--;
-		}
-	}
+//	for (idx_t i = pushdown_results.size(); i < filters.size(); ++i) {
+//		// any generated filters have not been pushed down yet
+//		pushdown_results.push_back(FilterPushdownResult::NO_PUSHDOWN);
+//	}
+//	// for any filters we did not manage to push into specialized table filters - try to push them as a generic
+//	// expression
+//	for (idx_t i = 0; i < filters.size(); ++i) {
+//		// get the previous pushdown result
+//		auto pushdown_result = pushdown_results[i];
+//		if (pushdown_result != FilterPushdownResult::NO_PUSHDOWN) {
+//			// this has already been (partially) pushed down - skip
+//			continue;
+//		}
+//		auto &expr = *filters[i]->filter;
+//		if (expr.IsVolatile() || expr.CanThrow()) {
+//			// we cannot push down volatile or throwing expressions
+//			continue;
+//		}
+//		pushdown_result = combiner.TryPushdownGenericExpression(get, expr);
+//		if (pushdown_result == FilterPushdownResult::PUSHED_DOWN_FULLY) {
+//			filters.erase_at(i);
+//			pushdown_results.erase_at(i);
+//			i--;
+//		}
+//	}
 
 	//! Now we try to pushdown the remaining filters to perform zonemap checking
 	return FinishPushdown(std::move(op));
