@@ -99,7 +99,7 @@ struct DebugClientContextState : public ClientContextState {
 	void QueryBegin(ClientContext &context) override {
 		if (active_query) {
 			// fixme: here might have bugs - Pei
-//			throw InternalException("DebugClientContextState::QueryBegin called when a query is already active");
+			// throw InternalException("DebugClientContextState::QueryBegin called when a query is already active");
 		}
 		active_query = true;
 	}
@@ -290,7 +290,7 @@ ErrorData ClientContext::EndQueryInternal(ClientContextLock &lock, bool success,
 }
 
 void ClientContext::CleanupInternal(ClientContextLock &lock, BaseQueryResult *result, bool invalidate_transaction,
-	bool continue_exec) {
+                                    bool continue_exec) {
 	if (!active_query) {
 		// no query currently active
 		return;
@@ -308,7 +308,8 @@ void ClientContext::CleanupInternal(ClientContextLock &lock, BaseQueryResult *re
 	if (result && result->HasError()) {
 		passed_error = result->GetErrorObject();
 	}
-	auto error = EndQueryInternal(lock, result ? !result->HasError() : false, invalidate_transaction, passed_error, continue_exec);
+	auto error = EndQueryInternal(lock, result ? !result->HasError() : false, invalidate_transaction, passed_error,
+	                              continue_exec);
 	if (result && !result->HasError()) {
 		// if an error occurred while committing report it in the result
 		result->SetError(error);
@@ -355,7 +356,8 @@ connection_t ClientContext::GetConnectionId() const {
 	return connection_id;
 }
 
-unique_ptr<QueryResult> ClientContext::FetchResultInternal(ClientContextLock &lock, PendingQueryResult &pending, bool continue_exec) {
+unique_ptr<QueryResult> ClientContext::FetchResultInternal(ClientContextLock &lock, PendingQueryResult &pending,
+                                                           bool continue_exec) {
 	D_ASSERT(active_query);
 	D_ASSERT(active_query->IsOpenResult(pending));
 	D_ASSERT(active_query->prepared);
@@ -652,8 +654,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 			subquery_preparer.ClearOldTableIndex();
 			subquery_preparer.AddOldTableIndex(subqueries.front()[0]);
-			auto sub_plan = subquery_preparer.GenerateProjHead(logical_plan, std::move(subqueries.front()[0]), table_expr_queue,
-			                                                   proj_expr, merge_sibling_expr);
+			auto sub_plan = subquery_preparer.GenerateProjHead(logical_plan, std::move(subqueries.front()[0]),
+			                                                   table_expr_queue, proj_expr, merge_sibling_expr);
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "GenerateProjHead time is\n");
 #endif
@@ -662,7 +664,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 #if MANUAL_EXPLAIN_ANALYZE
 			auto explain_sub_plan = sub_plan->Copy(*this);
-			explain_sub_plan = make_uniq<LogicalExplain>(std::move(explain_sub_plan), ExplainType::EXPLAIN_ANALYZE);
+			explain_sub_plan = make_uniq<LogicalExplain>(std::move(explain_sub_plan), ExplainType::EXPLAIN_ANALYZE,
+			                                             ExplainFormat::DEFAULT);
 			explain_sub_plan = optimizer.PostOptimize(std::move(explain_sub_plan));
 #if ENABLE_DEBUG_PRINT
 			// debug: print subquery
@@ -671,9 +674,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 			Planner::VerifyPlan(optimizer.context, explain_sub_plan);
 #endif
-			subquery_preparer.ExplainAnalyzeSubQuery(
-			    lock, result, std::move(explain_sub_plan), result->catalog_version, result->unbound_statement->query,
-			    result->unbound_statement->n_param, result->unbound_statement->named_param_map);
+			subquery_preparer.ExplainAnalyzeSubQuery(lock, result, std::move(explain_sub_plan),
+			                                         result->unbound_statement->query,
+			                                         result->unbound_statement->named_param_map);
 #endif
 
 #if TIME_BREAK_DOWN
@@ -757,9 +760,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			subquery_stmt->physical_plan = std::move(physical_plan);
 
 			// Execute subquery
-			auto prepared_stmt = make_uniq<PreparedStatement>(
-			    shared_from_this(), std::move(subquery_stmt), result->unbound_statement->query,
-			    result->unbound_statement->named_param_map);
+			auto prepared_stmt = make_uniq<PreparedStatement>(shared_from_this(), std::move(subquery_stmt),
+			                                                  result->unbound_statement->query,
+			                                                  result->unbound_statement->named_param_map);
 			duckdb::vector<Value> bound_values;
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "adapt to selection time is\n");
@@ -899,7 +902,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 #if MANUAL_EXPLAIN_ANALYZE
 		auto explain_sub_plan = logical_plan->Copy(*this);
-		explain_sub_plan = make_uniq<LogicalExplain>(std::move(explain_sub_plan), ExplainType::EXPLAIN_ANALYZE);
+		explain_sub_plan = make_uniq<LogicalExplain>(std::move(explain_sub_plan), ExplainType::EXPLAIN_ANALYZE,
+		                                             ExplainFormat::DEFAULT);
 		explain_sub_plan = optimizer.PostOptimize(std::move(explain_sub_plan));
 #if ENABLE_DEBUG_PRINT
 		// debug: print subquery
@@ -908,8 +912,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 		Planner::VerifyPlan(optimizer.context, explain_sub_plan);
 #endif
-		subquery_preparer.ExplainAnalyzeSubQuery(lock, result, std::move(explain_sub_plan), result->catalog_version,
-		                                         result->unbound_statement->query, result->unbound_statement->n_param,
+		subquery_preparer.ExplainAnalyzeSubQuery(lock, result, std::move(explain_sub_plan),
+		                                         result->unbound_statement->query,
 		                                         result->unbound_statement->named_param_map);
 #endif
 
@@ -945,10 +949,11 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		auto explain_whole_plan = subquery_preparer.MergeBack(std::move(whole_plan), logical_plan);
 		if (explain_whole_plan) {
 #if WHOLE_PLAN_EXPLAIN_ANALYZE
-			explain_whole_plan = make_uniq<LogicalExplain>(std::move(explain_whole_plan), ExplainType::EXPLAIN_ANALYZE);
+			explain_whole_plan = make_uniq<LogicalExplain>(std::move(explain_whole_plan), ExplainType::EXPLAIN_ANALYZE,
+			                                               ExplainFormat::DEFAULT);
 			subquery_preparer.ExplainAnalyzeSubQuery(
-				lock, result, std::move(explain_whole_plan), result->catalog_version, result->unbound_statement->query,
-				result->unbound_statement->n_param, result->unbound_statement->named_param_map);
+			    lock, result, std::move(explain_whole_plan), result->unbound_statement->query,
+			    result->unbound_statement->named_param_map);
 #else
 			logical_plan = std::move(explain_whole_plan);
 #endif
@@ -1320,8 +1325,8 @@ unique_ptr<PendingQueryResult> ClientContext::PendingQuery(const string &query,
 }
 
 unique_ptr<PendingQueryResult> ClientContext::PendingQuery(ClientContextLock &lock, const string &query,
-														   shared_ptr<PreparedStatementData> &prepared,
-														   const PendingQueryParameters &parameters) {
+                                                           shared_ptr<PreparedStatementData> &prepared,
+                                                           const PendingQueryParameters &parameters) {
 	return PendingStatementOrPreparedStatementInternal(lock, query, nullptr, prepared, parameters);
 }
 

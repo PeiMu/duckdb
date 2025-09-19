@@ -779,9 +779,8 @@ bool SubqueryPreparer::BlockUsed(const unordered_set<idx_t> &left_cond_table_ind
 
 void SubqueryPreparer::ExplainAnalyzeSubQuery(ClientContextLock &lock,
                                               shared_ptr<PreparedStatementData> original_stmt_data,
-                                              unique_ptr<LogicalOperator> explain_sub_plan, idx_t catalog_version,
-                                              string statement_query, idx_t n_param,
-                                              case_insensitive_map_t<idx_t> named_param_map) {
+                                              unique_ptr<LogicalOperator> explain_sub_plan, const string& statement_query,
+                                              const case_insensitive_map_t<idx_t>& named_param_map) {
 	switch (explain_sub_plan->children[0]->type) {
 	case LogicalOperatorType::LOGICAL_PROJECTION:
 	case LogicalOperatorType::LOGICAL_ORDER_BY:
@@ -798,8 +797,6 @@ void SubqueryPreparer::ExplainAnalyzeSubQuery(ClientContextLock &lock,
 	explain_stmt_data->names = {"explain_key", "explain_value"};
 	explain_stmt_data->types = {LogicalType::VARCHAR, LogicalType::VARCHAR};
 	explain_stmt_data->properties.return_type = StatementReturnType::QUERY_RESULT;
-	//			explain_stmt_data->value_map
-	// explain_stmt_data->catalog_version = catalog_version;
 	explain_stmt_data->unbound_statement = std::move(explain_stmt);
 
 	PhysicalPlanGenerator explain_physical_planner(context);

@@ -73,8 +73,8 @@ public:
 
 	// todo: refactor to a standalone class
 	void ExplainAnalyzeSubQuery(ClientContextLock &lock, shared_ptr<PreparedStatementData> original_stmt_data,
-	                            unique_ptr<LogicalOperator> explain_sub_plan, idx_t catalog_version,
-	                            string statement_query, idx_t n_param, case_insensitive_map_t<idx_t> named_param_map);
+	                            unique_ptr<LogicalOperator> explain_sub_plan, const string& statement_query,
+	                            const case_insensitive_map_t<idx_t>& named_param_map);
 
 	// todo: refactor to a standalone class
 	unique_ptr<LogicalOperator> MergeBack(unique_ptr<LogicalOperator> last_sub_plan,

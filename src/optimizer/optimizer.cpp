@@ -329,6 +329,7 @@ void Optimizer::RunBuiltInPreOptimizers() {
 		plan = deliminator.Optimize(std::move(plan));
 	});
 
+	// new
 	// Pulls up empty results
 	RunOptimizer(OptimizerType::EMPTY_RESULT_PULLUP, [&]() {
 		EmptyResultPullup empty_result_pullup;
@@ -459,7 +460,7 @@ void Optimizer::RunBuiltInPostOptimizers() {
 			plan = optimizer.Optimize(std::move(plan));
 		});
 
-		//#ifdef DEBUG
+		#ifdef DEBUG
 		// check if CORSS_PRODUCT are all simplified
 		std::function<void(unique_ptr<LogicalOperator> & op)> check_cross_product;
 		check_cross_product = [&check_cross_product](unique_ptr<LogicalOperator> &op) {
@@ -472,7 +473,7 @@ void Optimizer::RunBuiltInPostOptimizers() {
 			}
 		};
 		check_cross_product(plan);
-		//#endif
+		#endif
 
 		// rewrites UNNESTs in DelimJoins by moving them to the projection
 		RunOptimizer(OptimizerType::UNNEST_REWRITER, [&]() {
@@ -505,6 +506,7 @@ void Optimizer::RunBuiltInPostOptimizers() {
 		column_lifetime.VisitOperator(*plan);
 	});
 
+	// new
 	// Once we know the column lifetime, we have more information regarding
 	// what relations should be the build side/probe side.
 	RunOptimizer(OptimizerType::BUILD_SIDE_PROBE_SIDE, [&]() {
@@ -512,12 +514,14 @@ void Optimizer::RunBuiltInPostOptimizers() {
 		build_probe_side_optimizer.VisitOperator(*plan);
 	});
 
+	// new
 	// pushes LIMIT below PROJECTION
 	RunOptimizer(OptimizerType::LIMIT_PUSHDOWN, [&]() {
 		LimitPushdown limit_pushdown;
 		plan = limit_pushdown.Optimize(std::move(plan));
 	});
 
+	// new
 	// perform sampling pushdown
 	RunOptimizer(OptimizerType::SAMPLING_PUSHDOWN, [&]() {
 		SamplingPushdown sampling_pushdown;
@@ -530,6 +534,7 @@ void Optimizer::RunBuiltInPostOptimizers() {
 		plan = topn.Optimize(std::move(plan));
 	});
 
+	// new
 	// try to use late materialization
 	RunOptimizer(OptimizerType::LATE_MATERIALIZATION, [&]() {
 		LateMaterialization late_materialization(*this);
@@ -575,17 +580,11 @@ void Optimizer::RunBuiltInPostOptimizers() {
 		plan = expression_heuristics.Rewrite(std::move(plan));
 	});
 
-//	Printer::Print("plan before JOIN_FILTER_PUSHDOWN");
-//	plan->Print();
-
 //	// perform join filter pushdown after the dust has settled
 //	RunOptimizer(OptimizerType::JOIN_FILTER_PUSHDOWN, [&]() {
 //		JoinFilterPushdownOptimizer join_filter_pushdown(*this);
 //		join_filter_pushdown.VisitOperator(*plan);
 //	});
-//
-//	Printer::Print("plan after JOIN_FILTER_PUSHDOWN");
-//	plan->Print();
 }
 
 unique_ptr<LogicalOperator> Optimizer::Optimize(unique_ptr<LogicalOperator> plan_p) {
