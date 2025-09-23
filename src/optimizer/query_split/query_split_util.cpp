@@ -294,4 +294,15 @@ void VisitExprs(const unique_ptr<Expression> &expr, T &&func) {
 
 	func(expr);
 }
+
+bool HasNullptr(const unique_ptr<LogicalOperator> &plan) {
+	bool has_nullptr = false;
+	for (size_t idx = 0; idx < plan->children.size(); idx++) {
+		if (nullptr == plan->children[idx])
+			return true;
+		else
+			has_nullptr |= HasNullptr(plan->children[idx]);
+	}
+	return has_nullptr;
+}
 } // namespace duckdb

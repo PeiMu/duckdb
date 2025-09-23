@@ -590,21 +590,30 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 						merge_sibling_expr = false;
 					}
-#if REORDER_DATACHUNK && ENABLE_REORDER_PLAN
-					logical_plan = reorder_get.Optimize(std::move(logical_plan));
-					table_card_order = reorder_get.GetTableCardOrder();
-					if (reorder_get.NeedFilterPushDown()) {
-						FilterPushdown filter_pushdown(optimizer);
-						logical_plan = filter_pushdown.Rewrite(std::move(logical_plan));
-						reorder_get.Clear();
-#if ENABLE_DEBUG_PRINT
-						// debug: print subquery
-						Printer::Print("After reorder_get+filter_pushdown");
-						logical_plan->Print();
-#endif
-					}
-#endif
-					subquery_preparer.CanonicalizeCrossProduct(logical_plan);
+					// #if REORDER_DATACHUNK && ENABLE_REORDER_PLAN
+					//					logical_plan = reorder_get.Optimize(std::move(logical_plan));
+					//					table_card_order = reorder_get.GetTableCardOrder();
+					//					if (reorder_get.NeedFilterPushDown()) {
+					//						FilterPushdown filter_pushdown(optimizer);
+					//						logical_plan = filter_pushdown.Rewrite(std::move(logical_plan));
+					//						reorder_get.Clear();
+					// #if ENABLE_DEBUG_PRINT
+					//						// debug: print subquery
+					//						Printer::Print("After reorder_get+filter_pushdown");
+					//						logical_plan->Print();
+					// #endif
+					//					}
+					// #endif
+					//					subquery_preparer.CanonicalizeCrossProduct(logical_plan);
+					logical_plan = optimizer.MiddleOptimize(std::move(logical_plan));
+					// #if ENABLE_DEBUG_PRINT
+					//					if (execute_plan) {
+					//						// debug: print subquery
+					//						Printer::Print("After optimizer.MiddleOptimize");
+					//						logical_plan->Print();
+					//					}
+					// #endif
+
 #if TIME_BREAK_DOWN
 					if (execute_plan)
 						chrono_toc(&timer, "CanonicalizeCrossProduct time is\n");
@@ -951,9 +960,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if WHOLE_PLAN_EXPLAIN_ANALYZE
 			explain_whole_plan = make_uniq<LogicalExplain>(std::move(explain_whole_plan), ExplainType::EXPLAIN_ANALYZE,
 			                                               ExplainFormat::DEFAULT);
-			subquery_preparer.ExplainAnalyzeSubQuery(
-			    lock, result, std::move(explain_whole_plan), result->unbound_statement->query,
-			    result->unbound_statement->named_param_map);
+			subquery_preparer.ExplainAnalyzeSubQuery(lock, result, std::move(explain_whole_plan),
+			                                         result->unbound_statement->query,
+			                                         result->unbound_statement->named_param_map);
 #else
 			logical_plan = std::move(explain_whole_plan);
 #endif

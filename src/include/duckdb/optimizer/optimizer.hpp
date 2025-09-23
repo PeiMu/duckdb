@@ -29,6 +29,7 @@ public:
 	unique_ptr<LogicalOperator> Optimize(unique_ptr<LogicalOperator> plan);
 	//! Optimize a plan by running specialized optimizers before join order optimization
 	unique_ptr<LogicalOperator> PreOptimize(unique_ptr<LogicalOperator> plan_p);
+	unique_ptr<LogicalOperator> MiddleOptimize(unique_ptr<LogicalOperator> plan_p);
 	//! Optimize a plan by running specialized optimizers when enable split_jop config
 	unique_ptr<LogicalOperator> ReorderGetOptimize(unique_ptr<LogicalOperator> plan_p);
 	//! Optimize a plan by running specialized optimizers after join order optimization
@@ -47,6 +48,7 @@ public:
 private:
 	void RunBuiltInOptimizers();
 	void RunBuiltInPreOptimizers();
+	void RunBuiltInMiddleOptimizers();
 	void RunBuiltInPostOptimizers();
 	void RunOptimizer(OptimizerType type, const std::function<void()> &callback);
 	void Verify(LogicalOperator &op);

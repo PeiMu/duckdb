@@ -13,6 +13,7 @@
 #include "duckdb/planner/expression/bound_case_expression.hpp"
 #include "duckdb/planner/expression/bound_comparison_expression.hpp"
 #include "duckdb/planner/expression/bound_function_expression.hpp"
+#include "duckdb/planner/logical_operator.hpp"
 
 #include <chrono>
 #include <fstream>
@@ -76,5 +77,8 @@ template <typename T>
 void VisitComparisonExpr(const BoundComparisonExpression &comparison_expr, T &&func);
 template <typename T>
 void VisitExprs(const unique_ptr<Expression> &expr, T &&func);
+
+//! Check if the plan has nullptr node
+bool HasNullptr(const unique_ptr<LogicalOperator> &plan);
 
 } // namespace duckdb

@@ -655,12 +655,27 @@ void SubqueryPreparer::MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery
 				// keep the same order
 				new_plan->children[0] = std::move(old_subquery_pair[1]);
 				new_plan->children[1] = std::move(old_subquery_pair[0]);
+				if (HasNullptr(new_plan->children[1]))
+					new_plan = new_plan->children[1].get();
+				else
+					new_plan = new_plan->children[0].get();
 			} else {
 				new_plan->children[0] = std::move(old_subquery_pair[0]);
+				new_plan = new_plan->children[0].get();
 			}
 			old_subqueries.pop_back();
+		} else if (2 == new_plan->children.size()) {
+			auto old_subquery_pair = std::move(old_subqueries.back());
+#ifdef DEBUG
+			D_ASSERT(nullptr == new_plan->children[1]);
+			D_ASSERT(1 == old_subquery_pair.size());
+#endif
+			new_plan->children[1] = std::move(old_subquery_pair[0]);
+			old_subqueries.pop_back();
+			new_plan = new_plan->children[1].get();
+		} else {
+			new_plan = new_plan->children[0].get();
 		}
-		new_plan = new_plan->children[0].get();
 		if (old_subqueries.empty())
 			break;
 	}
@@ -779,8 +794,9 @@ bool SubqueryPreparer::BlockUsed(const unordered_set<idx_t> &left_cond_table_ind
 
 void SubqueryPreparer::ExplainAnalyzeSubQuery(ClientContextLock &lock,
                                               shared_ptr<PreparedStatementData> original_stmt_data,
-                                              unique_ptr<LogicalOperator> explain_sub_plan, const string& statement_query,
-                                              const case_insensitive_map_t<idx_t>& named_param_map) {
+                                              unique_ptr<LogicalOperator> explain_sub_plan,
+                                              const string &statement_query,
+                                              const case_insensitive_map_t<idx_t> &named_param_map) {
 	switch (explain_sub_plan->children[0]->type) {
 	case LogicalOperatorType::LOGICAL_PROJECTION:
 	case LogicalOperatorType::LOGICAL_ORDER_BY:

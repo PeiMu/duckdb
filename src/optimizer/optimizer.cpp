@@ -391,7 +391,46 @@ void Optimizer::RunBuiltInPreOptimizers() {
 			cse_optimizer.VisitOperator(*plan);
 		});
 	}
+}
 
+void Optimizer::RunBuiltInMiddleOptimizers() {
+	switch (plan->type) {
+	case LogicalOperatorType::LOGICAL_TRANSACTION:
+	case LogicalOperatorType::LOGICAL_PRAGMA:
+	case LogicalOperatorType::LOGICAL_SET:
+	case LogicalOperatorType::LOGICAL_UPDATE_EXTENSIONS:
+	case LogicalOperatorType::LOGICAL_CREATE_SECRET:
+	case LogicalOperatorType::LOGICAL_EXTENSION_OPERATOR:
+		// skip optimizing simple & often-occurring plans unaffected by rewrites
+		if (plan->children.empty()) {
+			return;
+		}
+		break;
+	default:
+		break;
+	}
+
+	// then we perform the join ordering optimization
+	// this also rewrites cross products + filters into joins and performs filter pushdowns
+	RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {
+		JoinOrderOptimizer optimizer(context);
+		plan = optimizer.Optimize(std::move(plan));
+	});
+
+	// todo: this pass will introduce proj nodes
+	//	// creates projection maps so unused columns are projected out early
+	//	RunOptimizer(OptimizerType::COLUMN_LIFETIME, [&]() {
+	//		ColumnLifetimeAnalyzer column_lifetime(*this, *plan, true);
+	//		column_lifetime.VisitOperator(*plan);
+	//	});
+
+	// new
+	// Once we know the column lifetime, we have more information regarding
+	// what relations should be the build side/probe side.
+	RunOptimizer(OptimizerType::BUILD_SIDE_PROBE_SIDE, [&]() {
+		BuildProbeSideOptimizer build_probe_side_optimizer(context, *plan);
+		build_probe_side_optimizer.VisitOperator(*plan);
+	});
 }
 
 unique_ptr<LogicalOperator> Optimizer::ReorderGetOptimize(unique_ptr<LogicalOperator> plan_p) {
@@ -460,7 +499,7 @@ void Optimizer::RunBuiltInPostOptimizers() {
 			plan = optimizer.Optimize(std::move(plan));
 		});
 
-		#ifdef DEBUG
+#ifdef DEBUG
 		// check if CORSS_PRODUCT are all simplified
 		std::function<void(unique_ptr<LogicalOperator> & op)> check_cross_product;
 		check_cross_product = [&check_cross_product](unique_ptr<LogicalOperator> &op) {
@@ -473,7 +512,7 @@ void Optimizer::RunBuiltInPostOptimizers() {
 			}
 		};
 		check_cross_product(plan);
-		#endif
+#endif
 
 		// rewrites UNNESTs in DelimJoins by moving them to the projection
 		RunOptimizer(OptimizerType::UNNEST_REWRITER, [&]() {
@@ -554,7 +593,7 @@ void Optimizer::RunBuiltInPostOptimizers() {
 			for (auto &ele : statistics_map) {
 				for (const auto &new_ele : new_statistics_map) {
 					if (ele.first.table_index == new_ele.first.table_index &&
-						ele.first.column_index == new_ele.first.column_index) {
+					    ele.first.column_index == new_ele.first.column_index) {
 						ele.second->Merge(*(new_ele.second));
 					}
 				}
@@ -580,11 +619,11 @@ void Optimizer::RunBuiltInPostOptimizers() {
 		plan = expression_heuristics.Rewrite(std::move(plan));
 	});
 
-//	// perform join filter pushdown after the dust has settled
-//	RunOptimizer(OptimizerType::JOIN_FILTER_PUSHDOWN, [&]() {
-//		JoinFilterPushdownOptimizer join_filter_pushdown(*this);
-//		join_filter_pushdown.VisitOperator(*plan);
-//	});
+	//	// perform join filter pushdown after the dust has settled
+	//	RunOptimizer(OptimizerType::JOIN_FILTER_PUSHDOWN, [&]() {
+	//		JoinFilterPushdownOptimizer join_filter_pushdown(*this);
+	//		join_filter_pushdown.VisitOperator(*plan);
+	//	});
 }
 
 unique_ptr<LogicalOperator> Optimizer::Optimize(unique_ptr<LogicalOperator> plan_p) {
@@ -632,6 +671,27 @@ unique_ptr<LogicalOperator> Optimizer::PreOptimize(unique_ptr<LogicalOperator> p
 	}
 
 	RunBuiltInPreOptimizers();
+
+	Planner::VerifyPlan(context, plan);
+
+	return std::move(plan);
+}
+
+unique_ptr<LogicalOperator> Optimizer::MiddleOptimize(unique_ptr<LogicalOperator> plan_p) {
+	Verify(*plan_p);
+
+	this->plan = std::move(plan_p);
+
+	for (auto &pre_optimizer_extension : DBConfig::GetConfig(context).optimizer_extensions) {
+		RunOptimizer(OptimizerType::EXTENSION, [&]() {
+			OptimizerExtensionInput input {GetContext(), *this, pre_optimizer_extension.optimizer_info.get()};
+			if (pre_optimizer_extension.pre_optimize_function) {
+				pre_optimizer_extension.pre_optimize_function(input, plan);
+			}
+		});
+	}
+
+	RunBuiltInMiddleOptimizers();
 
 	Planner::VerifyPlan(context, plan);
 
