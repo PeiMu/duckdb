@@ -589,6 +589,14 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 					merge_sibling_expr = false;
 				}
+				logical_plan = optimizer.MiddleOptimize(std::move(logical_plan));
+#if ENABLE_DEBUG_PRINT
+				if (execute_plan) {
+					// debug: print subquery
+					Printer::Print("After optimizer.MiddleOptimize");
+					logical_plan->Print();
+				}
+#endif
 				if (config.enable_dbshaker_split_jop) {
 #if REORDER_DATACHUNK && ENABLE_REORDER_PLAN
 					logical_plan = reorder_get.Optimize(std::move(logical_plan));
@@ -618,18 +626,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					}
 #endif
 				}
-			}
-			logical_plan = optimizer.MiddleOptimize(std::move(logical_plan));
-#if ENABLE_DEBUG_PRINT
-			if (execute_plan) {
-				// debug: print subquery
-				Printer::Print("After optimizer.MiddleOptimize");
-				logical_plan->Print();
-			}
-#endif
-			if (needToSplit) {
 				logical_plan = query_splitter.Clear(std::move(logical_plan));
-				logical_plan = query_splitter.Split(std::move(logical_plan), !config.enable_dbshaker_split_jop);
+				logical_plan = query_splitter.Split(std::move(logical_plan), true);
 				subqueries = query_splitter.GetSubqueries();
 				table_expr_queue = query_splitter.GetTableExprQueue();
 				proj_expr = query_splitter.GetProjExpr();
@@ -637,6 +635,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				chrono_toc(&timer, "Split time is\n");
 #endif
 			}
+
 			if (subqueries.empty())
 				break;
 			if (1 == subqueries.size()) {

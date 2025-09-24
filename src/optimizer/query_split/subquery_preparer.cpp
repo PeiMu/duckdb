@@ -449,13 +449,13 @@ void SubqueryPreparer::CanonicalizeCrossProduct(unique_ptr<LogicalOperator> &pla
 	}
 
 	// 1. collect the (JOIN, op_level) pair
-	// it is a left-deep plan at this point (before the JoinOrderOpt)
+	// in this branch we call join order optimization before split, so here is a bushy plan
 	auto op_child = plan.get();
 	std::stack<std::pair<LogicalOperator *, int>> join_pointers_pair;
 	int op_level = 0;
 	while (!op_child->children.empty()) {
 		if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op_child->type) {
-			join_pointers_pair.push({op_child, op_level});
+			join_pointers_pair.emplace(op_child, op_level);
 		}
 		op_child = op_child->children[0].get();
 		op_level++;
@@ -476,8 +476,9 @@ void SubqueryPreparer::CanonicalizeCrossProduct(unique_ptr<LogicalOperator> &pla
 
 		unique_ptr<LogicalOperator> last_block = CheckTableUsage(current_join_pointer, left_cond_table_index,
 		                                                         table_blocks, table_blocks_key_order, unused_blocks);
-		if (nullptr == last_block)
+		if (nullptr == last_block) {
 			continue;
+		}
 
 		// 2. if all tables below the last join are used,
 		// revert to the original sub plan and check the next JOIN point
