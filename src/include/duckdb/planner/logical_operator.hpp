@@ -45,6 +45,9 @@ public:
 
 	//! The node where need to be merged by another subquery, used by query_split
 	int split_index = 0;
+	// todo: now we only split at the build phase (right child); if we want to split both, data_chunk_split_index should
+	// be a pair
+	int merge_index = 0;
 
 	// fixme: used for the very hack verification in top_down Split,
 	//  using it to check if this JOIN was a split point but reverted

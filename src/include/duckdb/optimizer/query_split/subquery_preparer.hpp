@@ -31,12 +31,11 @@ public:
 	~SubqueryPreparer() = default;
 
 	//! Merge the data chunk (temp table) to the current subquery
-	int64_t MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
-	                       unique_ptr<ColumnDataCollection> previous_result, idx_t estimated_card);
+	idx_t MergeDataChunk(subquery_queue &old_subqueries, unique_ptr<ColumnDataCollection> previous_result,
+	                     idx_t estimated_card);
 
 	//! Merge the previous sibling node. If merged to the main stream (left node), we add the sibling expr to proj.
-	bool MergeSibling(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
-	                  unique_ptr<LogicalOperator> last_sibling_node);
+	bool MergeSibling(subquery_queue &old_subqueries, unique_ptr<LogicalOperator> last_sibling_node);
 
 	//! Generate the projection head node at the top of the current subquery
 	unique_ptr<LogicalOperator> GenerateProjHead(const unique_ptr<LogicalOperator> &original_plan,
@@ -65,20 +64,19 @@ public:
 	//! update the table_idx and column_idx
 	void UpdateSubqueriesIndex(subquery_queue &subqueries);
 
-	void SetMergeIndex(int index) {
-		merge_index = index;
-	}
-
 	void AddOldTableIndex(const unique_ptr<LogicalOperator> &op);
 
 	// todo: refactor to a standalone class
 	void ExplainAnalyzeSubQuery(ClientContextLock &lock, shared_ptr<PreparedStatementData> original_stmt_data,
-	                            unique_ptr<LogicalOperator> explain_sub_plan, const string& statement_query,
-	                            const case_insensitive_map_t<idx_t>& named_param_map);
+	                            unique_ptr<LogicalOperator> explain_sub_plan, const string &statement_query,
+	                            const case_insensitive_map_t<idx_t> &named_param_map);
 
 	// todo: refactor to a standalone class
 	unique_ptr<LogicalOperator> MergeBack(unique_ptr<LogicalOperator> last_sub_plan,
 	                                      const unique_ptr<LogicalOperator> &sub_plan);
+
+	//! find the insert point and insert the src_op, by checking split_index==merge_index
+	void MergeToSubquery(unique_ptr<LogicalOperator> &dest_op, unique_ptr<LogicalOperator> &src_op, bool &merged);
 
 	idx_t GetEstCard(const unique_ptr<LogicalOperator> &sub_plan);
 
@@ -90,9 +88,6 @@ public:
 	}
 
 private:
-	//! 1. find the insert point and insert the `ColumnDataGet` node to the logical plan;
-	//! 2. update the table_idx and column_idx
-	void MergeToSubquery(LogicalOperator &op, bool &merged);
 	//! Because the `chunk_scan` will create a new table index and contains the result of all tables (SEQ SCAN) of the
 	//! current level, it is necessary to replace the index of the related expressions
 	unique_ptr<Expression> VisitReplace(BoundColumnRefExpression &expr, unique_ptr<Expression> *expr_ptr) override;
@@ -127,14 +122,12 @@ private:
 	// so far we only execute the first child node and will miss the sibling info
 	// todo: should be changed when supporting the parallel execution of sibling execution
 	std::set<TableExpr> last_sibling_exprs;
-	// a new chunk scan node with the last level's result, generated and merged in `MergeDataChunk`
-	unique_ptr<LogicalColumnDataGet> chunk_scan = nullptr;
 	// `chunk_scan` will be moved, and we need one extra member to remember the new table index
 	idx_t new_table_idx = DConstants::INVALID_INDEX;
 	// the collection of the old table indexes, to detect and be replaced to the new index by `UpdateTableExpr`
 	std::set<idx_t> old_table_idx;
 
-	int merge_index = 0;
+	int data_chunk_split_index = 0;
 
 	// store the sub_plans and sub_plan_exprs in case the current_sub_plan doesn't have the CHUNK_GET node
 	// (in `MergeBack`)

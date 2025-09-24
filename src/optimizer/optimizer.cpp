@@ -350,16 +350,7 @@ void Optimizer::RunBuiltInPreOptimizers() {
 	}
 #endif
 
-	if (!context.config.enable_dbshaker_split_jop) {
-		if (context.config.enable_dbshaker_query_split) {
-			// perform statistics propagation
-			RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
-				StatisticsPropagator propagator(*this, *plan);
-				propagator.PropagateStatistics(plan);
-				statistics_map = propagator.GetStatisticsMap();
-			});
-		}
-
+	if (!context.config.enable_dbshaker_query_split) {
 		// then we perform the join ordering optimization
 		// this also rewrites cross products + filters into joins and performs filter pushdowns
 		RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {

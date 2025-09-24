@@ -181,7 +181,7 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 	// we need to check the right child first to fit the table_expr process - commit 1883b62
 	// Else (we ENABLE_CROSS_PRODUCT_REWRITE), we want to get the deep-first tables,
 	// to see if the CROSS_PRODUCTs of the subquery can be simplified
-	for (int idx = op.children.size() - 1; idx > -1; idx--) {
+	for (int idx = op.children.size() - 1; idx >= 0; idx--) {
 		auto &child = op.children[idx];
 		std::set<TableExpr> table_exprs;
 		switch (child->type) {
@@ -194,6 +194,7 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 				table_exprs = GetFilterTableExpr(child->Cast<LogicalFilter>());
 				query_split_index++;
 				child->split_index = query_split_index;
+				op.merge_index = query_split_index;
 				break;
 			}
 #if SPLIT_FILTER
@@ -214,11 +215,16 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 				         LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->children[0]->type ||
 				         LogicalOperatorType::LOGICAL_CROSS_PRODUCT == child->children[0]->type);
 #endif
+				// we only split at the right child if CROSS_PRODUCT_REWRITE disabled
+				if (follow_pipeline_breaker_ && 0 == idx) {
+					break;
+				}
 				// add filter's column usage
 				table_exprs = GetFilterTableExpr(child->Cast<LogicalFilter>());
 				// check continuous filter nodes, only split the first one
 				query_split_index++;
 				child->split_index = query_split_index;
+				op.merge_index = query_split_index;
 				// add the SEMI or MARK join's column usage
 				auto child_pointer = child->children[0].get();
 				if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child_pointer->type) {
@@ -230,9 +236,9 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 					auto child_exprs = GetJoinTableExpr(inner_join);
 					table_exprs.insert(child_exprs.begin(), child_exprs.end());
 				}
-				break;
 			}
 #endif
+			break;
 		}
 		case LogicalOperatorType::LOGICAL_COMPARISON_JOIN: {
 			// we skip the SEMI JOIN or MARK JOIN
@@ -247,10 +253,12 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 				if (top_most || 1 == idx) {
 					query_split_index++;
 					child->split_index = query_split_index;
+					op.merge_index = query_split_index;
 				}
 			} else {
 				query_split_index++;
 				child->split_index = query_split_index;
+				op.merge_index = query_split_index;
 			}
 
 			table_exprs = GetJoinTableExpr(join_op);
@@ -270,6 +278,7 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 				// fixme: add query_split_index when support ENABLE_PARALLEL_EXECUTION
 				// query_split_index++;
 				child->split_index = query_split_index;
+				op.merge_index = query_split_index;
 			}
 			break;
 		}
@@ -362,7 +371,8 @@ std::set<TableExpr> TopDownSplit::GetSeqScanTableExpr(const LogicalGet &get_op) 
 	for (const auto &table_filter : get_op.table_filters.filters) {
 		TableExpr table_filter_expr;
 		table_filter_expr.table_idx = get_op.table_index;
-		auto column_idx_it = std::find(get_op.GetColumnIds().begin(), get_op.GetColumnIds().end(), ColumnIndex(table_filter.first));
+		auto column_idx_it =
+		    std::find(get_op.GetColumnIds().begin(), get_op.GetColumnIds().end(), ColumnIndex(table_filter.first));
 #ifdef DEBUG
 		D_ASSERT(column_idx_it != get_op.GetColumnIds().end());
 #endif

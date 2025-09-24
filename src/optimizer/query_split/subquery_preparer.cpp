@@ -103,6 +103,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 	}
 
 	auto new_proj_node = make_uniq<LogicalProjection>(binder.GenerateTableIndex(), std::move(new_exprs));
+	data_chunk_split_index = subquery->split_index;
 	new_proj_node->AddChild(std::move(subquery));
 
 #if ENABLE_DEBUG_PRINT
@@ -155,8 +156,8 @@ shared_ptr<PreparedStatementData> SubqueryPreparer::AdaptSelect(shared_ptr<Prepa
 	return subquery_stmt;
 }
 
-int64_t SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
-                                         unique_ptr<ColumnDataCollection> previous_result, idx_t estimated_card) {
+idx_t SubqueryPreparer::MergeDataChunk(subquery_queue &old_subqueries, unique_ptr<ColumnDataCollection> previous_result,
+                                       idx_t estimated_card) {
 
 	//	unique_ptr<MaterializedQueryResult> result_materialized;
 	//	auto collection = make_uniq<ColumnDataCollection>(Allocator::DefaultAllocator(), types);
@@ -189,20 +190,13 @@ int64_t SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>
 	//	chrono_toc(&timer, str.data());
 	// #endif
 
-	int64_t chunk_size = previous_result->Count();
+	idx_t chunk_size = previous_result->Count();
 
 	// generate an unused table index by the binder
 	new_table_idx = binder.GenerateTableIndex();
 
-	if (nullptr == chunk_scan) {
-		chunk_scan =
-		    make_uniq<LogicalColumnDataGet>(new_table_idx, previous_result->Types(), std::move(previous_result));
-	} else {
-		chunk_scan->table_index = new_table_idx;
-		chunk_scan->chunk_types = previous_result->Types();
-		// chunk_scan->collection = std::move(previous_result);
-		chunk_scan->collection->Combine(*previous_result);
-	}
+	unique_ptr<LogicalColumnDataGet> chunk_scan =
+	    make_uniq<LogicalColumnDataGet>(new_table_idx, previous_result->Types(), std::move(previous_result));
 
 #if ENABLE_SPECIFY_EST_STAT
 #ifdef DEBUG
@@ -213,13 +207,17 @@ int64_t SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>
 	chunk_scan->estimated_cardinality = chunk_size;
 #endif
 	chunk_scan->has_estimated_cardinality = true;
+	chunk_scan->split_index = data_chunk_split_index;
+	auto chunk_scan_op = unique_ptr_cast<LogicalColumnDataGet, LogicalOperator>(std::move(chunk_scan));
 	bool merged = false;
-	MergeToSubquery(*current_level_subqueries[0], merged);
-	if (!merged) {
-#ifdef DEBUG
-		D_ASSERT(current_level_subqueries.size() == 2);
-#endif
-		MergeToSubquery(*current_level_subqueries[1], merged);
+	for (auto &current_level_subquery : old_subqueries) {
+		MergeToSubquery(current_level_subquery[0], chunk_scan_op, merged);
+		if (!merged && current_level_subquery.size() == 2) {
+			MergeToSubquery(current_level_subquery[1], chunk_scan_op, merged);
+		}
+		if (merged) {
+			break;
+		}
 	}
 #ifdef DEBUG
 	D_ASSERT(merged);
@@ -228,43 +226,22 @@ int64_t SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>
 	return chunk_size;
 }
 
-bool SubqueryPreparer::MergeSibling(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
-                                    unique_ptr<LogicalOperator> last_sibling_node) {
-	auto merge_sibling = [&last_sibling_node](LogicalOperator *subquery_pointer) {
-		while (LogicalOperatorType::LOGICAL_GET != subquery_pointer->type &&
-		       LogicalOperatorType::LOGICAL_CHUNK_GET != subquery_pointer->type &&
-		       !subquery_pointer->children.empty()) {
-			if (nullptr == subquery_pointer->children[0]) {
-				subquery_pointer->children[0] = std::move(last_sibling_node);
-				return true;
-			} else if (subquery_pointer->children.size() > 1 && nullptr == subquery_pointer->children[1]) {
-#ifdef DEBUG
-				D_ASSERT(nullptr != last_sibling_node);
-#endif
-				subquery_pointer->children[1] = std::move(last_sibling_node);
-				return true;
-			} else {
-				subquery_pointer = subquery_pointer->children[0].get();
-			}
+bool SubqueryPreparer::MergeSibling(subquery_queue &old_subqueries, unique_ptr<LogicalOperator> last_sibling_node) {
+	bool merge_to_left = false;
+	bool merged = false;
+	for (auto &current_level_subquery : old_subqueries) {
+		MergeToSubquery(current_level_subquery[0], last_sibling_node, merged);
+		merge_to_left = true;
+		if (!merged && current_level_subquery.size() == 2) {
+			MergeToSubquery(current_level_subquery[1], last_sibling_node, merged);
+			merge_to_left = false;
 		}
-		return false;
-	};
-
-	bool merge_to_left = true;
-	// merge the sibling back to the upper subquery
-	auto subquery_pointer = current_level_subqueries[0].get();
-	bool merged = merge_sibling(subquery_pointer);
-	if (!merged) {
-#ifdef DEBUG
-		D_ASSERT(current_level_subqueries.size() == 2);
-#endif
-		subquery_pointer = current_level_subqueries[1].get();
-		merged = merge_sibling(subquery_pointer);
-		merge_to_left = false;
+		if (merged) {
+			break;
+		}
 	}
-	// check this is the last operator
 #ifdef DEBUG
-	D_ASSERT(merged && !subquery_pointer->children.empty());
+	D_ASSERT(merged);
 #endif
 	return merge_to_left;
 }
@@ -275,34 +252,42 @@ void SubqueryPreparer::AddOldTableIndex(const unique_ptr<LogicalOperator> &op) {
 	} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == op->type) {
 		old_table_idx.emplace(op->Cast<LogicalColumnDataGet>().table_index);
 	} else if (LogicalOperatorType::LOGICAL_FILTER == op->type) {
-		AddOldTableIndex(std::move(op->children[0]));
+		AddOldTableIndex(op->children[0]);
 	} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->type ||
 	           LogicalOperatorType::LOGICAL_CROSS_PRODUCT == op->type ||
 	           LogicalOperatorType::LOGICAL_ANY_JOIN == op->type) {
-		AddOldTableIndex(std::move(op->children[0]));
-		AddOldTableIndex(std::move(op->children[1]));
+		AddOldTableIndex(op->children[0]);
+		AddOldTableIndex(op->children[1]);
 	} else {
 		Printer::Print(StringUtil::Format("Do not support yet, op->type:  %s", LogicalOperatorToString(op->type)));
 		D_ASSERT(false);
 	}
 }
 
-void SubqueryPreparer::MergeToSubquery(LogicalOperator &op, bool &merged) {
-	for (int idx = op.children.size() - 1; idx > -1; idx--) {
-		auto &child = op.children[idx];
-		if (merged)
-			return;
+void SubqueryPreparer::MergeToSubquery(unique_ptr<LogicalOperator> &dest_op, unique_ptr<LogicalOperator> &src_op,
+                                       bool &merged) {
+	if (merged) {
+		return;
+	}
+	if (nullptr == dest_op) {
+		return;
+	}
+	for (int idx = dest_op->children.size() - 1; idx > -1; idx--) {
+		auto &child = dest_op->children[idx];
 		// find the insert point and insert the `ColumnDataGet` node to the logical plan
-		if (nullptr == child || child->split_index == merge_index) {
+		if (src_op->split_index == dest_op->merge_index && 0 != src_op->split_index) {
+			if (nullptr == child) {
 #ifdef DEBUG
-			D_ASSERT(nullptr != chunk_scan);
+				D_ASSERT(nullptr != src_op);
 #endif
-			child = std::move(chunk_scan);
-			merged = true;
-			merge_index--;
+				src_op->split_index = 0;
+				dest_op->merge_index = 0;
+				child = std::move(src_op);
+				merged = true;
+			}
 			return;
 		}
-		MergeToSubquery(*child, merged);
+		MergeToSubquery(child, src_op, merged);
 	}
 }
 
@@ -644,41 +629,51 @@ bool SubqueryPreparer::NeedReorder(const std::vector<unique_ptr<LogicalOperator>
 
 void SubqueryPreparer::MergeSubquery(unique_ptr<LogicalOperator> &plan, subquery_queue old_subqueries) {
 	// get the position to reorder
-	auto new_plan = plan.get();
-	while (true) {
-		if (nullptr == new_plan->children[0]) {
-			auto old_subquery_pair = std::move(old_subqueries.back());
-			if (2 == old_subquery_pair.size()) {
-#ifdef DEBUG
-				D_ASSERT(nullptr == new_plan->children[1]);
-#endif
-				// keep the same order
-				new_plan->children[0] = std::move(old_subquery_pair[1]);
-				new_plan->children[1] = std::move(old_subquery_pair[0]);
-				if (HasNullptr(new_plan->children[1]))
-					new_plan = new_plan->children[1].get();
-				else
-					new_plan = new_plan->children[0].get();
-			} else {
-				new_plan->children[0] = std::move(old_subquery_pair[0]);
-				new_plan = new_plan->children[0].get();
+	// first merge all old_subqueries into one
+	bool merged = false;
+	while (old_subqueries.size() > 1) {
+		merged = false;
+		auto old_subquery_pair = std::move(old_subqueries.front());
+		old_subqueries.pop_front();
+		auto src_op = std::move(old_subquery_pair[0]);
+		for (auto &current_level_subquery : old_subqueries) {
+			MergeToSubquery(current_level_subquery[0], src_op, merged);
+			if (!merged && current_level_subquery.size() == 2) {
+				MergeToSubquery(current_level_subquery[1], src_op, merged);
 			}
-			old_subqueries.pop_back();
-		} else if (2 == new_plan->children.size()) {
-			auto old_subquery_pair = std::move(old_subqueries.back());
-#ifdef DEBUG
-			D_ASSERT(nullptr == new_plan->children[1]);
-			D_ASSERT(1 == old_subquery_pair.size());
-#endif
-			new_plan->children[1] = std::move(old_subquery_pair[0]);
-			old_subqueries.pop_back();
-			new_plan = new_plan->children[1].get();
-		} else {
-			new_plan = new_plan->children[0].get();
+			if (merged) {
+				break;
+			}
 		}
-		if (old_subqueries.empty())
-			break;
+#ifdef DEBUG
+		D_ASSERT(merged);
+#endif
+		if (2 == old_subquery_pair.size()) {
+			src_op = std::move(old_subquery_pair[1]);
+			for (auto &current_level_subquery : old_subqueries) {
+				MergeToSubquery(current_level_subquery[0], src_op, merged);
+				if (!merged && current_level_subquery.size() == 2) {
+					MergeToSubquery(current_level_subquery[1], src_op, merged);
+				}
+				if (merged) {
+					break;
+				}
+			}
+		}
+#ifdef DEBUG
+		D_ASSERT(merged);
+#endif
 	}
+	// then merge the old_subquery with plan
+	auto old_subquery_pair = std::move(old_subqueries.front());
+	old_subqueries.pop_front();
+	auto src_op = std::move(old_subquery_pair[0]);
+	merged = false;
+	MergeToSubquery(plan, src_op, merged);
+#ifdef DEBUG
+	D_ASSERT(merged);
+	D_ASSERT(1 == old_subquery_pair.size());
+#endif
 }
 
 void SubqueryPreparer::InsertTableBlocks(unique_ptr<LogicalOperator> &op,
@@ -901,7 +896,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 	// 3. remove projection head of the last_sub_plan
 	last_sub_plan = std::move(last_sub_plan->children[0]);
 
-	// 4. store the last_sub_plan into a map<merge_index, operator>
+	// 4. store the last_sub_plan into a map<new_table_idx, operator>
 	stored_sub_plans[new_table_idx] = std::move(last_sub_plan);
 
 	// 5. merge back the sub plans and revert the indexes
