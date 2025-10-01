@@ -337,7 +337,7 @@ void Optimizer::RunBuiltInPreOptimizers() {
 	});
 
 #if !REORDER_DATACHUNK && ENABLE_REORDER_PLAN
-	if (context.config.enable_dbshaker_split_jop) {
+	if (context.config.enable_dbshaker_query_split) {
 		RunOptimizer(OptimizerType::REORDER_GET, [&]() {
 			ReorderGet reorder_get(context);
 			plan = reorder_get.Optimize(std::move(plan));
@@ -475,7 +475,7 @@ void Optimizer::RunBuiltInPostOptimizers() {
 		break;
 	}
 
-	if (context.config.enable_dbshaker_split_jop) {
+	if (context.config.enable_dbshaker_query_split) {
 		// perform statistics propagation
 		RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
 			StatisticsPropagator propagator(*this, *plan);

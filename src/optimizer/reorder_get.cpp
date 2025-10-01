@@ -280,4 +280,310 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 
 	return std::move(plan);
 }
+
+bool ReorderGet::ReorderTables(subquery_queue &subqueries) {
+	bool reorder = false;
+	// get the first subquery
+	auto plan = std::move(subqueries.front()[0]);
+
+	// fixme: here might have a bug with subqueries.front()[1]
+#ifdef DEBUG
+	if (subqueries.front().size() > 1) {
+		// todo
+		D_ASSERT(false);
+	}
+#endif
+	// we call this after split, where the split points are JOIN or FILTER nodes
+	// so the first node of the plan should be JOIN or FILTER, and we only check JOIN here
+	if (LogicalOperatorType::LOGICAL_FILTER == plan->type) {
+		subqueries.front()[0] = std::move(plan);
+		return reorder;
+	}
+	subqueries.pop_front();
+
+#ifdef DEBUG
+	D_ASSERT(LogicalOperatorType::LOGICAL_COMPARISON_JOIN == plan->type);
+#endif
+
+#if ENABLE_DEBUG_PRINT
+	Printer::Print("before CheckFrontSubQuery");
+	plan->Print();
+#endif
+
+	// collect all tables, and join conditions
+	std::map<std::pair<idx_t, idx_t>, std::vector<JoinCondition>> join_conds;
+	std::map<idx_t, unique_ptr<LogicalOperator>> table_index_blocks;
+	// <table_index, card>
+	std::deque<std::pair<idx_t, idx_t>> table_card_order;
+	int split_index = 0;
+
+	std::function<void(unique_ptr<LogicalOperator> & op)> collect_block;
+	collect_block = [&collect_block, &join_conds, &table_index_blocks, &table_card_order, &split_index,
+	                 this](unique_ptr<LogicalOperator> &op) {
+		if (LogicalOperatorType::LOGICAL_GET == op->type) {
+			auto &get_op = op->Cast<LogicalGet>();
+			idx_t estimated_card = get_op.EstimateCardinality(context);
+			auto temp_table_card = std::make_pair(get_op.table_index, estimated_card);
+			table_index_blocks[get_op.table_index] = std::move(op);
+			// sort the table index with card, from the biggest to the smallest
+			for (size_t idx = 0; idx < table_card_order.size(); idx++) {
+				if (table_card_order[idx].second < temp_table_card.second) {
+					auto temp = table_card_order[idx];
+					table_card_order[idx] = temp_table_card;
+					temp_table_card = temp;
+				}
+			}
+			table_card_order.push_back(temp_table_card);
+#if REORDER_DATACHUNK
+		} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == op->type) {
+			auto &chunk_get_op = op->Cast<LogicalColumnDataGet>();
+			auto temp_table_card = std::make_pair(chunk_get_op.table_index, chunk_get_op.EstimateCardinality(context));
+			table_index_blocks[chunk_get_op.table_index] = std::move(op);
+			// sort the table index with card, from the biggest to the smallest
+			for (size_t idx = 0; idx < table_card_order.size(); idx++) {
+				if (table_card_order[idx].second < temp_table_card.second) {
+					auto temp = table_card_order[idx];
+					table_card_order[idx] = temp_table_card;
+					temp_table_card = temp;
+				}
+			}
+			table_card_order.push_back(temp_table_card);
+#endif
+		} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->type) {
+			auto &join_op = op->Cast<LogicalComparisonJoin>();
+			if (0 != join_op.split_index) {
+#ifdef DEBUG
+				D_ASSERT(0 == split_index);
+#endif
+				split_index = join_op.split_index;
+			}
+			for (auto &cond : join_op.conditions) {
+				auto left_table_index = GetConstTableExpr(cond.left).table_idx;
+				auto right_table_index = GetConstTableExpr(cond.right).table_idx;
+				join_conds[std::make_pair(left_table_index, right_table_index)].emplace_back(std::move(cond));
+			}
+			for (auto &child : op->children) {
+				collect_block(child);
+			}
+		} else {
+			Printer::Print("Doesn't support " + LogicalOperatorToString(op->type) +
+			               " in ReorderGet ReorderTables collect_block yet!");
+			D_ASSERT(false);
+		}
+	};
+	collect_block(plan);
+
+#if ENABLE_DEBUG_PRINT
+	Printer::Print("table_card_order");
+	for (const auto &ele : table_card_order) {
+		Printer::Print("table " + std::to_string(ele.first) + " with card = " + std::to_string(ele.second));
+	}
+#endif
+	table_card_order_bak = table_card_order;
+
+	// we assume the first subquery's CROSS_PRODUCT can be eliminated by the join order optimization,
+	// but this may not be the case if we enforce the order (smaller first) of relations.
+	// we construct the JOIN nodes following the order of relation size in table_card_order
+	std::unordered_set<idx_t> used_relations;
+
+	// collect the smallest relation index
+	idx_t smallest_relation_index = table_card_order.back().first;
+	table_card_order.pop_back();
+
+	// find the related JOIN conditions and construct the JOIN nodes (left-deep tree)
+	unique_ptr<LogicalOperator> current_plan = nullptr;
+	std::function<void(idx_t current_relation_index)> construct_join;
+	construct_join = [&current_plan, &join_conds, &used_relations, &table_index_blocks](idx_t current_relation_index) {
+		if (used_relations.find(current_relation_index) != used_relations.end()) {
+			return;
+		}
+
+		unique_ptr<LogicalOperator> tmp_comp_join = nullptr;
+		for (auto join_cond = join_conds.begin(); join_cond != join_conds.end();) {
+			if (join_cond->first.first == current_relation_index &&
+			    (nullptr == current_plan || used_relations.find(join_cond->first.second) != used_relations.end())) {
+				// insert the right relation to used_relations
+				used_relations.emplace(current_relation_index);
+				used_relations.emplace(join_cond->first.second);
+				if (nullptr == current_plan) {
+					current_plan = std::move(table_index_blocks[join_cond->first.second]);
+				}
+				for (auto &cond : join_cond->second) {
+					// swap the cond
+					auto temp = std::move(cond.left);
+					cond.left = std::move(cond.right);
+					cond.right = std::move(temp);
+					// change the comparison symbol if necessary
+					switch (cond.comparison) {
+					case ExpressionType::COMPARE_EQUAL:
+						break;
+					case ExpressionType::COMPARE_NOTEQUAL:
+						break;
+					case ExpressionType::COMPARE_LESSTHAN:
+						cond.comparison = ExpressionType::COMPARE_GREATERTHAN;
+						break;
+					case ExpressionType::COMPARE_GREATERTHAN:
+						cond.comparison = ExpressionType::COMPARE_LESSTHAN;
+						break;
+					case ExpressionType::COMPARE_LESSTHANOREQUALTO:
+						cond.comparison = ExpressionType::COMPARE_GREATERTHANOREQUALTO;
+						break;
+					case ExpressionType::COMPARE_GREATERTHANOREQUALTO:
+						cond.comparison = ExpressionType::COMPARE_LESSTHANOREQUALTO;
+						break;
+					default:
+						Printer::Print("Doesn't support " + ExpressionTypeToString(cond.comparison) +
+						               " in ReorderGet Opt yet!");
+						D_ASSERT(false);
+					}
+				}
+				// if this relation has been moved, we merge the corresponding condition vector
+				if (nullptr == table_index_blocks[join_cond->first.first]) {
+					auto current_plan_pointer = current_plan.get();
+					while (!current_plan_pointer->children.empty()) {
+#ifdef DEBUG
+						D_ASSERT(LogicalOperatorType::LOGICAL_COMPARISON_JOIN == current_plan_pointer->type);
+#endif
+						auto &current_join = current_plan_pointer->Cast<LogicalComparisonJoin>();
+						auto &right_child = current_plan_pointer->children[1];
+						if (LogicalOperatorType::LOGICAL_GET == right_child->type) {
+							auto table_index = right_child->Cast<LogicalGet>().table_index;
+							if (table_index == join_cond->first.first) {
+								for (auto &current_cond : join_cond->second) {
+									current_join.conditions.emplace_back(std::move(current_cond));
+								}
+								break;
+							}
+						} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == right_child->type) {
+							auto table_index = right_child->Cast<LogicalColumnDataGet>().table_index;
+							if (table_index == join_cond->first.first) {
+								for (auto &current_cond : join_cond->second) {
+									current_join.conditions.emplace_back(std::move(current_cond));
+								}
+								break;
+							}
+						} else if (LogicalOperatorType::LOGICAL_FILTER == right_child->type) {
+							// todo
+							Printer::Print("TODO: right child type is LOGICAL_FILTER");
+							D_ASSERT(false);
+						} else {
+							Printer::Print("Doesn't support " + LogicalOperatorToString(right_child->type) +
+							               " in ReorderGet ReorderTables construct_join yet!");
+							D_ASSERT(false);
+						}
+					}
+					join_cond = join_conds.erase(join_cond);
+					continue;
+				}
+				tmp_comp_join = make_uniq<LogicalComparisonJoin>(JoinType::INNER);
+				// we want to construct a left-deep tree
+				tmp_comp_join->children.push_back(std::move(current_plan));
+				tmp_comp_join->children.push_back(std::move(table_index_blocks[join_cond->first.first]));
+				tmp_comp_join->Cast<LogicalComparisonJoin>().conditions = std::move(join_cond->second);
+				current_plan = std::move(tmp_comp_join);
+				join_cond = join_conds.erase(join_cond);
+			} else if (join_cond->first.second == current_relation_index &&
+			           (nullptr == current_plan ||
+			            used_relations.find(join_cond->first.first) != used_relations.end())) {
+				// insert the left relation to used_relations
+				used_relations.emplace(current_relation_index);
+				used_relations.emplace(join_cond->first.first);
+				if (nullptr == current_plan) {
+					current_plan = std::move(table_index_blocks[join_cond->first.first]);
+				}
+				// if this relation has been moved, we merge the corresponding condition vector
+				if (nullptr == table_index_blocks[join_cond->first.second]) {
+					auto current_plan_pointer = current_plan.get();
+					while (!current_plan_pointer->children.empty()) {
+#ifdef DEBUG
+						D_ASSERT(LogicalOperatorType::LOGICAL_COMPARISON_JOIN == current_plan_pointer->type);
+#endif
+						auto &current_join = current_plan_pointer->Cast<LogicalComparisonJoin>();
+						auto &right_child = current_plan_pointer->children[1];
+						if (LogicalOperatorType::LOGICAL_GET == right_child->type) {
+							auto table_index = right_child->Cast<LogicalGet>().table_index;
+							if (table_index == join_cond->first.second) {
+								for (auto &current_cond : join_cond->second) {
+									current_join.conditions.emplace_back(std::move(current_cond));
+								}
+								break;
+							}
+						} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == right_child->type) {
+							auto table_index = right_child->Cast<LogicalColumnDataGet>().table_index;
+							if (table_index == join_cond->first.second) {
+								for (auto &current_cond : join_cond->second) {
+									current_join.conditions.emplace_back(std::move(current_cond));
+								}
+								break;
+							}
+						} else if (LogicalOperatorType::LOGICAL_FILTER == right_child->type) {
+							// todo
+							Printer::Print("TODO: right child type is LOGICAL_FILTER");
+							D_ASSERT(false);
+						} else {
+							Printer::Print("Doesn't support " + LogicalOperatorToString(right_child->type) +
+							               " in ReorderGet ReorderTables construct_join yet!");
+							D_ASSERT(false);
+						}
+					}
+					join_cond = join_conds.erase(join_cond);
+					continue;
+				}
+				tmp_comp_join = make_uniq<LogicalComparisonJoin>(JoinType::INNER);
+				tmp_comp_join->children.push_back(std::move(current_plan));
+				tmp_comp_join->children.push_back(std::move(table_index_blocks[join_cond->first.second]));
+				tmp_comp_join->Cast<LogicalComparisonJoin>().conditions = std::move(join_cond->second);
+				current_plan = std::move(tmp_comp_join);
+				join_cond = join_conds.erase(join_cond);
+			} else {
+				join_cond++;
+			}
+		}
+		if (used_relations.find(current_relation_index) == used_relations.end()) {
+#ifdef DEBUG
+			D_ASSERT(nullptr != current_plan);
+#endif
+			current_plan = LogicalCrossProduct::Create(std::move(current_plan),
+			                                           std::move(table_index_blocks[current_relation_index]));
+			used_relations.emplace(current_relation_index);
+		}
+	};
+	construct_join(smallest_relation_index);
+
+	while (!table_card_order.empty()) {
+		idx_t current_relation_index = table_card_order.back().first;
+		table_card_order.pop_back();
+		construct_join(current_relation_index);
+	}
+
+#ifdef DEBUG
+	D_ASSERT(join_conds.empty());
+#endif
+
+	// we check and merge the part above the CROSS_PRODUCT node with the second subquery
+	auto current_plan_pointer = current_plan.get();
+	while (!current_plan_pointer->children.empty()) {
+		if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == current_plan_pointer->type) {
+			break;
+		}
+		current_plan_pointer = current_plan_pointer->children[0].get();
+	}
+
+	if (LogicalOperatorType::LOGICAL_CROSS_PRODUCT == current_plan_pointer->type) {
+		// we merge the current_plan into the second subquery
+		current_plan_pointer->merge_index = split_index;
+		// swap the children to make sure it will be split at this point
+		auto temp = std::move(current_plan_pointer->children[0]);
+		current_plan_pointer->children[0] = std::move(current_plan_pointer->children[1]);
+		current_plan_pointer->children[1] = std::move(temp);
+		reorder = true;
+	}
+	// current_plan is the first subquery, and set split_index
+	current_plan->split_index = split_index;
+	std::vector<unique_ptr<LogicalOperator>> first_subquery_vec;
+	first_subquery_vec.emplace_back(std::move(current_plan));
+	subqueries.emplace_front(std::move(first_subquery_vec));
+
+	return reorder;
+}
 } // namespace duckdb

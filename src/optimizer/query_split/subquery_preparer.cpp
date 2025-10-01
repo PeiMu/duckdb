@@ -30,21 +30,9 @@ unique_ptr<LogicalOperator> SubqueryPreparer::GenerateProjHead(const unique_ptr<
 		temp_proj_exprs.insert(last_sibling_exprs.begin(), last_sibling_exprs.end());
 	}
 
-	if (context.config.enable_dbshaker_split_jop) {
-		if (expr_idx_pair_vec.size() > 1) {
-			if (ENABLE_PARALLEL_EXECUTION) {
-				// todo: execute in parallel
-			} else {
-				last_sibling_exprs.insert(expr_idx_pair_vec[1].begin(), expr_idx_pair_vec[1].end());
-			}
-		} else {
-			last_sibling_exprs.clear();
-		}
-	} else {
-		// follow the pipeline breaker role
-		if (expr_idx_pair_vec.size() > 1) {
-			temp_proj_exprs.insert(expr_idx_pair_vec[1].begin(), expr_idx_pair_vec[1].end());
-		}
+	// follow the pipeline breaker role
+	if (expr_idx_pair_vec.size() > 1) {
+		temp_proj_exprs.insert(expr_idx_pair_vec[1].begin(), expr_idx_pair_vec[1].end());
 	}
 
 	// collect all columns with the same table from the upper levels
@@ -266,13 +254,14 @@ void SubqueryPreparer::AddOldTableIndex(const unique_ptr<LogicalOperator> &op) {
 
 void SubqueryPreparer::MergeToSubquery(unique_ptr<LogicalOperator> &dest_op, unique_ptr<LogicalOperator> &src_op,
                                        bool &merged) {
-	if (merged) {
-		return;
-	}
 	if (nullptr == dest_op) {
 		return;
 	}
 	for (int idx = dest_op->children.size() - 1; idx > -1; idx--) {
+		if (merged) {
+			return;
+		}
+
 		auto &child = dest_op->children[idx];
 		// find the insert point and insert the `ColumnDataGet` node to the logical plan
 		if (src_op->split_index == dest_op->merge_index && 0 != src_op->split_index) {
@@ -285,7 +274,11 @@ void SubqueryPreparer::MergeToSubquery(unique_ptr<LogicalOperator> &dest_op, uni
 				child = std::move(src_op);
 				merged = true;
 			}
-			return;
+			if (merged) {
+				return;
+			} else {
+				continue;
+			}
 		}
 		MergeToSubquery(child, src_op, merged);
 	}

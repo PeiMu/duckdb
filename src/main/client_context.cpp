@@ -479,11 +479,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	logical_plan->Verify(*this);
 #endif
 
-#if ENABLE_MEASURE_EXE_TIME || ENABLE_MERGE_BACK_PLAN || ENABLE_DEBUG_PRINT
 	execute_plan = logical_plan->type == LogicalOperatorType::LOGICAL_PROJECTION ||
 	               logical_plan->type == LogicalOperatorType::LOGICAL_ORDER_BY ||
 	               logical_plan->type == LogicalOperatorType::LOGICAL_LIMIT;
-#endif
 
 #if ENABLE_DEBUG_PRINT
 	if (execute_plan) {
@@ -556,7 +554,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			return false;
 		};
 
-		while (config.enable_dbshaker_query_split) {
+		while (config.enable_dbshaker_query_split && execute_plan) {
 #if ALWAYS_SPLIT
 			needToSplit = true;
 #else
@@ -589,30 +587,21 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 					merge_sibling_expr = false;
 				}
-				logical_plan = optimizer.MiddleOptimize(std::move(logical_plan));
-#if ENABLE_DEBUG_PRINT
-				if (execute_plan) {
-					// debug: print subquery
-					Printer::Print("After optimizer.MiddleOptimize");
-					logical_plan->Print();
-				}
-#endif
 				if (config.enable_dbshaker_split_jop) {
 #if REORDER_DATACHUNK && ENABLE_REORDER_PLAN
-					logical_plan = reorder_get.Optimize(std::move(logical_plan));
+					subqueries.front()[0] = reorder_get.Optimize(std::move(subqueries.front()[0]));
 					table_card_order = reorder_get.GetTableCardOrder();
 					if (reorder_get.NeedFilterPushDown()) {
 						FilterPushdown filter_pushdown(optimizer);
-						logical_plan = filter_pushdown.Rewrite(std::move(logical_plan));
+						subqueries.front()[0] = filter_pushdown.Rewrite(std::move(subqueries.front()[0]));
 						reorder_get.Clear();
-#if ENABLE_DEBUG_PRINT
-						// debug: print subquery
-						Printer::Print("After reorder_get+filter_pushdown");
-						logical_plan->Print();
-#endif
 					}
+#if ENABLE_DEBUG_PRINT
+					Printer::Print("After reorder_get+filter_pushdown");
+					subqueries.front()[0]->Print();
 #endif
-					subquery_preparer.CanonicalizeCrossProduct(logical_plan);
+#endif
+					subquery_preparer.CanonicalizeCrossProduct(subqueries.front()[0]);
 
 #if TIME_BREAK_DOWN
 					if (execute_plan)
@@ -622,10 +611,20 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					if (execute_plan) {
 						// debug: print subquery
 						Printer::Print("After subquery_preparer.CanonicalizeCrossProduct");
+						subqueries.front()[0]->Print();
+					}
+#endif
+				} else {
+					logical_plan = optimizer.MiddleOptimize(std::move(logical_plan));
+#if ENABLE_DEBUG_PRINT
+					if (execute_plan) {
+						// debug: print subquery
+						Printer::Print("After optimizer.MiddleOptimize");
 						logical_plan->Print();
 					}
 #endif
 				}
+
 				logical_plan = query_splitter.Clear(std::move(logical_plan));
 				logical_plan = query_splitter.Split(std::move(logical_plan), true);
 				subqueries = query_splitter.GetSubqueries();
@@ -634,6 +633,36 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if TIME_BREAK_DOWN
 				chrono_toc(&timer, "Split time is\n");
 #endif
+			}
+
+			// reorder the get and data chunk nodes (smaller first), and extract out the potential CROSS_PRODUCT
+			if (!config.enable_dbshaker_split_jop) {
+				bool reordered = reorder_get.ReorderTables(subqueries);
+				if (reordered) {
+#ifdef DEBUG
+					D_ASSERT(!subqueries.empty());
+#endif
+					subquery_preparer.MergeSubquery(logical_plan, std::move(subqueries));
+#if ENABLE_DEBUG_PRINT
+					Printer::Print("after MergeSubquery");
+					logical_plan->Print();
+#endif
+					logical_plan = subquery_preparer.UpdateProjHead(std::move(logical_plan), proj_expr);
+#if ENABLE_DEBUG_PRINT
+					Printer::Print("after UpdateProjHead");
+					logical_plan->Print();
+#endif
+#if TIME_BREAK_DOWN
+					chrono_toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
+#endif
+					merge_sibling_expr = false;
+
+					logical_plan = query_splitter.Clear(std::move(logical_plan));
+					logical_plan = query_splitter.Split(std::move(logical_plan), true);
+					subqueries = query_splitter.GetSubqueries();
+					table_expr_queue = query_splitter.GetTableExprQueue();
+					proj_expr = query_splitter.GetProjExpr();
+				}
 			}
 
 			if (subqueries.empty())

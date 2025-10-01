@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "duckdb/optimizer/query_split/split_algorithm.hpp"
 #define REORDER_DATACHUNK true
 
 namespace duckdb {
@@ -31,6 +32,10 @@ public:
 		in_clause = false;
 		need_filter_push_down = false;
 	}
+
+	//! Reorder the get and data chunk nodes of the first subquery (the one to be executed) when it has
+	//!  CROSS_PRODUCT with the best relation order (smaller first)
+	bool ReorderTables(subquery_queue &subqueries);
 
 private:
 	ClientContext &context;
