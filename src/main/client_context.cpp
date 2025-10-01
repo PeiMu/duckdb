@@ -589,19 +589,19 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				}
 				if (config.enable_dbshaker_split_jop) {
 #if REORDER_DATACHUNK && ENABLE_REORDER_PLAN
-					subqueries.front()[0] = reorder_get.Optimize(std::move(subqueries.front()[0]));
+					logical_plan = reorder_get.Optimize(std::move(logical_plan));
 					table_card_order = reorder_get.GetTableCardOrder();
 					if (reorder_get.NeedFilterPushDown()) {
 						FilterPushdown filter_pushdown(optimizer);
-						subqueries.front()[0] = filter_pushdown.Rewrite(std::move(subqueries.front()[0]));
+						logical_plan = filter_pushdown.Rewrite(std::move(logical_plan));
 						reorder_get.Clear();
 					}
 #if ENABLE_DEBUG_PRINT
 					Printer::Print("After reorder_get+filter_pushdown");
-					subqueries.front()[0]->Print();
+					logical_plan->Print();
 #endif
 #endif
-					subquery_preparer.CanonicalizeCrossProduct(subqueries.front()[0]);
+					subquery_preparer.CanonicalizeCrossProduct(logical_plan);
 
 #if TIME_BREAK_DOWN
 					if (execute_plan)
@@ -611,7 +611,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					if (execute_plan) {
 						// debug: print subquery
 						Printer::Print("After subquery_preparer.CanonicalizeCrossProduct");
-						subqueries.front()[0]->Print();
+						logical_plan->Print();
 					}
 #endif
 				} else {

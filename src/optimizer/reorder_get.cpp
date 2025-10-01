@@ -2,6 +2,149 @@
 
 namespace duckdb {
 
+void ReorderGet::CollectBlock(unique_ptr<LogicalOperator> &op,
+                              std::map<std::pair<idx_t, idx_t>, std::vector<JoinCondition>> &join_conds,
+                              std::map<idx_t, unique_ptr<LogicalOperator>> &table_index_blocks,
+                              std::deque<std::pair<idx_t, idx_t>> &table_card_order,
+                              std::stack<unique_ptr<LogicalOperator>> &filter_nodes, int &split_index) {
+	if (LogicalOperatorType::LOGICAL_GET == op->type) {
+		auto &get_op = op->Cast<LogicalGet>();
+		idx_t estimated_card = get_op.EstimateCardinality(context);
+		auto temp_table_card = std::make_pair(get_op.table_index, estimated_card);
+		table_index_blocks[get_op.table_index] = std::move(op);
+		// sort the table index with card, from the biggest to the smallest
+		for (size_t idx = 0; idx < table_card_order.size(); idx++) {
+			if (table_card_order[idx].second < temp_table_card.second) {
+				auto temp = table_card_order[idx];
+				table_card_order[idx] = temp_table_card;
+				temp_table_card = temp;
+			}
+		}
+		table_card_order.push_back(temp_table_card);
+#if REORDER_DATACHUNK
+	} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == op->type) {
+		auto &chunk_get_op = op->Cast<LogicalColumnDataGet>();
+		auto temp_table_card = std::make_pair(chunk_get_op.table_index, chunk_get_op.EstimateCardinality(context));
+		table_index_blocks[chunk_get_op.table_index] = std::move(op);
+		// sort the table index with card, from the biggest to the smallest
+		for (size_t idx = 0; idx < table_card_order.size(); idx++) {
+			if (table_card_order[idx].second < temp_table_card.second) {
+				auto temp = table_card_order[idx];
+				table_card_order[idx] = temp_table_card;
+				temp_table_card = temp;
+			}
+		}
+		table_card_order.push_back(temp_table_card);
+#endif
+	} else if (LogicalOperatorType::LOGICAL_FILTER == op->type) {
+		// PS: we consider the FILTER+[JOIN]+[SCAN+CHUNK_GET] block as a whole
+		std::function<void(unique_ptr<LogicalOperator> & op)> collect_filter;
+		std::pair<idx_t, idx_t> temp_table_card;
+		int table_index = -1;
+		bool more_tables = false;
+		collect_filter = [&collect_filter, &table_index, &temp_table_card, &more_tables, &filter_nodes,
+		                  this](unique_ptr<LogicalOperator> &op) {
+			for (auto &child : op->children) {
+				if (-1 != table_index && !in_clause) {
+					more_tables = true;
+					break;
+				}
+
+				switch (child->type) {
+				case LogicalOperatorType::LOGICAL_GET: {
+					auto &get_op = child->Cast<LogicalGet>();
+					temp_table_card = std::make_pair(get_op.table_index, get_op.EstimateCardinality(context));
+					table_index = get_op.table_index;
+					break;
+				}
+#if REORDER_DATACHUNK
+				case LogicalOperatorType::LOGICAL_CHUNK_GET: {
+					auto &chunk_get_op = child->Cast<LogicalColumnDataGet>();
+					if (in_clause) {
+						// todo: estimate the cardinality of IN clause
+						in_clause = false;
+					} else {
+						temp_table_card =
+						    std::make_pair(chunk_get_op.table_index, chunk_get_op.EstimateCardinality(context));
+						table_index = chunk_get_op.table_index;
+					}
+					break;
+				}
+#endif
+				case LogicalOperatorType::LOGICAL_COMPARISON_JOIN: {
+					auto &join_op = child->Cast<LogicalComparisonJoin>();
+					if (JoinType::MARK == join_op.join_type || JoinType::SEMI == join_op.join_type) {
+						// todo: estimate the cardinality of IN clause, after modifying STATISTICS_PROPAGATION
+						in_clause = true;
+					}
+					collect_filter(child);
+					// if it's an IN clause
+					if (JoinType::MARK == join_op.join_type || JoinType::SEMI == join_op.join_type) {
+						// todo: estimate the cardinality of IN clause, after modifying STATISTICS_PROPAGATION
+					}
+					break;
+				}
+				case LogicalOperatorType::LOGICAL_FILTER:
+				case LogicalOperatorType::LOGICAL_CROSS_PRODUCT:
+					collect_filter(child);
+					break;
+				case LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY:
+					// skip
+					break;
+				default:
+					Printer::Print("Doesn't support " + LogicalOperatorToString(child->type) +
+					               " in ReorderGet Opt yet!");
+					D_ASSERT(false);
+				}
+			}
+		};
+		collect_filter(op);
+		if (-1 == table_index) {
+			// fixme: need to refactor
+			// have operators like aggregate, projection, etc.
+			CollectBlock(op, join_conds, table_index_blocks, table_card_order, filter_nodes, split_index);
+		}
+		if (more_tables) {
+			CollectBlock(op, join_conds, table_index_blocks, table_card_order, filter_nodes, split_index);
+			filter_nodes.push(std::move(op));
+		}
+
+		if (in_clause) {
+			// todo: estimate the cardinality of IN clause
+		}
+		// sort the table index with card, from the biggest to the smallest
+		for (size_t idx = 0; idx < table_card_order.size(); idx++) {
+			if (table_card_order[idx].second < temp_table_card.second) {
+				auto temp = table_card_order[idx];
+				table_card_order[idx] = temp_table_card;
+				temp_table_card = temp;
+			}
+		}
+		table_card_order.push_back(temp_table_card);
+		table_index_blocks[table_index] = std::move(op);
+	} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->type) {
+		auto &join_op = op->Cast<LogicalComparisonJoin>();
+		if (0 != join_op.split_index) {
+#ifdef DEBUG
+			D_ASSERT(0 == split_index);
+#endif
+			split_index = join_op.split_index;
+		}
+		for (auto &cond : join_op.conditions) {
+			auto left_table_index = GetConstTableExpr(cond.left).table_idx;
+			auto right_table_index = GetConstTableExpr(cond.right).table_idx;
+			join_conds[std::make_pair(left_table_index, right_table_index)].emplace_back(std::move(cond));
+		}
+		for (auto &child : op->children) {
+			CollectBlock(child, join_conds, table_index_blocks, table_card_order, filter_nodes, split_index);
+		}
+	} else {
+		for (auto &child : op->children) {
+			CollectBlock(child, join_conds, table_index_blocks, table_card_order, filter_nodes, split_index);
+		}
+	}
+}
+
 unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> plan) {
 	if (LogicalOperatorType::LOGICAL_PROJECTION != plan->type && LogicalOperatorType::LOGICAL_ORDER_BY != plan->type &&
 	    LogicalOperatorType::LOGICAL_LIMIT != plan->type && LogicalOperatorType::LOGICAL_EXPLAIN != plan->type) {
@@ -18,143 +161,9 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 	std::stack<unique_ptr<LogicalOperator>> filter_nodes;
 	// <table_index, card>
 	std::deque<std::pair<idx_t, idx_t>> table_card_order;
-	std::function<void(unique_ptr<LogicalOperator> & op)> collect_block;
-	collect_block = [&collect_block, &join_conds, &table_index_blocks, &table_card_order, &filter_nodes,
-	                 this](unique_ptr<LogicalOperator> &op) {
-		for (auto &child : op->children) {
-			if (LogicalOperatorType::LOGICAL_GET == child->type) {
-				auto &get_op = child->Cast<LogicalGet>();
-				idx_t estimated_card = get_op.EstimateCardinality(context);
-				auto temp_table_card = std::make_pair(get_op.table_index, estimated_card);
-				table_index_blocks[get_op.table_index] = std::move(child);
-				// sort the table index with card, from the biggest to the smallest
-				for (size_t idx = 0; idx < table_card_order.size(); idx++) {
-					if (table_card_order[idx].second < temp_table_card.second) {
-						auto temp = table_card_order[idx];
-						table_card_order[idx] = temp_table_card;
-						temp_table_card = temp;
-					}
-				}
-				table_card_order.push_back(temp_table_card);
-				continue;
-#if REORDER_DATACHUNK
-			} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == child->type) {
-				auto &chunk_get_op = child->Cast<LogicalColumnDataGet>();
-				auto temp_table_card =
-				    std::make_pair(chunk_get_op.table_index, chunk_get_op.EstimateCardinality(context));
-				table_index_blocks[chunk_get_op.table_index] = std::move(child);
-				// sort the table index with card, from the biggest to the smallest
-				for (size_t idx = 0; idx < table_card_order.size(); idx++) {
-					if (table_card_order[idx].second < temp_table_card.second) {
-						auto temp = table_card_order[idx];
-						table_card_order[idx] = temp_table_card;
-						temp_table_card = temp;
-					}
-				}
-				table_card_order.push_back(temp_table_card);
-				continue;
-#endif
-			} else if (LogicalOperatorType::LOGICAL_FILTER == child->type) {
-				// PS: we consider the FILTER+JOIN+[SCAN+CHUNK_GET] block as a whole
-				std::function<void(unique_ptr<LogicalOperator> & op)> collect_filter;
-				std::pair<idx_t, idx_t> temp_table_card;
-				int table_index = -1;
-				bool more_tables = false;
-				collect_filter = [&collect_filter, &table_index, &temp_table_card, &more_tables, &filter_nodes,
-				                  this](unique_ptr<LogicalOperator> &op) {
-					for (auto &child : op->children) {
-						if (-1 != table_index && !in_clause) {
-							more_tables = true;
-							break;
-						}
+	int split_index = 0;
 
-						switch (child->type) {
-						case LogicalOperatorType::LOGICAL_GET: {
-							auto &get_op = child->Cast<LogicalGet>();
-							temp_table_card = std::make_pair(get_op.table_index, get_op.EstimateCardinality(context));
-							table_index = get_op.table_index;
-							break;
-						}
-#if REORDER_DATACHUNK
-						case LogicalOperatorType::LOGICAL_CHUNK_GET: {
-							auto &chunk_get_op = child->Cast<LogicalColumnDataGet>();
-							if (in_clause) {
-								// todo: estimate the cardinality of IN clause
-								in_clause = false;
-							} else {
-								temp_table_card =
-								    std::make_pair(chunk_get_op.table_index, chunk_get_op.EstimateCardinality(context));
-								table_index = chunk_get_op.table_index;
-							}
-							break;
-						}
-#endif
-						case LogicalOperatorType::LOGICAL_COMPARISON_JOIN: {
-							auto &join_op = child->Cast<LogicalComparisonJoin>();
-							if (JoinType::MARK == join_op.join_type || JoinType::SEMI == join_op.join_type) {
-								// todo: estimate the cardinality of IN clause, after modifying STATISTICS_PROPAGATION
-								in_clause = true;
-							}
-							collect_filter(child);
-							// if it's an IN clause
-							if (JoinType::MARK == join_op.join_type || JoinType::SEMI == join_op.join_type) {
-								// todo: estimate the cardinality of IN clause, after modifying STATISTICS_PROPAGATION
-							}
-							break;
-						}
-						case LogicalOperatorType::LOGICAL_FILTER:
-						case LogicalOperatorType::LOGICAL_CROSS_PRODUCT:
-							collect_filter(child);
-							break;
-						case LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY:
-							// skip
-							break;
-						default:
-							Printer::Print("Doesn't support " + LogicalOperatorToString(child->type) +
-							               " in ReorderGet Opt yet!");
-							D_ASSERT(false);
-						}
-					}
-				};
-				collect_filter(child);
-				if (-1 == table_index) {
-					// fixme: need to refactor
-					// have operators like aggregate, projection, etc.
-					collect_block(child);
-					continue;
-				}
-				if (more_tables) {
-					collect_block(child);
-					filter_nodes.push(std::move(child));
-					continue;
-				}
-
-				if (in_clause) {
-					// todo: estimate the cardinality of IN clause
-				}
-				// sort the table index with card, from the biggest to the smallest
-				for (size_t idx = 0; idx < table_card_order.size(); idx++) {
-					if (table_card_order[idx].second < temp_table_card.second) {
-						auto temp = table_card_order[idx];
-						table_card_order[idx] = temp_table_card;
-						temp_table_card = temp;
-					}
-				}
-				table_card_order.push_back(temp_table_card);
-				table_index_blocks[table_index] = std::move(child);
-				continue;
-			} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->type) {
-				auto &join_op = child->Cast<LogicalComparisonJoin>();
-				for (auto &cond : join_op.conditions) {
-					auto left_table_index = GetConstTableExpr(cond.left).table_idx;
-					auto right_table_index = GetConstTableExpr(cond.right).table_idx;
-					join_conds[std::make_pair(left_table_index, right_table_index)].emplace_back(std::move(cond));
-				}
-			}
-			collect_block(child);
-		}
-	};
-	collect_block(plan);
+	CollectBlock(plan->children[0], join_conds, table_index_blocks, table_card_order, filter_nodes, split_index);
 
 #if ENABLE_DEBUG_PRINT
 	Printer::Print("table_card_order");
@@ -313,65 +322,12 @@ bool ReorderGet::ReorderTables(subquery_queue &subqueries) {
 	// collect all tables, and join conditions
 	std::map<std::pair<idx_t, idx_t>, std::vector<JoinCondition>> join_conds;
 	std::map<idx_t, unique_ptr<LogicalOperator>> table_index_blocks;
+	std::stack<unique_ptr<LogicalOperator>> filter_nodes;
 	// <table_index, card>
 	std::deque<std::pair<idx_t, idx_t>> table_card_order;
 	int split_index = 0;
 
-	std::function<void(unique_ptr<LogicalOperator> & op)> collect_block;
-	collect_block = [&collect_block, &join_conds, &table_index_blocks, &table_card_order, &split_index,
-	                 this](unique_ptr<LogicalOperator> &op) {
-		if (LogicalOperatorType::LOGICAL_GET == op->type) {
-			auto &get_op = op->Cast<LogicalGet>();
-			idx_t estimated_card = get_op.EstimateCardinality(context);
-			auto temp_table_card = std::make_pair(get_op.table_index, estimated_card);
-			table_index_blocks[get_op.table_index] = std::move(op);
-			// sort the table index with card, from the biggest to the smallest
-			for (size_t idx = 0; idx < table_card_order.size(); idx++) {
-				if (table_card_order[idx].second < temp_table_card.second) {
-					auto temp = table_card_order[idx];
-					table_card_order[idx] = temp_table_card;
-					temp_table_card = temp;
-				}
-			}
-			table_card_order.push_back(temp_table_card);
-#if REORDER_DATACHUNK
-		} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == op->type) {
-			auto &chunk_get_op = op->Cast<LogicalColumnDataGet>();
-			auto temp_table_card = std::make_pair(chunk_get_op.table_index, chunk_get_op.EstimateCardinality(context));
-			table_index_blocks[chunk_get_op.table_index] = std::move(op);
-			// sort the table index with card, from the biggest to the smallest
-			for (size_t idx = 0; idx < table_card_order.size(); idx++) {
-				if (table_card_order[idx].second < temp_table_card.second) {
-					auto temp = table_card_order[idx];
-					table_card_order[idx] = temp_table_card;
-					temp_table_card = temp;
-				}
-			}
-			table_card_order.push_back(temp_table_card);
-#endif
-		} else if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == op->type) {
-			auto &join_op = op->Cast<LogicalComparisonJoin>();
-			if (0 != join_op.split_index) {
-#ifdef DEBUG
-				D_ASSERT(0 == split_index);
-#endif
-				split_index = join_op.split_index;
-			}
-			for (auto &cond : join_op.conditions) {
-				auto left_table_index = GetConstTableExpr(cond.left).table_idx;
-				auto right_table_index = GetConstTableExpr(cond.right).table_idx;
-				join_conds[std::make_pair(left_table_index, right_table_index)].emplace_back(std::move(cond));
-			}
-			for (auto &child : op->children) {
-				collect_block(child);
-			}
-		} else {
-			Printer::Print("Doesn't support " + LogicalOperatorToString(op->type) +
-			               " in ReorderGet ReorderTables collect_block yet!");
-			D_ASSERT(false);
-		}
-	};
-	collect_block(plan);
+	CollectBlock(plan, join_conds, table_index_blocks, table_card_order, filter_nodes, split_index);
 
 #if ENABLE_DEBUG_PRINT
 	Printer::Print("table_card_order");

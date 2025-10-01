@@ -38,6 +38,12 @@ public:
 	bool ReorderTables(subquery_queue &subqueries);
 
 private:
+	void CollectBlock(unique_ptr<LogicalOperator> &op,
+	                  std::map<std::pair<idx_t, idx_t>, std::vector<JoinCondition>> &join_conds,
+	                  std::map<idx_t, unique_ptr<LogicalOperator>> &table_index_blocks,
+	                  std::deque<std::pair<idx_t, idx_t>> &table_card_order,
+	                  std::stack<unique_ptr<LogicalOperator>> &filter_nodes, int &split_index);
+
 	ClientContext &context;
 
 	bool in_clause = false;
