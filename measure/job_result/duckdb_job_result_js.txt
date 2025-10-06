@@ -249,12 +249,7 @@ execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19a.sql
 │ Angeline, Moriah │ Blue Harvest │
 └──────────────────┴──────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19b.sql
-┌─────────────────┬───────────────┐
-│ voicing_actress │ kung_fu_panda │
-│     varchar     │    varchar    │
-├─────────────────┼───────────────┤
-│ Jolie, Angelina │ Kung Fu Panda │
-└─────────────────┴───────────────┘
+TODO: right child type is LOGICAL_FILTER
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19c.sql
 ┌────────────────────┬───────────────────────────┐
 │  voicing_actress   │   jap_engl_voiced_movie   │
@@ -340,26 +335,11 @@ execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21c.sql
 │ Churchill Films │ followed by │ Batman Beyond     │
 └─────────────────┴─────────────┴───────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22a.sql
-┌─────────────────┬─────────┬───────────────────────┐
-│  movie_company  │ rating  │ western_violent_movie │
-│     varchar     │ varchar │        varchar        │
-├─────────────────┼─────────┼───────────────────────┤
-│ 01 Distribution │ 2.1     │ 12 Rounds             │
-└─────────────────┴─────────┴───────────────────────┘
+TODO: right child type is LOGICAL_FILTER
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22b.sql
-┌──────────────────────────────────────┬─────────┬───────────────────────┐
-│            movie_company             │ rating  │ western_violent_movie │
-│               varchar                │ varchar │        varchar        │
-├──────────────────────────────────────┼─────────┼───────────────────────┤
-│ Boll Kino Beteiligungs GmbH & Co. KG │ 3.0     │ A Small Act           │
-└──────────────────────────────────────┴─────────┴───────────────────────┘
+TODO: right child type is LOGICAL_FILTER
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22c.sql
-┌─────────────────┬─────────┬───────────────────────┐
-│  movie_company  │ rating  │ western_violent_movie │
-│     varchar     │ varchar │        varchar        │
-├─────────────────┼─────────┼───────────────────────┤
-│ 01 Distribution │ 1.9     │ (#1.1)                │
-└─────────────────┴─────────┴───────────────────────┘
+TODO: right child type is LOGICAL_FILTER
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22d.sql
 ┌─────────────────┬─────────┬───────────────────────┐
 │  movie_company  │ rating  │ western_violent_movie │
@@ -501,12 +481,7 @@ execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29b.sql
 │ Queen       │ Andrews, Julie  │ Shrek 2          │
 └─────────────┴─────────────────┴──────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29c.sql
-┌─────────────┬─────────────────┬──────────────────┐
-│ voiced_char │ voicing_actress │ voiced_animation │
-│   varchar   │     varchar     │     varchar      │
-├─────────────┼─────────────────┼──────────────────┤
-│ Lola        │ Andrews, Julie  │ Hoodwinked!      │
-└─────────────┴─────────────────┴──────────────────┘
+TODO: right child type is LOGICAL_FILTER
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2a.sql
 ┌─────────────┐
 │ movie_title │
@@ -550,7 +525,12 @@ execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30b.sql
 │ Horror       │ 194782      │ Shannon, Damian │ Freddy vs. Jason    │
 └──────────────┴─────────────┴─────────────────┴─────────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30c.sql
-TODO: right child type is LOGICAL_FILTER
+┌──────────────┬─────────────┬──────────────────┬────────────────────────┐
+│ movie_budget │ movie_votes │      writer      │ complete_violent_movie │
+│   varchar    │   varchar   │     varchar      │        varchar         │
+├──────────────┼─────────────┼──────────────────┼────────────────────────┤
+│ Action       │ 100356      │ Abernathy, Lewis │ $                      │
+└──────────────┴─────────────┴──────────────────┴────────────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31a.sql
 ┌──────────────┬─────────────┬────────────┬────────────────────────┐
 │ movie_budget │ movie_votes │   writer   │ violent_liongate_movie │
@@ -566,12 +546,7 @@ execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31b.sql
 │ Horror       │ 129755      │ Bousman, Darren Lynn │ Saw                    │
 └──────────────┴─────────────┴──────────────────────┴────────────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31c.sql
-┌──────────────┬─────────────┬───────────────┬────────────────────────┐
-│ movie_budget │ movie_votes │    writer     │ violent_liongate_movie │
-│   varchar    │   varchar   │    varchar    │        varchar         │
-├──────────────┼─────────────┼───────────────┼────────────────────────┤
-│ Action       │ 1008        │ Abraham, Brad │ 11:14                  │
-└──────────────┴─────────────┴───────────────┴────────────────────────┘
+TODO: right child type is LOGICAL_FILTER
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/32a.sql
 ┌───────────┬─────────────┬──────────────┐
 │ link_type │ first_movie │ second_movie │
