@@ -102,26 +102,11 @@ execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13d.sql
 │ "O" Films         │ 1.0     │ #54 Meets #47 │
 └───────────────────┴─────────┴───────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14a.sql
-┌─────────┬─────────────────────┐
-│ rating  │ northern_dark_movie │
-│ varchar │       varchar       │
-├─────────┼─────────────────────┤
-│ 1.0     │ $lowdown            │
-└─────────┴─────────────────────┘
+TODO: right child type is LOGICAL_FILTER
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14b.sql
-┌─────────┬─────────────────────────┐
-│ rating  │ western_dark_production │
-│ varchar │         varchar         │
-├─────────┼─────────────────────────┤
-│ 6.4     │ Of Dolls and Murder     │
-└─────────┴─────────────────────────┘
+TODO: right child type is LOGICAL_FILTER
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14c.sql
-┌─────────┬────────────────────────────────┐
-│ rating  │ north_european_dark_production │
-│ varchar │            varchar             │
-├─────────┼────────────────────────────────┤
-│ 1.0     │ $lowdown                       │
-└─────────┴────────────────────────────────┘
+TODO: right child type is LOGICAL_FILTER
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/15a.sql
 ┌─────────────────┬──────────────────────────────────────┐
 │  release_date   │            internet_movie            │
@@ -307,12 +292,43 @@ execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/20b.sql
 │ Iron Man                      │
 └───────────────────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/20c.sql
-┌─────────────────┬─────────────────────────────┐
-│   cast_member   │ complete_dynamic_hero_movie │
-│     varchar     │           varchar           │
-├─────────────────┼─────────────────────────────┤
-│ Abell, Alistair │ ...And Then I...            │
-└─────────────────┴─────────────────────────────┘
+INTERNAL Error: Attempted to access index 4 within vector of size 4
+
+Stack Trace:
+
+duckdb(+0x5784b6) [0x55ffb317e4b6]
+duckdb(+0x578574) [0x55ffb317e574]
+duckdb(+0x57b361) [0x55ffb3181361]
+duckdb(+0x3a345c) [0x55ffb2fa945c]
+duckdb(+0x1fdc4c) [0x55ffb2e03c4c]
+duckdb(+0xaf2e53) [0x55ffb36f8e53]
+duckdb(+0xaf2dcc) [0x55ffb36f8dcc]
+duckdb(+0xb11f55) [0x55ffb3717f55]
+duckdb(+0xb11d87) [0x55ffb3717d87]
+duckdb(+0xb11f11) [0x55ffb3717f11]
+duckdb(+0x9f6614) [0x55ffb35fc614]
+duckdb(+0x801d1a) [0x55ffb3407d1a]
+duckdb(+0x80350a) [0x55ffb340950a]
+duckdb(+0x803a1c) [0x55ffb3409a1c]
+duckdb(+0x7dca7c) [0x55ffb33e2a7c]
+duckdb(+0x7dce2d) [0x55ffb33e2e2d]
+duckdb(+0x7fc395) [0x55ffb3402395]
+duckdb(+0x7fc43b) [0x55ffb340243b]
+duckdb(+0x3cad35) [0x55ffb2fd0d35]
+duckdb(+0x3b89b0) [0x55ffb2fbe9b0]
+duckdb(+0x3b963a) [0x55ffb2fbf63a]
+duckdb(+0x3b9c91) [0x55ffb2fbfc91]
+duckdb(+0x3b9e00) [0x55ffb2fbfe00]
+duckdb(+0x3b9eb6) [0x55ffb2fbfeb6]
+duckdb(+0x3b7511) [0x55ffb2fbd511]
+duckdb(+0x3b9bcb) [0x55ffb2fbfbcb]
+duckdb(+0x39e1a6) [0x55ffb2fa41a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f086122624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f0861226305]
+duckdb(+0x3a18d1) [0x55ffb2fa78d1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21a.sql
 ┌─────────────────────────┬─────────────┬─────────────────────────────────────┐
 │      company_name       │  link_type  │          western_follow_up          │
@@ -335,11 +351,26 @@ execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21c.sql
 │ Churchill Films │ followed by │ Batman Beyond     │
 └─────────────────┴─────────────┴───────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22a.sql
-TODO: right child type is LOGICAL_FILTER
+┌─────────────────┬─────────┬───────────────────────┐
+│  movie_company  │ rating  │ western_violent_movie │
+│     varchar     │ varchar │        varchar        │
+├─────────────────┼─────────┼───────────────────────┤
+│ 01 Distribution │ 2.1     │ 12 Rounds             │
+└─────────────────┴─────────┴───────────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22b.sql
-TODO: right child type is LOGICAL_FILTER
+┌──────────────────────────────────────┬─────────┬───────────────────────┐
+│            movie_company             │ rating  │ western_violent_movie │
+│               varchar                │ varchar │        varchar        │
+├──────────────────────────────────────┼─────────┼───────────────────────┤
+│ Boll Kino Beteiligungs GmbH & Co. KG │ 3.0     │ A Small Act           │
+└──────────────────────────────────────┴─────────┴───────────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22c.sql
-TODO: right child type is LOGICAL_FILTER
+┌─────────────────┬─────────┬───────────────────────┐
+│  movie_company  │ rating  │ western_violent_movie │
+│     varchar     │ varchar │        varchar        │
+├─────────────────┼─────────┼───────────────────────┤
+│ 01 Distribution │ 1.9     │ (#1.1)                │
+└─────────────────┴─────────┴───────────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22d.sql
 ┌─────────────────┬─────────┬───────────────────────┐
 │  movie_company  │ rating  │ western_violent_movie │
@@ -369,19 +400,79 @@ execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/23c.sql
 │ movie      │ Dirt Merchant              │
 └────────────┴────────────────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/24a.sql
-┌───────────────────┬──────────────────────┬─────────────────────────────┐
-│ voiced_char_name  │ voicing_actress_name │ voiced_action_movie_jap_eng │
-│      varchar      │       varchar        │           varchar           │
-├───────────────────┼──────────────────────┼─────────────────────────────┤
-│ Additional Voices │ Baker, Andrea        │ Baiohazâdo 6                │
-└───────────────────┴──────────────────────┴─────────────────────────────┘
+INTERNAL Error: Attempted to access index 2 within vector of size 2
+
+Stack Trace:
+
+duckdb(+0x5784b6) [0x5562110054b6]
+duckdb(+0x578574) [0x556211005574]
+duckdb(+0x57b361) [0x556211008361]
+duckdb(+0x3a345c) [0x556210e3045c]
+duckdb(+0x1fdc4c) [0x556210c8ac4c]
+duckdb(+0xaf2e53) [0x55621157fe53]
+duckdb(+0xb11f55) [0x55621159ef55]
+duckdb(+0xb11d87) [0x55621159ed87]
+duckdb(+0xb11f11) [0x55621159ef11]
+duckdb(+0x9f6614) [0x556211483614]
+duckdb(+0x801d1a) [0x55621128ed1a]
+duckdb(+0x80350a) [0x55621129050a]
+duckdb(+0x803a1c) [0x556211290a1c]
+duckdb(+0x7dca7c) [0x556211269a7c]
+duckdb(+0x7dce2d) [0x556211269e2d]
+duckdb(+0x7fc395) [0x556211289395]
+duckdb(+0x7fc43b) [0x55621128943b]
+duckdb(+0x3cad35) [0x556210e57d35]
+duckdb(+0x3b89b0) [0x556210e459b0]
+duckdb(+0x3b963a) [0x556210e4663a]
+duckdb(+0x3b9c91) [0x556210e46c91]
+duckdb(+0x3b9e00) [0x556210e46e00]
+duckdb(+0x3b9eb6) [0x556210e46eb6]
+duckdb(+0x3b7511) [0x556210e44511]
+duckdb(+0x3b9bcb) [0x556210e46bcb]
+duckdb(+0x39e1a6) [0x556210e2b1a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f84a624624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f84a6246305]
+duckdb(+0x3a18d1) [0x556210e2e8d1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/24b.sql
-┌──────────────────┬──────────────────────┬─────────────────┐
-│ voiced_char_name │ voicing_actress_name │  kung_fu_panda  │
-│     varchar      │       varchar        │     varchar     │
-├──────────────────┼──────────────────────┼─────────────────┤
-│ Tigress          │ Jolie, Angelina      │ Kung Fu Panda 2 │
-└──────────────────┴──────────────────────┴─────────────────┘
+INTERNAL Error: Attempted to access index 2 within vector of size 2
+
+Stack Trace:
+
+duckdb(+0x5784b6) [0x55da63a334b6]
+duckdb(+0x578574) [0x55da63a33574]
+duckdb(+0x57b361) [0x55da63a36361]
+duckdb(+0x3a345c) [0x55da6385e45c]
+duckdb(+0x1fdc4c) [0x55da636b8c4c]
+duckdb(+0xaf2e53) [0x55da63fade53]
+duckdb(+0xb11f55) [0x55da63fccf55]
+duckdb(+0xb11d87) [0x55da63fccd87]
+duckdb(+0xb11f11) [0x55da63fccf11]
+duckdb(+0x9f6614) [0x55da63eb1614]
+duckdb(+0x801d1a) [0x55da63cbcd1a]
+duckdb(+0x80350a) [0x55da63cbe50a]
+duckdb(+0x803a1c) [0x55da63cbea1c]
+duckdb(+0x7dca7c) [0x55da63c97a7c]
+duckdb(+0x7dce2d) [0x55da63c97e2d]
+duckdb(+0x7fc395) [0x55da63cb7395]
+duckdb(+0x7fc43b) [0x55da63cb743b]
+duckdb(+0x3cad35) [0x55da63885d35]
+duckdb(+0x3b89b0) [0x55da638739b0]
+duckdb(+0x3b963a) [0x55da6387463a]
+duckdb(+0x3b9c91) [0x55da63874c91]
+duckdb(+0x3b9e00) [0x55da63874e00]
+duckdb(+0x3b9eb6) [0x55da63874eb6]
+duckdb(+0x3b7511) [0x55da63872511]
+duckdb(+0x3b9bcb) [0x55da63874bcb]
+duckdb(+0x39e1a6) [0x55da638591a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f1d1384624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f1d13846305]
+duckdb(+0x3a18d1) [0x55da6385c8d1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/25a.sql
 ┌──────────────┬─────────────┬─────────────────┬──────────────────────────────────┐
 │ movie_budget │ movie_votes │   male_writer   │       violent_movie_title        │
@@ -404,26 +495,122 @@ execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/25c.sql
 │ Action       │ 10          │ Aakeson, Kim Fupz │ $                   │
 └──────────────┴─────────────┴───────────────────┴─────────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26a.sql
-┌────────────────┬─────────┬─────────────────┬─────────────────────┐
-│ character_name │ rating  │  playing_actor  │ complete_hero_movie │
-│    varchar     │ varchar │     varchar     │       varchar       │
-├────────────────┼─────────┼─────────────────┼─────────────────────┤
-│ 'Agua' Man     │ 7.1     │ Acereda, Hermie │ 3:10 to Yuma        │
-└────────────────┴─────────┴─────────────────┴─────────────────────┘
+INTERNAL Error: Attempted to access index 3 within vector of size 3
+
+Stack Trace:
+
+duckdb(+0x5784b6) [0x55e38ac504b6]
+duckdb(+0x578574) [0x55e38ac50574]
+duckdb(+0x57b361) [0x55e38ac53361]
+duckdb(+0x3a345c) [0x55e38aa7b45c]
+duckdb(+0x1fe08a) [0x55e38a8d608a]
+duckdb(+0xaf332a) [0x55e38b1cb32a]
+duckdb(+0xb07397) [0x55e38b1df397]
+duckdb(+0xa15946) [0x55e38b0ed946]
+duckdb(+0xa276b5) [0x55e38b0ff6b5]
+duckdb(+0xa14e5d) [0x55e38b0ece5d]
+duckdb(+0xa197a0) [0x55e38b0f17a0]
+duckdb(+0xa19a84) [0x55e38b0f1a84]
+duckdb(+0x802335) [0x55e38aeda335]
+duckdb(+0x80350a) [0x55e38aedb50a]
+duckdb(+0x803a1c) [0x55e38aedba1c]
+duckdb(+0x7dca7c) [0x55e38aeb4a7c]
+duckdb(+0x7dce2d) [0x55e38aeb4e2d]
+duckdb(+0x7fc395) [0x55e38aed4395]
+duckdb(+0x7fc43b) [0x55e38aed443b]
+duckdb(+0x3cad35) [0x55e38aaa2d35]
+duckdb(+0x3b89b0) [0x55e38aa909b0]
+duckdb(+0x3b963a) [0x55e38aa9163a]
+duckdb(+0x3b9c91) [0x55e38aa91c91]
+duckdb(+0x3b9e00) [0x55e38aa91e00]
+duckdb(+0x3b9eb6) [0x55e38aa91eb6]
+duckdb(+0x3b7511) [0x55e38aa8f511]
+duckdb(+0x3b9bcb) [0x55e38aa91bcb]
+duckdb(+0x39e1a6) [0x55e38aa761a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f88dbf6724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f88dbf67305]
+duckdb(+0x3a18d1) [0x55e38aa798d1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26b.sql
-┌────────────────┬─────────┬─────────────────────┐
-│ character_name │ rating  │ complete_hero_movie │
-│    varchar     │ varchar │       varchar       │
-├────────────────┼─────────┼─────────────────────┤
-│ Bank Manager   │ 8.2     │ Inception           │
-└────────────────┴─────────┴─────────────────────┘
+INTERNAL Error: Attempted to access index 3 within vector of size 3
+
+Stack Trace:
+
+duckdb(+0x5784b6) [0x55b2d82974b6]
+duckdb(+0x578574) [0x55b2d8297574]
+duckdb(+0x57b361) [0x55b2d829a361]
+duckdb(+0x3a345c) [0x55b2d80c245c]
+duckdb(+0x1fe08a) [0x55b2d7f1d08a]
+duckdb(+0xaf332a) [0x55b2d881232a]
+duckdb(+0xb07397) [0x55b2d8826397]
+duckdb(+0xa15946) [0x55b2d8734946]
+duckdb(+0xa276b5) [0x55b2d87466b5]
+duckdb(+0xa14e5d) [0x55b2d8733e5d]
+duckdb(+0xa197a0) [0x55b2d87387a0]
+duckdb(+0xa19a84) [0x55b2d8738a84]
+duckdb(+0x802335) [0x55b2d8521335]
+duckdb(+0x80350a) [0x55b2d852250a]
+duckdb(+0x803a1c) [0x55b2d8522a1c]
+duckdb(+0x7dca7c) [0x55b2d84fba7c]
+duckdb(+0x7dce2d) [0x55b2d84fbe2d]
+duckdb(+0x7fc395) [0x55b2d851b395]
+duckdb(+0x7fc43b) [0x55b2d851b43b]
+duckdb(+0x3cad35) [0x55b2d80e9d35]
+duckdb(+0x3b89b0) [0x55b2d80d79b0]
+duckdb(+0x3b963a) [0x55b2d80d863a]
+duckdb(+0x3b9c91) [0x55b2d80d8c91]
+duckdb(+0x3b9e00) [0x55b2d80d8e00]
+duckdb(+0x3b9eb6) [0x55b2d80d8eb6]
+duckdb(+0x3b7511) [0x55b2d80d6511]
+duckdb(+0x3b9bcb) [0x55b2d80d8bcb]
+duckdb(+0x39e1a6) [0x55b2d80bd1a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f0a9b24624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f0a9b246305]
+duckdb(+0x3a18d1) [0x55b2d80c08d1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26c.sql
-┌────────────────┬─────────┬─────────────────────┐
-│ character_name │ rating  │ complete_hero_movie │
-│    varchar     │ varchar │       varchar       │
-├────────────────┼─────────┼─────────────────────┤
-│ 'Agua' Man     │ 1.9     │ 12 Rounds           │
-└────────────────┴─────────┴─────────────────────┘
+INTERNAL Error: Attempted to access index 3 within vector of size 3
+
+Stack Trace:
+
+duckdb(+0x5784b6) [0x56310bb7b4b6]
+duckdb(+0x578574) [0x56310bb7b574]
+duckdb(+0x57b361) [0x56310bb7e361]
+duckdb(+0x3a345c) [0x56310b9a645c]
+duckdb(+0x1fe08a) [0x56310b80108a]
+duckdb(+0xaf332a) [0x56310c0f632a]
+duckdb(+0xb07397) [0x56310c10a397]
+duckdb(+0xa15946) [0x56310c018946]
+duckdb(+0xa276b5) [0x56310c02a6b5]
+duckdb(+0xa14e5d) [0x56310c017e5d]
+duckdb(+0xa197a0) [0x56310c01c7a0]
+duckdb(+0xa19a84) [0x56310c01ca84]
+duckdb(+0x802335) [0x56310be05335]
+duckdb(+0x80350a) [0x56310be0650a]
+duckdb(+0x803a1c) [0x56310be06a1c]
+duckdb(+0x7dca7c) [0x56310bddfa7c]
+duckdb(+0x7dce2d) [0x56310bddfe2d]
+duckdb(+0x7fc395) [0x56310bdff395]
+duckdb(+0x7fc43b) [0x56310bdff43b]
+duckdb(+0x3cad35) [0x56310b9cdd35]
+duckdb(+0x3b89b0) [0x56310b9bb9b0]
+duckdb(+0x3b963a) [0x56310b9bc63a]
+duckdb(+0x3b9c91) [0x56310b9bcc91]
+duckdb(+0x3b9e00) [0x56310b9bce00]
+duckdb(+0x3b9eb6) [0x56310b9bceb6]
+duckdb(+0x3b7511) [0x56310b9ba511]
+duckdb(+0x3b9bcb) [0x56310b9bcbcb]
+duckdb(+0x39e1a6) [0x56310b9a11a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f209da4624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f209da46305]
+duckdb(+0x3a18d1) [0x56310b9a48d1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/27a.sql
 ┌─────────────────────────┬─────────────┬─────────────────────────┐
 │    producing_company    │  link_type  │ complete_western_sequel │
@@ -467,12 +654,7 @@ execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/28c.sql
 │ 01 Distribuzione │ 1.9     │ (#1.1)                   │
 └──────────────────┴─────────┴──────────────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29a.sql
-┌─────────────┬─────────────────┬──────────────────┐
-│ voiced_char │ voicing_actress │ voiced_animation │
-│   varchar   │     varchar     │     varchar      │
-├─────────────┼─────────────────┼──────────────────┤
-│ Queen       │ Andrews, Julie  │ Shrek 2          │
-└─────────────┴─────────────────┴──────────────────┘
+TODO: right child type is LOGICAL_FILTER
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29b.sql
 ┌─────────────┬─────────────────┬──────────────────┐
 │ voiced_char │ voicing_actress │ voiced_animation │
@@ -481,49 +663,246 @@ execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29b.sql
 │ Queen       │ Andrews, Julie  │ Shrek 2          │
 └─────────────┴─────────────────┴──────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29c.sql
-TODO: right child type is LOGICAL_FILTER
+┌─────────────┬─────────────────┬──────────────────┐
+│ voiced_char │ voicing_actress │ voiced_animation │
+│   varchar   │     varchar     │     varchar      │
+├─────────────┼─────────────────┼──────────────────┤
+│ Lola        │ Andrews, Julie  │ Hoodwinked!      │
+└─────────────┴─────────────────┴──────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2a.sql
-┌─────────────┐
-│ movie_title │
-│   varchar   │
-├─────────────┤
-│ 'Doc'       │
-└─────────────┘
+INTERNAL Error: Attempted to access index 2 within vector of size 2
+
+Stack Trace:
+
+duckdb(+0x5784b6) [0x5606cf8a44b6]
+duckdb(+0x578574) [0x5606cf8a4574]
+duckdb(+0x57b361) [0x5606cf8a7361]
+duckdb(+0x3a345c) [0x5606cf6cf45c]
+duckdb(+0x1fe08a) [0x5606cf52a08a]
+duckdb(+0xaf332a) [0x5606cfe1f32a]
+duckdb(+0xb07397) [0x5606cfe33397]
+duckdb(+0xa15946) [0x5606cfd41946]
+duckdb(+0xa276b5) [0x5606cfd536b5]
+duckdb(+0xa14e5d) [0x5606cfd40e5d]
+duckdb(+0xa197a0) [0x5606cfd457a0]
+duckdb(+0xa19a84) [0x5606cfd45a84]
+duckdb(+0x802335) [0x5606cfb2e335]
+duckdb(+0x80350a) [0x5606cfb2f50a]
+duckdb(+0x803a1c) [0x5606cfb2fa1c]
+duckdb(+0x7dca7c) [0x5606cfb08a7c]
+duckdb(+0x7dce2d) [0x5606cfb08e2d]
+duckdb(+0x7fc395) [0x5606cfb28395]
+duckdb(+0x7fc43b) [0x5606cfb2843b]
+duckdb(+0x3cad35) [0x5606cf6f6d35]
+duckdb(+0x3b89b0) [0x5606cf6e49b0]
+duckdb(+0x3b963a) [0x5606cf6e563a]
+duckdb(+0x3b9c91) [0x5606cf6e5c91]
+duckdb(+0x3b9e00) [0x5606cf6e5e00]
+duckdb(+0x3b9eb6) [0x5606cf6e5eb6]
+duckdb(+0x3b7511) [0x5606cf6e3511]
+duckdb(+0x3b9bcb) [0x5606cf6e5bcb]
+duckdb(+0x39e1a6) [0x5606cf6ca1a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fcc2d04624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fcc2d046305]
+duckdb(+0x3a18d1) [0x5606cf6cd8d1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2b.sql
-┌─────────────┐
-│ movie_title │
-│   varchar   │
-├─────────────┤
-│ 'Doc'       │
-└─────────────┘
+INTERNAL Error: Attempted to access index 2 within vector of size 2
+
+Stack Trace:
+
+duckdb(+0x5784b6) [0x55947352c4b6]
+duckdb(+0x578574) [0x55947352c574]
+duckdb(+0x57b361) [0x55947352f361]
+duckdb(+0x3a345c) [0x55947335745c]
+duckdb(+0x1fe08a) [0x5594731b208a]
+duckdb(+0xaf332a) [0x559473aa732a]
+duckdb(+0xb07397) [0x559473abb397]
+duckdb(+0xa15946) [0x5594739c9946]
+duckdb(+0xa276b5) [0x5594739db6b5]
+duckdb(+0xa14e5d) [0x5594739c8e5d]
+duckdb(+0xa197a0) [0x5594739cd7a0]
+duckdb(+0xa19a84) [0x5594739cda84]
+duckdb(+0x802335) [0x5594737b6335]
+duckdb(+0x80350a) [0x5594737b750a]
+duckdb(+0x803a1c) [0x5594737b7a1c]
+duckdb(+0x7dca7c) [0x559473790a7c]
+duckdb(+0x7dce2d) [0x559473790e2d]
+duckdb(+0x7fc395) [0x5594737b0395]
+duckdb(+0x7fc43b) [0x5594737b043b]
+duckdb(+0x3cad35) [0x55947337ed35]
+duckdb(+0x3b89b0) [0x55947336c9b0]
+duckdb(+0x3b963a) [0x55947336d63a]
+duckdb(+0x3b9c91) [0x55947336dc91]
+duckdb(+0x3b9e00) [0x55947336de00]
+duckdb(+0x3b9eb6) [0x55947336deb6]
+duckdb(+0x3b7511) [0x55947336b511]
+duckdb(+0x3b9bcb) [0x55947336dbcb]
+duckdb(+0x39e1a6) [0x5594733521a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fd3f696724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fd3f6967305]
+duckdb(+0x3a18d1) [0x5594733558d1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2c.sql
-┌─────────────┐
-│ movie_title │
-│   varchar   │
-├─────────────┤
-│ NULL        │
-└─────────────┘
+INTERNAL Error: Attempted to access index 2 within vector of size 2
+
+Stack Trace:
+
+duckdb(+0x5784b6) [0x5557a47ad4b6]
+duckdb(+0x578574) [0x5557a47ad574]
+duckdb(+0x57b361) [0x5557a47b0361]
+duckdb(+0x3a345c) [0x5557a45d845c]
+duckdb(+0x1fe08a) [0x5557a443308a]
+duckdb(+0xaf332a) [0x5557a4d2832a]
+duckdb(+0xb07397) [0x5557a4d3c397]
+duckdb(+0xa15946) [0x5557a4c4a946]
+duckdb(+0xa276b5) [0x5557a4c5c6b5]
+duckdb(+0xa14e5d) [0x5557a4c49e5d]
+duckdb(+0xa197a0) [0x5557a4c4e7a0]
+duckdb(+0xa19a84) [0x5557a4c4ea84]
+duckdb(+0x802335) [0x5557a4a37335]
+duckdb(+0x80350a) [0x5557a4a3850a]
+duckdb(+0x803a1c) [0x5557a4a38a1c]
+duckdb(+0x7dca7c) [0x5557a4a11a7c]
+duckdb(+0x7dce2d) [0x5557a4a11e2d]
+duckdb(+0x7fc395) [0x5557a4a31395]
+duckdb(+0x7fc43b) [0x5557a4a3143b]
+duckdb(+0x3cad35) [0x5557a45ffd35]
+duckdb(+0x3b89b0) [0x5557a45ed9b0]
+duckdb(+0x3b963a) [0x5557a45ee63a]
+duckdb(+0x3b9c91) [0x5557a45eec91]
+duckdb(+0x3b9e00) [0x5557a45eee00]
+duckdb(+0x3b9eb6) [0x5557a45eeeb6]
+duckdb(+0x3b7511) [0x5557a45ec511]
+duckdb(+0x3b9bcb) [0x5557a45eebcb]
+duckdb(+0x39e1a6) [0x5557a45d31a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f695944624a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f6959446305]
+duckdb(+0x3a18d1) [0x5557a45d68d1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2d.sql
-┌─────────────┐
-│ movie_title │
-│   varchar   │
-├─────────────┤
-│ & Teller    │
-└─────────────┘
+INTERNAL Error: Attempted to access index 2 within vector of size 2
+
+Stack Trace:
+
+duckdb(+0x5784b6) [0x564f517974b6]
+duckdb(+0x578574) [0x564f51797574]
+duckdb(+0x57b361) [0x564f5179a361]
+duckdb(+0x3a345c) [0x564f515c245c]
+duckdb(+0x1fe08a) [0x564f5141d08a]
+duckdb(+0xaf332a) [0x564f51d1232a]
+duckdb(+0xb07397) [0x564f51d26397]
+duckdb(+0xa15946) [0x564f51c34946]
+duckdb(+0xa276b5) [0x564f51c466b5]
+duckdb(+0xa14e5d) [0x564f51c33e5d]
+duckdb(+0xa197a0) [0x564f51c387a0]
+duckdb(+0xa19a84) [0x564f51c38a84]
+duckdb(+0x802335) [0x564f51a21335]
+duckdb(+0x80350a) [0x564f51a2250a]
+duckdb(+0x803a1c) [0x564f51a22a1c]
+duckdb(+0x7dca7c) [0x564f519fba7c]
+duckdb(+0x7dce2d) [0x564f519fbe2d]
+duckdb(+0x7fc395) [0x564f51a1b395]
+duckdb(+0x7fc43b) [0x564f51a1b43b]
+duckdb(+0x3cad35) [0x564f515e9d35]
+duckdb(+0x3b89b0) [0x564f515d79b0]
+duckdb(+0x3b963a) [0x564f515d863a]
+duckdb(+0x3b9c91) [0x564f515d8c91]
+duckdb(+0x3b9e00) [0x564f515d8e00]
+duckdb(+0x3b9eb6) [0x564f515d8eb6]
+duckdb(+0x3b7511) [0x564f515d6511]
+duckdb(+0x3b9bcb) [0x564f515d8bcb]
+duckdb(+0x39e1a6) [0x564f515bd1a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f033896724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f0338967305]
+duckdb(+0x3a18d1) [0x564f515c08d1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30a.sql
-┌──────────────┬─────────────┬──────────────┬────────────────────────┐
-│ movie_budget │ movie_votes │    writer    │ complete_violent_movie │
-│   varchar    │   varchar   │   varchar    │        varchar         │
-├──────────────┼─────────────┼──────────────┼────────────────────────┤
-│ Horror       │ 100356      │ Abrams, J.J. │ 16 Blocks              │
-└──────────────┴─────────────┴──────────────┴────────────────────────┘
+INTERNAL Error: Attempted to access index 4 within vector of size 4
+
+Stack Trace:
+
+duckdb(+0x5784b6) [0x555edadd34b6]
+duckdb(+0x578574) [0x555edadd3574]
+duckdb(+0x57b361) [0x555edadd6361]
+duckdb(+0x3a345c) [0x555edabfe45c]
+duckdb(+0x1fe08a) [0x555edaa5908a]
+duckdb(+0xaf332a) [0x555edb34e32a]
+duckdb(+0xb07397) [0x555edb362397]
+duckdb(+0xa15946) [0x555edb270946]
+duckdb(+0xa276b5) [0x555edb2826b5]
+duckdb(+0xa14e5d) [0x555edb26fe5d]
+duckdb(+0xa197a0) [0x555edb2747a0]
+duckdb(+0xa19a84) [0x555edb274a84]
+duckdb(+0x802335) [0x555edb05d335]
+duckdb(+0x80350a) [0x555edb05e50a]
+duckdb(+0x803a1c) [0x555edb05ea1c]
+duckdb(+0x7dca7c) [0x555edb037a7c]
+duckdb(+0x7dce2d) [0x555edb037e2d]
+duckdb(+0x7fc395) [0x555edb057395]
+duckdb(+0x7fc43b) [0x555edb05743b]
+duckdb(+0x3cad35) [0x555edac25d35]
+duckdb(+0x3b89b0) [0x555edac139b0]
+duckdb(+0x3b963a) [0x555edac1463a]
+duckdb(+0x3b9c91) [0x555edac14c91]
+duckdb(+0x3b9e00) [0x555edac14e00]
+duckdb(+0x3b9eb6) [0x555edac14eb6]
+duckdb(+0x3b7511) [0x555edac12511]
+duckdb(+0x3b9bcb) [0x555edac14bcb]
+duckdb(+0x39e1a6) [0x555edabf91a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7f381b96724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7f381b967305]
+duckdb(+0x3a18d1) [0x555edabfc8d1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30b.sql
-┌──────────────┬─────────────┬─────────────────┬─────────────────────┐
-│ movie_budget │ movie_votes │     writer      │ complete_gore_movie │
-│   varchar    │   varchar   │     varchar     │       varchar       │
-├──────────────┼─────────────┼─────────────────┼─────────────────────┤
-│ Horror       │ 194782      │ Shannon, Damian │ Freddy vs. Jason    │
-└──────────────┴─────────────┴─────────────────┴─────────────────────┘
+INTERNAL Error: Attempted to access index 4 within vector of size 4
+
+Stack Trace:
+
+duckdb(+0x5784b6) [0x56390a9ef4b6]
+duckdb(+0x578574) [0x56390a9ef574]
+duckdb(+0x57b361) [0x56390a9f2361]
+duckdb(+0x3a345c) [0x56390a81a45c]
+duckdb(+0x1fe08a) [0x56390a67508a]
+duckdb(+0xaf332a) [0x56390af6a32a]
+duckdb(+0xb07397) [0x56390af7e397]
+duckdb(+0xa15946) [0x56390ae8c946]
+duckdb(+0xa276b5) [0x56390ae9e6b5]
+duckdb(+0xa14e5d) [0x56390ae8be5d]
+duckdb(+0xa197a0) [0x56390ae907a0]
+duckdb(+0xa19a84) [0x56390ae90a84]
+duckdb(+0x802335) [0x56390ac79335]
+duckdb(+0x80350a) [0x56390ac7a50a]
+duckdb(+0x803a1c) [0x56390ac7aa1c]
+duckdb(+0x7dca7c) [0x56390ac53a7c]
+duckdb(+0x7dce2d) [0x56390ac53e2d]
+duckdb(+0x7fc395) [0x56390ac73395]
+duckdb(+0x7fc43b) [0x56390ac7343b]
+duckdb(+0x3cad35) [0x56390a841d35]
+duckdb(+0x3b89b0) [0x56390a82f9b0]
+duckdb(+0x3b963a) [0x56390a83063a]
+duckdb(+0x3b9c91) [0x56390a830c91]
+duckdb(+0x3b9e00) [0x56390a830e00]
+duckdb(+0x3b9eb6) [0x56390a830eb6]
+duckdb(+0x3b7511) [0x56390a82e511]
+duckdb(+0x3b9bcb) [0x56390a830bcb]
+duckdb(+0x39e1a6) [0x56390a8151a6]
+/lib/x86_64-linux-gnu/libc.so.6(+0x2724a) [0x7fcf05f4724a]
+/lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0x85) [0x7fcf05f47305]
+duckdb(+0x3a18d1) [0x56390a8188d1]
+
+This error signals an assertion failure within DuckDB. This usually occurs due to unexpected conditions or errors in the program's logic.
+For more information, see https://duckdb.org/docs/stable/dev/internal_errors
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30c.sql
 ┌──────────────┬─────────────┬──────────────────┬────────────────────────┐
 │ movie_budget │ movie_votes │      writer      │ complete_violent_movie │
@@ -546,7 +925,12 @@ execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31b.sql
 │ Horror       │ 129755      │ Bousman, Darren Lynn │ Saw                    │
 └──────────────┴─────────────┴──────────────────────┴────────────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31c.sql
-TODO: right child type is LOGICAL_FILTER
+┌──────────────┬─────────────┬───────────────┬────────────────────────┐
+│ movie_budget │ movie_votes │    writer     │ violent_liongate_movie │
+│   varchar    │   varchar   │    varchar    │        varchar         │
+├──────────────┼─────────────┼───────────────┼────────────────────────┤
+│ Action       │ 1008        │ Abraham, Brad │ 11:14                  │
+└──────────────┴─────────────┴───────────────┴────────────────────────┘
 execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/32a.sql
 ┌───────────┬─────────────┬──────────────┐
 │ link_type │ first_movie │ second_movie │
