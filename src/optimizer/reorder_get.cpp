@@ -422,6 +422,7 @@ bool ReorderGet::ReorderTables(subquery_queue &subqueries) {
 							// todo
 							Printer::Print("TODO: right child type is LOGICAL_FILTER");
 							D_ASSERT(false);
+							exit(-1);
 						} else {
 							Printer::Print("Doesn't support " + LogicalOperatorToString(right_child->type) +
 							               " in ReorderGet ReorderTables construct_join yet!");
@@ -476,6 +477,7 @@ bool ReorderGet::ReorderTables(subquery_queue &subqueries) {
 							// todo
 							Printer::Print("TODO: right child type is LOGICAL_FILTER");
 							D_ASSERT(false);
+							exit(-1);
 						} else {
 							Printer::Print("Doesn't support " + LogicalOperatorToString(right_child->type) +
 							               " in ReorderGet ReorderTables construct_join yet!");

@@ -12,7 +12,7 @@ void LogicalOperatorVisitor::VisitOperator(LogicalOperator &op) {
 }
 
 void LogicalOperatorVisitor::VisitOperatorChildren(LogicalOperator &op) {
-	if (op.HasProjectionMap()) {
+	if (op.HasProjectionMap() && !HasNullptr(op)) {
 		VisitOperatorWithProjectionMapChildren(op);
 	} else {
 		for (auto &child : op.children) {

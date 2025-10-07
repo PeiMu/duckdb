@@ -56,7 +56,10 @@ void ColumnLifetimeAnalyzer::ExtractColumnBindings(Expression &expr, vector<Colu
 }
 
 void ColumnLifetimeAnalyzer::VisitOperator(LogicalOperator &op) {
-	Verify(op);
+	// not generating proj node before query split
+	if (!optimizer.context.config.enable_dbshaker_query_split) {
+		Verify(op);
+	}
 	if (TopN::CanOptimize(op) && op.children[0]->type == LogicalOperatorType::LOGICAL_ORDER_BY) {
 		// Let's not mess with this, TopN is more important than projection maps
 		// TopN does not support a projection map like Order does

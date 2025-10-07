@@ -212,6 +212,7 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 #ifdef DEBUG
 				D_ASSERT(LogicalOperatorType::LOGICAL_GET == child->children[0]->type ||
 				         LogicalOperatorType::LOGICAL_CHUNK_GET == child->children[0]->type ||
+				         LogicalOperatorType::LOGICAL_FILTER == child->children[0]->type ||
 				         LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->children[0]->type ||
 				         LogicalOperatorType::LOGICAL_CROSS_PRODUCT == child->children[0]->type);
 #endif

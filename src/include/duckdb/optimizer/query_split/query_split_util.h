@@ -80,5 +80,6 @@ void VisitExprs(const unique_ptr<Expression> &expr, T &&func);
 
 //! Check if the plan has nullptr node
 bool HasNullptr(const unique_ptr<LogicalOperator> &plan);
+bool HasNullptr(LogicalOperator &plan);
 
 } // namespace duckdb

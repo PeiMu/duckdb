@@ -273,6 +273,12 @@ void SubqueryPreparer::MergeToSubquery(unique_ptr<LogicalOperator> &dest_op, uni
 				dest_op->merge_index = 0;
 				child = std::move(src_op);
 				merged = true;
+
+				// fixme: now we clear the right_projection_map, but there might be a better way. Need to confirm
+				if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == dest_op->type) {
+					auto &join_op = dest_op->Cast<LogicalComparisonJoin>();
+					join_op.right_projection_map.clear();
+				}
 			}
 			if (merged) {
 				return;
@@ -845,7 +851,7 @@ unique_ptr<LogicalOperator> SubqueryPreparer::MergeBack(unique_ptr<LogicalOperat
 		switch (op->type) {
 		case LogicalOperatorType::LOGICAL_COMPARISON_JOIN: {
 			auto &join = op->Cast<LogicalComparisonJoin>();
-			join.left_projection_map.clear();
+			// join.left_projection_map.clear();
 			join.right_projection_map.clear();
 			break;
 		}

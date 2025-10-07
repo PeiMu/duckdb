@@ -305,4 +305,15 @@ bool HasNullptr(const unique_ptr<LogicalOperator> &plan) {
 	}
 	return has_nullptr;
 }
+
+bool HasNullptr(LogicalOperator &plan) {
+	bool has_nullptr = false;
+	for (size_t idx = 0; idx < plan.children.size(); idx++) {
+		if (nullptr == plan.children[idx])
+			return true;
+		else
+			has_nullptr |= HasNullptr(plan.children[idx]);
+	}
+	return has_nullptr;
+}
 } // namespace duckdb

@@ -85,10 +85,13 @@ unique_ptr<NodeStatistics> StatisticsPropagator::PropagateStatistics(LogicalOper
 		result = PropagateChildren(node, node_ptr);
 	}
 
-	if (!optimizer.OptimizerDisabled(OptimizerType::COMPRESSED_MATERIALIZATION)) {
-		// compress data based on statistics for materializing operators
-		CompressedMaterialization compressed_materialization(optimizer, *root, statistics_map);
-		compressed_materialization.Compress(node_ptr);
+	if (!context.config.enable_dbshaker_query_split) {
+		// not generating proj node before query split
+		if (!optimizer.OptimizerDisabled(OptimizerType::COMPRESSED_MATERIALIZATION)) {
+			// compress data based on statistics for materializing operators
+			CompressedMaterialization compressed_materialization(optimizer, *root, statistics_map);
+			compressed_materialization.Compress(node_ptr);
+		}
 	}
 
 	return result;
