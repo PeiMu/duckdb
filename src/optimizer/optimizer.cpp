@@ -625,11 +625,13 @@ void Optimizer::RunBuiltInPostOptimizers() {
 		});
 	}
 
+#if !ENABLE_MERGE_BACK_PLAN
 	// creates projection maps so unused columns are projected out early
 	RunOptimizer(OptimizerType::COLUMN_LIFETIME, [&]() {
 		ColumnLifetimeAnalyzer column_lifetime(*this, *plan, true);
 		column_lifetime.VisitOperator(*plan);
 	});
+#endif
 
 	// new
 	// Once we know the column lifetime, we have more information regarding
@@ -693,11 +695,13 @@ void Optimizer::RunBuiltInPostOptimizers() {
 		common_aggregate.VisitOperator(*plan);
 	});
 
+#if !ENABLE_MERGE_BACK_PLAN
 	// creates projection maps so unused columns are projected out early
 	RunOptimizer(OptimizerType::COLUMN_LIFETIME, [&]() {
 		ColumnLifetimeAnalyzer column_lifetime(*this, *plan, true);
 		column_lifetime.VisitOperator(*plan);
 	});
+#endif
 
 	// apply simple expression heuristics to get an initial reordering
 	RunOptimizer(OptimizerType::REORDER_FILTER, [&]() {
