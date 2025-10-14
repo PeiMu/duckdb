@@ -638,31 +638,29 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			// reorder the get and data chunk nodes (smaller first), and extract out the potential CROSS_PRODUCT
 			if (!config.enable_dbshaker_split_jop) {
 				bool reordered = reorder_get.ReorderTables(subqueries);
-				if (reordered) {
 #ifdef DEBUG
-					D_ASSERT(!subqueries.empty());
+				D_ASSERT(!subqueries.empty());
 #endif
-					subquery_preparer.MergeSubquery(logical_plan, std::move(subqueries));
+				subquery_preparer.MergeSubquery(logical_plan, std::move(subqueries));
 #if ENABLE_DEBUG_PRINT
-					Printer::Print("after MergeSubquery");
-					logical_plan->Print();
+				Printer::Print("after MergeSubquery");
+				logical_plan->Print();
 #endif
-					logical_plan = subquery_preparer.UpdateProjHead(std::move(logical_plan), proj_expr);
+				logical_plan = subquery_preparer.UpdateProjHead(std::move(logical_plan), proj_expr);
 #if ENABLE_DEBUG_PRINT
-					Printer::Print("after UpdateProjHead");
-					logical_plan->Print();
+				Printer::Print("after UpdateProjHead");
+				logical_plan->Print();
 #endif
 #if TIME_BREAK_DOWN
-					chrono_toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
+				chrono_toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
 #endif
-					merge_sibling_expr = false;
+				merge_sibling_expr = false;
 
-					logical_plan = query_splitter.Clear(std::move(logical_plan));
-					logical_plan = query_splitter.Split(std::move(logical_plan), true);
-					subqueries = query_splitter.GetSubqueries();
-					table_expr_queue = query_splitter.GetTableExprQueue();
-					proj_expr = query_splitter.GetProjExpr();
-				}
+				logical_plan = query_splitter.Clear(std::move(logical_plan));
+				logical_plan = query_splitter.Split(std::move(logical_plan), true);
+				subqueries = query_splitter.GetSubqueries();
+				table_expr_queue = query_splitter.GetTableExprQueue();
+				proj_expr = query_splitter.GetProjExpr();
 			}
 
 			if (subqueries.empty())

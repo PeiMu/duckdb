@@ -82,4 +82,8 @@ void VisitExprs(const unique_ptr<Expression> &expr, T &&func);
 bool HasNullptr(const unique_ptr<LogicalOperator> &plan);
 bool HasNullptr(LogicalOperator &plan);
 
+//! Check if there's inner join under filter
+bool InnerJoinUnderFilter(const unique_ptr<LogicalOperator> &plan);
+bool InnerJoinUnderFilter(LogicalOperator &plan);
+
 } // namespace duckdb

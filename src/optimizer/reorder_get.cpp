@@ -155,6 +155,11 @@ unique_ptr<LogicalOperator> ReorderGet::Optimize(unique_ptr<LogicalOperator> pla
 	plan->Print();
 #endif
 
+	// we then check if there's inner join under filter, which we don't support it yet
+	if (InnerJoinUnderFilter(plan)) {
+		return std::move(plan);
+	}
+
 	// collect all tables
 	std::map<std::pair<idx_t, idx_t>, std::vector<JoinCondition>> join_conds;
 	std::map<idx_t, unique_ptr<LogicalOperator>> table_index_blocks;
@@ -308,6 +313,13 @@ bool ReorderGet::ReorderTables(subquery_queue &subqueries) {
 		subqueries.front()[0] = std::move(plan);
 		return reorder;
 	}
+
+	// we then check if there's inner join under filter, which we don't support it yet
+	if (InnerJoinUnderFilter(plan)) {
+		subqueries.front()[0] = std::move(plan);
+		return reorder;
+	}
+
 	subqueries.pop_front();
 
 #ifdef DEBUG

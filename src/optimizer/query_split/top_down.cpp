@@ -10,164 +10,156 @@ unique_ptr<LogicalOperator> TopDownSplit::Split(unique_ptr<LogicalOperator> plan
 	AddTargetTables(*plan);
 	VisitOperator(*plan);
 
-//	// fixme: a very hack verification: if tables under this JOIN have the same name, we don't split here
-//	//  note: here should still be a left-deep plan
-//	std::string prev_table_name, current_table_name;
-//	while (!subqueries.empty()) {
-//		auto current_subquery_vec = std::move(subqueries.front());
-//		auto &current_subquery = current_subquery_vec[0];
-//		auto child_ptr = current_subquery.get();
-//		bool has_same_table = false;
-//		while (0 != child_ptr->children.size() && !child_ptr->reverted) {
-//#ifdef DEBUG
-//			D_ASSERT(nullptr != child_ptr->children[0]);
-//#endif
-//			if (1 == child_ptr->children.size()) {
-//				child_ptr = child_ptr->children[0].get();
-//				continue;
-//			}
-//
-//			// check if the children tables have the same name
-//			if (nullptr != child_ptr->children[0] && LogicalOperatorType::LOGICAL_GET == child_ptr->children[0]->type) {
-//				auto &get_op = child_ptr->children[0]->Cast<LogicalGet>();
-//				auto param_str = get_op.ParamsToString();
-//				current_table_name = param_str["Table"];
-//				if (prev_table_name == current_table_name) {
-//					has_same_table = true;
-//					break;
-//				} else {
-//					prev_table_name = current_table_name;
-//				}
-//			}
-//			if (nullptr != child_ptr->children[1] && LogicalOperatorType::LOGICAL_GET == child_ptr->children[1]->type) {
-//				auto &get_op = child_ptr->children[1]->Cast<LogicalGet>();
-//				auto param_str = get_op.ParamsToString();
-//				current_table_name = param_str["Table"];
-//				if (prev_table_name == current_table_name) {
-//					has_same_table = true;
-//					break;
-//				} else {
-//					prev_table_name = current_table_name;
-//				}
-//			}
-//			child_ptr = child_ptr->children[0].get();
-//		}
-//
-//		if (has_same_table) {
-//			// we first check if it has a sibling subquery, we swap the subqueries.front and table_expr_queue.front()
-//			if (2 == current_subquery_vec.size()) {
-//				auto temp_subquery = std::move(current_subquery_vec[0]);
-//				current_subquery_vec[0] = std::move(current_subquery_vec[1]);
-//				current_subquery_vec[1] = std::move(temp_subquery);
-//				subqueries.front() = std::move(current_subquery_vec);
-//
-//#ifdef DEBUG
-//				D_ASSERT(2 == table_expr_queue.front().size());
-//#endif
-//				auto temp_table_expr = std::move(table_expr_queue.front()[0]);
-//				table_expr_queue.front()[0] = std::move(table_expr_queue.front()[1]);
-//				table_expr_queue.front()[1] = std::move(temp_table_expr);
-//				break;
-//			} else {
-//				// then merge the subquery and table_expr_queue
-//				subqueries.pop_front();
-//				current_subquery->split_index = 0;
-//				current_subquery->reverted = true;
-//				auto &new_current_subquery_vec = subqueries.front();
-//				// todo: find the correct split point to merge
-//				//  first visit the branch of new_current_subquery_vec[0]->children[0],
-//				//  then check new_current_subquery_vec[0]->children[1]
-//				auto merge_subquery = [](unique_ptr<LogicalOperator> &merged_subquery,
-//				                         LogicalOperator *subquery_pointer) {
-//					while (LogicalOperatorType::LOGICAL_GET != subquery_pointer->type &&
-//					       LogicalOperatorType::LOGICAL_CHUNK_GET != subquery_pointer->type &&
-//					       !subquery_pointer->children.empty()) {
-//#ifdef DEBUG
-//						D_ASSERT(nullptr != merged_subquery);
-//#endif
-//						if (nullptr == subquery_pointer->children[0]) {
-//							subquery_pointer->children[0] = std::move(merged_subquery);
-//							return true;
-//						} else if (subquery_pointer->children.size() > 1 && nullptr == subquery_pointer->children[1]) {
-//							subquery_pointer->children[1] = std::move(merged_subquery);
-//							return true;
-//						} else {
-//							subquery_pointer = subquery_pointer->children[0].get();
-//						}
-//					}
-//					return false;
-//				};
-//				bool merged = merge_subquery(current_subquery, new_current_subquery_vec[0].get());
-//				bool merge_to_sibling = false;
-//				if (!merged) {
-//#ifdef DEBUG
-//					D_ASSERT(new_current_subquery_vec.size() == 2);
-//#endif
-//					merged = merge_subquery(current_subquery, new_current_subquery_vec[1].get());
-//					merge_to_sibling = true;
-//				}
-//#ifdef DEBUG
-//				D_ASSERT(merged);
-//#endif
-//
-//				query_split_index--;
-//				if (current_subquery_vec.size() == 2) {
-//					merged = merge_subquery(current_subquery_vec[1], new_current_subquery_vec[0].get());
-//#ifdef DEBUG
-//					D_ASSERT(merged);
-//#endif
-//				}
-//
-//				auto current_table_expr_queue_vec = std::move(table_expr_queue.front());
-//				table_expr_queue.pop_front();
-//				// keep the same order, the `table_expr_queue` should be aligned with `subqueries`
-//				// todo: check if there's any bug
-//				if (subqueries.front().size() == 2) {
-//					if (table_expr_queue.front().size() == 1) {
-//						table_expr_queue.front().emplace_back(current_table_expr_queue_vec[0]);
-//					} else {
-//						if (merge_to_sibling) {
-//							// store the current_table_expr to the sibling's table_expr_queue
-//							for (auto &item : current_table_expr_queue_vec[0]) {
-//								table_expr_queue.front()[1].emplace(item);
-//							}
-//							if (current_table_expr_queue_vec.size() == 2)
-//								for (auto &item : current_table_expr_queue_vec[1]) {
-//									table_expr_queue.front()[0].emplace(item);
-//								}
-//						} else {
-//							// keep the current_table_expr to the left ones
-//							for (auto &item : current_table_expr_queue_vec[0]) {
-//								table_expr_queue.front()[0].emplace(item);
-//							}
-//							if (current_table_expr_queue_vec.size() == 2)
-//								for (auto &item : current_table_expr_queue_vec[1]) {
-//									table_expr_queue.front()[1].emplace(item);
-//								}
-//						}
-//					}
-//#ifdef DEBUG
-//					D_ASSERT(table_expr_queue.front().size() == 2);
-//#endif
-//				} else {
-//#ifdef DEBUG
-//					D_ASSERT(table_expr_queue.front().size() == 1);
-//#endif
-//					for (auto &item : current_table_expr_queue_vec[0]) {
-//						table_expr_queue.front()[0].emplace(item);
-//					}
-//					if (2 == current_table_expr_queue_vec.size()) {
-//						for (auto &item : current_table_expr_queue_vec[1]) {
-//							table_expr_queue.front()[0].emplace(item);
-//						}
-//					}
-//				}
-//			}
-//		} else {
-//			subqueries.front() = std::move(current_subquery_vec);
-//			break;
-//		}
-//	}
+	//	// fixme: a very hack verification: if tables under this JOIN have the same name, we don't split here
+	//	//  note: here should still be a left-deep plan
+	//	std::string prev_table_name, current_table_name;
+	//	while (!subqueries.empty()) {
+	//		auto current_subquery_vec = std::move(subqueries.front());
+	//		auto &current_subquery = current_subquery_vec[0];
+	//		auto child_ptr = current_subquery.get();
+	//		bool has_same_table = false;
+	//		while (0 != child_ptr->children.size() && !child_ptr->reverted) {
+	// #ifdef DEBUG
+	//			D_ASSERT(nullptr != child_ptr->children[0]);
+	// #endif
+	//			if (1 == child_ptr->children.size()) {
+	//				child_ptr = child_ptr->children[0].get();
+	//				continue;
+	//			}
+	//
+	//			// check if the children tables have the same name
+	//			if (nullptr != child_ptr->children[0] && LogicalOperatorType::LOGICAL_GET ==
+	// child_ptr->children[0]->type) { 				auto &get_op = child_ptr->children[0]->Cast<LogicalGet>();
+	// auto param_str = get_op.ParamsToString(); 				current_table_name = param_str["Table"]; if
+	// (prev_table_name == current_table_name) { 					has_same_table = true; 					break;
+	// } else { 					prev_table_name =
+	// current_table_name;
+	//				}
+	//			}
+	//			if (nullptr != child_ptr->children[1] && LogicalOperatorType::LOGICAL_GET ==
+	// child_ptr->children[1]->type) { 				auto &get_op = child_ptr->children[1]->Cast<LogicalGet>();
+	// auto param_str = get_op.ParamsToString(); 				current_table_name = param_str["Table"]; if
+	// (prev_table_name == current_table_name) { 					has_same_table = true; 					break;
+	// } else { 					prev_table_name =
+	// current_table_name;
+	//				}
+	//			}
+	//			child_ptr = child_ptr->children[0].get();
+	//		}
+	//
+	//		if (has_same_table) {
+	//			// we first check if it has a sibling subquery, we swap the subqueries.front and
+	// table_expr_queue.front() 			if (2 == current_subquery_vec.size()) { 				auto temp_subquery =
+	// std::move(current_subquery_vec[0]); 				current_subquery_vec[0] = std::move(current_subquery_vec[1]);
+	//				current_subquery_vec[1] = std::move(temp_subquery);
+	//				subqueries.front() = std::move(current_subquery_vec);
+	//
+	// #ifdef DEBUG
+	//				D_ASSERT(2 == table_expr_queue.front().size());
+	// #endif
+	//				auto temp_table_expr = std::move(table_expr_queue.front()[0]);
+	//				table_expr_queue.front()[0] = std::move(table_expr_queue.front()[1]);
+	//				table_expr_queue.front()[1] = std::move(temp_table_expr);
+	//				break;
+	//			} else {
+	//				// then merge the subquery and table_expr_queue
+	//				subqueries.pop_front();
+	//				current_subquery->split_index = 0;
+	//				current_subquery->reverted = true;
+	//				auto &new_current_subquery_vec = subqueries.front();
+	//				// todo: find the correct split point to merge
+	//				//  first visit the branch of new_current_subquery_vec[0]->children[0],
+	//				//  then check new_current_subquery_vec[0]->children[1]
+	//				auto merge_subquery = [](unique_ptr<LogicalOperator> &merged_subquery,
+	//				                         LogicalOperator *subquery_pointer) {
+	//					while (LogicalOperatorType::LOGICAL_GET != subquery_pointer->type &&
+	//					       LogicalOperatorType::LOGICAL_CHUNK_GET != subquery_pointer->type &&
+	//					       !subquery_pointer->children.empty()) {
+	// #ifdef DEBUG
+	//						D_ASSERT(nullptr != merged_subquery);
+	// #endif
+	//						if (nullptr == subquery_pointer->children[0]) {
+	//							subquery_pointer->children[0] = std::move(merged_subquery);
+	//							return true;
+	//						} else if (subquery_pointer->children.size() > 1 && nullptr ==
+	// subquery_pointer->children[1]) { 							subquery_pointer->children[1] =
+	// std::move(merged_subquery); 							return true; 						} else {
+	//							subquery_pointer = subquery_pointer->children[0].get();
+	//						}
+	//					}
+	//					return false;
+	//				};
+	//				bool merged = merge_subquery(current_subquery, new_current_subquery_vec[0].get());
+	//				bool merge_to_sibling = false;
+	//				if (!merged) {
+	// #ifdef DEBUG
+	//					D_ASSERT(new_current_subquery_vec.size() == 2);
+	// #endif
+	//					merged = merge_subquery(current_subquery, new_current_subquery_vec[1].get());
+	//					merge_to_sibling = true;
+	//				}
+	// #ifdef DEBUG
+	//				D_ASSERT(merged);
+	// #endif
+	//
+	//				query_split_index--;
+	//				if (current_subquery_vec.size() == 2) {
+	//					merged = merge_subquery(current_subquery_vec[1], new_current_subquery_vec[0].get());
+	// #ifdef DEBUG
+	//					D_ASSERT(merged);
+	// #endif
+	//				}
+	//
+	//				auto current_table_expr_queue_vec = std::move(table_expr_queue.front());
+	//				table_expr_queue.pop_front();
+	//				// keep the same order, the `table_expr_queue` should be aligned with `subqueries`
+	//				// todo: check if there's any bug
+	//				if (subqueries.front().size() == 2) {
+	//					if (table_expr_queue.front().size() == 1) {
+	//						table_expr_queue.front().emplace_back(current_table_expr_queue_vec[0]);
+	//					} else {
+	//						if (merge_to_sibling) {
+	//							// store the current_table_expr to the sibling's table_expr_queue
+	//							for (auto &item : current_table_expr_queue_vec[0]) {
+	//								table_expr_queue.front()[1].emplace(item);
+	//							}
+	//							if (current_table_expr_queue_vec.size() == 2)
+	//								for (auto &item : current_table_expr_queue_vec[1]) {
+	//									table_expr_queue.front()[0].emplace(item);
+	//								}
+	//						} else {
+	//							// keep the current_table_expr to the left ones
+	//							for (auto &item : current_table_expr_queue_vec[0]) {
+	//								table_expr_queue.front()[0].emplace(item);
+	//							}
+	//							if (current_table_expr_queue_vec.size() == 2)
+	//								for (auto &item : current_table_expr_queue_vec[1]) {
+	//									table_expr_queue.front()[1].emplace(item);
+	//								}
+	//						}
+	//					}
+	// #ifdef DEBUG
+	//					D_ASSERT(table_expr_queue.front().size() == 2);
+	// #endif
+	//				} else {
+	// #ifdef DEBUG
+	//					D_ASSERT(table_expr_queue.front().size() == 1);
+	// #endif
+	//					for (auto &item : current_table_expr_queue_vec[0]) {
+	//						table_expr_queue.front()[0].emplace(item);
+	//					}
+	//					if (2 == current_table_expr_queue_vec.size()) {
+	//						for (auto &item : current_table_expr_queue_vec[1]) {
+	//							table_expr_queue.front()[0].emplace(item);
+	//						}
+	//					}
+	//				}
+	//			}
+	//		} else {
+	//			subqueries.front() = std::move(current_subquery_vec);
+	//			break;
+	//		}
+	//	}
 
 	return std::move(plan);
 }
@@ -198,8 +190,8 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 				break;
 			}
 #if SPLIT_FILTER
-			// otherwise, it might have MARK join under it
-			if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->children[0]->type) {
+			// otherwise, it might have INNER join or MARK join under it when enabling CROSS_PRODUCT rewrite
+			if (!follow_pipeline_breaker_ && LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child->children[0]->type) {
 				auto &join_op = child->children[0]->Cast<LogicalComparisonJoin>();
 				if (JoinType::SEMI != join_op.join_type && JoinType::MARK != join_op.join_type) {
 					child->split_index = 0;
@@ -226,12 +218,15 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 				query_split_index++;
 				child->split_index = query_split_index;
 				op.merge_index = query_split_index;
-				// add the SEMI or MARK join's column usage
+				// add the SEMI or MARK join's column usage when enabling CROSS_PRODUCT rewrite
+				//  or inner join's info
 				auto child_pointer = child->children[0].get();
 				if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == child_pointer->type) {
 					auto &inner_join = child_pointer->Cast<LogicalComparisonJoin>();
 #ifdef DEBUG
-					D_ASSERT(JoinType::SEMI == inner_join.join_type || JoinType::MARK == inner_join.join_type);
+					if (!follow_pipeline_breaker_) {
+						D_ASSERT(JoinType::SEMI == inner_join.join_type || JoinType::MARK == inner_join.join_type);
+					}
 
 #endif
 					auto child_exprs = GetJoinTableExpr(inner_join);

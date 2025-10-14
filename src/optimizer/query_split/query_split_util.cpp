@@ -128,7 +128,7 @@ ColumnBinding &GetRefColumnBinding(unique_ptr<Expression> &expr) {
 	case ExpressionType::BOUND_FUNCTION: {
 		auto &bound_func_expr = expr->Cast<BoundFunctionExpression>();
 #ifdef DEBUG
-		D_ASSERT(2 == bound_func_expr.children.size());
+		D_ASSERT(2 <= bound_func_expr.children.size());
 #endif
 		if (ExpressionType::VALUE_CONSTANT == bound_func_expr.children[0]->type) {
 			return GetRefColumnBinding(bound_func_expr.children[1]);
@@ -315,5 +315,45 @@ bool HasNullptr(LogicalOperator &plan) {
 			has_nullptr |= HasNullptr(plan.children[idx]);
 	}
 	return has_nullptr;
+}
+
+bool InnerJoinUnderFilter(const unique_ptr<LogicalOperator> &plan) {
+	bool found = false;
+	for (size_t idx = 0; idx < plan->children.size(); idx++) {
+		if (nullptr == plan->children[idx])
+			continue;
+		else if (LogicalOperatorType::LOGICAL_FILTER == plan->children[idx]->type &&
+		         nullptr != plan->children[idx]->children[0] &&
+		         LogicalOperatorType::LOGICAL_COMPARISON_JOIN == plan->children[idx]->children[0]->type) {
+			auto &join_op = plan->children[idx]->children[0]->Cast<LogicalComparisonJoin>();
+			if (JoinType::SEMI != join_op.join_type && JoinType::MARK != join_op.join_type) {
+				return true;
+			} else {
+				found |= HasNullptr(plan->children[idx]);
+			}
+		} else
+			found |= HasNullptr(plan->children[idx]);
+	}
+	return found;
+}
+
+bool InnerJoinUnderFilter(LogicalOperator &plan) {
+	bool found = false;
+	for (size_t idx = 0; idx < plan.children.size(); idx++) {
+		if (nullptr == plan.children[idx])
+			continue;
+		else if (LogicalOperatorType::LOGICAL_FILTER == plan.children[idx]->type &&
+		         nullptr != plan.children[idx]->children[0] &&
+		         LogicalOperatorType::LOGICAL_COMPARISON_JOIN == plan.children[idx]->children[0]->type) {
+			auto &join_op = plan.children[idx]->children[0]->Cast<LogicalComparisonJoin>();
+			if (JoinType::SEMI != join_op.join_type && JoinType::MARK != join_op.join_type) {
+				return true;
+			} else {
+				found |= HasNullptr(plan.children[idx]);
+			}
+		} else
+			found |= HasNullptr(plan.children[idx]);
+	}
+	return found;
 }
 } // namespace duckdb

@@ -429,17 +429,21 @@ void Optimizer::RunBuiltInMiddleOptimizers() {
 		remove.VisitOperator(*plan);
 	});
 
-	// then we extract common subexpressions inside the different operators
-	RunOptimizer(OptimizerType::COMMON_SUBEXPRESSIONS, [&]() {
-		CommonSubExpressionOptimizer cse_optimizer(binder);
-		cse_optimizer.VisitOperator(*plan);
-	});
+	// fixme: this will create new proj node, dsb query050 and query099
+	//	// then we extract common subexpressions inside the different operators
+	//	RunOptimizer(OptimizerType::COMMON_SUBEXPRESSIONS, [&]() {
+	//		CommonSubExpressionOptimizer cse_optimizer(binder);
+	//		cse_optimizer.VisitOperator(*plan);
+	//	});
 
+	// fixme: dsb query072_spj
+#if !ENABLE_MERGE_BACK_PLAN || !ENABLE_SPECIFY_EST_STAT
 	// creates projection maps so unused columns are projected out early
 	RunOptimizer(OptimizerType::COLUMN_LIFETIME, [&]() {
 		ColumnLifetimeAnalyzer column_lifetime(*this, *plan, true);
 		column_lifetime.VisitOperator(*plan);
 	});
+#endif
 
 	// Once we know the column lifetime, we have more information regarding
 	// what relations should be the build side/probe side.
@@ -460,11 +464,12 @@ void Optimizer::RunBuiltInMiddleOptimizers() {
 		plan = sampling_pushdown.Optimize(std::move(plan));
 	});
 
-	// transform ORDER BY + LIMIT to TopN
-	RunOptimizer(OptimizerType::TOP_N, [&]() {
-		TopN topn(context);
-		plan = topn.Optimize(std::move(plan));
-	});
+	// todo: we only support LIMIT but not TopN yet
+	//	// transform ORDER BY + LIMIT to TopN
+	//	RunOptimizer(OptimizerType::TOP_N, [&]() {
+	//		TopN topn(context);
+	//		plan = topn.Optimize(std::move(plan));
+	//	});
 
 	// try to use late materialization
 	RunOptimizer(OptimizerType::LATE_MATERIALIZATION, [&]() {
@@ -486,11 +491,13 @@ void Optimizer::RunBuiltInMiddleOptimizers() {
 		common_aggregate.VisitOperator(*plan);
 	});
 
+#if !ENABLE_MERGE_BACK_PLAN || !ENABLE_SPECIFY_EST_STAT
 	// creates projection maps so unused columns are projected out early
 	RunOptimizer(OptimizerType::COLUMN_LIFETIME, [&]() {
 		ColumnLifetimeAnalyzer column_lifetime(*this, *plan, true);
 		column_lifetime.VisitOperator(*plan);
 	});
+#endif
 
 	// apply simple expression heuristics to get an initial reordering
 	RunOptimizer(OptimizerType::REORDER_FILTER, [&]() {
