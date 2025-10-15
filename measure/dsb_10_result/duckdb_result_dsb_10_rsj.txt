@@ -1,0 +1,556 @@
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query013/query013_0.sql
+┌──────────────────┬─────────────────────────┬────────────────────────────┬────────────────────────────┐
+│ avg(ss_quantity) │ avg(ss_ext_sales_price) │ avg(ss_ext_wholesale_cost) │ sum(ss_ext_wholesale_cost) │
+│      double      │         double          │           double           │       decimal(38,2)        │
+├──────────────────┼─────────────────────────┼────────────────────────────┼────────────────────────────┤
+│             NULL │                    NULL │                       NULL │                       NULL │
+└──────────────────┴─────────────────────────┴────────────────────────────┴────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query018/query018_0.sql
+┌───────────┬────────────┬──────────┬───────────┬────────┬────────┬────────┬────────┬────────┬────────┐
+│ i_item_id │ ca_country │ ca_state │ ca_county │  agg1  │  agg2  │  agg3  │  agg4  │  agg5  │  agg6  │
+│  varchar  │  varchar   │ varchar  │  varchar  │ double │ double │ double │ double │ double │ double │
+├───────────┼────────────┼──────────┼───────────┼────────┼────────┼────────┼────────┼────────┼────────┤
+│ NULL      │ NULL       │ NULL     │ NULL      │   NULL │   NULL │   NULL │   NULL │   NULL │   NULL │
+└───────────┴────────────┴──────────┴───────────┴────────┴────────┴────────┴────────┴────────┴────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query019/query019_0.sql
+┌──────────┬─────────┬───────────────┬────────────┬───────────────┐
+│ brand_id │  brand  │ i_manufact_id │ i_manufact │   ext_price   │
+│  int32   │ varchar │     int32     │  varchar   │ decimal(38,2) │
+├──────────┴─────────┴───────────────┴────────────┴───────────────┤
+│                             0 rows                              │
+└─────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query025/query025_0.sql
+┌───────────┬─────────────┬────────────┬──────────────┬────────────────────┬────────────────────┬──────────────────────┐
+│ i_item_id │ i_item_desc │ s_store_id │ s_store_name │ store_sales_profit │ store_returns_loss │ catalog_sales_profit │
+│  varchar  │   varchar   │  varchar   │   varchar    │       double       │       double       │        double        │
+├───────────┴─────────────┴────────────┴──────────────┴────────────────────┴────────────────────┴──────────────────────┤
+│                                                        0 rows                                                        │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query027/query027_0.sql
+┌───────────┬─────────┬─────────┬────────┬────────┬────────┬────────┐
+│ i_item_id │ s_state │ g_state │  agg1  │  agg2  │  agg3  │  agg4  │
+│  varchar  │ varchar │  int64  │ double │ double │ double │ double │
+├───────────┼─────────┼─────────┼────────┼────────┼────────┼────────┤
+│ NULL      │ NULL    │       1 │   NULL │   NULL │   NULL │   NULL │
+└───────────┴─────────┴─────────┴────────┴────────┴────────┴────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query040/query040_0.sql
+┌─────────┬───────────┬───────────────┬───────────────┐
+│ w_state │ i_item_id │ sales_before  │  sales_after  │
+│ varchar │  varchar  │ decimal(38,2) │ decimal(38,2) │
+├─────────┴───────────┴───────────────┴───────────────┤
+│                       0 rows                        │
+└─────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query050/query050_0.sql
+┌──────────────┬──────────────┬─────────────────┬──────────────────┬─────────────────┬────────────────┬─────────────────┬───────────────────────┬─────────┬────────────┬─────────┬────────────┬────────────┬─────────────┬───────────┐
+│ s_store_name │ s_company_id │ s_street_number │  s_street_name   │  s_street_type  │ s_suite_number │     s_city      │       s_county        │ s_state │   s_zip    │ 30 days │ 31-60 days │ 61-90 days │ 91-120 days │ >120 days │
+│   varchar    │    int32     │     varchar     │     varchar      │     varchar     │    varchar     │     varchar     │        varchar        │ varchar │  varchar   │ int128  │   int128   │   int128   │   int128    │  int128   │
+├──────────────┼──────────────┼─────────────────┼──────────────────┼─────────────────┼────────────────┼─────────────────┼───────────────────────┼─────────┼────────────┼─────────┼────────────┼────────────┼─────────────┼───────────┤
+│ able         │            1 │ 994             │ Pine             │ Avenue          │ Suite 410      │ Macedonia       │ Nowata County         │ OK      │ 71087      │     141 │        498 │        283 │         159 │         0 │
+│ able         │            1 │ 994             │ Tenth            │ Circle          │ Suite G        │ Shiloh          │ Box Butte County      │ NE      │ 69275      │      81 │        251 │        129 │          68 │         0 │
+│ anti         │            1 │ 416             │ 8th              │ Circle          │ Suite 360      │ White Oak       │ Walker County         │ AL      │ 36668      │      83 │        293 │        195 │          96 │         0 │
+│ anti         │            1 │ 562             │ 5th              │ Way             │ Suite G        │ Liberty         │ Camden County         │ GA      │ 33451      │     163 │        515 │        340 │         161 │         0 │
+│ ation        │            1 │ 170             │ 15th             │ Way             │ Suite 490      │ Smithville      │ Mobile County         │ AL      │ 30307      │     187 │        695 │        441 │         226 │         0 │
+│ ation        │            1 │ 413             │ Laurel Maple     │ Ave             │ Suite 320      │ Jackson         │ Murray County         │ GA      │ 39583      │     265 │        997 │        625 │         336 │         0 │
+│ ation        │            1 │ 848             │ Lincoln          │ Dr.             │ Suite T        │ Springfield     │ Mariposa County       │ CA      │ 99303      │     299 │       1041 │        633 │         351 │         0 │
+│ bar          │            1 │ 180             │ Sunset           │ Street          │ Suite 320      │ Pleasant Hill   │ Saginaw County        │ MI      │ 43604      │     197 │        685 │        475 │         254 │         0 │
+│ bar          │            1 │ 369             │ Ninth            │ Ln              │ Suite 270      │ Mount Zion      │ Essex County          │ VT      │ 08654      │      20 │         77 │         54 │          24 │         0 │
+│ bar          │            1 │ 50              │ Jefferson Elm    │ Lane            │ Suite 220      │ Friendship      │ Dade County           │ GA      │ 34536      │     124 │        426 │        281 │         147 │         0 │
+│ bar          │            1 │ 523             │ 11th             │ Way             │ Suite Q        │ Bunker Hill     │ Itawamba County       │ MS      │ 50150      │      48 │        181 │        109 │          49 │         0 │
+│ bar          │            1 │ 523             │ 9th Forest       │ RD              │ Suite 340      │ Pleasant Valley │ Harding County        │ NM      │ 82477      │    2674 │      10153 │       6423 │        3400 │         0 │
+│ cally        │            1 │ 198             │ Davis            │ Ave             │ Suite E        │ Florence        │ Henry County          │ VA      │ 23394      │      50 │        174 │        118 │          66 │         0 │
+│ cally        │            1 │ 267             │ Center Lincoln   │ Drive           │ Suite S        │ Valley View     │ West Feliciana Parish │ LA      │ 75124      │      91 │        339 │        242 │         125 │         0 │
+│ cally        │            1 │ 299             │ Williams         │ Ln              │ Suite W        │ Bethel          │ Salem County          │ NJ      │ 05881      │     216 │        773 │        474 │         247 │         0 │
+│ eing         │            1 │ 203             │ Washington Green │ Lane            │ Suite A        │ Union Hill      │ Alamosa County        │ CO      │ 87746      │     202 │        723 │        495 │         268 │         0 │
+│ eing         │            1 │ 368             │ Sunset           │ Drive           │ Suite 340      │ Oakwood         │ Dauphin County        │ PA      │ 10169      │      34 │        178 │        112 │          55 │         0 │
+│ eing         │            1 │ 568             │ Fifth            │ Way             │ Suite 50       │ Greenwood       │ Harmon County         │ OK      │ 78828      │     250 │        988 │        642 │         362 │         0 │
+│ eing         │            1 │ 584             │ Hill Main        │ ST              │ Suite 200      │ Forest Hills    │ Somerset County       │ MD      │ 29237      │     127 │        596 │        344 │         184 │         0 │
+│ eing         │            1 │ 983             │ Hickory          │ ST              │ Suite P        │ Plainview       │ Saginaw County        │ MI      │ 43683      │      77 │        329 │        198 │         107 │         0 │
+│ ese          │            1 │ 185             │ Central Spring   │ Road            │ Suite E        │ Lakewood        │ Box Butte County      │ NE      │ 68877      │     118 │        501 │        281 │         181 │         0 │
+│ ese          │            1 │ 378             │ Williams 1st     │ Circle          │ Suite 390      │ Edgewood        │ Ziebach County        │ SD      │ 50069      │      38 │        161 │        105 │          64 │         0 │
+│ ese          │            1 │ 411             │ 14th             │ Parkway         │ Suite 300      │ Jamestown       │ Wadena County         │ MN      │ 56867      │     126 │        482 │        303 │         131 │         0 │
+│ ese          │            1 │ 715             │ Lee              │ Drive           │ Suite Y        │ Spring Valley   │ Maverick County       │ TX      │ 76060      │      80 │        300 │        222 │         109 │         0 │
+│ n st         │            1 │ 12              │ Sunset           │ RD              │ Suite D        │ Highland        │ Pulaski County        │ KY      │ 49454      │      61 │        217 │        160 │          71 │         0 │
+│ n st         │            1 │ 933             │ Eigth            │ Ln              │ Suite T        │ Oak Ridge       │ Dade County           │ GA      │ 38371      │      89 │        328 │        223 │         128 │         0 │
+│ ought        │            1 │ 721             │ Poplar           │ Ave             │ Suite 250      │ Wildwood        │ Sumner County         │ TN      │ 36871      │     231 │        829 │        517 │         266 │         0 │
+│ ought        │            1 │ 892             │ Seventh Williams │ Wy              │ Suite D        │ Antioch         │ Reagan County         │ TX      │ 78605      │     146 │        580 │        374 │         210 │         0 │
+│ pri          │            1 │ 248             │ Tenth            │ Drive           │ Suite 180      │ Spring Valley   │ Oglethorpe County     │ GA      │ 36060      │     114 │        391 │        263 │         125 │         0 │
+│ pri          │            1 │ 876             │ 8th              │ Pkwy            │ Suite 70       │ Pleasant Valley │ Franklin Parish       │ LA      │ 72477      │      79 │        268 │        159 │          73 │         0 │
+├──────────────┴──────────────┴─────────────────┴──────────────────┴─────────────────┴────────────────┴─────────────────┴───────────────────────┴─────────┴────────────┴─────────┴────────────┴────────────┴─────────────┴───────────┤
+│ 30 rows                                                                                                                                                                                                                 15 columns │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query084/query084_0.sql
+┌──────────────────┬──────────────────────────────────────────────────────┐
+│   customer_id    │                     customername                     │
+│     varchar      │                       varchar                        │
+├──────────────────┼──────────────────────────────────────────────────────┤
+│ AAAAAAAAAMNGAAAA │ Ha                            , Richard              │
+│ AAAAAAAABIMBFAAA │ Stack                         , Dinah                │
+│ AAAAAAAABIMBFAAA │ Stack                         , Dinah                │
+│ AAAAAAAABIMBFAAA │ Stack                         , Dinah                │
+│ AAAAAAAABIMBFAAA │ Stack                         , Dinah                │
+│ AAAAAAAABIMIAAAA │ Green                         , Kenneth              │
+│ AAAAAAAABIMIAAAA │ Green                         , Kenneth              │
+│ AAAAAAAABIMIAAAA │ Green                         , Kenneth              │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│        ·         │                          ·                           │
+│        ·         │                          ·                           │
+│        ·         │                          ·                           │
+│ AAAAAAAAFOJJHAAA │ Dominquez                     , Don                  │
+│ AAAAAAAAFOJJHAAA │ Dominquez                     , Don                  │
+│ AAAAAAAAGDBJGAAA │ Carey                         , Herman               │
+│ AAAAAAAAGDBJGAAA │ Carey                         , Herman               │
+│ AAAAAAAAGDBJGAAA │ Carey                         , Herman               │
+│ AAAAAAAAGDBJGAAA │ Carey                         , Herman               │
+│ AAAAAAAAGDBJGAAA │ Carey                         , Herman               │
+│ AAAAAAAAGDBJGAAA │ Carey                         , Herman               │
+│ AAAAAAAAGDBJGAAA │ Carey                         , Herman               │
+│ AAAAAAAAGHLFFAAA │ Rose                          , Alma                 │
+│ AAAAAAAAGIFIGAAA │ Rich                          , Anne                 │
+│ AAAAAAAAGPDGHAAA │ Ferguson                      , Virginia             │
+│ AAAAAAAAHGIAHAAA │ Cantwell                      , William              │
+│ AAAAAAAAHJFFGAAA │ Washington                    , William              │
+│ AAAAAAAAHJFFGAAA │ Washington                    , William              │
+│ AAAAAAAAHJFFGAAA │ Washington                    , William              │
+│ AAAAAAAAHJFFGAAA │ Washington                    , William              │
+│ AAAAAAAAHJFFGAAA │ Washington                    , William              │
+│ AAAAAAAAHJFFGAAA │ Washington                    , William              │
+│ AAAAAAAAHJFFGAAA │ Washington                    , William              │
+├──────────────────┴──────────────────────────────────────────────────────┤
+│ 100 rows (40 shown)                                           2 columns │
+└─────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query085/query085_0.sql
+┌────────────────────────────────────────┬──────────────────┬───────────────────────┬─────────────┐
+│ main."substring"(r_reason_desc, 1, 20) │ avg(ws_quantity) │ avg(wr_refunded_cash) │ avg(wr_fee) │
+│                varchar                 │      double      │        double         │   double    │
+├────────────────────────────────────────┴──────────────────┴───────────────────────┴─────────────┤
+│                                             0 rows                                              │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query091/query091_0.sql
+┌─────────────┬──────────────────┬─────────┬───────────────┐
+│ Call_Center │ Call_Center_Name │ Manager │ Returns_Loss  │
+│   varchar   │     varchar      │ varchar │ decimal(38,2) │
+├─────────────┴──────────────────┴─────────┴───────────────┤
+│                          0 rows                          │
+└──────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query099/query099_0.sql
+┌───────────────────────────────────────────┬─────────┬─────────┬─────────┬────────────┬────────────┬─────────────┬───────────┐
+│ main."substring"(w_warehouse_name, 1, 20) │ sm_type │ cc_name │ 30 days │ 31-60 days │ 61-90 days │ 91-120 days │ >120 days │
+│                  varchar                  │ varchar │ varchar │ int128  │   int128   │   int128   │   int128    │  int128   │
+├───────────────────────────────────────────┴─────────┴─────────┴─────────┴────────────┴────────────┴─────────────┴───────────┤
+│                                                           0 rows                                                            │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query100/query100_0.sql
+┌───────────┬───────────┬───────┐
+│ i_item_sk │ i_item_sk │  cnt  │
+│   int32   │   int32   │ int64 │
+├───────────┴───────────┴───────┤
+│            0 rows             │
+└───────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query101/query101_0.sql
+┌───────────────┬──────────────┬─────────────┬───────┐
+│ c_customer_sk │ c_first_name │ c_last_name │  cnt  │
+│     int32     │   varchar    │   varchar   │ int64 │
+├───────────────┴──────────────┴─────────────┴───────┤
+│                       0 rows                       │
+└────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query102/query102_0.sql
+┌───────────┬───────────────────┬─────────────────────┬──────────────────┬───────┐
+│ cd_gender │ cd_marital_status │ cd_education_status │ hd_vehicle_count │  cnt  │
+│  varchar  │      varchar      │       varchar       │      int32       │ int64 │
+├───────────┴───────────────────┴─────────────────────┴──────────────────┴───────┤
+│                                     0 rows                                     │
+└────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query013_spj/query013_spj_0.sql
+┌──────────────────┬─────────────────────────┬────────────────────────────┬────────────────────────────┐
+│ min(ss_quantity) │ min(ss_ext_sales_price) │ min(ss_ext_wholesale_cost) │ min(ss_ext_wholesale_cost) │
+│      int32       │      decimal(7,2)       │        decimal(7,2)        │        decimal(7,2)        │
+├──────────────────┼─────────────────────────┼────────────────────────────┼────────────────────────────┤
+│             NULL │                    NULL │                       NULL │                       NULL │
+└──────────────────┴─────────────────────────┴────────────────────────────┴────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query018_spj/query018_spj_0.sql
+┌────────────────┬─────────────────┬───────────────┬────────────────┬──────────────────┬────────────────────┬────────────────────┬─────────────────────┬────────────────────┬───────────────────┬───────────────────┐
+│ min(i_item_id) │ min(ca_country) │ min(ca_state) │ min(ca_county) │ min(cs_quantity) │ min(cs_list_price) │ min(cs_coupon_amt) │ min(cs_sales_price) │ min(cs_net_profit) │ min(c_birth_year) │ min(cd_dep_count) │
+│    varchar     │     varchar     │    varchar    │    varchar     │      int32       │    decimal(7,2)    │    decimal(7,2)    │    decimal(7,2)     │    decimal(7,2)    │       int32       │       int32       │
+├────────────────┼─────────────────┼───────────────┼────────────────┼──────────────────┼────────────────────┼────────────────────┼─────────────────────┼────────────────────┼───────────────────┼───────────────────┤
+│ NULL           │ NULL            │ NULL          │ NULL           │             NULL │               NULL │               NULL │                NULL │               NULL │              NULL │              NULL │
+└────────────────┴─────────────────┴───────────────┴────────────────┴──────────────────┴────────────────────┴────────────────────┴─────────────────────┴────────────────────┴───────────────────┴───────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query019_spj/query019_spj_0.sql
+┌─────────────────┬────────────────────┬─────────────────────────┐
+│ min(i_brand_id) │ min(i_manufact_id) │ min(ss_ext_sales_price) │
+│      int32      │       int32        │      decimal(7,2)       │
+├─────────────────┼────────────────────┼─────────────────────────┤
+│            NULL │               NULL │                    NULL │
+└─────────────────┴────────────────────┴─────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query025_spj/query025_spj_0.sql
+┌────────────────┬──────────────────┬─────────────────┬───────────────────┬────────────────────┬──────────────────┬────────────────────┬─────────────────┬───────────────────────┬──────────────────────┐
+│ min(i_item_id) │ min(i_item_desc) │ min(s_store_id) │ min(s_store_name) │ min(ss_net_profit) │ min(sr_net_loss) │ min(cs_net_profit) │ min(ss_item_sk) │ min(sr_ticket_number) │ min(cs_order_number) │
+│    varchar     │     varchar      │     varchar     │      varchar      │    decimal(7,2)    │   decimal(7,2)   │    decimal(7,2)    │      int32      │         int32         │        int32         │
+├────────────────┼──────────────────┼─────────────────┼───────────────────┼────────────────────┼──────────────────┼────────────────────┼─────────────────┼───────────────────────┼──────────────────────┤
+│ NULL           │ NULL             │ NULL            │ NULL              │               NULL │             NULL │               NULL │            NULL │                  NULL │                 NULL │
+└────────────────┴──────────────────┴─────────────────┴───────────────────┴────────────────────┴──────────────────┴────────────────────┴─────────────────┴───────────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query027_spj/query027_spj_0.sql
+┌────────────────┬──────────────┬──────────────────┬────────────────────┬────────────────────┬─────────────────────┬─────────────────┬───────────────────────┐
+│ min(i_item_id) │ min(s_state) │ min(ss_quantity) │ min(ss_list_price) │ min(ss_coupon_amt) │ min(ss_sales_price) │ min(ss_item_sk) │ min(ss_ticket_number) │
+│    varchar     │   varchar    │      int32       │    decimal(7,2)    │    decimal(7,2)    │    decimal(7,2)     │      int32      │         int32         │
+├────────────────┼──────────────┼──────────────────┼────────────────────┼────────────────────┼─────────────────────┼─────────────────┼───────────────────────┤
+│ NULL           │ NULL         │             NULL │               NULL │               NULL │                NULL │            NULL │                  NULL │
+└────────────────┴──────────────┴──────────────────┴────────────────────┴────────────────────┴─────────────────────┴─────────────────┴───────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query040_spj/query040_spj_0.sql
+┌──────────────┬────────────────┬─────────────────┬──────────────────────┬─────────────────┬──────────────────────┐
+│ min(w_state) │ min(i_item_id) │ min(cs_item_sk) │ min(cs_order_number) │ min(cr_item_sk) │ min(cr_order_number) │
+│   varchar    │    varchar     │      int32      │        int32         │      int32      │        int32         │
+├──────────────┼────────────────┼─────────────────┼──────────────────────┼─────────────────┼──────────────────────┤
+│ NULL         │ NULL           │            NULL │                 NULL │            NULL │                 NULL │
+└──────────────┴────────────────┴─────────────────┴──────────────────────┴─────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query050_spj/query050_spj_0.sql
+┌───────────────────┬───────────────────┬──────────────────────┬────────────────────┬─────────────────────┬─────────────┬────────────┬───────────────────────┬──────────────────────┬──────────────────────────┬─────────────────┬───────────────────┐
+│ min(s_store_name) │ min(s_company_id) │ min(s_street_number) │ min(s_street_name) │ min(s_suite_number) │ min(s_city) │ min(s_zip) │ min(ss_ticket_number) │ min(ss_sold_date_sk) │ min(sr_returned_date_sk) │ min(ss_item_sk) │ min(d1.d_date_sk) │
+│      varchar      │       int32       │       varchar        │      varchar       │       varchar       │   varchar   │  varchar   │         int32         │        int32         │          int32           │      int32      │       int32       │
+├───────────────────┼───────────────────┼──────────────────────┼────────────────────┼─────────────────────┼─────────────┼────────────┼───────────────────────┼──────────────────────┼──────────────────────────┼─────────────────┼───────────────────┤
+│ bar               │                 1 │ 180                  │ Hickory            │ Suite 320           │ Plainview   │ 43604      │                  8346 │              2450819 │                  2450859 │            8179 │           2450819 │
+└───────────────────┴───────────────────┴──────────────────────┴────────────────────┴─────────────────────┴─────────────┴────────────┴───────────────────────┴──────────────────────┴──────────────────────────┴─────────────────┴───────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query072_spj/query072_spj_0.sql
+┌────────────────┬───────────────────────┬────────────────────┬─────────────────┬──────────────────────┬──────────────────┐
+│ min(i_item_sk) │ min(w_warehouse_name) │ min(d1.d_week_seq) │ min(cs_item_sk) │ min(cs_order_number) │ min(inv_item_sk) │
+│     int32      │        varchar        │       int32        │      int32      │        int32         │      int32       │
+├────────────────┼───────────────────────┼────────────────────┼─────────────────┼──────────────────────┼──────────────────┤
+│           NULL │ NULL                  │               NULL │            NULL │                 NULL │             NULL │
+└────────────────┴───────────────────────┴────────────────────┴─────────────────┴──────────────────────┴──────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query084_spj/query084_spj_0.sql
+┌────────────────────┬───────────────────────┬─────────────────┐
+│ min(c_customer_id) │ min(sr_ticket_number) │ min(sr_item_sk) │
+│      varchar       │         int32         │      int32      │
+├────────────────────┼───────────────────────┼─────────────────┤
+│ AAAAAAAAAEPDCAAA   │                 12297 │             219 │
+└────────────────────┴───────────────────────┴─────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query085_spj/query085_spj_0.sql
+┌──────────────────┬───────────────────────┬──────────────┬─────────────────┬──────────────────────┬─────────────────────┬─────────────────────┐
+│ min(ws_quantity) │ min(wr_refunded_cash) │ min(wr_fee)  │ min(ws_item_sk) │ min(wr_order_number) │ min(cd1.cd_demo_sk) │ min(cd2.cd_demo_sk) │
+│      int32       │     decimal(7,2)      │ decimal(7,2) │      int32      │        int32         │        int32        │        int32        │
+├──────────────────┼───────────────────────┼──────────────┼─────────────────┼──────────────────────┼─────────────────────┼─────────────────────┤
+│             NULL │                  NULL │         NULL │            NULL │                 NULL │                NULL │                NULL │
+└──────────────────┴───────────────────────┴──────────────┴─────────────────┴──────────────────────┴─────────────────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query091_spj/query091_spj_0.sql
+┌────────────────────────┬──────────────┬─────────────────┬──────────────────┬─────────────────┬──────────────────────┐
+│ min(cc_call_center_id) │ min(cc_name) │ min(cc_manager) │ min(cr_net_loss) │ min(cr_item_sk) │ min(cr_order_number) │
+│        varchar         │   varchar    │     varchar     │   decimal(7,2)   │      int32      │        int32         │
+├────────────────────────┼──────────────┼─────────────────┼──────────────────┼─────────────────┼──────────────────────┤
+│ NULL                   │ NULL         │ NULL            │             NULL │            NULL │                 NULL │
+└────────────────────────┴──────────────┴─────────────────┴──────────────────┴─────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query099_spj/query099_spj_0.sql
+┌───────────────────────┬──────────────┬──────────────┬──────────────────────┬─────────────────┐
+│ min(w_warehouse_name) │ min(sm_type) │ min(cc_name) │ min(cs_order_number) │ min(cs_item_sk) │
+│        varchar        │   varchar    │   varchar    │        int32         │      int32      │
+├───────────────────────┼──────────────┼──────────────┼──────────────────────┼─────────────────┤
+│ NULL                  │ NULL         │ NULL         │                 NULL │            NULL │
+└───────────────────────┴──────────────┴──────────────┴──────────────────────┴─────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query100_spj/query100_spj_0.sql
+┌──────────────────────┬──────────────────────┬──────────────────────────┬────────────────────┐
+│ min(item1.i_item_sk) │ min(item2.i_item_sk) │ min(s1.ss_ticket_number) │ min(s1.ss_item_sk) │
+│        int32         │        int32         │          int32           │       int32        │
+├──────────────────────┼──────────────────────┼──────────────────────────┼────────────────────┤
+│                 NULL │                 NULL │                     NULL │               NULL │
+└──────────────────────┴──────────────────────┴──────────────────────────┴────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query101_spj/query101_spj_0.sql
+┌────────────────────┬─────────────────┬───────────────────────┬──────────────────────┐
+│ min(c_customer_sk) │ min(ss_item_sk) │ min(sr_ticket_number) │ min(ws_order_number) │
+│       int32        │      int32      │         int32         │        int32         │
+├────────────────────┼─────────────────┼───────────────────────┼──────────────────────┤
+│               NULL │            NULL │                  NULL │                 NULL │
+└────────────────────┴─────────────────┴───────────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query102_spj/query102_spj_0.sql
+┌─────────────────┬───────────────────────┬──────────────────────┬────────────────────┬─────────────────┬─────────────────┐
+│ min(ss_item_sk) │ min(ss_ticket_number) │ min(ws_order_number) │ min(c_customer_sk) │ min(cd_demo_sk) │ min(hd_demo_sk) │
+│      int32      │         int32         │        int32         │       int32        │      int32      │      int32      │
+├─────────────────┼───────────────────────┼──────────────────────┼────────────────────┼─────────────────┼─────────────────┤
+│            NULL │                  NULL │                 NULL │               NULL │            NULL │            NULL │
+└─────────────────┴───────────────────────┴──────────────────────┴────────────────────┴─────────────────┴─────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query013/query013_0.sql
+┌──────────────────┬─────────────────────────┬────────────────────────────┬────────────────────────────┐
+│ avg(ss_quantity) │ avg(ss_ext_sales_price) │ avg(ss_ext_wholesale_cost) │ sum(ss_ext_wholesale_cost) │
+│      double      │         double          │           double           │       decimal(38,2)        │
+├──────────────────┼─────────────────────────┼────────────────────────────┼────────────────────────────┤
+│             NULL │                    NULL │                       NULL │                       NULL │
+└──────────────────┴─────────────────────────┴────────────────────────────┴────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query018/query018_0.sql
+┌───────────┬────────────┬──────────┬───────────┬────────┬────────┬────────┬────────┬────────┬────────┐
+│ i_item_id │ ca_country │ ca_state │ ca_county │  agg1  │  agg2  │  agg3  │  agg4  │  agg5  │  agg6  │
+│  varchar  │  varchar   │ varchar  │  varchar  │ double │ double │ double │ double │ double │ double │
+├───────────┼────────────┼──────────┼───────────┼────────┼────────┼────────┼────────┼────────┼────────┤
+│ NULL      │ NULL       │ NULL     │ NULL      │   NULL │   NULL │   NULL │   NULL │   NULL │   NULL │
+└───────────┴────────────┴──────────┴───────────┴────────┴────────┴────────┴────────┴────────┴────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query019/query019_0.sql
+┌──────────┬─────────┬───────────────┬────────────┬───────────────┐
+│ brand_id │  brand  │ i_manufact_id │ i_manufact │   ext_price   │
+│  int32   │ varchar │     int32     │  varchar   │ decimal(38,2) │
+├──────────┴─────────┴───────────────┴────────────┴───────────────┤
+│                             0 rows                              │
+└─────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query025/query025_0.sql
+┌───────────┬─────────────┬────────────┬──────────────┬────────────────────┬────────────────────┬──────────────────────┐
+│ i_item_id │ i_item_desc │ s_store_id │ s_store_name │ store_sales_profit │ store_returns_loss │ catalog_sales_profit │
+│  varchar  │   varchar   │  varchar   │   varchar    │       double       │       double       │        double        │
+├───────────┴─────────────┴────────────┴──────────────┴────────────────────┴────────────────────┴──────────────────────┤
+│                                                        0 rows                                                        │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query027/query027_0.sql
+┌───────────┬─────────┬─────────┬────────┬────────┬────────┬────────┐
+│ i_item_id │ s_state │ g_state │  agg1  │  agg2  │  agg3  │  agg4  │
+│  varchar  │ varchar │  int64  │ double │ double │ double │ double │
+├───────────┼─────────┼─────────┼────────┼────────┼────────┼────────┤
+│ NULL      │ NULL    │       1 │   NULL │   NULL │   NULL │   NULL │
+└───────────┴─────────┴─────────┴────────┴────────┴────────┴────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query040/query040_0.sql
+┌─────────┬───────────┬───────────────┬───────────────┐
+│ w_state │ i_item_id │ sales_before  │  sales_after  │
+│ varchar │  varchar  │ decimal(38,2) │ decimal(38,2) │
+├─────────┴───────────┴───────────────┴───────────────┤
+│                       0 rows                        │
+└─────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query050/query050_0.sql
+┌──────────────┬──────────────┬─────────────────┬──────────────────┬─────────────────┬────────────────┬─────────────────┬───────────────────────┬─────────┬────────────┬─────────┬────────────┬────────────┬─────────────┬───────────┐
+│ s_store_name │ s_company_id │ s_street_number │  s_street_name   │  s_street_type  │ s_suite_number │     s_city      │       s_county        │ s_state │   s_zip    │ 30 days │ 31-60 days │ 61-90 days │ 91-120 days │ >120 days │
+│   varchar    │    int32     │     varchar     │     varchar      │     varchar     │    varchar     │     varchar     │        varchar        │ varchar │  varchar   │ int128  │   int128   │   int128   │   int128    │  int128   │
+├──────────────┼──────────────┼─────────────────┼──────────────────┼─────────────────┼────────────────┼─────────────────┼───────────────────────┼─────────┼────────────┼─────────┼────────────┼────────────┼─────────────┼───────────┤
+│ able         │            1 │ 994             │ Pine             │ Avenue          │ Suite 410      │ Macedonia       │ Nowata County         │ OK      │ 71087      │     141 │        498 │        283 │         159 │         0 │
+│ able         │            1 │ 994             │ Tenth            │ Circle          │ Suite G        │ Shiloh          │ Box Butte County      │ NE      │ 69275      │      81 │        251 │        129 │          68 │         0 │
+│ anti         │            1 │ 416             │ 8th              │ Circle          │ Suite 360      │ White Oak       │ Walker County         │ AL      │ 36668      │      83 │        293 │        195 │          96 │         0 │
+│ anti         │            1 │ 562             │ 5th              │ Way             │ Suite G        │ Liberty         │ Camden County         │ GA      │ 33451      │     163 │        515 │        340 │         161 │         0 │
+│ ation        │            1 │ 170             │ 15th             │ Way             │ Suite 490      │ Smithville      │ Mobile County         │ AL      │ 30307      │     187 │        695 │        441 │         226 │         0 │
+│ ation        │            1 │ 413             │ Laurel Maple     │ Ave             │ Suite 320      │ Jackson         │ Murray County         │ GA      │ 39583      │     265 │        997 │        625 │         336 │         0 │
+│ ation        │            1 │ 848             │ Lincoln          │ Dr.             │ Suite T        │ Springfield     │ Mariposa County       │ CA      │ 99303      │     299 │       1041 │        633 │         351 │         0 │
+│ bar          │            1 │ 180             │ Sunset           │ Street          │ Suite 320      │ Pleasant Hill   │ Saginaw County        │ MI      │ 43604      │     197 │        685 │        475 │         254 │         0 │
+│ bar          │            1 │ 369             │ Ninth            │ Ln              │ Suite 270      │ Mount Zion      │ Essex County          │ VT      │ 08654      │      20 │         77 │         54 │          24 │         0 │
+│ bar          │            1 │ 50              │ Jefferson Elm    │ Lane            │ Suite 220      │ Friendship      │ Dade County           │ GA      │ 34536      │     124 │        426 │        281 │         147 │         0 │
+│ bar          │            1 │ 523             │ 11th             │ Way             │ Suite Q        │ Bunker Hill     │ Itawamba County       │ MS      │ 50150      │      48 │        181 │        109 │          49 │         0 │
+│ bar          │            1 │ 523             │ 9th Forest       │ RD              │ Suite 340      │ Pleasant Valley │ Harding County        │ NM      │ 82477      │    2674 │      10153 │       6423 │        3400 │         0 │
+│ cally        │            1 │ 198             │ Davis            │ Ave             │ Suite E        │ Florence        │ Henry County          │ VA      │ 23394      │      50 │        174 │        118 │          66 │         0 │
+│ cally        │            1 │ 267             │ Center Lincoln   │ Drive           │ Suite S        │ Valley View     │ West Feliciana Parish │ LA      │ 75124      │      91 │        339 │        242 │         125 │         0 │
+│ cally        │            1 │ 299             │ Williams         │ Ln              │ Suite W        │ Bethel          │ Salem County          │ NJ      │ 05881      │     216 │        773 │        474 │         247 │         0 │
+│ eing         │            1 │ 203             │ Washington Green │ Lane            │ Suite A        │ Union Hill      │ Alamosa County        │ CO      │ 87746      │     202 │        723 │        495 │         268 │         0 │
+│ eing         │            1 │ 368             │ Sunset           │ Drive           │ Suite 340      │ Oakwood         │ Dauphin County        │ PA      │ 10169      │      34 │        178 │        112 │          55 │         0 │
+│ eing         │            1 │ 568             │ Fifth            │ Way             │ Suite 50       │ Greenwood       │ Harmon County         │ OK      │ 78828      │     250 │        988 │        642 │         362 │         0 │
+│ eing         │            1 │ 584             │ Hill Main        │ ST              │ Suite 200      │ Forest Hills    │ Somerset County       │ MD      │ 29237      │     127 │        596 │        344 │         184 │         0 │
+│ eing         │            1 │ 983             │ Hickory          │ ST              │ Suite P        │ Plainview       │ Saginaw County        │ MI      │ 43683      │      77 │        329 │        198 │         107 │         0 │
+│ ese          │            1 │ 185             │ Central Spring   │ Road            │ Suite E        │ Lakewood        │ Box Butte County      │ NE      │ 68877      │     118 │        501 │        281 │         181 │         0 │
+│ ese          │            1 │ 378             │ Williams 1st     │ Circle          │ Suite 390      │ Edgewood        │ Ziebach County        │ SD      │ 50069      │      38 │        161 │        105 │          64 │         0 │
+│ ese          │            1 │ 411             │ 14th             │ Parkway         │ Suite 300      │ Jamestown       │ Wadena County         │ MN      │ 56867      │     126 │        482 │        303 │         131 │         0 │
+│ ese          │            1 │ 715             │ Lee              │ Drive           │ Suite Y        │ Spring Valley   │ Maverick County       │ TX      │ 76060      │      80 │        300 │        222 │         109 │         0 │
+│ n st         │            1 │ 12              │ Sunset           │ RD              │ Suite D        │ Highland        │ Pulaski County        │ KY      │ 49454      │      61 │        217 │        160 │          71 │         0 │
+│ n st         │            1 │ 933             │ Eigth            │ Ln              │ Suite T        │ Oak Ridge       │ Dade County           │ GA      │ 38371      │      89 │        328 │        223 │         128 │         0 │
+│ ought        │            1 │ 721             │ Poplar           │ Ave             │ Suite 250      │ Wildwood        │ Sumner County         │ TN      │ 36871      │     231 │        829 │        517 │         266 │         0 │
+│ ought        │            1 │ 892             │ Seventh Williams │ Wy              │ Suite D        │ Antioch         │ Reagan County         │ TX      │ 78605      │     146 │        580 │        374 │         210 │         0 │
+│ pri          │            1 │ 248             │ Tenth            │ Drive           │ Suite 180      │ Spring Valley   │ Oglethorpe County     │ GA      │ 36060      │     114 │        391 │        263 │         125 │         0 │
+│ pri          │            1 │ 876             │ 8th              │ Pkwy            │ Suite 70       │ Pleasant Valley │ Franklin Parish       │ LA      │ 72477      │      79 │        268 │        159 │          73 │         0 │
+├──────────────┴──────────────┴─────────────────┴──────────────────┴─────────────────┴────────────────┴─────────────────┴───────────────────────┴─────────┴────────────┴─────────┴────────────┴────────────┴─────────────┴───────────┤
+│ 30 rows                                                                                                                                                                                                                 15 columns │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query084/query084_0.sql
+┌──────────────────┬──────────────────────────────────────────────────────┐
+│   customer_id    │                     customername                     │
+│     varchar      │                       varchar                        │
+├──────────────────┼──────────────────────────────────────────────────────┤
+│ AAAAAAAAAMNGAAAA │ Ha                            , Richard              │
+│ AAAAAAAABIMBFAAA │ Stack                         , Dinah                │
+│ AAAAAAAABIMBFAAA │ Stack                         , Dinah                │
+│ AAAAAAAABIMBFAAA │ Stack                         , Dinah                │
+│ AAAAAAAABIMBFAAA │ Stack                         , Dinah                │
+│ AAAAAAAABIMIAAAA │ Green                         , Kenneth              │
+│ AAAAAAAABIMIAAAA │ Green                         , Kenneth              │
+│ AAAAAAAABIMIAAAA │ Green                         , Kenneth              │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│ AAAAAAAACFLDFAAA │ Yanez                         , Vera                 │
+│        ·         │                          ·                           │
+│        ·         │                          ·                           │
+│        ·         │                          ·                           │
+│ AAAAAAAAFOJJHAAA │ Dominquez                     , Don                  │
+│ AAAAAAAAFOJJHAAA │ Dominquez                     , Don                  │
+│ AAAAAAAAGDBJGAAA │ Carey                         , Herman               │
+│ AAAAAAAAGDBJGAAA │ Carey                         , Herman               │
+│ AAAAAAAAGDBJGAAA │ Carey                         , Herman               │
+│ AAAAAAAAGDBJGAAA │ Carey                         , Herman               │
+│ AAAAAAAAGDBJGAAA │ Carey                         , Herman               │
+│ AAAAAAAAGDBJGAAA │ Carey                         , Herman               │
+│ AAAAAAAAGDBJGAAA │ Carey                         , Herman               │
+│ AAAAAAAAGHLFFAAA │ Rose                          , Alma                 │
+│ AAAAAAAAGIFIGAAA │ Rich                          , Anne                 │
+│ AAAAAAAAGPDGHAAA │ Ferguson                      , Virginia             │
+│ AAAAAAAAHGIAHAAA │ Cantwell                      , William              │
+│ AAAAAAAAHJFFGAAA │ Washington                    , William              │
+│ AAAAAAAAHJFFGAAA │ Washington                    , William              │
+│ AAAAAAAAHJFFGAAA │ Washington                    , William              │
+│ AAAAAAAAHJFFGAAA │ Washington                    , William              │
+│ AAAAAAAAHJFFGAAA │ Washington                    , William              │
+│ AAAAAAAAHJFFGAAA │ Washington                    , William              │
+│ AAAAAAAAHJFFGAAA │ Washington                    , William              │
+├──────────────────┴──────────────────────────────────────────────────────┤
+│ 100 rows (40 shown)                                           2 columns │
+└─────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query085/query085_0.sql
+┌────────────────────────────────────────┬──────────────────┬───────────────────────┬─────────────┐
+│ main."substring"(r_reason_desc, 1, 20) │ avg(ws_quantity) │ avg(wr_refunded_cash) │ avg(wr_fee) │
+│                varchar                 │      double      │        double         │   double    │
+├────────────────────────────────────────┴──────────────────┴───────────────────────┴─────────────┤
+│                                             0 rows                                              │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query091/query091_0.sql
+┌─────────────┬──────────────────┬─────────┬───────────────┐
+│ Call_Center │ Call_Center_Name │ Manager │ Returns_Loss  │
+│   varchar   │     varchar      │ varchar │ decimal(38,2) │
+├─────────────┴──────────────────┴─────────┴───────────────┤
+│                          0 rows                          │
+└──────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query099/query099_0.sql
+┌───────────────────────────────────────────┬─────────┬─────────┬─────────┬────────────┬────────────┬─────────────┬───────────┐
+│ main."substring"(w_warehouse_name, 1, 20) │ sm_type │ cc_name │ 30 days │ 31-60 days │ 61-90 days │ 91-120 days │ >120 days │
+│                  varchar                  │ varchar │ varchar │ int128  │   int128   │   int128   │   int128    │  int128   │
+├───────────────────────────────────────────┴─────────┴─────────┴─────────┴────────────┴────────────┴─────────────┴───────────┤
+│                                                           0 rows                                                            │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query100/query100_0.sql
+┌───────────┬───────────┬───────┐
+│ i_item_sk │ i_item_sk │  cnt  │
+│   int32   │   int32   │ int64 │
+├───────────┴───────────┴───────┤
+│            0 rows             │
+└───────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query101/query101_0.sql
+┌───────────────┬──────────────┬─────────────┬───────┐
+│ c_customer_sk │ c_first_name │ c_last_name │  cnt  │
+│     int32     │   varchar    │   varchar   │ int64 │
+├───────────────┴──────────────┴─────────────┴───────┤
+│                       0 rows                       │
+└────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query102/query102_0.sql
+┌───────────┬───────────────────┬─────────────────────┬──────────────────┬───────┐
+│ cd_gender │ cd_marital_status │ cd_education_status │ hd_vehicle_count │  cnt  │
+│  varchar  │      varchar      │       varchar       │      int32       │ int64 │
+├───────────┴───────────────────┴─────────────────────┴──────────────────┴───────┤
+│                                     0 rows                                     │
+└────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query013_spj/query013_spj_0.sql
+┌──────────────────┬─────────────────────────┬────────────────────────────┬────────────────────────────┐
+│ min(ss_quantity) │ min(ss_ext_sales_price) │ min(ss_ext_wholesale_cost) │ min(ss_ext_wholesale_cost) │
+│      int32       │      decimal(7,2)       │        decimal(7,2)        │        decimal(7,2)        │
+├──────────────────┼─────────────────────────┼────────────────────────────┼────────────────────────────┤
+│             NULL │                    NULL │                       NULL │                       NULL │
+└──────────────────┴─────────────────────────┴────────────────────────────┴────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query018_spj/query018_spj_0.sql
+┌────────────────┬─────────────────┬───────────────┬────────────────┬──────────────────┬────────────────────┬────────────────────┬─────────────────────┬────────────────────┬───────────────────┬───────────────────┐
+│ min(i_item_id) │ min(ca_country) │ min(ca_state) │ min(ca_county) │ min(cs_quantity) │ min(cs_list_price) │ min(cs_coupon_amt) │ min(cs_sales_price) │ min(cs_net_profit) │ min(c_birth_year) │ min(cd_dep_count) │
+│    varchar     │     varchar     │    varchar    │    varchar     │      int32       │    decimal(7,2)    │    decimal(7,2)    │    decimal(7,2)     │    decimal(7,2)    │       int32       │       int32       │
+├────────────────┼─────────────────┼───────────────┼────────────────┼──────────────────┼────────────────────┼────────────────────┼─────────────────────┼────────────────────┼───────────────────┼───────────────────┤
+│ NULL           │ NULL            │ NULL          │ NULL           │             NULL │               NULL │               NULL │                NULL │               NULL │              NULL │              NULL │
+└────────────────┴─────────────────┴───────────────┴────────────────┴──────────────────┴────────────────────┴────────────────────┴─────────────────────┴────────────────────┴───────────────────┴───────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query019_spj/query019_spj_0.sql
+┌─────────────────┬────────────────────┬─────────────────────────┐
+│ min(i_brand_id) │ min(i_manufact_id) │ min(ss_ext_sales_price) │
+│      int32      │       int32        │      decimal(7,2)       │
+├─────────────────┼────────────────────┼─────────────────────────┤
+│            NULL │               NULL │                    NULL │
+└─────────────────┴────────────────────┴─────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query025_spj/query025_spj_0.sql
+┌────────────────┬──────────────────┬─────────────────┬───────────────────┬────────────────────┬──────────────────┬────────────────────┬─────────────────┬───────────────────────┬──────────────────────┐
+│ min(i_item_id) │ min(i_item_desc) │ min(s_store_id) │ min(s_store_name) │ min(ss_net_profit) │ min(sr_net_loss) │ min(cs_net_profit) │ min(ss_item_sk) │ min(sr_ticket_number) │ min(cs_order_number) │
+│    varchar     │     varchar      │     varchar     │      varchar      │    decimal(7,2)    │   decimal(7,2)   │    decimal(7,2)    │      int32      │         int32         │        int32         │
+├────────────────┼──────────────────┼─────────────────┼───────────────────┼────────────────────┼──────────────────┼────────────────────┼─────────────────┼───────────────────────┼──────────────────────┤
+│ NULL           │ NULL             │ NULL            │ NULL              │               NULL │             NULL │               NULL │            NULL │                  NULL │                 NULL │
+└────────────────┴──────────────────┴─────────────────┴───────────────────┴────────────────────┴──────────────────┴────────────────────┴─────────────────┴───────────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query027_spj/query027_spj_0.sql
+┌────────────────┬──────────────┬──────────────────┬────────────────────┬────────────────────┬─────────────────────┬─────────────────┬───────────────────────┐
+│ min(i_item_id) │ min(s_state) │ min(ss_quantity) │ min(ss_list_price) │ min(ss_coupon_amt) │ min(ss_sales_price) │ min(ss_item_sk) │ min(ss_ticket_number) │
+│    varchar     │   varchar    │      int32       │    decimal(7,2)    │    decimal(7,2)    │    decimal(7,2)     │      int32      │         int32         │
+├────────────────┼──────────────┼──────────────────┼────────────────────┼────────────────────┼─────────────────────┼─────────────────┼───────────────────────┤
+│ NULL           │ NULL         │             NULL │               NULL │               NULL │                NULL │            NULL │                  NULL │
+└────────────────┴──────────────┴──────────────────┴────────────────────┴────────────────────┴─────────────────────┴─────────────────┴───────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query040_spj/query040_spj_0.sql
+┌──────────────┬────────────────┬─────────────────┬──────────────────────┬─────────────────┬──────────────────────┐
+│ min(w_state) │ min(i_item_id) │ min(cs_item_sk) │ min(cs_order_number) │ min(cr_item_sk) │ min(cr_order_number) │
+│   varchar    │    varchar     │      int32      │        int32         │      int32      │        int32         │
+├──────────────┼────────────────┼─────────────────┼──────────────────────┼─────────────────┼──────────────────────┤
+│ NULL         │ NULL           │            NULL │                 NULL │            NULL │                 NULL │
+└──────────────┴────────────────┴─────────────────┴──────────────────────┴─────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query050_spj/query050_spj_0.sql
+┌───────────────────┬───────────────────┬──────────────────────┬────────────────────┬─────────────────────┬─────────────┬────────────┬───────────────────────┬──────────────────────┬──────────────────────────┬─────────────────┬───────────────────┐
+│ min(s_store_name) │ min(s_company_id) │ min(s_street_number) │ min(s_street_name) │ min(s_suite_number) │ min(s_city) │ min(s_zip) │ min(ss_ticket_number) │ min(ss_sold_date_sk) │ min(sr_returned_date_sk) │ min(ss_item_sk) │ min(d1.d_date_sk) │
+│      varchar      │       int32       │       varchar        │      varchar       │       varchar       │   varchar   │  varchar   │         int32         │        int32         │          int32           │      int32      │       int32       │
+├───────────────────┼───────────────────┼──────────────────────┼────────────────────┼─────────────────────┼─────────────┼────────────┼───────────────────────┼──────────────────────┼──────────────────────────┼─────────────────┼───────────────────┤
+│ bar               │                 1 │ 180                  │ Hickory            │ Suite 320           │ Plainview   │ 43604      │                  8346 │              2450819 │                  2450859 │            8179 │           2450819 │
+└───────────────────┴───────────────────┴──────────────────────┴────────────────────┴─────────────────────┴─────────────┴────────────┴───────────────────────┴──────────────────────┴──────────────────────────┴─────────────────┴───────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query072_spj/query072_spj_0.sql
+┌────────────────┬───────────────────────┬────────────────────┬─────────────────┬──────────────────────┬──────────────────┐
+│ min(i_item_sk) │ min(w_warehouse_name) │ min(d1.d_week_seq) │ min(cs_item_sk) │ min(cs_order_number) │ min(inv_item_sk) │
+│     int32      │        varchar        │       int32        │      int32      │        int32         │      int32       │
+├────────────────┼───────────────────────┼────────────────────┼─────────────────┼──────────────────────┼──────────────────┤
+│           NULL │ NULL                  │               NULL │            NULL │                 NULL │             NULL │
+└────────────────┴───────────────────────┴────────────────────┴─────────────────┴──────────────────────┴──────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query084_spj/query084_spj_0.sql
+┌────────────────────┬───────────────────────┬─────────────────┐
+│ min(c_customer_id) │ min(sr_ticket_number) │ min(sr_item_sk) │
+│      varchar       │         int32         │      int32      │
+├────────────────────┼───────────────────────┼─────────────────┤
+│ AAAAAAAAAEPDCAAA   │                 12297 │             219 │
+└────────────────────┴───────────────────────┴─────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query085_spj/query085_spj_0.sql
+┌──────────────────┬───────────────────────┬──────────────┬─────────────────┬──────────────────────┬─────────────────────┬─────────────────────┐
+│ min(ws_quantity) │ min(wr_refunded_cash) │ min(wr_fee)  │ min(ws_item_sk) │ min(wr_order_number) │ min(cd1.cd_demo_sk) │ min(cd2.cd_demo_sk) │
+│      int32       │     decimal(7,2)      │ decimal(7,2) │      int32      │        int32         │        int32        │        int32        │
+├──────────────────┼───────────────────────┼──────────────┼─────────────────┼──────────────────────┼─────────────────────┼─────────────────────┤
+│             NULL │                  NULL │         NULL │            NULL │                 NULL │                NULL │                NULL │
+└──────────────────┴───────────────────────┴──────────────┴─────────────────┴──────────────────────┴─────────────────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query091_spj/query091_spj_0.sql
+┌────────────────────────┬──────────────┬─────────────────┬──────────────────┬─────────────────┬──────────────────────┐
+│ min(cc_call_center_id) │ min(cc_name) │ min(cc_manager) │ min(cr_net_loss) │ min(cr_item_sk) │ min(cr_order_number) │
+│        varchar         │   varchar    │     varchar     │   decimal(7,2)   │      int32      │        int32         │
+├────────────────────────┼──────────────┼─────────────────┼──────────────────┼─────────────────┼──────────────────────┤
+│ NULL                   │ NULL         │ NULL            │             NULL │            NULL │                 NULL │
+└────────────────────────┴──────────────┴─────────────────┴──────────────────┴─────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query099_spj/query099_spj_0.sql
+┌───────────────────────┬──────────────┬──────────────┬──────────────────────┬─────────────────┐
+│ min(w_warehouse_name) │ min(sm_type) │ min(cc_name) │ min(cs_order_number) │ min(cs_item_sk) │
+│        varchar        │   varchar    │   varchar    │        int32         │      int32      │
+├───────────────────────┼──────────────┼──────────────┼──────────────────────┼─────────────────┤
+│ NULL                  │ NULL         │ NULL         │                 NULL │            NULL │
+└───────────────────────┴──────────────┴──────────────┴──────────────────────┴─────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query100_spj/query100_spj_0.sql
+┌──────────────────────┬──────────────────────┬──────────────────────────┬────────────────────┐
+│ min(item1.i_item_sk) │ min(item2.i_item_sk) │ min(s1.ss_ticket_number) │ min(s1.ss_item_sk) │
+│        int32         │        int32         │          int32           │       int32        │
+├──────────────────────┼──────────────────────┼──────────────────────────┼────────────────────┤
+│                 NULL │                 NULL │                     NULL │               NULL │
+└──────────────────────┴──────────────────────┴──────────────────────────┴────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query101_spj/query101_spj_0.sql
+┌────────────────────┬─────────────────┬───────────────────────┬──────────────────────┐
+│ min(c_customer_sk) │ min(ss_item_sk) │ min(sr_ticket_number) │ min(ws_order_number) │
+│       int32        │      int32      │         int32         │        int32         │
+├────────────────────┼─────────────────┼───────────────────────┼──────────────────────┤
+│               NULL │            NULL │                  NULL │                 NULL │
+└────────────────────┴─────────────────┴───────────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query102_spj/query102_spj_0.sql
+┌─────────────────┬───────────────────────┬──────────────────────┬────────────────────┬─────────────────┬─────────────────┐
+│ min(ss_item_sk) │ min(ss_ticket_number) │ min(ws_order_number) │ min(c_customer_sk) │ min(cd_demo_sk) │ min(hd_demo_sk) │
+│      int32      │         int32         │        int32         │       int32        │      int32      │      int32      │
+├─────────────────┼───────────────────────┼──────────────────────┼────────────────────┼─────────────────┼─────────────────┤
+│            NULL │                  NULL │                 NULL │               NULL │            NULL │            NULL │
+└─────────────────┴───────────────────────┴──────────────────────┴────────────────────┴─────────────────┴─────────────────┘

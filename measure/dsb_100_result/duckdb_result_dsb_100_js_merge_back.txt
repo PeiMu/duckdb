@@ -1,0 +1,614 @@
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query013/query013_0.sql
+┌──────────────────┬─────────────────────────┬────────────────────────────┬────────────────────────────┐
+│ avg(ss_quantity) │ avg(ss_ext_sales_price) │ avg(ss_ext_wholesale_cost) │ sum(ss_ext_wholesale_cost) │
+│      double      │         double          │           double           │       decimal(38,2)        │
+├──────────────────┼─────────────────────────┼────────────────────────────┼────────────────────────────┤
+│             NULL │                    NULL │                       NULL │                       NULL │
+└──────────────────┴─────────────────────────┴────────────────────────────┴────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query018/query018_0.sql
+┌───────────┬────────────┬──────────┬───────────┬────────┬────────┬────────┬────────┬────────┬────────┐
+│ i_item_id │ ca_country │ ca_state │ ca_county │  agg1  │  agg2  │  agg3  │  agg4  │  agg5  │  agg6  │
+│  varchar  │  varchar   │ varchar  │  varchar  │ double │ double │ double │ double │ double │ double │
+├───────────┼────────────┼──────────┼───────────┼────────┼────────┼────────┼────────┼────────┼────────┤
+│ NULL      │ NULL       │ NULL     │ NULL      │   NULL │   NULL │   NULL │   NULL │   NULL │   NULL │
+└───────────┴────────────┴──────────┴───────────┴────────┴────────┴────────┴────────┴────────┴────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query019/query019_0.sql
+┌──────────┬─────────┬───────────────┬────────────┬───────────────┐
+│ brand_id │  brand  │ i_manufact_id │ i_manufact │   ext_price   │
+│  int32   │ varchar │     int32     │  varchar   │ decimal(38,2) │
+├──────────┴─────────┴───────────────┴────────────┴───────────────┤
+│                             0 rows                              │
+└─────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query025/query025_0.sql
+┌──────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬──────────────────┬──────────────┬────────────────────┬────────────────────┬──────────────────────┐
+│    i_item_id     │                                                                                  i_item_desc                                                                                  │    s_store_id    │ s_store_name │ store_sales_profit │ store_returns_loss │ catalog_sales_profit │
+│     varchar      │                                                                                    varchar                                                                                    │     varchar      │   varchar    │       double       │       double       │        double        │
+├──────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────┼──────────────┼────────────────────┼────────────────────┼──────────────────────┤
+│ AAAAAAAAAJJICAAA │ Small, social minutes read almost strange                                                                                                                                     │ AAAAAAAAAJBAAAAA │ able         │  778.8372146561394 │ 422.64606378544846 │   250.66239287136793 │
+│ AAAAAAAAAJJICAAA │ Small, social minutes read almost strange                                                                                                                                     │ AAAAAAAAHMAAAAAA │ n st         │               NULL │               NULL │                 NULL │
+│ AAAAAAAAAJJICAAA │ Small, social minutes read almost strange                                                                                                                                     │ AAAAAAAAMDBAAAAA │ cally        │               NULL │               NULL │                 NULL │
+│ AAAAAAAAAKNFAAAA │ Va                                                                                                                                                                            │ AAAAAAAAAJBAAAAA │ able         │               NULL │               NULL │                 NULL │
+│ AAAAAAAAAKNFAAAA │ Va                                                                                                                                                                            │ AAAAAAAADKAAAAAA │ pri          │               NULL │               NULL │                 NULL │
+│ AAAAAAAABGFKAAAA │ Businesses can start eyes. Most linguistic criteria achieve effectively moral rates. Well residential accounts form just sure targets. Particular, full                       │ AAAAAAAAAJBAAAAA │ able         │               NULL │               NULL │                 NULL │
+│ AAAAAAAABPPLBAAA │ Also current minutes should see bills. Full, european voices clear always important parts. Expected, outdoor years think again medical, other countries. Capital things may   │ AAAAAAAAAJBAAAAA │ able         │               NULL │               NULL │                 NULL │
+│ AAAAAAAADDAABAAA │ Industrial, possible toys should not attack still long birds. Privileges might utter there successful, international expressions. Free feet may not get                       │ AAAAAAAAAJBAAAAA │ able         │                0.0 │                0.0 │    723.1934604585414 │
+│ AAAAAAAADGOFAAAA │ Feet hit clean tears. Simply good points set for instance junior definitions. Available, continued males will not become already large things; ne                             │ AAAAAAAAAJBAAAAA │ able         │               NULL │               NULL │                 NULL │
+│ AAAAAAAAEDLOAAAA │ Also clear publishers may break now quite solar managers; small trees                                                                                                         │ AAAAAAAAAJBAAAAA │ able         │               NULL │               NULL │                 NULL │
+│ AAAAAAAAEOACCAAA │ Areas make. Tiny,                                                                                                                                                             │ AAAAAAAAKDBAAAAA │ ese          │               NULL │               NULL │                 NULL │
+│ AAAAAAAAFDOPAAAA │ Good mice used to force urgent animals. Involved services can summarise so. European frames rule here indeed canadian rights. Flat, able components find only for the types.  │ AAAAAAAAAJBAAAAA │ able         │               NULL │               NULL │                 NULL │
+│ AAAAAAAAFKDOCAAA │ As different churches would put yesterday to a schools. Teenage sk                                                                                                            │ AAAAAAAAOCAAAAAA │ cally        │                0.0 │                0.0 │    1257.999532273363 │
+│ AAAAAAAAGKIICAAA │ Strong, good affairs cannot store still new allegations. As simple proposals bring continuously pregnant directors. Groups apply mothers. Problems ma                         │ AAAAAAAAEHAAAAAA │ cally        │               NULL │               NULL │                 NULL │
+│ AAAAAAAAGKIICAAA │ Strong, good affairs cannot store still new allegations. As simple proposals bring continuously pregnant directors. Groups apply mothers. Problems ma                         │ AAAAAAAAMGBAAAAA │ ese          │               NULL │               NULL │                 NULL │
+├──────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴──────────────────┴──────────────┴────────────────────┴────────────────────┴──────────────────────┤
+│ 15 rows                                                                                                                                                                                                                                                                                   7 columns │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query027/query027_0.sql
+┌───────────┬─────────┬─────────┬────────┬────────┬────────┬────────┐
+│ i_item_id │ s_state │ g_state │  agg1  │  agg2  │  agg3  │  agg4  │
+│  varchar  │ varchar │  int64  │ double │ double │ double │ double │
+├───────────┼─────────┼─────────┼────────┼────────┼────────┼────────┤
+│ NULL      │ NULL    │       1 │   NULL │   NULL │   NULL │   NULL │
+└───────────┴─────────┴─────────┴────────┴────────┴────────┴────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query040/query040_0.sql
+┌─────────┬───────────┬───────────────┬───────────────┐
+│ w_state │ i_item_id │ sales_before  │  sales_after  │
+│ varchar │  varchar  │ decimal(38,2) │ decimal(38,2) │
+├─────────┴───────────┴───────────────┴───────────────┤
+│                       0 rows                        │
+└─────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query050/query050_0.sql
+┌──────────────┬──────────────┬─────────────────┬───────────────────┬─────────────────┬────────────────┬─────────────────┬───────────────────┬─────────┬────────────┬─────────┬────────────┬────────────┬─────────────┬───────────┐
+│ s_store_name │ s_company_id │ s_street_number │   s_street_name   │  s_street_type  │ s_suite_number │     s_city      │     s_county      │ s_state │   s_zip    │ 30 days │ 31-60 days │ 61-90 days │ 91-120 days │ >120 days │
+│   varchar    │    int32     │     varchar     │      varchar      │     varchar     │    varchar     │     varchar     │      varchar      │ varchar │  varchar   │ int128  │   int128   │   int128   │   int128    │  int128   │
+├──────────────┼──────────────┼─────────────────┼───────────────────┼─────────────────┼────────────────┼─────────────────┼───────────────────┼─────────┼────────────┼─────────┼────────────┼────────────┼─────────────┼───────────┤
+│ able         │            1 │ 120             │ Park              │ Ln              │ Suite L        │ Fairfield       │ Nassau County     │ FL      │ 36192      │     376 │       1454 │        858 │         445 │         0 │
+│ able         │            1 │ 154             │ Fifteenth         │ Lane            │ Suite 230      │ Mount Vernon    │ Texas County      │ OK      │ 78482      │     586 │       2167 │       1441 │         691 │         0 │
+│ able         │            1 │ 258             │ Lincoln Park      │ Ln              │ Suite 240      │ Beechwood       │ Pinellas County   │ FL      │ 35402      │     521 │       1995 │       1310 │         655 │         0 │
+│ able         │            1 │ 28              │ Hill South        │ Road            │ Suite D        │ Canton          │ Marshall County   │ TN      │ 38221      │     487 │       1782 │       1089 │         542 │         0 │
+│ able         │            1 │ 287             │ 11th Third        │ Road            │ Suite P        │ Brentwood       │ Walton County     │ GA      │ 34188      │     344 │       1267 │        758 │         394 │         0 │
+│ able         │            1 │ 295             │ Jefferson First   │ RD              │ Suite 20       │ Saint Paul      │ Forsyth County    │ GA      │ 35720      │     231 │        937 │        650 │         284 │         0 │
+│ able         │            1 │ 300             │ Franklin Maple    │ ST              │ Suite 10       │ York            │ Kootenai County   │ ID      │ 80236      │     168 │        526 │        315 │         154 │         0 │
+│ able         │            1 │ 516             │ Williams Sycamore │ Avenue          │ Suite C        │ Verona          │ Grayson County    │ KY      │ 43629      │     384 │       1425 │        830 │         476 │         0 │
+│ able         │            1 │ 54              │ Jefferson         │ Ave             │ Suite 290      │ Berlin          │ Turner County     │ GA      │ 34039      │     185 │        794 │        452 │         244 │         0 │
+│ able         │            1 │ 588             │ Park              │ Ln              │ Suite S        │ Pine Ridge      │ Stillwater County │ MT      │ 65319      │     148 │        631 │        383 │         185 │         0 │
+│ able         │            1 │ 592             │ Lee Meadow        │ Ln              │ Suite Y        │ Bradford        │ Buncombe County   │ NC      │ 21184      │     108 │        458 │        256 │         130 │         0 │
+│ able         │            1 │ 622             │ 10th Maple        │ Way             │ Suite X        │ Sherwood Forest │ Suffolk County    │ MA      │ 07302      │     227 │        895 │        602 │         302 │         0 │
+│ able         │            1 │ 996             │ Willow            │ Pkwy            │ Suite 490      │ Jordan          │ Metcalfe County   │ KY      │ 17752      │   29366 │     109810 │      69342 │       34644 │         0 │
+│ anti         │            1 │ 257             │ First Railroad    │ Avenue          │ Suite D        │ Lincoln Park    │ Medina County     │ OH      │ 40444      │     715 │       2571 │       1660 │         773 │         0 │
+│ anti         │            1 │ 351             │ Miller Oak        │ Court           │ Suite T        │ Williamsburg    │ Duplin County     │ NC      │ 28336      │     121 │        499 │        301 │         151 │         0 │
+│ anti         │            1 │ 541             │ Railroad          │ Court           │ Suite 210      │ Evergreen       │ Harper County     │ KS      │ 65621      │     284 │       1049 │        651 │         323 │         0 │
+│ anti         │            1 │ 562             │ 5th               │ Way             │ Suite G        │ Enon            │ Crawford County   │ IL      │ 60965      │     120 │        415 │        248 │         136 │         0 │
+│ anti         │            1 │ 625             │ 10th 14th         │ Lane            │ Suite 470      │ West Point      │ Giles County      │ VA      │ 22698      │     540 │       2129 │       1292 │         671 │         0 │
+│ anti         │            1 │ 665             │ Ridge Lake        │ RD              │ Suite 400      │ Geneva          │ El Dorado County  │ CA      │ 96033      │     140 │        559 │        370 │         159 │         0 │
+│ anti         │            1 │ 780             │ Laurel            │ Drive           │ Suite G        │ Pine Hill       │ Hartley County    │ TX      │ 79236      │     103 │        427 │        265 │         122 │         0 │
+│  ·           │            · │  ·              │   ·               │        ·        │     ·          │     ·           │       ·           │ ·       │     ·      │      ·  │         ·  │         ·  │          ·  │         · │
+│  ·           │            · │  ·              │   ·               │        ·        │     ·          │     ·           │       ·           │ ·       │     ·      │      ·  │         ·  │         ·  │          ·  │         · │
+│  ·           │            · │  ·              │   ·               │        ·        │     ·          │     ·           │       ·           │ ·       │     ·      │      ·  │         ·  │         ·  │          ·  │         · │
+│ ese          │            1 │ 805             │ Lake              │ Lane            │ Suite F        │ Pleasant Ridge  │ Howard County     │ IN      │ 44137      │     135 │        514 │        319 │         146 │         0 │
+│ ese          │            1 │ 829             │ Twelfth           │ Lane            │ Suite 60       │ Bethel          │ Harper County     │ KS      │ 65281      │     436 │       1746 │       1149 │         540 │         0 │
+│ ese          │            1 │ 862             │ 9th               │ Dr.             │ Suite V        │ Poplar Grove    │ Richland County   │ OH      │ 43664      │     371 │       1323 │        853 │         434 │         0 │
+│ ese          │            1 │ 872             │ Fifteenth Maple   │ Lane            │ Suite R        │ Hickory Grove   │ Box Butte County  │ NE      │ 60481      │     220 │        864 │        513 │         301 │         0 │
+│ ese          │            1 │ 894             │ Chestnut          │ ST              │ Suite L        │ Ashland         │ Wallace County    │ KS      │ 64244      │     511 │       2133 │       1407 │         694 │         0 │
+│ n st         │            1 │ 106             │ Lee               │ Way             │ Suite 300      │ Taylor          │ Allen County      │ KY      │ 44045      │     400 │       1435 │        887 │         475 │         0 │
+│ n st         │            1 │ 257             │ Twelfth Walnut    │ Ave             │ Suite E        │ Auburn          │ Polk County       │ FL      │ 39231      │     453 │       1655 │       1001 │         512 │         0 │
+│ n st         │            1 │ 726             │ Franklin          │ Street          │ Suite 280      │ Columbia        │ Camden County     │ GA      │ 33292      │     426 │       1750 │       1085 │         550 │         0 │
+│ n st         │            1 │ 809             │ View Second       │ Way             │ Suite 470      │ Fairfield       │ Moore County      │ TN      │ 36192      │     561 │       1937 │       1203 │         582 │         0 │
+│ n st         │            1 │ 843             │ 7th Fifth         │ Ln              │ Suite P        │ Waterloo        │ Moore County      │ TN      │ 31675      │     238 │        805 │        489 │         232 │         0 │
+│ n st         │            1 │ 918             │ Lee               │ Boulevard       │ Suite 310      │ Harmony         │ Quitman County    │ MS      │ 55804      │     213 │        771 │        502 │         232 │         0 │
+│ ought        │            1 │ 364             │ College Miller    │ Circle          │ Suite 300      │ Arlington       │ Tuolumne County   │ CA      │ 96557      │     147 │        466 │        290 │         151 │         0 │
+│ ought        │            1 │ 376             │ Eigth             │ Ln              │ Suite 490      │ Westwood        │ Baldwin County    │ AL      │ 31715      │     126 │        429 │        303 │         150 │         0 │
+│ ought        │            1 │ 414             │ Park 5th          │ Avenue          │ Suite C        │ Lexington       │ Franklin County   │ KS      │ 68342      │     257 │       1031 │        677 │         308 │         0 │
+│ ought        │            1 │ 45              │ Ridge 7th         │ Pkwy            │ Suite S        │ Taylor          │ Dauphin County    │ PA      │ 14045      │     281 │       1163 │        728 │         362 │         0 │
+│ ought        │            1 │ 552             │ Highland Oak      │ Circle          │ Suite C        │ Hope            │ Randolph County   │ NC      │ 20386      │     254 │        894 │        604 │         279 │         0 │
+│ ought        │            1 │ 612             │ Lake 5th          │ Ct.             │ Suite 80       │ Thornton        │ Grady County      │ OK      │ 71140      │     285 │        897 │        517 │         271 │         0 │
+│ ought        │            1 │ 614             │ Madison 8th       │ Lane            │ Suite S        │ Forest Hills    │ Roane County      │ TN      │ 39237      │     181 │        609 │        392 │         201 │         0 │
+│ ought        │            1 │ 721             │ Poplar            │ Ave             │ Suite 250      │ West Point      │ Rush County       │ KS      │ 62698      │     114 │        520 │        333 │         168 │         0 │
+│ ought        │            1 │ 892             │ Seventh Williams  │ Wy              │ Suite D        │ Windsor         │ Monroe County     │ GA      │ 38137      │      52 │        165 │        110 │          58 │         0 │
+├──────────────┴──────────────┴─────────────────┴───────────────────┴─────────────────┴────────────────┴─────────────────┴───────────────────┴─────────┴────────────┴─────────┴────────────┴────────────┴─────────────┴───────────┤
+│ 100 rows (40 shown)                                                                                                                                                                                                  15 columns │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query084/query084_0.sql
+┌──────────────────┬──────────────────────────────────────────────────────┐
+│   customer_id    │                     customername                     │
+│     varchar      │                       varchar                        │
+├──────────────────┼──────────────────────────────────────────────────────┤
+│ AAAAAAAAAAIALAAA │ Lam                           , Richard              │
+│ AAAAAAAAAAIALAAA │ Lam                           , Richard              │
+│ AAAAAAAAAAIALAAA │ Lam                           , Richard              │
+│ AAAAAAAAAAIALAAA │ Lam                           , Richard              │
+│ AAAAAAAAADJANAAA │ Price                         , James                │
+│ AAAAAAAAADJANAAA │ Price                         , James                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│        ·         │                          ·                           │
+│        ·         │                          ·                           │
+│        ·         │                          ·                           │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+├──────────────────┴──────────────────────────────────────────────────────┤
+│ 100 rows (40 shown)                                           2 columns │
+└─────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query085/query085_0.sql
+┌────────────────────────────────────────┬──────────────────┬───────────────────────┬─────────────┐
+│ main."substring"(r_reason_desc, 1, 20) │ avg(ws_quantity) │ avg(wr_refunded_cash) │ avg(wr_fee) │
+│                varchar                 │      double      │        double         │   double    │
+├────────────────────────────────────────┴──────────────────┴───────────────────────┴─────────────┤
+│                                             0 rows                                              │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query091/query091_0.sql
+┌─────────────┬──────────────────┬─────────┬───────────────┐
+│ Call_Center │ Call_Center_Name │ Manager │ Returns_Loss  │
+│   varchar   │     varchar      │ varchar │ decimal(38,2) │
+├─────────────┴──────────────────┴─────────┴───────────────┤
+│                          0 rows                          │
+└──────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query099/query099_0.sql
+┌───────────────────────────────────────────┬─────────┬─────────┬─────────┬────────────┬────────────┬─────────────┬───────────┐
+│ main."substring"(w_warehouse_name, 1, 20) │ sm_type │ cc_name │ 30 days │ 31-60 days │ 61-90 days │ 91-120 days │ >120 days │
+│                  varchar                  │ varchar │ varchar │ int128  │   int128   │   int128   │   int128    │  int128   │
+├───────────────────────────────────────────┴─────────┴─────────┴─────────┴────────────┴────────────┴─────────────┴───────────┤
+│                                                           0 rows                                                            │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query100/query100_0.sql
+┌───────────┬───────────┬───────┐
+│ i_item_sk │ i_item_sk │  cnt  │
+│   int32   │   int32   │ int64 │
+├───────────┴───────────┴───────┤
+│            0 rows             │
+└───────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query101/query101_0.sql
+┌───────────────┬──────────────┬─────────────┬───────┐
+│ c_customer_sk │ c_first_name │ c_last_name │  cnt  │
+│     int32     │   varchar    │   varchar   │ int64 │
+├───────────────┴──────────────┴─────────────┴───────┤
+│                       0 rows                       │
+└────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query102/query102_0.sql
+┌───────────┬───────────────────┬─────────────────────┬──────────────────┬───────┐
+│ cd_gender │ cd_marital_status │ cd_education_status │ hd_vehicle_count │  cnt  │
+│  varchar  │      varchar      │       varchar       │      int32       │ int64 │
+├───────────┴───────────────────┴─────────────────────┴──────────────────┴───────┤
+│                                     0 rows                                     │
+└────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query013_spj/query013_spj_0.sql
+┌──────────────────┬─────────────────────────┬────────────────────────────┬────────────────────────────┐
+│ min(ss_quantity) │ min(ss_ext_sales_price) │ min(ss_ext_wholesale_cost) │ min(ss_ext_wholesale_cost) │
+│      int32       │      decimal(7,2)       │        decimal(7,2)        │        decimal(7,2)        │
+├──────────────────┼─────────────────────────┼────────────────────────────┼────────────────────────────┤
+│             NULL │                    NULL │                       NULL │                       NULL │
+└──────────────────┴─────────────────────────┴────────────────────────────┴────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query018_spj/query018_spj_0.sql
+┌────────────────┬─────────────────┬───────────────┬────────────────┬──────────────────┬────────────────────┬────────────────────┬─────────────────────┬────────────────────┬───────────────────┬───────────────────┐
+│ min(i_item_id) │ min(ca_country) │ min(ca_state) │ min(ca_county) │ min(cs_quantity) │ min(cs_list_price) │ min(cs_coupon_amt) │ min(cs_sales_price) │ min(cs_net_profit) │ min(c_birth_year) │ min(cd_dep_count) │
+│    varchar     │     varchar     │    varchar    │    varchar     │      int32       │    decimal(7,2)    │    decimal(7,2)    │    decimal(7,2)     │    decimal(7,2)    │       int32       │       int32       │
+├────────────────┼─────────────────┼───────────────┼────────────────┼──────────────────┼────────────────────┼────────────────────┼─────────────────────┼────────────────────┼───────────────────┼───────────────────┤
+│ NULL           │ NULL            │ NULL          │ NULL           │             NULL │               NULL │               NULL │                NULL │               NULL │              NULL │              NULL │
+└────────────────┴─────────────────┴───────────────┴────────────────┴──────────────────┴────────────────────┴────────────────────┴─────────────────────┴────────────────────┴───────────────────┴───────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query019_spj/query019_spj_0.sql
+┌─────────────────┬────────────────────┬─────────────────────────┐
+│ min(i_brand_id) │ min(i_manufact_id) │ min(ss_ext_sales_price) │
+│      int32      │       int32        │      decimal(7,2)       │
+├─────────────────┼────────────────────┼─────────────────────────┤
+│            NULL │               NULL │                    NULL │
+└─────────────────┴────────────────────┴─────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query025_spj/query025_spj_0.sql
+┌──────────────────┬─────────────────────────────────────────────────────────────┬──────────────────┬───────────────────┬────────────────────┬──────────────────┬────────────────────┬─────────────────┬───────────────────────┬──────────────────────┐
+│  min(i_item_id)  │                      min(i_item_desc)                       │ min(s_store_id)  │ min(s_store_name) │ min(ss_net_profit) │ min(sr_net_loss) │ min(cs_net_profit) │ min(ss_item_sk) │ min(sr_ticket_number) │ min(cs_order_number) │
+│     varchar      │                           varchar                           │     varchar      │      varchar      │    decimal(7,2)    │   decimal(7,2)   │    decimal(7,2)    │      int32      │         int32         │        int32         │
+├──────────────────┼─────────────────────────────────────────────────────────────┼──────────────────┼───────────────────┼────────────────────┼──────────────────┼────────────────────┼─────────────────┼───────────────────────┼──────────────────────┤
+│ AAAAAAAAAAILBAAA │ Actually social letters occur just past a groups. Independe │ AAAAAAAAAJBAAAAA │ able              │           -2772.11 │            59.23 │           -2262.70 │           32473 │               7375089 │              3727087 │
+└──────────────────┴─────────────────────────────────────────────────────────────┴──────────────────┴───────────────────┴────────────────────┴──────────────────┴────────────────────┴─────────────────┴───────────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query027_spj/query027_spj_0.sql
+┌────────────────┬──────────────┬──────────────────┬────────────────────┬────────────────────┬─────────────────────┬─────────────────┬───────────────────────┐
+│ min(i_item_id) │ min(s_state) │ min(ss_quantity) │ min(ss_list_price) │ min(ss_coupon_amt) │ min(ss_sales_price) │ min(ss_item_sk) │ min(ss_ticket_number) │
+│    varchar     │   varchar    │      int32       │    decimal(7,2)    │    decimal(7,2)    │    decimal(7,2)     │      int32      │         int32         │
+├────────────────┼──────────────┼──────────────────┼────────────────────┼────────────────────┼─────────────────────┼─────────────────┼───────────────────────┤
+│ NULL           │ NULL         │             NULL │               NULL │               NULL │                NULL │            NULL │                  NULL │
+└────────────────┴──────────────┴──────────────────┴────────────────────┴────────────────────┴─────────────────────┴─────────────────┴───────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query040_spj/query040_spj_0.sql
+┌──────────────┬────────────────┬─────────────────┬──────────────────────┬─────────────────┬──────────────────────┐
+│ min(w_state) │ min(i_item_id) │ min(cs_item_sk) │ min(cs_order_number) │ min(cr_item_sk) │ min(cr_order_number) │
+│   varchar    │    varchar     │      int32      │        int32         │      int32      │        int32         │
+├──────────────┼────────────────┼─────────────────┼──────────────────────┼─────────────────┼──────────────────────┤
+│ NULL         │ NULL           │            NULL │                 NULL │            NULL │                 NULL │
+└──────────────┴────────────────┴─────────────────┴──────────────────────┴─────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query050_spj/query050_spj_0.sql
+┌───────────────────┬───────────────────┬──────────────────────┬────────────────────┬─────────────────────┬─────────────┬────────────┬───────────────────────┬──────────────────────┬──────────────────────────┬─────────────────┬───────────────────┐
+│ min(s_store_name) │ min(s_company_id) │ min(s_street_number) │ min(s_street_name) │ min(s_suite_number) │ min(s_city) │ min(s_zip) │ min(ss_ticket_number) │ min(ss_sold_date_sk) │ min(sr_returned_date_sk) │ min(ss_item_sk) │ min(d1.d_date_sk) │
+│      varchar      │       int32       │       varchar        │      varchar       │       varchar       │   varchar   │  varchar   │         int32         │        int32         │          int32           │      int32      │       int32       │
+├───────────────────┼───────────────────┼──────────────────────┼────────────────────┼─────────────────────┼─────────────┼────────────┼───────────────────────┼──────────────────────┼──────────────────────────┼─────────────────┼───────────────────┤
+│ anti              │                 1 │ 115                  │ 15th               │ Suite 230           │ Benton      │ 08737      │                 80825 │              2450819 │                  2450872 │            6260 │           2450819 │
+└───────────────────┴───────────────────┴──────────────────────┴────────────────────┴─────────────────────┴─────────────┴────────────┴───────────────────────┴──────────────────────┴──────────────────────────┴─────────────────┴───────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query072_spj/query072_spj_0.sql
+┌────────────────┬───────────────────────┬────────────────────┬─────────────────┬──────────────────────┬──────────────────┐
+│ min(i_item_sk) │ min(w_warehouse_name) │ min(d1.d_week_seq) │ min(cs_item_sk) │ min(cs_order_number) │ min(inv_item_sk) │
+│     int32      │        varchar        │       int32        │      int32      │        int32         │      int32       │
+├────────────────┼───────────────────────┼────────────────────┼─────────────────┼──────────────────────┼──────────────────┤
+│           NULL │ NULL                  │               NULL │            NULL │                 NULL │             NULL │
+└────────────────┴───────────────────────┴────────────────────┴─────────────────┴──────────────────────┴──────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query084_spj/query084_spj_0.sql
+┌────────────────────┬───────────────────────┬─────────────────┐
+│ min(c_customer_id) │ min(sr_ticket_number) │ min(sr_item_sk) │
+│      varchar       │         int32         │      int32      │
+├────────────────────┼───────────────────────┼─────────────────┤
+│ AAAAAAAAAAIALAAA   │                  5759 │              85 │
+└────────────────────┴───────────────────────┴─────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query085_spj/query085_spj_0.sql
+┌──────────────────┬───────────────────────┬──────────────┬─────────────────┬──────────────────────┬─────────────────────┬─────────────────────┐
+│ min(ws_quantity) │ min(wr_refunded_cash) │ min(wr_fee)  │ min(ws_item_sk) │ min(wr_order_number) │ min(cd1.cd_demo_sk) │ min(cd2.cd_demo_sk) │
+│      int32       │     decimal(7,2)      │ decimal(7,2) │      int32      │        int32         │        int32        │        int32        │
+├──────────────────┼───────────────────────┼──────────────┼─────────────────┼──────────────────────┼─────────────────────┼─────────────────────┤
+│             NULL │                  NULL │         NULL │            NULL │                 NULL │                NULL │                NULL │
+└──────────────────┴───────────────────────┴──────────────┴─────────────────┴──────────────────────┴─────────────────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query091_spj/query091_spj_0.sql
+┌────────────────────────┬──────────────┬─────────────────┬──────────────────┬─────────────────┬──────────────────────┐
+│ min(cc_call_center_id) │ min(cc_name) │ min(cc_manager) │ min(cr_net_loss) │ min(cr_item_sk) │ min(cr_order_number) │
+│        varchar         │   varchar    │     varchar     │   decimal(7,2)   │      int32      │        int32         │
+├────────────────────────┼──────────────┼─────────────────┼──────────────────┼─────────────────┼──────────────────────┤
+│ NULL                   │ NULL         │ NULL            │             NULL │            NULL │                 NULL │
+└────────────────────────┴──────────────┴─────────────────┴──────────────────┴─────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query099_spj/query099_spj_0.sql
+┌───────────────────────┬──────────────┬──────────────┬──────────────────────┬─────────────────┐
+│ min(w_warehouse_name) │ min(sm_type) │ min(cc_name) │ min(cs_order_number) │ min(cs_item_sk) │
+│        varchar        │   varchar    │   varchar    │        int32         │      int32      │
+├───────────────────────┼──────────────┼──────────────┼──────────────────────┼─────────────────┤
+│ NULL                  │ NULL         │ NULL         │                 NULL │            NULL │
+└───────────────────────┴──────────────┴──────────────┴──────────────────────┴─────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query100_spj/query100_spj_0.sql
+┌──────────────────────┬──────────────────────┬──────────────────────────┬────────────────────┐
+│ min(item1.i_item_sk) │ min(item2.i_item_sk) │ min(s1.ss_ticket_number) │ min(s1.ss_item_sk) │
+│        int32         │        int32         │          int32           │       int32        │
+├──────────────────────┼──────────────────────┼──────────────────────────┼────────────────────┤
+│                 NULL │                 NULL │                     NULL │               NULL │
+└──────────────────────┴──────────────────────┴──────────────────────────┴────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query101_spj/query101_spj_0.sql
+┌────────────────────┬─────────────────┬───────────────────────┬──────────────────────┐
+│ min(c_customer_sk) │ min(ss_item_sk) │ min(sr_ticket_number) │ min(ws_order_number) │
+│       int32        │      int32      │         int32         │        int32         │
+├────────────────────┼─────────────────┼───────────────────────┼──────────────────────┤
+│               NULL │            NULL │                  NULL │                 NULL │
+└────────────────────┴─────────────────┴───────────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query102_spj/query102_spj_0.sql
+┌─────────────────┬───────────────────────┬──────────────────────┬────────────────────┬─────────────────┬─────────────────┐
+│ min(ss_item_sk) │ min(ss_ticket_number) │ min(ws_order_number) │ min(c_customer_sk) │ min(cd_demo_sk) │ min(hd_demo_sk) │
+│      int32      │         int32         │        int32         │       int32        │      int32      │      int32      │
+├─────────────────┼───────────────────────┼──────────────────────┼────────────────────┼─────────────────┼─────────────────┤
+│            NULL │                  NULL │                 NULL │               NULL │            NULL │            NULL │
+└─────────────────┴───────────────────────┴──────────────────────┴────────────────────┴─────────────────┴─────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query013/query013_0.sql
+┌──────────────────┬─────────────────────────┬────────────────────────────┬────────────────────────────┐
+│ avg(ss_quantity) │ avg(ss_ext_sales_price) │ avg(ss_ext_wholesale_cost) │ sum(ss_ext_wholesale_cost) │
+│      double      │         double          │           double           │       decimal(38,2)        │
+├──────────────────┼─────────────────────────┼────────────────────────────┼────────────────────────────┤
+│             NULL │                    NULL │                       NULL │                       NULL │
+└──────────────────┴─────────────────────────┴────────────────────────────┴────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query018/query018_0.sql
+┌───────────┬────────────┬──────────┬───────────┬────────┬────────┬────────┬────────┬────────┬────────┐
+│ i_item_id │ ca_country │ ca_state │ ca_county │  agg1  │  agg2  │  agg3  │  agg4  │  agg5  │  agg6  │
+│  varchar  │  varchar   │ varchar  │  varchar  │ double │ double │ double │ double │ double │ double │
+├───────────┼────────────┼──────────┼───────────┼────────┼────────┼────────┼────────┼────────┼────────┤
+│ NULL      │ NULL       │ NULL     │ NULL      │   NULL │   NULL │   NULL │   NULL │   NULL │   NULL │
+└───────────┴────────────┴──────────┴───────────┴────────┴────────┴────────┴────────┴────────┴────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query019/query019_0.sql
+┌──────────┬─────────┬───────────────┬────────────┬───────────────┐
+│ brand_id │  brand  │ i_manufact_id │ i_manufact │   ext_price   │
+│  int32   │ varchar │     int32     │  varchar   │ decimal(38,2) │
+├──────────┴─────────┴───────────────┴────────────┴───────────────┤
+│                             0 rows                              │
+└─────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query025/query025_0.sql
+┌──────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬──────────────────┬──────────────┬────────────────────┬────────────────────┬──────────────────────┐
+│    i_item_id     │                                                                                  i_item_desc                                                                                  │    s_store_id    │ s_store_name │ store_sales_profit │ store_returns_loss │ catalog_sales_profit │
+│     varchar      │                                                                                    varchar                                                                                    │     varchar      │   varchar    │       double       │       double       │        double        │
+├──────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼──────────────────┼──────────────┼────────────────────┼────────────────────┼──────────────────────┤
+│ AAAAAAAAAJJICAAA │ Small, social minutes read almost strange                                                                                                                                     │ AAAAAAAAAJBAAAAA │ able         │  778.8372146561394 │ 422.64606378544846 │   250.66239287136793 │
+│ AAAAAAAAAJJICAAA │ Small, social minutes read almost strange                                                                                                                                     │ AAAAAAAAHMAAAAAA │ n st         │               NULL │               NULL │                 NULL │
+│ AAAAAAAAAJJICAAA │ Small, social minutes read almost strange                                                                                                                                     │ AAAAAAAAMDBAAAAA │ cally        │               NULL │               NULL │                 NULL │
+│ AAAAAAAAAKNFAAAA │ Va                                                                                                                                                                            │ AAAAAAAAAJBAAAAA │ able         │               NULL │               NULL │                 NULL │
+│ AAAAAAAAAKNFAAAA │ Va                                                                                                                                                                            │ AAAAAAAADKAAAAAA │ pri          │               NULL │               NULL │                 NULL │
+│ AAAAAAAABGFKAAAA │ Businesses can start eyes. Most linguistic criteria achieve effectively moral rates. Well residential accounts form just sure targets. Particular, full                       │ AAAAAAAAAJBAAAAA │ able         │               NULL │               NULL │                 NULL │
+│ AAAAAAAABPPLBAAA │ Also current minutes should see bills. Full, european voices clear always important parts. Expected, outdoor years think again medical, other countries. Capital things may   │ AAAAAAAAAJBAAAAA │ able         │               NULL │               NULL │                 NULL │
+│ AAAAAAAADDAABAAA │ Industrial, possible toys should not attack still long birds. Privileges might utter there successful, international expressions. Free feet may not get                       │ AAAAAAAAAJBAAAAA │ able         │                0.0 │                0.0 │    723.1934604585414 │
+│ AAAAAAAADGOFAAAA │ Feet hit clean tears. Simply good points set for instance junior definitions. Available, continued males will not become already large things; ne                             │ AAAAAAAAAJBAAAAA │ able         │               NULL │               NULL │                 NULL │
+│ AAAAAAAAEDLOAAAA │ Also clear publishers may break now quite solar managers; small trees                                                                                                         │ AAAAAAAAAJBAAAAA │ able         │               NULL │               NULL │                 NULL │
+│ AAAAAAAAEOACCAAA │ Areas make. Tiny,                                                                                                                                                             │ AAAAAAAAKDBAAAAA │ ese          │               NULL │               NULL │                 NULL │
+│ AAAAAAAAFDOPAAAA │ Good mice used to force urgent animals. Involved services can summarise so. European frames rule here indeed canadian rights. Flat, able components find only for the types.  │ AAAAAAAAAJBAAAAA │ able         │               NULL │               NULL │                 NULL │
+│ AAAAAAAAFKDOCAAA │ As different churches would put yesterday to a schools. Teenage sk                                                                                                            │ AAAAAAAAOCAAAAAA │ cally        │                0.0 │                0.0 │    1257.999532273363 │
+│ AAAAAAAAGKIICAAA │ Strong, good affairs cannot store still new allegations. As simple proposals bring continuously pregnant directors. Groups apply mothers. Problems ma                         │ AAAAAAAAEHAAAAAA │ cally        │               NULL │               NULL │                 NULL │
+│ AAAAAAAAGKIICAAA │ Strong, good affairs cannot store still new allegations. As simple proposals bring continuously pregnant directors. Groups apply mothers. Problems ma                         │ AAAAAAAAMGBAAAAA │ ese          │               NULL │               NULL │                 NULL │
+├──────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴──────────────────┴──────────────┴────────────────────┴────────────────────┴──────────────────────┤
+│ 15 rows                                                                                                                                                                                                                                                                                   7 columns │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query027/query027_0.sql
+┌───────────┬─────────┬─────────┬────────┬────────┬────────┬────────┐
+│ i_item_id │ s_state │ g_state │  agg1  │  agg2  │  agg3  │  agg4  │
+│  varchar  │ varchar │  int64  │ double │ double │ double │ double │
+├───────────┼─────────┼─────────┼────────┼────────┼────────┼────────┤
+│ NULL      │ NULL    │       1 │   NULL │   NULL │   NULL │   NULL │
+└───────────┴─────────┴─────────┴────────┴────────┴────────┴────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query040/query040_0.sql
+┌─────────┬───────────┬───────────────┬───────────────┐
+│ w_state │ i_item_id │ sales_before  │  sales_after  │
+│ varchar │  varchar  │ decimal(38,2) │ decimal(38,2) │
+├─────────┴───────────┴───────────────┴───────────────┤
+│                       0 rows                        │
+└─────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query050/query050_0.sql
+┌──────────────┬──────────────┬─────────────────┬───────────────────┬─────────────────┬────────────────┬─────────────────┬───────────────────┬─────────┬────────────┬─────────┬────────────┬────────────┬─────────────┬───────────┐
+│ s_store_name │ s_company_id │ s_street_number │   s_street_name   │  s_street_type  │ s_suite_number │     s_city      │     s_county      │ s_state │   s_zip    │ 30 days │ 31-60 days │ 61-90 days │ 91-120 days │ >120 days │
+│   varchar    │    int32     │     varchar     │      varchar      │     varchar     │    varchar     │     varchar     │      varchar      │ varchar │  varchar   │ int128  │   int128   │   int128   │   int128    │  int128   │
+├──────────────┼──────────────┼─────────────────┼───────────────────┼─────────────────┼────────────────┼─────────────────┼───────────────────┼─────────┼────────────┼─────────┼────────────┼────────────┼─────────────┼───────────┤
+│ able         │            1 │ 120             │ Park              │ Ln              │ Suite L        │ Fairfield       │ Nassau County     │ FL      │ 36192      │     376 │       1454 │        858 │         445 │         0 │
+│ able         │            1 │ 154             │ Fifteenth         │ Lane            │ Suite 230      │ Mount Vernon    │ Texas County      │ OK      │ 78482      │     586 │       2167 │       1441 │         691 │         0 │
+│ able         │            1 │ 258             │ Lincoln Park      │ Ln              │ Suite 240      │ Beechwood       │ Pinellas County   │ FL      │ 35402      │     521 │       1995 │       1310 │         655 │         0 │
+│ able         │            1 │ 28              │ Hill South        │ Road            │ Suite D        │ Canton          │ Marshall County   │ TN      │ 38221      │     487 │       1782 │       1089 │         542 │         0 │
+│ able         │            1 │ 287             │ 11th Third        │ Road            │ Suite P        │ Brentwood       │ Walton County     │ GA      │ 34188      │     344 │       1267 │        758 │         394 │         0 │
+│ able         │            1 │ 295             │ Jefferson First   │ RD              │ Suite 20       │ Saint Paul      │ Forsyth County    │ GA      │ 35720      │     231 │        937 │        650 │         284 │         0 │
+│ able         │            1 │ 300             │ Franklin Maple    │ ST              │ Suite 10       │ York            │ Kootenai County   │ ID      │ 80236      │     168 │        526 │        315 │         154 │         0 │
+│ able         │            1 │ 516             │ Williams Sycamore │ Avenue          │ Suite C        │ Verona          │ Grayson County    │ KY      │ 43629      │     384 │       1425 │        830 │         476 │         0 │
+│ able         │            1 │ 54              │ Jefferson         │ Ave             │ Suite 290      │ Berlin          │ Turner County     │ GA      │ 34039      │     185 │        794 │        452 │         244 │         0 │
+│ able         │            1 │ 588             │ Park              │ Ln              │ Suite S        │ Pine Ridge      │ Stillwater County │ MT      │ 65319      │     148 │        631 │        383 │         185 │         0 │
+│ able         │            1 │ 592             │ Lee Meadow        │ Ln              │ Suite Y        │ Bradford        │ Buncombe County   │ NC      │ 21184      │     108 │        458 │        256 │         130 │         0 │
+│ able         │            1 │ 622             │ 10th Maple        │ Way             │ Suite X        │ Sherwood Forest │ Suffolk County    │ MA      │ 07302      │     227 │        895 │        602 │         302 │         0 │
+│ able         │            1 │ 996             │ Willow            │ Pkwy            │ Suite 490      │ Jordan          │ Metcalfe County   │ KY      │ 17752      │   29366 │     109810 │      69342 │       34644 │         0 │
+│ anti         │            1 │ 257             │ First Railroad    │ Avenue          │ Suite D        │ Lincoln Park    │ Medina County     │ OH      │ 40444      │     715 │       2571 │       1660 │         773 │         0 │
+│ anti         │            1 │ 351             │ Miller Oak        │ Court           │ Suite T        │ Williamsburg    │ Duplin County     │ NC      │ 28336      │     121 │        499 │        301 │         151 │         0 │
+│ anti         │            1 │ 541             │ Railroad          │ Court           │ Suite 210      │ Evergreen       │ Harper County     │ KS      │ 65621      │     284 │       1049 │        651 │         323 │         0 │
+│ anti         │            1 │ 562             │ 5th               │ Way             │ Suite G        │ Enon            │ Crawford County   │ IL      │ 60965      │     120 │        415 │        248 │         136 │         0 │
+│ anti         │            1 │ 625             │ 10th 14th         │ Lane            │ Suite 470      │ West Point      │ Giles County      │ VA      │ 22698      │     540 │       2129 │       1292 │         671 │         0 │
+│ anti         │            1 │ 665             │ Ridge Lake        │ RD              │ Suite 400      │ Geneva          │ El Dorado County  │ CA      │ 96033      │     140 │        559 │        370 │         159 │         0 │
+│ anti         │            1 │ 780             │ Laurel            │ Drive           │ Suite G        │ Pine Hill       │ Hartley County    │ TX      │ 79236      │     103 │        427 │        265 │         122 │         0 │
+│  ·           │            · │  ·              │   ·               │        ·        │     ·          │     ·           │       ·           │ ·       │     ·      │      ·  │         ·  │         ·  │          ·  │         · │
+│  ·           │            · │  ·              │   ·               │        ·        │     ·          │     ·           │       ·           │ ·       │     ·      │      ·  │         ·  │         ·  │          ·  │         · │
+│  ·           │            · │  ·              │   ·               │        ·        │     ·          │     ·           │       ·           │ ·       │     ·      │      ·  │         ·  │         ·  │          ·  │         · │
+│ ese          │            1 │ 805             │ Lake              │ Lane            │ Suite F        │ Pleasant Ridge  │ Howard County     │ IN      │ 44137      │     135 │        514 │        319 │         146 │         0 │
+│ ese          │            1 │ 829             │ Twelfth           │ Lane            │ Suite 60       │ Bethel          │ Harper County     │ KS      │ 65281      │     436 │       1746 │       1149 │         540 │         0 │
+│ ese          │            1 │ 862             │ 9th               │ Dr.             │ Suite V        │ Poplar Grove    │ Richland County   │ OH      │ 43664      │     371 │       1323 │        853 │         434 │         0 │
+│ ese          │            1 │ 872             │ Fifteenth Maple   │ Lane            │ Suite R        │ Hickory Grove   │ Box Butte County  │ NE      │ 60481      │     220 │        864 │        513 │         301 │         0 │
+│ ese          │            1 │ 894             │ Chestnut          │ ST              │ Suite L        │ Ashland         │ Wallace County    │ KS      │ 64244      │     511 │       2133 │       1407 │         694 │         0 │
+│ n st         │            1 │ 106             │ Lee               │ Way             │ Suite 300      │ Taylor          │ Allen County      │ KY      │ 44045      │     400 │       1435 │        887 │         475 │         0 │
+│ n st         │            1 │ 257             │ Twelfth Walnut    │ Ave             │ Suite E        │ Auburn          │ Polk County       │ FL      │ 39231      │     453 │       1655 │       1001 │         512 │         0 │
+│ n st         │            1 │ 726             │ Franklin          │ Street          │ Suite 280      │ Columbia        │ Camden County     │ GA      │ 33292      │     426 │       1750 │       1085 │         550 │         0 │
+│ n st         │            1 │ 809             │ View Second       │ Way             │ Suite 470      │ Fairfield       │ Moore County      │ TN      │ 36192      │     561 │       1937 │       1203 │         582 │         0 │
+│ n st         │            1 │ 843             │ 7th Fifth         │ Ln              │ Suite P        │ Waterloo        │ Moore County      │ TN      │ 31675      │     238 │        805 │        489 │         232 │         0 │
+│ n st         │            1 │ 918             │ Lee               │ Boulevard       │ Suite 310      │ Harmony         │ Quitman County    │ MS      │ 55804      │     213 │        771 │        502 │         232 │         0 │
+│ ought        │            1 │ 364             │ College Miller    │ Circle          │ Suite 300      │ Arlington       │ Tuolumne County   │ CA      │ 96557      │     147 │        466 │        290 │         151 │         0 │
+│ ought        │            1 │ 376             │ Eigth             │ Ln              │ Suite 490      │ Westwood        │ Baldwin County    │ AL      │ 31715      │     126 │        429 │        303 │         150 │         0 │
+│ ought        │            1 │ 414             │ Park 5th          │ Avenue          │ Suite C        │ Lexington       │ Franklin County   │ KS      │ 68342      │     257 │       1031 │        677 │         308 │         0 │
+│ ought        │            1 │ 45              │ Ridge 7th         │ Pkwy            │ Suite S        │ Taylor          │ Dauphin County    │ PA      │ 14045      │     281 │       1163 │        728 │         362 │         0 │
+│ ought        │            1 │ 552             │ Highland Oak      │ Circle          │ Suite C        │ Hope            │ Randolph County   │ NC      │ 20386      │     254 │        894 │        604 │         279 │         0 │
+│ ought        │            1 │ 612             │ Lake 5th          │ Ct.             │ Suite 80       │ Thornton        │ Grady County      │ OK      │ 71140      │     285 │        897 │        517 │         271 │         0 │
+│ ought        │            1 │ 614             │ Madison 8th       │ Lane            │ Suite S        │ Forest Hills    │ Roane County      │ TN      │ 39237      │     181 │        609 │        392 │         201 │         0 │
+│ ought        │            1 │ 721             │ Poplar            │ Ave             │ Suite 250      │ West Point      │ Rush County       │ KS      │ 62698      │     114 │        520 │        333 │         168 │         0 │
+│ ought        │            1 │ 892             │ Seventh Williams  │ Wy              │ Suite D        │ Windsor         │ Monroe County     │ GA      │ 38137      │      52 │        165 │        110 │          58 │         0 │
+├──────────────┴──────────────┴─────────────────┴───────────────────┴─────────────────┴────────────────┴─────────────────┴───────────────────┴─────────┴────────────┴─────────┴────────────┴────────────┴─────────────┴───────────┤
+│ 100 rows (40 shown)                                                                                                                                                                                                  15 columns │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query084/query084_0.sql
+┌──────────────────┬──────────────────────────────────────────────────────┐
+│   customer_id    │                     customername                     │
+│     varchar      │                       varchar                        │
+├──────────────────┼──────────────────────────────────────────────────────┤
+│ AAAAAAAAAAIALAAA │ Lam                           , Richard              │
+│ AAAAAAAAAAIALAAA │ Lam                           , Richard              │
+│ AAAAAAAAAAIALAAA │ Lam                           , Richard              │
+│ AAAAAAAAAAIALAAA │ Lam                           , Richard              │
+│ AAAAAAAAADJANAAA │ Price                         , James                │
+│ AAAAAAAAADJANAAA │ Price                         , James                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│ AAAAAAAAAFNBAAAA │ Neal                          , Ellen                │
+│        ·         │                          ·                           │
+│        ·         │                          ·                           │
+│        ·         │                          ·                           │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+│ AAAAAAAAAMKNEBAA │ Pettit                        , Joe                  │
+├──────────────────┴──────────────────────────────────────────────────────┤
+│ 100 rows (40 shown)                                           2 columns │
+└─────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query085/query085_0.sql
+┌────────────────────────────────────────┬──────────────────┬───────────────────────┬─────────────┐
+│ main."substring"(r_reason_desc, 1, 20) │ avg(ws_quantity) │ avg(wr_refunded_cash) │ avg(wr_fee) │
+│                varchar                 │      double      │        double         │   double    │
+├────────────────────────────────────────┴──────────────────┴───────────────────────┴─────────────┤
+│                                             0 rows                                              │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query091/query091_0.sql
+┌─────────────┬──────────────────┬─────────┬───────────────┐
+│ Call_Center │ Call_Center_Name │ Manager │ Returns_Loss  │
+│   varchar   │     varchar      │ varchar │ decimal(38,2) │
+├─────────────┴──────────────────┴─────────┴───────────────┤
+│                          0 rows                          │
+└──────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query099/query099_0.sql
+┌───────────────────────────────────────────┬─────────┬─────────┬─────────┬────────────┬────────────┬─────────────┬───────────┐
+│ main."substring"(w_warehouse_name, 1, 20) │ sm_type │ cc_name │ 30 days │ 31-60 days │ 61-90 days │ 91-120 days │ >120 days │
+│                  varchar                  │ varchar │ varchar │ int128  │   int128   │   int128   │   int128    │  int128   │
+├───────────────────────────────────────────┴─────────┴─────────┴─────────┴────────────┴────────────┴─────────────┴───────────┤
+│                                                           0 rows                                                            │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query100/query100_0.sql
+┌───────────┬───────────┬───────┐
+│ i_item_sk │ i_item_sk │  cnt  │
+│   int32   │   int32   │ int64 │
+├───────────┴───────────┴───────┤
+│            0 rows             │
+└───────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query101/query101_0.sql
+┌───────────────┬──────────────┬─────────────┬───────┐
+│ c_customer_sk │ c_first_name │ c_last_name │  cnt  │
+│     int32     │   varchar    │   varchar   │ int64 │
+├───────────────┴──────────────┴─────────────┴───────┤
+│                       0 rows                       │
+└────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query102/query102_0.sql
+┌───────────┬───────────────────┬─────────────────────┬──────────────────┬───────┐
+│ cd_gender │ cd_marital_status │ cd_education_status │ hd_vehicle_count │  cnt  │
+│  varchar  │      varchar      │       varchar       │      int32       │ int64 │
+├───────────┴───────────────────┴─────────────────────┴──────────────────┴───────┤
+│                                     0 rows                                     │
+└────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query013_spj/query013_spj_0.sql
+┌──────────────────┬─────────────────────────┬────────────────────────────┬────────────────────────────┐
+│ min(ss_quantity) │ min(ss_ext_sales_price) │ min(ss_ext_wholesale_cost) │ min(ss_ext_wholesale_cost) │
+│      int32       │      decimal(7,2)       │        decimal(7,2)        │        decimal(7,2)        │
+├──────────────────┼─────────────────────────┼────────────────────────────┼────────────────────────────┤
+│             NULL │                    NULL │                       NULL │                       NULL │
+└──────────────────┴─────────────────────────┴────────────────────────────┴────────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query018_spj/query018_spj_0.sql
+┌────────────────┬─────────────────┬───────────────┬────────────────┬──────────────────┬────────────────────┬────────────────────┬─────────────────────┬────────────────────┬───────────────────┬───────────────────┐
+│ min(i_item_id) │ min(ca_country) │ min(ca_state) │ min(ca_county) │ min(cs_quantity) │ min(cs_list_price) │ min(cs_coupon_amt) │ min(cs_sales_price) │ min(cs_net_profit) │ min(c_birth_year) │ min(cd_dep_count) │
+│    varchar     │     varchar     │    varchar    │    varchar     │      int32       │    decimal(7,2)    │    decimal(7,2)    │    decimal(7,2)     │    decimal(7,2)    │       int32       │       int32       │
+├────────────────┼─────────────────┼───────────────┼────────────────┼──────────────────┼────────────────────┼────────────────────┼─────────────────────┼────────────────────┼───────────────────┼───────────────────┤
+│ NULL           │ NULL            │ NULL          │ NULL           │             NULL │               NULL │               NULL │                NULL │               NULL │              NULL │              NULL │
+└────────────────┴─────────────────┴───────────────┴────────────────┴──────────────────┴────────────────────┴────────────────────┴─────────────────────┴────────────────────┴───────────────────┴───────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query019_spj/query019_spj_0.sql
+┌─────────────────┬────────────────────┬─────────────────────────┐
+│ min(i_brand_id) │ min(i_manufact_id) │ min(ss_ext_sales_price) │
+│      int32      │       int32        │      decimal(7,2)       │
+├─────────────────┼────────────────────┼─────────────────────────┤
+│            NULL │               NULL │                    NULL │
+└─────────────────┴────────────────────┴─────────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query025_spj/query025_spj_0.sql
+┌──────────────────┬─────────────────────────────────────────────────────────────┬──────────────────┬───────────────────┬────────────────────┬──────────────────┬────────────────────┬─────────────────┬───────────────────────┬──────────────────────┐
+│  min(i_item_id)  │                      min(i_item_desc)                       │ min(s_store_id)  │ min(s_store_name) │ min(ss_net_profit) │ min(sr_net_loss) │ min(cs_net_profit) │ min(ss_item_sk) │ min(sr_ticket_number) │ min(cs_order_number) │
+│     varchar      │                           varchar                           │     varchar      │      varchar      │    decimal(7,2)    │   decimal(7,2)   │    decimal(7,2)    │      int32      │         int32         │        int32         │
+├──────────────────┼─────────────────────────────────────────────────────────────┼──────────────────┼───────────────────┼────────────────────┼──────────────────┼────────────────────┼─────────────────┼───────────────────────┼──────────────────────┤
+│ AAAAAAAAAAILBAAA │ Actually social letters occur just past a groups. Independe │ AAAAAAAAAJBAAAAA │ able              │           -2772.11 │            59.23 │           -2262.70 │           32473 │               7375089 │              3727087 │
+└──────────────────┴─────────────────────────────────────────────────────────────┴──────────────────┴───────────────────┴────────────────────┴──────────────────┴────────────────────┴─────────────────┴───────────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query027_spj/query027_spj_0.sql
+┌────────────────┬──────────────┬──────────────────┬────────────────────┬────────────────────┬─────────────────────┬─────────────────┬───────────────────────┐
+│ min(i_item_id) │ min(s_state) │ min(ss_quantity) │ min(ss_list_price) │ min(ss_coupon_amt) │ min(ss_sales_price) │ min(ss_item_sk) │ min(ss_ticket_number) │
+│    varchar     │   varchar    │      int32       │    decimal(7,2)    │    decimal(7,2)    │    decimal(7,2)     │      int32      │         int32         │
+├────────────────┼──────────────┼──────────────────┼────────────────────┼────────────────────┼─────────────────────┼─────────────────┼───────────────────────┤
+│ NULL           │ NULL         │             NULL │               NULL │               NULL │                NULL │            NULL │                  NULL │
+└────────────────┴──────────────┴──────────────────┴────────────────────┴────────────────────┴─────────────────────┴─────────────────┴───────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query040_spj/query040_spj_0.sql
+┌──────────────┬────────────────┬─────────────────┬──────────────────────┬─────────────────┬──────────────────────┐
+│ min(w_state) │ min(i_item_id) │ min(cs_item_sk) │ min(cs_order_number) │ min(cr_item_sk) │ min(cr_order_number) │
+│   varchar    │    varchar     │      int32      │        int32         │      int32      │        int32         │
+├──────────────┼────────────────┼─────────────────┼──────────────────────┼─────────────────┼──────────────────────┤
+│ NULL         │ NULL           │            NULL │                 NULL │            NULL │                 NULL │
+└──────────────┴────────────────┴─────────────────┴──────────────────────┴─────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query050_spj/query050_spj_0.sql
+┌───────────────────┬───────────────────┬──────────────────────┬────────────────────┬─────────────────────┬─────────────┬────────────┬───────────────────────┬──────────────────────┬──────────────────────────┬─────────────────┬───────────────────┐
+│ min(s_store_name) │ min(s_company_id) │ min(s_street_number) │ min(s_street_name) │ min(s_suite_number) │ min(s_city) │ min(s_zip) │ min(ss_ticket_number) │ min(ss_sold_date_sk) │ min(sr_returned_date_sk) │ min(ss_item_sk) │ min(d1.d_date_sk) │
+│      varchar      │       int32       │       varchar        │      varchar       │       varchar       │   varchar   │  varchar   │         int32         │        int32         │          int32           │      int32      │       int32       │
+├───────────────────┼───────────────────┼──────────────────────┼────────────────────┼─────────────────────┼─────────────┼────────────┼───────────────────────┼──────────────────────┼──────────────────────────┼─────────────────┼───────────────────┤
+│ anti              │                 1 │ 115                  │ 15th               │ Suite 230           │ Benton      │ 08737      │                 80825 │              2450819 │                  2450872 │            6260 │           2450819 │
+└───────────────────┴───────────────────┴──────────────────────┴────────────────────┴─────────────────────┴─────────────┴────────────┴───────────────────────┴──────────────────────┴──────────────────────────┴─────────────────┴───────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query072_spj/query072_spj_0.sql
+┌────────────────┬───────────────────────┬────────────────────┬─────────────────┬──────────────────────┬──────────────────┐
+│ min(i_item_sk) │ min(w_warehouse_name) │ min(d1.d_week_seq) │ min(cs_item_sk) │ min(cs_order_number) │ min(inv_item_sk) │
+│     int32      │        varchar        │       int32        │      int32      │        int32         │      int32       │
+├────────────────┼───────────────────────┼────────────────────┼─────────────────┼──────────────────────┼──────────────────┤
+│           NULL │ NULL                  │               NULL │            NULL │                 NULL │             NULL │
+└────────────────┴───────────────────────┴────────────────────┴─────────────────┴──────────────────────┴──────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query084_spj/query084_spj_0.sql
+┌────────────────────┬───────────────────────┬─────────────────┐
+│ min(c_customer_id) │ min(sr_ticket_number) │ min(sr_item_sk) │
+│      varchar       │         int32         │      int32      │
+├────────────────────┼───────────────────────┼─────────────────┤
+│ AAAAAAAAAAIALAAA   │                  5759 │              85 │
+└────────────────────┴───────────────────────┴─────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query085_spj/query085_spj_0.sql
+┌──────────────────┬───────────────────────┬──────────────┬─────────────────┬──────────────────────┬─────────────────────┬─────────────────────┐
+│ min(ws_quantity) │ min(wr_refunded_cash) │ min(wr_fee)  │ min(ws_item_sk) │ min(wr_order_number) │ min(cd1.cd_demo_sk) │ min(cd2.cd_demo_sk) │
+│      int32       │     decimal(7,2)      │ decimal(7,2) │      int32      │        int32         │        int32        │        int32        │
+├──────────────────┼───────────────────────┼──────────────┼─────────────────┼──────────────────────┼─────────────────────┼─────────────────────┤
+│             NULL │                  NULL │         NULL │            NULL │                 NULL │                NULL │                NULL │
+└──────────────────┴───────────────────────┴──────────────┴─────────────────┴──────────────────────┴─────────────────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query091_spj/query091_spj_0.sql
+┌────────────────────────┬──────────────┬─────────────────┬──────────────────┬─────────────────┬──────────────────────┐
+│ min(cc_call_center_id) │ min(cc_name) │ min(cc_manager) │ min(cr_net_loss) │ min(cr_item_sk) │ min(cr_order_number) │
+│        varchar         │   varchar    │     varchar     │   decimal(7,2)   │      int32      │        int32         │
+├────────────────────────┼──────────────┼─────────────────┼──────────────────┼─────────────────┼──────────────────────┤
+│ NULL                   │ NULL         │ NULL            │             NULL │            NULL │                 NULL │
+└────────────────────────┴──────────────┴─────────────────┴──────────────────┴─────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query099_spj/query099_spj_0.sql
+┌───────────────────────┬──────────────┬──────────────┬──────────────────────┬─────────────────┐
+│ min(w_warehouse_name) │ min(sm_type) │ min(cc_name) │ min(cs_order_number) │ min(cs_item_sk) │
+│        varchar        │   varchar    │   varchar    │        int32         │      int32      │
+├───────────────────────┼──────────────┼──────────────┼──────────────────────┼─────────────────┤
+│ NULL                  │ NULL         │ NULL         │                 NULL │            NULL │
+└───────────────────────┴──────────────┴──────────────┴──────────────────────┴─────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query100_spj/query100_spj_0.sql
+┌──────────────────────┬──────────────────────┬──────────────────────────┬────────────────────┐
+│ min(item1.i_item_sk) │ min(item2.i_item_sk) │ min(s1.ss_ticket_number) │ min(s1.ss_item_sk) │
+│        int32         │        int32         │          int32           │       int32        │
+├──────────────────────┼──────────────────────┼──────────────────────────┼────────────────────┤
+│                 NULL │                 NULL │                     NULL │               NULL │
+└──────────────────────┴──────────────────────┴──────────────────────────┴────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query101_spj/query101_spj_0.sql
+┌────────────────────┬─────────────────┬───────────────────────┬──────────────────────┐
+│ min(c_customer_sk) │ min(ss_item_sk) │ min(sr_ticket_number) │ min(ws_order_number) │
+│       int32        │      int32      │         int32         │        int32         │
+├────────────────────┼─────────────────┼───────────────────────┼──────────────────────┤
+│               NULL │            NULL │                  NULL │                 NULL │
+└────────────────────┴─────────────────┴───────────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query102_spj/query102_spj_0.sql
+┌─────────────────┬───────────────────────┬──────────────────────┬────────────────────┬─────────────────┬─────────────────┐
+│ min(ss_item_sk) │ min(ss_ticket_number) │ min(ws_order_number) │ min(c_customer_sk) │ min(cd_demo_sk) │ min(hd_demo_sk) │
+│      int32      │         int32         │        int32         │       int32        │      int32      │      int32      │
+├─────────────────┼───────────────────────┼──────────────────────┼────────────────────┼─────────────────┼─────────────────┤
+│            NULL │                  NULL │                 NULL │               NULL │            NULL │            NULL │
+└─────────────────┴───────────────────────┴──────────────────────┴────────────────────┴─────────────────┴─────────────────┘

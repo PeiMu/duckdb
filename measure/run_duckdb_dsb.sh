@@ -24,7 +24,7 @@ mkdir -p dsb_$2_result/
 for i in $(eval echo {1.."${iteration}"}); do
   for sql in $(find "$dir_1" "$dir_2" -type f -name "*.sql"); do
     echo "execute ${sql}" 2>&1|tee -a ${log_name};
-    echo -ne ".read ${sql}" | duckdb ./dsb_$2.db 2>&1|tee -a ${log_name};
+    echo -ne ".read ${sql}" | duckdb /home/pei/Project/duckdb/measure/dsb_$2.db 2>&1|tee -a ${log_name};
   done
 done
 

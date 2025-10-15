@@ -11,7 +11,7 @@ iteration=10
 
 for sql in $(find "$dir_1" "$dir_2" -type f -name "*.sql"); do
 #  echo "hyperfine run ${sql}" 2>&1|tee -a ${log_name}
-  hyperfine --warmup 5 --runs ${iteration} --export-csv temp.csv "duckdb -c \".read ${sql}\" ./dsb_$3.db"
+  hyperfine --warmup 5 --runs ${iteration} --export-csv temp.csv "duckdb -c \".read ${sql}\" /home/pei/Project/duckdb/measure/dsb_$3.db"
   cat temp.csv >> ${log_name}
 done
 
