@@ -53,7 +53,7 @@ for sql in "${dir}"/*; do
     echo -ne ".read ${sql}" | duckdb ./imdb.db;
   done
 done
-mv ${LOG_NAME} duckdb_js_whole_plan_breakdown_${LOG_NAME}
+mv ${LOG_NAME} duckdb_js_whole_plan_wo_stats_breakdown_${LOG_NAME}
 
 ####### reorder table + split + join order opt + merge back to the whole plan
 #echo "compile with ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWRITE=1 ENABLE_SPECIFY_EST_STAT=1 ENABLE_MERGE_BACK_PLAN=1" 2>&1|tee -a compile.log
