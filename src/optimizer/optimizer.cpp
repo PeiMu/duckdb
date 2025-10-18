@@ -723,6 +723,187 @@ void Optimizer::RunBuiltInPostOptimizers() {
 	});
 }
 
+void Optimizer::RunBuiltInWholePlanOptimizers() {
+	switch (plan->type) {
+	case LogicalOperatorType::LOGICAL_TRANSACTION:
+	case LogicalOperatorType::LOGICAL_PRAGMA:
+	case LogicalOperatorType::LOGICAL_SET:
+	case LogicalOperatorType::LOGICAL_UPDATE_EXTENSIONS:
+	case LogicalOperatorType::LOGICAL_CREATE_SECRET:
+	case LogicalOperatorType::LOGICAL_EXTENSION_OPERATOR:
+		// skip optimizing simple & often-occurring plans unaffected by rewrites
+		if (plan->children.empty()) {
+			return;
+		}
+		break;
+	default:
+		break;
+	}
+	// first we perform expression rewrites using the ExpressionRewriter
+	// this does not change the logical plan structure, but only simplifies the expression trees
+	RunOptimizer(OptimizerType::EXPRESSION_REWRITER, [&]() { rewriter.VisitOperator(*plan); });
+
+	// Rewrites SUM(x + C) into SUM(x) + C * COUNT(x)
+	RunOptimizer(OptimizerType::SUM_REWRITER, [&]() {
+		SumRewriterOptimizer optimizer(*this);
+		optimizer.Optimize(plan);
+	});
+
+	// perform filter pullup
+	RunOptimizer(OptimizerType::FILTER_PULLUP, [&]() {
+		FilterPullup filter_pullup;
+		plan = filter_pullup.Rewrite(std::move(plan));
+	});
+
+	// perform filter pushdown
+	RunOptimizer(OptimizerType::FILTER_PUSHDOWN, [&]() {
+		FilterPushdown filter_pushdown(*this);
+		unordered_set<idx_t> top_bindings;
+		filter_pushdown.CheckMarkToSemi(*plan, top_bindings);
+		plan = filter_pushdown.Rewrite(std::move(plan));
+	});
+
+	// derive and push filters into materialized CTEs
+	RunOptimizer(OptimizerType::CTE_FILTER_PUSHER, [&]() {
+		CTEFilterPusher cte_filter_pusher(*this);
+		plan = cte_filter_pusher.Optimize(std::move(plan));
+	});
+
+	RunOptimizer(OptimizerType::REGEX_RANGE, [&]() {
+		RegexRangeFilter regex_opt;
+		plan = regex_opt.Rewrite(std::move(plan));
+	});
+
+	RunOptimizer(OptimizerType::IN_CLAUSE, [&]() {
+		InClauseRewriter ic_rewriter(context, *this);
+		plan = ic_rewriter.Rewrite(std::move(plan));
+	});
+
+	// removes any redundant DelimGets/DelimJoins
+	RunOptimizer(OptimizerType::DELIMINATOR, [&]() {
+		Deliminator deliminator;
+		plan = deliminator.Optimize(std::move(plan));
+	});
+
+	// Pulls up empty results
+	RunOptimizer(OptimizerType::EMPTY_RESULT_PULLUP, [&]() {
+		EmptyResultPullup empty_result_pullup;
+		plan = empty_result_pullup.Optimize(std::move(plan));
+	});
+
+//	// then we perform the join ordering optimization
+//	// this also rewrites cross products + filters into joins and performs filter pushdowns
+//	RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {
+//		JoinOrderOptimizer optimizer(context);
+//		plan = optimizer.Optimize(std::move(plan));
+//	});
+
+	// rewrites UNNESTs in DelimJoins by moving them to the projection
+	RunOptimizer(OptimizerType::UNNEST_REWRITER, [&]() {
+		UnnestRewriter unnest_rewriter;
+		plan = unnest_rewriter.Optimize(std::move(plan));
+	});
+
+	// removes unused columns
+	RunOptimizer(OptimizerType::UNUSED_COLUMNS, [&]() {
+		RemoveUnusedColumns unused(binder, context, true);
+		unused.VisitOperator(*plan);
+	});
+
+	// Remove duplicate groups from aggregates
+	RunOptimizer(OptimizerType::DUPLICATE_GROUPS, [&]() {
+		RemoveDuplicateGroups remove;
+		remove.VisitOperator(*plan);
+	});
+
+	// then we extract common subexpressions inside the different operators
+	RunOptimizer(OptimizerType::COMMON_SUBEXPRESSIONS, [&]() {
+		CommonSubExpressionOptimizer cse_optimizer(binder);
+		cse_optimizer.VisitOperator(*plan);
+	});
+
+	// creates projection maps so unused columns are projected out early
+	RunOptimizer(OptimizerType::COLUMN_LIFETIME, [&]() {
+		ColumnLifetimeAnalyzer column_lifetime(*this, *plan, true);
+		column_lifetime.VisitOperator(*plan);
+	});
+
+//	// Once we know the column lifetime, we have more information regarding
+//	// what relations should be the build side/probe side.
+//	RunOptimizer(OptimizerType::BUILD_SIDE_PROBE_SIDE, [&]() {
+//		BuildProbeSideOptimizer build_probe_side_optimizer(context, *plan);
+//		build_probe_side_optimizer.VisitOperator(*plan);
+//	});
+
+	// pushes LIMIT below PROJECTION
+	RunOptimizer(OptimizerType::LIMIT_PUSHDOWN, [&]() {
+		LimitPushdown limit_pushdown;
+		plan = limit_pushdown.Optimize(std::move(plan));
+	});
+
+	// perform sampling pushdown
+	RunOptimizer(OptimizerType::SAMPLING_PUSHDOWN, [&]() {
+		SamplingPushdown sampling_pushdown;
+		plan = sampling_pushdown.Optimize(std::move(plan));
+	});
+
+	// transform ORDER BY + LIMIT to TopN
+	RunOptimizer(OptimizerType::TOP_N, [&]() {
+		TopN topn(context);
+		plan = topn.Optimize(std::move(plan));
+	});
+
+	// try to use late materialization
+	RunOptimizer(OptimizerType::LATE_MATERIALIZATION, [&]() {
+		LateMaterialization late_materialization(*this);
+		plan = late_materialization.Optimize(std::move(plan));
+	});
+
+	// perform statistics propagation
+//	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
+//		StatisticsPropagator propagator(*this, *plan);
+//		propagator.PropagateStatistics(plan);
+//		// todo: need to double check once finsh collecting statistics from ColumnGet
+//		if (statistics_map.empty()) {
+//			statistics_map = propagator.GetStatisticsMap();
+//		} else {
+//			auto new_statistics_map = propagator.GetStatisticsMap();
+//			for (auto &ele : statistics_map) {
+//				for (const auto &new_ele : new_statistics_map) {
+//					if (ele.first.table_index == new_ele.first.table_index &&
+//					    ele.first.column_index == new_ele.first.column_index) {
+//						ele.second->Merge(*(new_ele.second));
+//					}
+//				}
+//			}
+//		}
+//	});
+
+	// remove duplicate aggregates
+	RunOptimizer(OptimizerType::COMMON_AGGREGATE, [&]() {
+		CommonAggregateOptimizer common_aggregate;
+		common_aggregate.VisitOperator(*plan);
+	});
+
+	// creates projection maps so unused columns are projected out early
+	RunOptimizer(OptimizerType::COLUMN_LIFETIME, [&]() {
+		ColumnLifetimeAnalyzer column_lifetime(*this, *plan, true);
+		column_lifetime.VisitOperator(*plan);
+	});
+
+	// apply simple expression heuristics to get an initial reordering
+	RunOptimizer(OptimizerType::REORDER_FILTER, [&]() {
+		ExpressionHeuristics expression_heuristics(*this);
+		plan = expression_heuristics.Rewrite(std::move(plan));
+	});
+
+	// perform join filter pushdown after the dust has settled
+	RunOptimizer(OptimizerType::JOIN_FILTER_PUSHDOWN, [&]() {
+		JoinFilterPushdownOptimizer join_filter_pushdown(*this);
+		join_filter_pushdown.VisitOperator(*plan);
+	});
+}
+
 unique_ptr<LogicalOperator> Optimizer::Optimize(unique_ptr<LogicalOperator> plan_p) {
 	Verify(*plan_p);
 
@@ -807,6 +988,36 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 	this->plan = std::move(plan_p);
 
 	RunBuiltInPostOptimizers();
+
+	for (auto &optimizer_extension : DBConfig::GetConfig(context).optimizer_extensions) {
+		RunOptimizer(OptimizerType::EXTENSION, [&]() {
+			OptimizerExtensionInput input {GetContext(), *this, optimizer_extension.optimizer_info.get()};
+			if (optimizer_extension.optimize_function) {
+				optimizer_extension.optimize_function(input, plan);
+			}
+		});
+	}
+
+	Planner::VerifyPlan(context, plan);
+
+	return std::move(plan);
+}
+
+unique_ptr<LogicalOperator> Optimizer::WholePlanOptimize(unique_ptr<LogicalOperator> plan_p) {
+	Verify(*plan_p);
+
+	this->plan = std::move(plan_p);
+
+	for (auto &pre_optimizer_extension : DBConfig::GetConfig(context).optimizer_extensions) {
+		RunOptimizer(OptimizerType::EXTENSION, [&]() {
+			OptimizerExtensionInput input {GetContext(), *this, pre_optimizer_extension.optimizer_info.get()};
+			if (pre_optimizer_extension.pre_optimize_function) {
+				pre_optimizer_extension.pre_optimize_function(input, plan);
+			}
+		});
+	}
+
+	RunBuiltInWholePlanOptimizers();
 
 	for (auto &optimizer_extension : DBConfig::GetConfig(context).optimizer_extensions) {
 		RunOptimizer(OptimizerType::EXTENSION, [&]() {

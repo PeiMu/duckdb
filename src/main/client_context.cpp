@@ -757,6 +757,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #if ENABLE_MERGE_BACK_PLAN
 			// merge sub_plan to whole_plan
 			whole_plan = subquery_preparer.MergeBack(std::move(whole_plan), sub_plan);
+#if ENABLE_DEBUG_PRINT
+			Printer::Print("After MergeBack");
+			whole_plan->Print();
+#endif
 #endif
 #if ENABLE_MEASURE_EXE_TIME
 			if (execute_plan) {
@@ -979,16 +983,32 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 #if ENABLE_MERGE_BACK_PLAN
 		// merge sub_plan to whole_plan
-		auto explain_whole_plan = subquery_preparer.MergeBack(std::move(whole_plan), logical_plan);
-		if (explain_whole_plan) {
+		whole_plan = subquery_preparer.MergeBack(std::move(whole_plan), logical_plan);
+		if (whole_plan) {
+#if ENABLE_DEBUG_PRINT
+			if (execute_plan) {
+				// debug: print last MergeBack query
+				Printer::Print("After last MergeBack");
+				whole_plan->Print();
+			}
+#endif
+			whole_plan = optimizer.WholePlanOptimize(std::move(whole_plan));
+#if ENABLE_DEBUG_PRINT
+			if (execute_plan) {
+				// debug: print last MergeBack query
+				Printer::Print("After WholePlanOptimize");
+				whole_plan->Print();
+			}
+#endif
+
 #if WHOLE_PLAN_EXPLAIN_ANALYZE
-			explain_whole_plan = make_uniq<LogicalExplain>(std::move(explain_whole_plan), ExplainType::EXPLAIN_ANALYZE,
-			                                               ExplainFormat::DEFAULT);
+			auto explain_whole_plan =
+			    make_uniq<LogicalExplain>(std::move(whole_plan), ExplainType::EXPLAIN_ANALYZE, ExplainFormat::DEFAULT);
 			subquery_preparer.ExplainAnalyzeSubQuery(lock, result, std::move(explain_whole_plan),
 			                                         result->unbound_statement->query,
 			                                         result->unbound_statement->named_param_map);
 #else
-			logical_plan = std::move(explain_whole_plan);
+			logical_plan = std::move(whole_plan);
 #endif
 		}
 #endif
