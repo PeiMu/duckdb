@@ -1,0 +1,96 @@
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query3/query3_0.sql"" ./tpcds_4.db",0.13333007848000003,0.0006003053619428938,0.13325520598,0.10960505999999999,0.02361064,0.13255948898,0.13478774998
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query17/query17_0.sql"" ./tpcds_4.db",0.34175135615999996,0.002378684131282674,0.34140853716,0.2806361,0.061004539999999996,0.33830229566000003,0.34528799266
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query18/query18_0.sql"" ./tpcds_4.db",0.12976979076,0.001534577523487667,0.12917359796000003,0.10619598,0.023474099999999998,0.12806974646000002,0.13192385446
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query19/query19_0.sql"" ./tpcds_4.db",0.78579745224,0.004671001742596124,0.78421858964,0.70285832,0.08274003999999999,0.7798152861400001,0.7925541861400001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query22/query22_0.sql"" ./tpcds_4.db",2.11672922132,0.0645788412546702,2.0821967152200003,2.1032982199999997,0.013277259999999999,2.0752685047200004,2.2526627457200004
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query25/query25_0.sql"" ./tpcds_4.db",0.20179154380000003,0.0035564131156663003,0.20132704099999998,0.15746758,0.04421546,0.197389047,0.208138073
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query26/query26_0.sql"" ./tpcds_4.db",0.08154594796,0.00038150506376136845,0.08150700716,0.05932676,0.02211796,0.08102697266000002,0.08211364566000001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query27/query27_0.sql"" ./tpcds_4.db",0.2785953969,0.0014661109738087863,0.27841255080000005,0.22792242,0.050560379999999995,0.27555036580000003,0.28097430580000005
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query29/query29_0.sql"" ./tpcds_4.db",0.2886791155600001,0.0018001861829622828,0.28896292316000005,0.24528917999999997,0.04326822,0.28461064566000005,0.29078765766000003
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query37/query37_0.sql"" ./tpcds_4.db",0.05232705350000001,0.00025696376592216236,0.052297692800000004,0.04122463999999999,0.010997639999999998,0.051906580800000005,0.0527658308
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query40/query40_0.sql"" ./tpcds_4.db",0.034630464459999996,0.00022362684012842146,0.034612229359999996,0.024603820000000002,0.00992546,0.03434583486,0.03497715886
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query42/query42_0.sql"" ./tpcds_4.db",0.1194162289,0.002159798983553037,0.1204036819,0.10004832,0.019256000000000002,0.11456517540000001,0.12129487640000002
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query43/query43_0.sql"" ./tpcds_4.db",0.24524930734,0.0036060051274298052,0.24688105734,0.21887078,0.026262039999999997,0.23873416584,0.24821837584
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query50/query50_0.sql"" ./tpcds_4.db",0.4436948878600001,0.0025266802884693863,0.44319553466000006,0.41558931999999993,0.02799874,0.44048555916000004,0.44902698416000003
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query52/query52_0.sql"" ./tpcds_4.db",0.11867673322000001,0.0029782182369340613,0.11994641452,0.09316432,0.025399460000000002,0.11244448102,0.12162116502
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query55/query55_0.sql"" ./tpcds_4.db",0.12523641832000001,0.0030516257539028066,0.12656171812,0.09711915999999998,0.02800576,0.12083906812,0.12847609212000002
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query62/query62_0.sql"" ./tpcds_4.db",0.10278497019999999,0.001009175354214082,0.102818468,0.08827655999999999,0.014401519999999998,0.10079315750000001,0.1046924375
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query82/query82_0.sql"" ./tpcds_4.db",0.07423715016000001,0.0005640257470370542,0.07409034726000001,0.06292653999999999,0.01119914,0.07353468376000001,0.07545131276
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query84/query84_0.sql"" ./tpcds_4.db",0.12168782352000003,0.000656150363886282,0.12172579192,0.10773592000000001,0.013859439999999997,0.12075426642,0.12285922842000001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query85/query85_0.sql"" ./tpcds_4.db",0.36451655562,0.0029816100771748824,0.36405822032,0.32030037999999994,0.04411028,0.36043250182000003,0.36961367882
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query91/query91_0.sql"" ./tpcds_4.db",0.052175704239999995,0.00009757141323404542,0.05219453914000001,0.04218164,0.009892380000000001,0.052027137640000005,0.052341800640000005
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query96/query96_0.sql"" ./tpcds_4.db",0.10868552108,0.0017119952742507757,0.10855970868,0.08811203999999999,0.02046986,0.10636603218,0.11200490118
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query99/query99_0.sql"" ./tpcds_4.db",0.12195348446000003,0.0008501296860879254,0.12209490666,0.11051599999999999,0.011356,0.12021362666000002,0.12289114266000001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/1/query7/query7_0.sql"" ./tpcds_4.db",0.27386453704,0.002365478559988283,0.27418138804000003,0.2136187,0.06013914,0.26895315204,0.27699274804
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query3/query3_0.sql"" ./tpcds_4.db",0.13325840760000002,0.0009510515899285246,0.13319458080000002,0.10627128000000001,0.026892199999999998,0.1313863173,0.1346934153
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query17/query17_0.sql"" ./tpcds_4.db",0.34453103098000004,0.005793430366880251,0.34318158878000005,0.29030787999999996,0.05409146,0.33778148678000003,0.35930229778000006
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query18/query18_0.sql"" ./tpcds_4.db",0.12900988012,0.0013042759226895208,0.12875030902,0.11070476,0.018190559999999998,0.12754186752,0.13231807852
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query19/query19_0.sql"" ./tpcds_4.db",0.78688944466,0.004952909029143798,0.7885519843600001,0.6947222599999999,0.09202817999999999,0.77925974886,0.7921966668600001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query22/query22_0.sql"" ./tpcds_4.db",2.0964778304,0.01137225184870246,2.0980472965,2.08023518,0.01612006,2.077135689,2.110855526
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query25/query25_0.sql"" ./tpcds_4.db",0.20571320306000002,0.002327063293868703,0.20554850776,0.1679618,0.037627680000000004,0.20271844026,0.21005563026
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query26/query26_0.sql"" ./tpcds_4.db",0.08131073688000001,0.00037739851245613,0.08136673098000001,0.06651762,0.014707719999999999,0.08045577198000001,0.08190871198
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query27/query27_0.sql"" ./tpcds_4.db",0.27918945262,0.0021467944853619317,0.27898904082,0.22721701999999994,0.05188,0.27641241482,0.28402521982
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query29/query29_0.sql"" ./tpcds_4.db",0.28952332704,0.002721100882274828,0.28974504234000004,0.24562203999999999,0.043797760000000005,0.28458781784000003,0.29319485784000004
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query37/query37_0.sql"" ./tpcds_4.db",0.05212867854000001,0.0002801211603546854,0.052072200340000006,0.04086976,0.011166800000000001,0.051787028840000006,0.052621246840000004
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query40/query40_0.sql"" ./tpcds_4.db",0.03452900416,0.000269182751028389,0.034560620560000005,0.024190479999999997,0.01024934,0.03404994906,0.034961300060000006
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query42/query42_0.sql"" ./tpcds_4.db",0.11925214344000004,0.003422535316578861,0.12058516114000001,0.09262837999999998,0.02651616,0.11334798514000001,0.12297703314000001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query43/query43_0.sql"" ./tpcds_4.db",0.24612108448000006,0.0045280773605436125,0.24780948248,0.22432466,0.02166004,0.23834688498000003,0.25156886398
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query50/query50_0.sql"" ./tpcds_4.db",0.44356801710000004,0.0021986164023798244,0.44295369920000005,0.41562555999999995,0.027802379999999998,0.44165624870000003,0.44883941870000005
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query52/query52_0.sql"" ./tpcds_4.db",0.11874042972000001,0.0033705407494416077,0.12029085092,0.09247434,0.026176579999999998,0.11186500892000001,0.12182327592
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query55/query55_0.sql"" ./tpcds_4.db",0.12439202553999999,0.0029440741565418204,0.12394626614,0.10309614,0.021182199999999998,0.12021917964,0.12810790964000002
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query62/query62_0.sql"" ./tpcds_4.db",0.10266451988,0.0008487013337208832,0.10258469728,0.09025399999999997,0.012281819999999999,0.10184705728,0.10462762628000001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query82/query82_0.sql"" ./tpcds_4.db",0.07406271314,0.0002992269242283465,0.07407193074000001,0.05807111999999999,0.01589178,0.07356081774,0.07451213974000001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query84/query84_0.sql"" ./tpcds_4.db",0.12204623458000001,0.0006781161070128531,0.12200206098000001,0.10542828,0.01651368,0.12112928398,0.12358936898
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query85/query85_0.sql"" ./tpcds_4.db",0.36372836812,0.0028213369196274127,0.36318018592,0.32129016,0.042312659999999995,0.36017544942,0.37017901742000003
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query91/query91_0.sql"" ./tpcds_4.db",0.05237589784,0.0003886973687336396,0.05233256604,0.04388428,0.008398899999999999,0.051905367540000004,0.05306209754
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query96/query96_0.sql"" ./tpcds_4.db",0.10869213096,0.0021354237548450524,0.10838643486,0.0897028,0.01886862,0.10595876986000001,0.11227601886000001
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query99/query99_0.sql"" ./tpcds_4.db",0.12328697636000001,0.002558064167993534,0.12255612766000001,0.11298146,0.010217798,0.12175862766000001,0.13039216066
+command,mean,stddev,median,user,system,min,max
+"duckdb -c "".read /home/pei/Project/benchmarks/tpcds-kit/tools/1_instance_out_duckdb/2/query7/query7_0.sql"" ./tpcds_4.db",0.27370056954,0.001386617211091666,0.27367161464,0.21303132000000002,0.060547039999999996,0.27113969214,0.27562104314
