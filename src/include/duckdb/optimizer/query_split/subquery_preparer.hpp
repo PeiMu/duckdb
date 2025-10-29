@@ -17,6 +17,12 @@
 #include "duckdb/parser/query_node/select_node.hpp"
 #include "duckdb/parser/statement/explain_statement.hpp"
 #include "duckdb/planner/binder.hpp"
+#include "duckdb/planner/expression/bound_aggregate_expression.hpp"
+#include "duckdb/planner/operator/logical_aggregate.hpp"
+#include "duckdb/planner/operator/logical_column_data_get.hpp"
+#include "duckdb/planner/operator/logical_comparison_join.hpp"
+#include "duckdb/planner/operator/logical_filter.hpp"
+#include "duckdb/planner/operator/logical_get.hpp"
 #include "duckdb/planner/operator/logical_projection.hpp"
 
 namespace duckdb {
@@ -30,9 +36,12 @@ public:
 	SubqueryPreparer(Binder &binder, ClientContext &context) : binder(binder), context(context) {};
 	~SubqueryPreparer() = default;
 
-	//! Merge the data chunk (temp table) to the current subquery
+	//! Merge the data chunk to the current subquery
 	int64_t MergeDataChunk(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
 	                       unique_ptr<ColumnDataCollection> previous_result, idx_t estimated_card);
+	//! Merge the created temp table to the current subquery
+	unique_ptr<LogicalGet> MergeCreatedTable(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
+	                       TableCatalogEntry& created_table_entry);
 
 	//! Merge the previous sibling node. If merged to the main stream (left node), we add the sibling expr to proj.
 	bool MergeSibling(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
@@ -96,6 +105,7 @@ private:
 	//! 1. find the insert point and insert the `ColumnDataGet` node to the logical plan;
 	//! 2. update the table_idx and column_idx
 	void MergeToSubquery(LogicalOperator &op, bool &merged);
+	void MergeToSubquery(LogicalOperator &op, unique_ptr<LogicalGet> &created_table, bool &merged);
 	//! Because the `chunk_scan` will create a new table index and contains the result of all tables (SEQ SCAN) of the
 	//! current level, it is necessary to replace the index of the related expressions
 	unique_ptr<Expression> VisitReplace(BoundColumnRefExpression &expr, unique_ptr<Expression> *expr_ptr) override;

@@ -195,8 +195,8 @@ int64_t SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>
 		return chunk_size;
 	}
 
-	//	// generate an unused table index by the binder
-	//	new_table_idx = binder.GenerateTableIndex();
+	// generate an unused table index by the binder
+	new_table_idx = binder.GenerateTableIndex();
 
 	if (nullptr == chunk_scan) {
 		chunk_scan =
@@ -229,6 +229,50 @@ int64_t SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>
 #endif
 
 	return chunk_size;
+}
+
+unique_ptr<LogicalGet> SubqueryPreparer::MergeCreatedTable(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
+                       					 TableCatalogEntry& created_table_entry) {
+	// merge generated table
+	// Create a LogicalGet node for the intermediate table
+	unique_ptr<FunctionData> bind_data;
+	TableFunction scan_function = created_table_entry.GetScanFunction(context, bind_data);
+
+	vector<LogicalType> created_table_types;
+	vector<string> created_table_names;
+	vector<TableColumnType> created_table_categories;
+	vector<LogicalType> created_return_types;
+	vector<string> created_return_names;
+	for (auto &col : created_table_entry.GetColumns().Logical()) {
+		created_table_types.push_back(col.Type());
+		created_table_names.push_back(col.Name());
+		created_return_types.push_back(col.Type());
+		created_return_names.push_back(col.Name());
+	}
+
+	// generate an unused table index by the binder
+	new_table_idx = binder.GenerateTableIndex();
+
+	auto created_logical_get =
+	    make_uniq<LogicalGet>(new_table_idx, scan_function, std::move(bind_data),
+	                          std::move(created_return_types), std::move(created_return_names));
+	binder.bind_context.AddBaseTable(new_table_idx, created_table_entry.name, created_table_names, created_table_types,
+	                                           created_logical_get->column_ids,
+	                                           created_logical_get->GetTable().get());
+
+	bool merged = false;
+	MergeToSubquery(*current_level_subqueries[0], created_logical_get, merged);
+	if (!merged) {
+#ifdef DEBUG
+		D_ASSERT(current_level_subqueries.size() == 2);
+#endif
+		MergeToSubquery(*current_level_subqueries[1], created_logical_get, merged);
+	}
+#ifdef DEBUG
+	D_ASSERT(merged);
+#endif
+
+	return created_logical_get;
 }
 
 bool SubqueryPreparer::MergeSibling(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
@@ -287,6 +331,25 @@ void SubqueryPreparer::AddOldTableIndex(const unique_ptr<LogicalOperator> &op) {
 	} else {
 		Printer::Print(StringUtil::Format("Do not support yet, op->type:  %s", LogicalOperatorToString(op->type)));
 		D_ASSERT(false);
+	}
+}
+
+void SubqueryPreparer::MergeToSubquery(LogicalOperator &op, unique_ptr<LogicalGet> &created_table, bool &merged) {
+	for (int idx = op.children.size() - 1; idx > -1; idx--) {
+		auto &child = op.children[idx];
+		if (merged)
+			return;
+		// find the insert point and insert the `ColumnDataGet` node to the logical plan
+		if (nullptr == child || child->split_index == merge_index) {
+#ifdef DEBUG
+			D_ASSERT(nullptr != created_table);
+#endif
+			child = std::move(created_table);
+			merged = true;
+			merge_index--;
+			return;
+		}
+		MergeToSubquery(*child, created_table, merged);
 	}
 }
 

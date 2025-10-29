@@ -508,7 +508,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		std::unordered_map<unsigned int, std::string> intermediate_table_map;
 		unique_ptr<SimplestStmt> simplest_ir;
 
-		auto merge_child = [](LogicalOperator *subquery_pointer, unique_ptr<LogicalOperator> child_node) {
+		auto merge_child = [](LogicalOperator *subquery_pointer, unique_ptr<LogicalOperator>& child_node) {
 			while (!subquery_pointer->children.empty()) {
 				if (subquery_pointer->children.size() > 1 && nullptr == subquery_pointer->children[1]) {
 					subquery_pointer->children[1] = std::move(child_node);
@@ -602,7 +602,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #ifdef DEBUG
 				D_ASSERT(nullptr != child_node);
 #endif
-				bool merged = merge_child(plan.get(), std::move(child_node));
+				bool merged = merge_child(plan.get(), child_node);
 #ifdef DEBUG
 				D_ASSERT(merged);
 #endif
@@ -831,8 +831,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					info->columns.AddColumn(ColumnDefinition(column_name, types[i]));
 				}
 				auto created_table = catalog.CreateTable(*this, std::move(info));
-				auto &table_entry = created_table->Cast<TableCatalogEntry>();
-				table_entry.GetStorage().LocalAppend(table_entry, *this, *subquery_result);
+				auto &created_table_entry = created_table->Cast<TableCatalogEntry>();
+				created_table_entry.GetStorage().LocalAppend(created_table_entry, *this, *subquery_result);
 				result->catalog_version = catalog.GetCatalogVersion();
 
 #if ENABLE_MEASURE_EXE_TIME
@@ -845,12 +845,15 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					log_file.close();
 				}
 #endif
+				subquery_preparer.MergeCreatedTable(subqueries.front(), created_table_entry);
+			} else {
+				subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result), estimated_card);
 			}
+			previous_result_card = subquery_result->Count();
 
-			previous_result_card =
-			    subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result), estimated_card);
 			if (!ENABLE_PARALLEL_EXECUTION && nullptr != last_sibling_node) {
-				merge_sibling_expr = subquery_preparer.MergeSibling(subqueries.front(), std::move(last_sibling_node));
+				merge_sibling_expr =
+					subquery_preparer.MergeSibling(subqueries.front(), std::move(last_sibling_node));
 				//			    // check if we need to swap the children
 				//			    // fixme: might have bugs when the data chunk merge to subqueries.front()[1]
 				//			    auto front_subquery_pointer = subqueries.front()[0].get();
@@ -938,7 +941,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #ifdef DEBUG
 				D_ASSERT(nullptr != child_node);
 #endif
-				bool merged = merge_child(child, std::move(child_node));
+				bool merged = merge_child(child, child_node);
 #ifdef DEBUG
 				D_ASSERT(merged);
 #endif

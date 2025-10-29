@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # execute queries
-dir="/home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS"
+dir="$JOB_PATH/queries"
 iteration=15 # 5 warm up, 10 runs
 
 LOG_NAME=time_log.csv

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-dir="/home/pei/Project/benchmarks/imdb_job-postgres/queries_without_AS"
+dir="$JOB_PATH/queries"
 
 mkdir -p convert_job_sql/
 rm -rf compile.log
