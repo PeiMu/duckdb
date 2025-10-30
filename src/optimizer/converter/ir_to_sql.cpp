@@ -72,13 +72,24 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 			auto target_table_index = target->GetTableIndex();
 			// for DuckDB with agg
 			if (table_names.find(target_table_index) == table_names.end()) {
+				size_t agg_fn_index = idx;
 				auto &child_op = proj_op.children[0];
 				if (SimplestNodeType::AggregateNode == child_op->GetNodeType()) {
 					auto &agg_op = child_op->Cast<SimplestAggregate>();
 					if (target_table_index == agg_op.GetAggIndex()) {
-						std::string agg_fn_type = TranslateSimplestAggFnType(agg_op.agg_fns[idx].second);
-						auto table_name = table_names[agg_op.agg_fns[idx].first->GetTableIndex()];
-						std::string select_str = table_name + "." + agg_op.agg_fns[idx].first->GetColumnName();
+						if (agg_op.agg_fns.size() - 1 < agg_fn_index) {
+							// fixme: might have a bug here.
+							//  This hack for JOB 17a/b/c.sql, where proj [9.0] and [9.0].
+							//  but only one agg_fn
+							agg_fn_index = 0;
+						}
+						std::string agg_fn_type = TranslateSimplestAggFnType(agg_op.agg_fns[agg_fn_index].second);
+						unsigned int table_idx = agg_op.agg_fns[agg_fn_index].first->GetTableIndex();
+						auto table_name = table_names[table_idx];
+						std::string orig_col_name = agg_op.agg_fns[agg_fn_index].first->GetColumnName();
+						unsigned int col_idx = agg_op.agg_fns[agg_fn_index].first->GetColumnIndex();
+						std::string actual_col_name = GetActualColumnName(table_name, orig_col_name, col_idx);
+						std::string select_str = table_name + "." + actual_col_name;
 						select_str = agg_fn_type + "(" + select_str + ")";
 						select_field.emplace_back(select_str);
 					} else {
@@ -94,7 +105,10 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 			} else {
 				// for the others
 				auto table_name = table_names[target_table_index];
-				std::string select_str = table_name + "." + target->GetColumnName();
+				std::string orig_col_name = target->GetColumnName();
+				unsigned int col_idx = target->GetColumnIndex();
+				std::string actual_col_name = GetActualColumnName(table_name, orig_col_name, col_idx);
+				std::string select_str = table_name + "." + actual_col_name;
 				auto find_select_str = agg_field.find(agg_field_key(target_table_index, target->GetColumnIndex()));
 				if (find_select_str != agg_field.end()) {
 					select_str = find_select_str->second + "(" + select_str + ")";
@@ -146,11 +160,17 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 				auto &var_comp = cond->Cast<SimplestVarComparison>();
 				auto &left_var_attr = var_comp.left_attr;
 				auto left_table_name = table_names[left_var_attr->GetTableIndex()];
-				auto join_str = left_table_name + "." + left_var_attr->GetColumnName();
+				std::string left_orig_col = left_var_attr->GetColumnName();
+				unsigned int left_col_idx = left_var_attr->GetColumnIndex();
+				std::string left_actual_col = GetActualColumnName(left_table_name, left_orig_col, left_col_idx);
+				auto join_str = left_table_name + "." + left_actual_col;
 				join_str += " = ";
 				auto &right_var_attr = var_comp.right_attr;
 				auto right_table_name = table_names[right_var_attr->GetTableIndex()];
-				join_str += right_table_name + "." + right_var_attr->GetColumnName();
+				std::string right_orig_col = right_var_attr->GetColumnName();
+				unsigned int right_col_idx = right_var_attr->GetColumnIndex();
+				std::string right_actual_col = GetActualColumnName(right_table_name, right_orig_col, right_col_idx);
+				join_str += right_table_name + "." + right_actual_col;
 				join_field.emplace_back(join_str);
 			}
 			break;
@@ -161,7 +181,10 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 				auto &var_comp = cond->Cast<SimplestVarComparison>();
 				auto &left_var_attr = var_comp.left_attr;
 				auto table_name = table_names[left_var_attr->GetTableIndex()];
-				auto filter_str = table_name + "." + left_var_attr->GetColumnName();
+				std::string orig_col = left_var_attr->GetColumnName();
+				unsigned int col_idx = left_var_attr->GetColumnIndex();
+				std::string actual_col = GetActualColumnName(table_name, orig_col, col_idx);
+				auto filter_str = table_name + "." + actual_col;
 
 				auto &right_var_attr = var_comp.right_attr;
 				auto chunk_contents_str = chunk_contents[right_var_attr->GetTableIndex()];
@@ -245,7 +268,10 @@ std::string IRToSQLConverter::CollectFilter(const unique_ptr<SimplestExpr> &qual
 		auto &var_const_comp = qual_expr->Cast<SimplestVarConstComparison>();
 		auto &var_attr = var_const_comp.attr;
 		auto table_name = table_names[var_attr->GetTableIndex()];
-		ret_str = table_name + "." + var_attr->GetColumnName();
+		std::string orig_col_name = var_attr->GetColumnName();
+		unsigned int col_idx = var_attr->GetColumnIndex();
+		std::string actual_col_name = GetActualColumnName(table_name, orig_col_name, col_idx);
+		ret_str = table_name + "." + actual_col_name;
 		auto &const_attr = var_const_comp.const_var;
 
 		switch (var_const_comp.GetSimplestExprType()) {
@@ -365,7 +391,10 @@ std::string IRToSQLConverter::CollectFilter(const unique_ptr<SimplestExpr> &qual
 		auto &is_null_expr = qual_expr->Cast<SimplestIsNullExpr>();
 		auto &var_attr = is_null_expr.attr;
 		auto table_name = table_names[var_attr->GetTableIndex()];
-		ret_str = table_name + "." + var_attr->GetColumnName();
+		std::string orig_col_name = var_attr->GetColumnName();
+		unsigned int col_idx = var_attr->GetColumnIndex();
+		std::string actual_col_name = GetActualColumnName(table_name, orig_col_name, col_idx);
+		ret_str = table_name + "." + actual_col_name;
 		switch (is_null_expr.GetSimplestExprType()) {
 		case SimplestExprType::InvalidExprType:
 			Printer::Print("Invalid logical expr!");
@@ -390,5 +419,20 @@ std::string IRToSQLConverter::CollectFilter(const unique_ptr<SimplestExpr> &qual
 		D_ASSERT(false);
 	}
 	return ret_str;
+}
+
+std::string IRToSQLConverter::GetActualColumnName(const std::string &table_name,
+                                                  const std::string &original_col_name,
+                                                  unsigned int col_position) {
+	// Check if this is an intermediate table with renamed columns
+	if (table_column_mappings.count(table_name) > 0) {
+		auto &actual_columns = table_column_mappings[table_name];
+		if (col_position < actual_columns.size()) {
+			return actual_columns[col_position];
+		}
+	}
+
+	// Not an intermediate table or position out of bounds, use original name
+	return original_col_name;
 }
 } // namespace duckdb

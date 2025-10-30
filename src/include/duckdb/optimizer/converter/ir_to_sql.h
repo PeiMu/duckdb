@@ -18,10 +18,17 @@ public:
 
 	std::string LogicalPlanToSQL(const unique_ptr<SimplestStmt> &plan);
 
+	void SetTableColumnMappings(const std::unordered_map<std::string, std::vector<std::string>> &mappings) {
+		table_column_mappings = mappings;
+	}
+
 private:
 	void GenerateSQL(const unique_ptr<SimplestStmt> &op);
 	std::string TranslateSimplestAggFnType(SimplestAggFnType agg_fn_type);
 	std::string CollectFilter(const unique_ptr<SimplestExpr> &qual_expr);
+
+	std::string GetActualColumnName(const std::string &table_name, const std::string &original_col_name,
+	                                unsigned int col_position);
 
 	unsigned int agg_field_key(unsigned int table_idx, unsigned int column_idx) {
 		return std::hash<unsigned int>()(table_idx) ^ std::hash<unsigned int>()(column_idx);
@@ -37,5 +44,11 @@ private:
 
 	std::unordered_map<unsigned int, std::string> table_names;
 	std::unordered_map<unsigned int, std::vector<std::string>> chunk_contents;
+
+	// mapping from table_name -> actual column names in created table
+	std::unordered_map<std::string, std::vector<std::string>> table_column_mappings;
+
+	// mapping from table_idx -> original column names (from IR)
+	std::unordered_map<unsigned int, std::vector<std::string>> original_column_names;
 };
 } // namespace duckdb

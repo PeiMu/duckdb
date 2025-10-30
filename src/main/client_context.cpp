@@ -497,6 +497,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		std::deque<std::pair<idx_t, idx_t>> table_card_order;
 		int64_t previous_result_card;
 
+		std::unordered_map<std::string, std::vector<std::string>> table_column_mappings;
+
 #if ENABLE_MERGE_BACK_PLAN
 		unique_ptr<LogicalOperator> whole_plan;
 #endif
@@ -824,12 +826,27 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				info->temporary = false;
 				info->on_conflict = OnCreateConflict::ERROR_ON_CONFLICT;
 
+				// Track used column names to handle duplicates
+				case_insensitive_set_t used_column_names;
+				std::vector<std::string> actual_column_names;
+
 				// add column names and types
 				auto &simplest_proj = simplest_ir->Cast<SimplestProjection>();
 				for (idx_t i = 0; i < simplest_proj.target_list.size(); i++) {
 					auto column_name = simplest_proj.target_list[i]->GetColumnName();
-					info->columns.AddColumn(ColumnDefinition(column_name, types[i]));
+					// Handle duplicate column names by appending a suffix
+					std::string unique_column_name = column_name;
+					idx_t suffix = 1;
+					while (used_column_names.count(unique_column_name) > 0) {
+						unique_column_name = column_name + "_" + std::to_string(suffix);
+						suffix++;
+					}
+					used_column_names.insert(unique_column_name);
+					actual_column_names.emplace_back(unique_column_name);
+					info->columns.AddColumn(ColumnDefinition(unique_column_name, types[i]));
 				}
+				table_column_mappings[intermediate_table_name] = std::move(actual_column_names);
+
 				auto created_table = catalog.CreateTable(*this, std::move(info));
 				auto &created_table_entry = created_table->Cast<TableCatalogEntry>();
 				created_table_entry.GetStorage().LocalAppend(created_table_entry, *this, *subquery_result);
@@ -1015,6 +1032,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 			if (config.convert_ir_to_sql) {
 				IRToSQLConverter ir_to_sql_converter;
+				ir_to_sql_converter.SetTableColumnMappings(table_column_mappings);
 				std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(simplest_ir);
 				std::string sql_file_name =
 				    "/home/pei/Project/duckdb/measure/dd_sub_plan_" + std::to_string(subquery_index) + ".sql";
