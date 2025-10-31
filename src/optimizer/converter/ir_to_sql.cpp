@@ -24,8 +24,9 @@ std::string IRToSQLConverter::LogicalPlanToSQL(const unique_ptr<SimplestStmt> &p
 
 	sql_code += "\nFROM ";
 	for (auto table_name : table_names) {
-		table_name.second += ", ";
-		sql_code += table_name.second;
+		auto table_name_idx = table_name.second + "_" + std::to_string(table_name.first);
+		auto alias = table_name.second + " AS " + table_name_idx + ", ";
+		sql_code += alias;
 	}
 	if (!table_names.empty())
 		sql_code.erase(sql_code.size() - 2);
@@ -85,7 +86,7 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 						}
 						std::string agg_fn_type = TranslateSimplestAggFnType(agg_op.agg_fns[agg_fn_index].second);
 						unsigned int table_idx = agg_op.agg_fns[agg_fn_index].first->GetTableIndex();
-						auto table_name = table_names[table_idx];
+						auto table_name = table_names[table_idx] + "_" + std::to_string(table_idx);
 						std::string orig_col_name = agg_op.agg_fns[agg_fn_index].first->GetColumnName();
 						unsigned int col_idx = agg_op.agg_fns[agg_fn_index].first->GetColumnIndex();
 						std::string actual_col_name = GetActualColumnName(table_name, orig_col_name, col_idx);
@@ -104,7 +105,7 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 				}
 			} else {
 				// for the others
-				auto table_name = table_names[target_table_index];
+				auto table_name = table_names[target_table_index] + "_" + std::to_string(target_table_index);
 				std::string orig_col_name = target->GetColumnName();
 				unsigned int col_idx = target->GetColumnIndex();
 				std::string actual_col_name = GetActualColumnName(table_name, orig_col_name, col_idx);
@@ -159,14 +160,16 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 			for (const auto &cond : conditions) {
 				auto &var_comp = cond->Cast<SimplestVarComparison>();
 				auto &left_var_attr = var_comp.left_attr;
-				auto left_table_name = table_names[left_var_attr->GetTableIndex()];
+				auto left_table_name = table_names[left_var_attr->GetTableIndex()] + "_" +
+				                       std::to_string(left_var_attr->GetTableIndex());
 				std::string left_orig_col = left_var_attr->GetColumnName();
 				unsigned int left_col_idx = left_var_attr->GetColumnIndex();
 				std::string left_actual_col = GetActualColumnName(left_table_name, left_orig_col, left_col_idx);
 				auto join_str = left_table_name + "." + left_actual_col;
 				join_str += " = ";
 				auto &right_var_attr = var_comp.right_attr;
-				auto right_table_name = table_names[right_var_attr->GetTableIndex()];
+				auto right_table_name = table_names[right_var_attr->GetTableIndex()] + "_" +
+				                        std::to_string(right_var_attr->GetTableIndex());
 				std::string right_orig_col = right_var_attr->GetColumnName();
 				unsigned int right_col_idx = right_var_attr->GetColumnIndex();
 				std::string right_actual_col = GetActualColumnName(right_table_name, right_orig_col, right_col_idx);
@@ -180,7 +183,8 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 			for (const auto &cond : conditions) {
 				auto &var_comp = cond->Cast<SimplestVarComparison>();
 				auto &left_var_attr = var_comp.left_attr;
-				auto table_name = table_names[left_var_attr->GetTableIndex()];
+				auto table_name = table_names[left_var_attr->GetTableIndex()] + "_" +
+				                  std::to_string(left_var_attr->GetTableIndex());
 				std::string orig_col = left_var_attr->GetColumnName();
 				unsigned int col_idx = left_var_attr->GetColumnIndex();
 				std::string actual_col = GetActualColumnName(table_name, orig_col, col_idx);
@@ -267,7 +271,7 @@ std::string IRToSQLConverter::CollectFilter(const unique_ptr<SimplestExpr> &qual
 	case SimplestNodeType::VarConstComparisonNode: {
 		auto &var_const_comp = qual_expr->Cast<SimplestVarConstComparison>();
 		auto &var_attr = var_const_comp.attr;
-		auto table_name = table_names[var_attr->GetTableIndex()];
+		auto table_name = table_names[var_attr->GetTableIndex()] + "_" + std::to_string(var_attr->GetTableIndex());
 		std::string orig_col_name = var_attr->GetColumnName();
 		unsigned int col_idx = var_attr->GetColumnIndex();
 		std::string actual_col_name = GetActualColumnName(table_name, orig_col_name, col_idx);
@@ -390,7 +394,7 @@ std::string IRToSQLConverter::CollectFilter(const unique_ptr<SimplestExpr> &qual
 	case SimplestNodeType::IsNullExprNode: {
 		auto &is_null_expr = qual_expr->Cast<SimplestIsNullExpr>();
 		auto &var_attr = is_null_expr.attr;
-		auto table_name = table_names[var_attr->GetTableIndex()];
+		auto table_name = table_names[var_attr->GetTableIndex()] + "_" + std::to_string(var_attr->GetTableIndex());
 		std::string orig_col_name = var_attr->GetColumnName();
 		unsigned int col_idx = var_attr->GetColumnIndex();
 		std::string actual_col_name = GetActualColumnName(table_name, orig_col_name, col_idx);

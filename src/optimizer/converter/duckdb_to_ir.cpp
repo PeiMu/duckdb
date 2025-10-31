@@ -257,10 +257,6 @@ unique_ptr<SimplestScan> DuckToIRConverter::ConstructSimplestScan(LogicalGet &ge
 	}
 
 	auto base_stmt = make_uniq<SimplestStmt>(std::move(target_list), std::move(qual_vec), SimplestNodeType::ScanNode);
-
-	optional_ptr<TableCatalogEntry> table_catalog_entry = get_op.GetTable();
-//	auto catalog_entry = unique_ptr_cast<TableCatalogEntry, CatalogEntry>(table_catalog_entry);
-//	table_catalog_entry->Cast<CatalogEntry>();
 	auto table_name = get_op.function.to_string(get_op.bind_data.get());
 	auto simplest_scan = make_uniq<SimplestScan>(std::move(base_stmt), table_index, table_name);
 	return simplest_scan;

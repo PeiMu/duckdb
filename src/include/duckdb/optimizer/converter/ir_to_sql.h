@@ -47,8 +47,5 @@ private:
 
 	// mapping from table_name -> actual column names in created table
 	std::unordered_map<std::string, std::vector<std::string>> table_column_mappings;
-
-	// mapping from table_idx -> original column names (from IR)
-	std::unordered_map<unsigned int, std::vector<std::string>> original_column_names;
 };
 } // namespace duckdb
