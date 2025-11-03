@@ -191,10 +191,6 @@ int64_t SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>
 
 	int64_t chunk_size = previous_result->Count();
 
-	if (context.config.convert_ir_to_sql) {
-		return chunk_size;
-	}
-
 	// generate an unused table index by the binder
 	new_table_idx = binder.GenerateTableIndex();
 
@@ -231,8 +227,9 @@ int64_t SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>
 	return chunk_size;
 }
 
-unique_ptr<LogicalGet> SubqueryPreparer::MergeCreatedTable(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
-                       					 TableCatalogEntry& created_table_entry) {
+unique_ptr<LogicalGet>
+SubqueryPreparer::MergeCreatedTable(std::vector<unique_ptr<LogicalOperator>> &current_level_subqueries,
+                                    TableCatalogEntry &created_table_entry) {
 	// merge generated table
 	// Create a LogicalGet node for the intermediate table
 	unique_ptr<FunctionData> bind_data;
@@ -253,12 +250,10 @@ unique_ptr<LogicalGet> SubqueryPreparer::MergeCreatedTable(std::vector<unique_pt
 	// generate an unused table index by the binder
 	new_table_idx = binder.GenerateTableIndex();
 
-	auto created_logical_get =
-	    make_uniq<LogicalGet>(new_table_idx, scan_function, std::move(bind_data),
-	                          std::move(created_return_types), std::move(created_return_names));
+	auto created_logical_get = make_uniq<LogicalGet>(new_table_idx, scan_function, std::move(bind_data),
+	                                                 std::move(created_return_types), std::move(created_return_names));
 	binder.bind_context.AddBaseTable(new_table_idx, created_table_entry.name, created_table_names, created_table_types,
-	                                           created_logical_get->column_ids,
-	                                           created_logical_get->GetTable().get());
+	                                 created_logical_get->column_ids, created_logical_get->GetTable().get());
 
 	bool merged = false;
 	MergeToSubquery(*current_level_subqueries[0], created_logical_get, merged);

@@ -437,11 +437,11 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	plan->Verify(*this);
 #endif
 
-#if ENABLE_MEASURE_EXE_TIME || ENABLE_MERGE_BACK_PLAN || ENABLE_DEBUG_PRINT
+	// #if ENABLE_MEASURE_EXE_TIME || ENABLE_MERGE_BACK_PLAN || ENABLE_DEBUG_PRINT
 	execute_plan = plan->type == LogicalOperatorType::LOGICAL_PROJECTION ||
 	               plan->type == LogicalOperatorType::LOGICAL_ORDER_BY ||
 	               plan->type == LogicalOperatorType::LOGICAL_LIMIT;
-#endif
+	// #endif
 
 #if ENABLE_DEBUG_PRINT
 	if (execute_plan) {
@@ -481,6 +481,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			log_file.open("time_log.csv", std::ios_base::app);
 			log_file << std::to_string(execute_time / 1000) + ", ";
 			log_file.close();
+			timer = chrono_tic();
 		}
 #endif
 
@@ -510,7 +511,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		std::unordered_map<unsigned int, std::string> intermediate_table_map;
 		unique_ptr<SimplestStmt> simplest_ir;
 
-		auto merge_child = [](LogicalOperator *subquery_pointer, unique_ptr<LogicalOperator>& child_node) {
+		auto merge_child = [](LogicalOperator *subquery_pointer, unique_ptr<LogicalOperator> &child_node) {
 			while (!subquery_pointer->children.empty()) {
 				if (subquery_pointer->children.size() > 1 && nullptr == subquery_pointer->children[1]) {
 					subquery_pointer->children[1] = std::move(child_node);
@@ -524,7 +525,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			return false;
 		};
 
-		while (config.enable_dbshaker_query_split && !config.convert_ir_to_duckdb) {
+		while (config.enable_dbshaker_query_split && !config.convert_ir_to_duckdb && execute_plan) {
 			if (config.enable_dbshaker_split_jop) {
 #if ALWAYS_SPLIT
 				needToSplit = true;
@@ -657,6 +658,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				log_file.open("time_log.csv", std::ios_base::app);
 				log_file << std::to_string(execute_time / 1000) + ", ";
 				log_file.close();
+				timer = chrono_tic();
 			}
 #endif
 
@@ -671,29 +673,73 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				DuckToIRConverter duck_to_ir_converter(*planner.binder, *this);
 
 				simplest_ir = duck_to_ir_converter.ConstructSimplestStmt(sub_plan.get(), intermediate_table_map);
+				// #if ENABLE_MEASURE_EXE_TIME
+				//				if (execute_plan) {
+				//					auto execute_time = chrono_toc(&timer, "Generate IR time is\n", false);
+				//					// save time to a file
+				//					std::ofstream log_file;
+				//					log_file.open("time_log.csv", std::ios_base::app);
+				//					log_file << std::to_string(execute_time / 1000) + ", ";
+				//					log_file.close();
+				//					timer = chrono_tic();
+				//				}
+				// #endif
 
 				if (config.convert_ir_to_sql) {
 					IRToSQLConverter ir_to_sql_converter;
 					std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(simplest_ir);
-					std::string sql_file_name =
-					    "/home/pei/Project/duckdb/measure/dd_sub_plan_" + std::to_string(subquery_index) + ".sql";
+					std::string sql_file_name = "/dev/shm/dd_sub_plan_" + std::to_string(subquery_index) + ".sql";
 					std::ofstream sql_file(sql_file_name);
 					sql_file << sql_code;
 					sql_file.close();
+					// #if ENABLE_MEASURE_EXE_TIME
+					//					if (execute_plan) {
+					//						auto execute_time = chrono_toc(&timer, "Generate SQL time is\n", false);
+					//						// save time to a file
+					//						std::ofstream log_file;
+					//						log_file.open("time_log.csv", std::ios_base::app);
+					//						log_file << std::to_string(execute_time / 1000) + ", ";
+					//						log_file.close();
+					//						timer = chrono_tic();
+					//					}
+					// #endif
 
 					// read and parse the SQL, then continue the duckdb process
 					std::string sub_sql = ReadSQLFile(sql_file_name);
+					// #if ENABLE_MEASURE_EXE_TIME
+					//					if (execute_plan) {
+					//						auto execute_time = chrono_toc(&timer, "Read SQL time is\n", false);
+					//						// save time to a file
+					//						std::ofstream log_file;
+					//						log_file.open("time_log.csv", std::ios_base::app);
+					//						log_file << std::to_string(execute_time / 1000) + ", ";
+					//						log_file.close();
+					//						timer = chrono_tic();
+					//					}
+					// #endif
 
 					auto statements = ParseStatementsInternal(lock, sub_sql);
 					if (statements.size() != 1) {
 						throw InvalidInputException("ExtractPlan can only prepare a single statement");
 					}
+					// #if ENABLE_MEASURE_EXE_TIME
+					//					if (execute_plan) {
+					//						auto execute_time = chrono_toc(&timer, "Parse SQL time is\n", false);
+					//						// save time to a file
+					//						std::ofstream log_file;
+					//						log_file.open("time_log.csv", std::ios_base::app);
+					//						log_file << std::to_string(execute_time / 1000) + ", ";
+					//						log_file.close();
+					//						timer = chrono_tic();
+					//					}
+					// #endif
 
 					RunFunctionInTransactionInternal(lock, [&]() {
 						Planner planner(*this);
 						planner.CreatePlan(std::move(statements[0]));
 
 						sub_plan = std::move(planner.plan);
+						sub_plan = optimizer.PreOptimize(std::move(sub_plan));
 					});
 #if ENABLE_MEASURE_EXE_TIME
 					if (execute_plan) {
@@ -703,6 +749,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 						log_file.open("time_log.csv", std::ios_base::app);
 						log_file << std::to_string(execute_time / 1000) + ", ";
 						log_file.close();
+						timer = chrono_tic();
 					}
 #endif
 
@@ -712,6 +759,23 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					sub_plan->Print();
 
 					Planner::VerifyPlan(optimizer.context, sub_plan);
+#endif
+#if MANUAL_EXPLAIN_ANALYZE_CONVERTER
+					auto explain_converted_sub_plan = sub_plan->Copy(*this);
+					explain_converted_sub_plan =
+					    make_uniq<LogicalExplain>(std::move(explain_converted_sub_plan), ExplainType::EXPLAIN_ANALYZE);
+					explain_converted_sub_plan = optimizer.PostOptimize(std::move(explain_converted_sub_plan));
+#if ENABLE_DEBUG_PRINT
+					// debug: print subquery
+					Printer::Print("Explain Converted Sub Plan After PostOptimization");
+					explain_converted_sub_plan->Print();
+
+					Planner::VerifyPlan(optimizer.context, explain_converted_sub_plan);
+#endif
+					subquery_preparer.ExplainAnalyzeSubQuery(lock, result, std::move(explain_converted_sub_plan),
+					                                         result->catalog_version, result->unbound_statement->query,
+					                                         result->unbound_statement->n_param,
+					                                         result->unbound_statement->named_param_map);
 #endif
 				} else {
 					// todo: convert IR to duckdb plan
@@ -730,6 +794,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				log_file.open("time_log.csv", std::ios_base::app);
 				log_file << std::to_string(execute_time / 1000) + ", ";
 				log_file.close();
+				timer = chrono_tic();
 			}
 #endif
 #if ENABLE_DEBUG_PRINT
@@ -757,6 +822,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				log_file.open("time_log.csv", std::ios_base::app);
 				log_file << std::to_string(execute_time / 1000) + ", ";
 				log_file.close();
+				timer = chrono_tic();
 			}
 #endif
 			auto subquery_stmt = subquery_preparer.AdaptSelect(result, sub_plan);
@@ -780,6 +846,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				log_file.open("time_log.csv", std::ios_base::app);
 				log_file << std::to_string(execute_time / 1000) + ", ";
 				log_file.close();
+				timer = chrono_tic();
 			}
 #endif
 #if ENABLE_DEBUG_PRINT
@@ -820,10 +887,14 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				auto current_catalog = default_entry.catalog;
 				auto current_schema = default_entry.schema;
 
-				auto &catalog = Catalog::GetCatalog(*this, current_catalog);
+				//				auto &catalog = Catalog::GetCatalog(*this, current_catalog);
+				//				auto &types = subquery_result->Types();
+				//				auto info = make_uniq<CreateTableInfo>(current_catalog, current_schema,
+				// intermediate_table_name); 				info->temporary = false;
+				auto &catalog = Catalog::GetCatalog(*this, TEMP_CATALOG);
 				auto &types = subquery_result->Types();
-				auto info = make_uniq<CreateTableInfo>(current_catalog, current_schema, intermediate_table_name);
-				info->temporary = false;
+				auto info = make_uniq<CreateTableInfo>(TEMP_CATALOG, DEFAULT_SCHEMA, intermediate_table_name);
+				info->temporary = true;
 				info->on_conflict = OnCreateConflict::ERROR_ON_CONFLICT;
 
 				// Track used column names to handle duplicates
@@ -854,23 +925,34 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 #if ENABLE_MEASURE_EXE_TIME
 				if (execute_plan) {
-					auto execute_time = chrono_toc(&timer, "create temp table time is\n", false);
+					auto execute_time = chrono_toc(&timer, "Create temp table time is\n", false);
 					// save time to a file
 					std::ofstream log_file;
 					log_file.open("time_log.csv", std::ios_base::app);
 					log_file << std::to_string(execute_time / 1000) + ", ";
 					log_file.close();
+					timer = chrono_tic();
 				}
 #endif
 				subquery_preparer.MergeCreatedTable(subqueries.front(), created_table_entry);
+				// #if ENABLE_MEASURE_EXE_TIME
+				//				if (execute_plan) {
+				//					auto execute_time = chrono_toc(&timer, "Merge temp table time is\n", false);
+				//					// save time to a file
+				//					std::ofstream log_file;
+				//					log_file.open("time_log.csv", std::ios_base::app);
+				//					log_file << std::to_string(execute_time / 1000) + ", ";
+				//					log_file.close();
+				//					timer = chrono_tic();
+				//				}
+				//  #endif
 			} else {
-				subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result), estimated_card);
+				previous_result_card =
+				    subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result), estimated_card);
 			}
-			previous_result_card = subquery_result->Count();
 
 			if (!ENABLE_PARALLEL_EXECUTION && nullptr != last_sibling_node) {
-				merge_sibling_expr =
-					subquery_preparer.MergeSibling(subqueries.front(), std::move(last_sibling_node));
+				merge_sibling_expr = subquery_preparer.MergeSibling(subqueries.front(), std::move(last_sibling_node));
 				//			    // check if we need to swap the children
 				//			    // fixme: might have bugs when the data chunk merge to subqueries.front()[1]
 				//			    auto front_subquery_pointer = subqueries.front()[0].get();
@@ -980,6 +1062,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					log_file.open("time_log.csv", std::ios_base::app);
 					log_file << std::to_string(execute_time / 1000) + ", ";
 					log_file.close();
+					timer = chrono_tic();
 				}
 #endif
 				break;
@@ -993,6 +1076,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				log_file.open("time_log.csv", std::ios_base::app);
 				log_file << std::to_string(execute_time / 1000) + ", ";
 				log_file.close();
+				timer = chrono_tic();
 			}
 #endif
 		}
@@ -1018,7 +1102,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			timer = chrono_tic();
 #endif
 
-		if (config.convert_duckdb_to_ir) {
+		if (config.convert_duckdb_to_ir && execute_plan) {
 			// export the final plan, aka the `plan`
 #if ENABLE_DEBUG_PRINT
 			Printer::Print("Exported final plan");
@@ -1029,30 +1113,75 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			DuckToIRConverter duck_to_ir_converter(*planner.binder, *this);
 
 			simplest_ir = duck_to_ir_converter.ConstructSimplestStmt(plan.get(), intermediate_table_map);
+			// #if ENABLE_MEASURE_EXE_TIME
+			//			if (execute_plan) {
+			//				auto execute_time = chrono_toc(&timer, "Generate IR time is\n", false);
+			//				// save time to a file
+			//				std::ofstream log_file;
+			//				log_file.open("time_log.csv", std::ios_base::app);
+			//				log_file << std::to_string(execute_time / 1000) + ", ";
+			//				log_file.close();
+			//				timer = chrono_tic();
+			//			}
+			// #endif
 
 			if (config.convert_ir_to_sql) {
 				IRToSQLConverter ir_to_sql_converter;
 				ir_to_sql_converter.SetTableColumnMappings(table_column_mappings);
 				std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(simplest_ir);
-				std::string sql_file_name =
-				    "/home/pei/Project/duckdb/measure/dd_sub_plan_" + std::to_string(subquery_index) + ".sql";
+				std::string sql_file_name = "/dev/shm/dd_sub_plan_" + std::to_string(subquery_index) + ".sql";
 				std::ofstream sql_file(sql_file_name);
 				sql_file << sql_code;
 				sql_file.close();
+				// #if ENABLE_MEASURE_EXE_TIME
+				//				if (execute_plan) {
+				//					auto execute_time = chrono_toc(&timer, "Generate SQL time is\n", false);
+				//					// save time to a file
+				//					std::ofstream log_file;
+				//					log_file.open("time_log.csv", std::ios_base::app);
+				//					log_file << std::to_string(execute_time / 1000) + ", ";
+				//					log_file.close();
+				//					timer = chrono_tic();
+				//				}
+				// #endif
 
 				// read and parse the SQL, then continue the duckdb process
 				std::string final_sub_sql = ReadSQLFile(sql_file_name);
+				// #if ENABLE_MEASURE_EXE_TIME
+				//				if (execute_plan) {
+				//					auto execute_time = chrono_toc(&timer, "Read SQL time is\n", false);
+				//					// save time to a file
+				//					std::ofstream log_file;
+				//					log_file.open("time_log.csv", std::ios_base::app);
+				//					log_file << std::to_string(execute_time / 1000) + ", ";
+				//					log_file.close();
+				//					timer = chrono_tic();
+				//				}
+				// #endif
 
 				auto statements = ParseStatementsInternal(lock, final_sub_sql);
 				if (statements.size() != 1) {
 					throw InvalidInputException("ExtractPlan can only prepare a single statement");
 				}
+				// #if ENABLE_MEASURE_EXE_TIME
+				//				if (execute_plan) {
+				//					auto execute_time = chrono_toc(&timer, "Parse SQL time is\n", false);
+				//					// save time to a file
+				//					std::ofstream log_file;
+				//					log_file.open("time_log.csv", std::ios_base::app);
+				//					log_file << std::to_string(execute_time / 1000) + ", ";
+				//					log_file.close();
+				//					timer = chrono_tic();
+				//				}
+				// #endif
 
 				RunFunctionInTransactionInternal(lock, [&]() {
 					Planner planner(*this);
 					planner.CreatePlan(std::move(statements[0]));
+					plan = optimizer.PreOptimize(std::move(plan));
 
 					plan = std::move(planner.plan);
+					plan = optimizer.PreOptimize(std::move(plan));
 				});
 #if ENABLE_MEASURE_EXE_TIME
 				if (execute_plan) {
@@ -1062,6 +1191,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					log_file.open("time_log.csv", std::ios_base::app);
 					log_file << std::to_string(execute_time / 1000) + ", ";
 					log_file.close();
+					timer = chrono_tic();
 				}
 #endif
 
@@ -1071,6 +1201,24 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				plan->Print();
 
 				Planner::VerifyPlan(optimizer.context, plan);
+#endif
+
+#if MANUAL_EXPLAIN_ANALYZE_CONVERTER
+				auto explain_converted_sub_plan = plan->Copy(*this);
+				explain_converted_sub_plan =
+				    make_uniq<LogicalExplain>(std::move(explain_converted_sub_plan), ExplainType::EXPLAIN_ANALYZE);
+				explain_converted_sub_plan = optimizer.PostOptimize(std::move(explain_converted_sub_plan));
+#if ENABLE_DEBUG_PRINT
+				// debug: print subquery
+				Printer::Print("Explain Converted Sub Plan After PostOptimization");
+				explain_converted_sub_plan->Print();
+
+				Planner::VerifyPlan(optimizer.context, explain_converted_sub_plan);
+#endif
+				subquery_preparer.ExplainAnalyzeSubQuery(lock, result, std::move(explain_converted_sub_plan),
+				                                         result->catalog_version, result->unbound_statement->query,
+				                                         result->unbound_statement->n_param,
+				                                         result->unbound_statement->named_param_map);
 #endif
 			} else {
 				// todo: convert IR to duckdb plan
@@ -1092,6 +1240,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			log_file.open("time_log.csv", std::ios_base::app);
 			log_file << std::to_string(execute_time / 1000) + ", ";
 			log_file.close();
+			timer = chrono_tic();
 		}
 #endif
 #if ENABLE_DEBUG_PRINT
@@ -1121,7 +1270,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 	}
 
-	if (config.convert_ir_to_duckdb &&
+	if (execute_plan && config.convert_ir_to_duckdb &&
 	    (LogicalOperatorType::LOGICAL_PROJECTION == plan->type || LogicalOperatorType::LOGICAL_ORDER_BY == plan->type ||
 	     LogicalOperatorType::LOGICAL_LIMIT == plan->type)) {
 #if ENABLE_DEBUG_PRINT
@@ -1156,8 +1305,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		new_plan->children.clear();
 
 		// get the postgres node string
-		std::ifstream input_stream("/home/pei/Project/duckdb/measure/postgres_plan/postgres_plan",
-		                           std::ios_base::binary);
+		std::ifstream input_stream("/dev/shm/postgres_plan", std::ios_base::binary);
 		if (input_stream.fail()) {
 			Printer::Print("Error! Failed to open file!!!");
 			exit(-1);
@@ -1206,8 +1354,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			if (config.convert_ir_to_sql) {
 				IRToSQLConverter ir_to_sql_converter;
 				std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(postgres_stmt);
-				std::string sql_file_name =
-				    "/home/pei/Project/duckdb/measure/pg_sub_plan_" + std::to_string(subquery_index) + ".sql";
+				std::string sql_file_name = "/dev/shm/pg_sub_plan_" + std::to_string(subquery_index) + ".sql";
 				std::ofstream sql_file(sql_file_name);
 				sql_file << sql_code;
 				sql_file.close();
@@ -1331,6 +1478,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		log_file.open("time_log.csv", std::ios_base::app);
 		log_file << std::to_string(execute_time / 1000) + ", ";
 		log_file.close();
+		timer = chrono_tic();
 	}
 #endif
 #if ENABLE_DEBUG_PRINT
