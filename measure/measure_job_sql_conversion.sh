@@ -6,7 +6,7 @@ iteration=10
 mkdir -p convert_job_sql/
 rm -rf compile.log
 
-log_name=duckdb_job_performance.csv
+log_name=duckdb_sql_conversion.csv
 
 rm -rf ${log_name}
 rm -rf convert_job_sql/${log_name}
@@ -17,7 +17,8 @@ cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWR
 
 for sql in "${dir}"/*.sql; do
   rm -f dd_sub_plan_*
-  hyperfine --warmup 5 --runs ${iteration} --export-csv temp.csv --conclude "for i in \$(seq 1 \$((\$(find \${PWD} -maxdepth 1 -type f -name \"dd_sub_plan_*.sql\" | wc -l)-1))); do duckdb -c \"drop table temp\${i};\" imdb.db; done;" "duckdb -c \".read ${sql}\" ./imdb.db"
+  #hyperfine --warmup 5 --runs ${iteration} --export-csv temp.csv --conclude "for i in \$(seq 1 \$((\$(find \${PWD} -maxdepth 1 -type f -name \"dd_sub_plan_*.sql\" | wc -l)-1))); do duckdb -c \"drop table temp\${i};\" imdb.db; done;" "duckdb -c \".read ${sql}\" ./imdb.db"
+  hyperfine --warmup 5 --runs ${iteration} --export-csv temp.csv "duckdb -c \".read ${sql}\" ./imdb.db"
   cat temp.csv >> ${log_name}
 done
 
