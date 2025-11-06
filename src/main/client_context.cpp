@@ -53,6 +53,8 @@
 #include "duckdb/planner/planner.hpp"
 #include "duckdb/planner/pragma_handler.hpp"
 #include "duckdb/storage/data_table.hpp"
+#include "duckdb/storage/table/append_state.hpp"
+#include "duckdb/transaction/duck_transaction.hpp"
 #include "duckdb/transaction/meta_transaction.hpp"
 #include "duckdb/transaction/transaction_manager.hpp"
 
@@ -499,6 +501,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		int64_t previous_result_card;
 
 		std::unordered_map<std::string, std::vector<std::string>> table_column_mappings;
+		// std::string intermediate_table_name, int64_t created_table_size
+		std::unordered_map<std::string, int64_t> temp_table_card;
 
 #if ENABLE_MERGE_BACK_PLAN
 		unique_ptr<LogicalOperator> whole_plan;
@@ -523,6 +527,23 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				subquery_pointer = subquery_pointer->children[0].get();
 			}
 			return false;
+		};
+
+		// set cardinality for created temp table
+		std::function<void(unique_ptr<LogicalOperator> & plan)> set_temp_table_card;
+		set_temp_table_card = [&set_temp_table_card, &temp_table_card](unique_ptr<LogicalOperator> &plan) {
+			if (LogicalOperatorType::LOGICAL_GET == plan->type) {
+				auto &get_op = plan->Cast<LogicalGet>();
+				auto table_name = get_op.function.to_string(get_op.bind_data.get());
+				auto find_table_name = temp_table_card.find(table_name);
+				if (find_table_name != temp_table_card.end()) {
+					get_op.estimated_cardinality = find_table_name->second;
+					get_op.has_estimated_cardinality = true;
+				}
+			}
+			for (auto &child : plan->children) {
+				set_temp_table_card(child);
+			}
 		};
 
 		while (config.enable_dbshaker_query_split && !config.convert_ir_to_duckdb && execute_plan) {
@@ -740,6 +761,21 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 						sub_plan = std::move(planner.plan);
 						sub_plan = optimizer.PreOptimize(std::move(sub_plan));
+						set_temp_table_card(sub_plan);
+						// #if REORDER_DATACHUNK && ENABLE_REORDER_PLAN
+						//						sub_plan = reorder_get.Optimize(std::move(sub_plan));
+						//						table_card_order = reorder_get.GetTableCardOrder();
+						//						if (reorder_get.NeedFilterPushDown()) {
+						//							FilterPushdown filter_pushdown(optimizer);
+						//							sub_plan = filter_pushdown.Rewrite(std::move(sub_plan));
+						//							reorder_get.Clear();
+						// #if ENABLE_DEBUG_PRINT
+						//							// debug: print subquery
+						//							Printer::Print("After reorder_get+filter_pushdown");
+						//							sub_plan->Print();
+						// #endif
+						//						}
+						// #endif
 					});
 #if ENABLE_MEASURE_EXE_TIME
 					if (execute_plan) {
@@ -920,7 +956,40 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 				auto created_table = catalog.CreateTable(*this, std::move(info));
 				auto &created_table_entry = created_table->Cast<TableCatalogEntry>();
-				created_table_entry.GetStorage().LocalAppend(created_table_entry, *this, *subquery_result);
+				int64_t created_table_size = subquery_result->Count();
+				temp_table_card.emplace(intermediate_table_name, created_table_size);
+
+				auto &storage = created_table_entry.GetStorage();
+				storage.LocalAppend(created_table_entry, *this, *subquery_result);
+
+//				// Option 1
+//				// Force update statistics after local append
+//				auto &local_storage = LocalStorage::Get(*this, catalog);
+//				if (local_storage.Find(created_table_entry.GetStorage())) {
+//					auto local_table_storage =
+// local_storage.table_manager.GetStorage(created_table_entry.GetStorage()); 					if
+// (local_table_storage) {
+//						// Ensure statistics are computed
+//						local_table_storage->row_groups->Verify();
+//					}
+//				}
+
+//				// Option 2
+//				// Analyze the temp table
+//				string analyze_query = "ANALYZE " + intermediate_table_name;
+//				auto analyze_statements = ParseStatementsInternal(lock, analyze_query);
+//				RunFunctionInTransactionInternal(lock, [&]() {
+//					Planner planner(*this);
+//					planner.CreatePlan(std::move(analyze_statements[0]));
+//
+//					auto explain_plan = std::move(planner.plan);
+//					explain_plan = make_uniq<LogicalExplain>(std::move(explain_plan), ExplainType::EXPLAIN_STANDARD);
+//					subquery_preparer.ExplainAnalyzeSubQuery(
+//					    lock, result, std::move(explain_plan), catalog.GetCatalogVersion(),
+//					    result->unbound_statement->query, result->unbound_statement->n_param,
+//					    result->unbound_statement->named_param_map);
+//				});
+
 				result->catalog_version = catalog.GetCatalogVersion();
 
 #if ENABLE_MEASURE_EXE_TIME
@@ -1178,10 +1247,24 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				RunFunctionInTransactionInternal(lock, [&]() {
 					Planner planner(*this);
 					planner.CreatePlan(std::move(statements[0]));
-					plan = optimizer.PreOptimize(std::move(plan));
 
 					plan = std::move(planner.plan);
 					plan = optimizer.PreOptimize(std::move(plan));
+					set_temp_table_card(plan);
+					// #if REORDER_DATACHUNK && ENABLE_REORDER_PLAN
+					//					plan = reorder_get.Optimize(std::move(plan));
+					//					table_card_order = reorder_get.GetTableCardOrder();
+					//					if (reorder_get.NeedFilterPushDown()) {
+					//						FilterPushdown filter_pushdown(optimizer);
+					//						plan = filter_pushdown.Rewrite(std::move(plan));
+					//						reorder_get.Clear();
+					// #if ENABLE_DEBUG_PRINT
+					//						// debug: print subquery
+					//						Printer::Print("After reorder_get+filter_pushdown");
+					//						plan->Print();
+					// #endif
+					//					}
+					// #endif
 				});
 #if ENABLE_MEASURE_EXE_TIME
 				if (execute_plan) {
@@ -1207,6 +1290,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				auto explain_converted_sub_plan = plan->Copy(*this);
 				explain_converted_sub_plan =
 				    make_uniq<LogicalExplain>(std::move(explain_converted_sub_plan), ExplainType::EXPLAIN_ANALYZE);
+				set_temp_table_card(explain_converted_sub_plan);
 				explain_converted_sub_plan = optimizer.PostOptimize(std::move(explain_converted_sub_plan));
 #if ENABLE_DEBUG_PRINT
 				// debug: print subquery

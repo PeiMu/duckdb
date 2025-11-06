@@ -40,6 +40,11 @@ unique_ptr<NodeStatistics> StatisticsPropagator::PropagateStatistics(LogicalGet 
 		// no column statistics to get
 		return std::move(node_stats);
 	}
+	auto table_name = get.function.to_string(get.bind_data.get());
+	if ("temp" == table_name.substr(0, 4)) {
+		return std::move(node_stats);
+	}
+
 	for (idx_t i = 0; i < get.column_ids.size(); i++) {
 		auto stats = get.function.statistics(context, get.bind_data.get(), get.column_ids[i]);
 		if (stats) {

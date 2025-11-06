@@ -62,10 +62,12 @@ unique_ptr<LogicalOperator> JoinOrderOptimizer::Optimize(unique_ptr<LogicalOpera
 
 //	// debug test: set statistics
 //	if (LogicalOperatorType::LOGICAL_COMPARISON_JOIN == new_logical_plan->type) {
-//		if (LogicalOperatorType::LOGICAL_CHUNK_GET == new_logical_plan->children[1]->type) {
-//			auto &chunk_get = new_logical_plan->children[1]->Cast<LogicalColumnDataGet>();
-//			if (chunk_get.table_index == 15) {
-//				new_logical_plan->children[0]->estimated_cardinality = 2832555;
+//		if (LogicalOperatorType::LOGICAL_FILTER == new_logical_plan->children[1]->type) {
+//			if (LogicalOperatorType::LOGICAL_GET == new_logical_plan->children[1]->children[0]->type) {
+//				auto &target_op = new_logical_plan->children[1]->children[0]->Cast<LogicalGet>();
+////				if (target_op.table_index == 1) {
+//					new_logical_plan->children[1]->children[0]->estimated_cardinality = 1153798;
+////				}
 //			}
 //		}
 //	}

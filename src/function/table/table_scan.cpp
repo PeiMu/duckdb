@@ -113,7 +113,8 @@ static unique_ptr<BaseStatistics> TableScanStatistics(ClientContext &context, co
 		// we don't emit any statistics for tables that have outstanding transaction-local data
 		return nullptr;
 	}
-	return bind_data.table.GetStatistics(context, column_id);
+	auto stat = bind_data.table.GetStatistics(context, column_id);
+	return stat;
 }
 
 static void TableScanFunc(ClientContext &context, TableFunctionInput &data_p, DataChunk &output) {

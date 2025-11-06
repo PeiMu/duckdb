@@ -66,6 +66,16 @@ RelationStats RelationStatisticsHelper::ExtractGetStats(LogicalGet &get, ClientC
 		return_stats.table_name = name;
 	}
 
+	if ("temp" == return_stats.table_name.substr(0, 4)) {
+		return_stats.cardinality = base_table_cardinality;
+		return_stats.stats_initialized = true;
+		for (auto &binding : get.GetColumnBindings()) {
+			return_stats.column_distinct_count.push_back(DistinctCount({base_table_cardinality, false}));
+			return_stats.column_names.push_back("column" + to_string(binding.column_index));
+		}
+		return return_stats;
+	}
+
 	// if we can get the catalog table, then our column statistics will be accurate
 	// parquet readers etc. will still return statistics, but they initialize distinct column
 	// counts to 0.
