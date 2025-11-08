@@ -253,7 +253,7 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 			JoinOrderOptimizer optimizer(context);
 			plan = optimizer.Optimize(std::move(plan));
 		});
-//#ifdef DEBUG
+#ifdef DEBUG
 		// check if CORSS_PRODUCT are all simplified
 		std::function<void(unique_ptr<LogicalOperator> & op)> check_cross_product;
 		check_cross_product = [&check_cross_product](unique_ptr<LogicalOperator> &op) {
@@ -266,7 +266,7 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 			}
 		};
 		check_cross_product(plan);
-//#endif
+#endif
 
 		// rewrites UNNESTs in DelimJoins by moving them to the projection
 		RunOptimizer(OptimizerType::UNNEST_REWRITER, [&]() {

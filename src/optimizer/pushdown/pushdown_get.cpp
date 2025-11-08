@@ -11,6 +11,12 @@ unique_ptr<LogicalOperator> FilterPushdown::PushdownGet(unique_ptr<LogicalOperat
 	D_ASSERT(op->type == LogicalOperatorType::LOGICAL_GET);
 	auto &get = op->Cast<LogicalGet>();
 
+	bool is_temp_table = false;
+	auto table_name = get.function.to_string(get.bind_data.get());
+	if ("temp" == table_name.substr(0, 4)) {
+		is_temp_table = true;
+	}
+
 	if (get.function.pushdown_complex_filter || get.function.filter_pushdown) {
 		// this scan supports some form of filter push-down
 		// check if there are any parameters
@@ -27,7 +33,20 @@ unique_ptr<LogicalOperator> FilterPushdown::PushdownGet(unique_ptr<LogicalOperat
 		vector<unique_ptr<Expression>> expressions;
 		expressions.reserve(filters.size());
 		for (auto &filter : filters) {
-			expressions.push_back(std::move(filter->filter));
+			auto &expr = filter->filter;
+			if (ExpressionClass::BOUND_COMPARISON == expr->GetExpressionClass() && is_temp_table) {
+				auto &bound_comp_expr = expr->Cast<BoundComparisonExpression>();
+				auto &left_expr = bound_comp_expr.left;
+				auto &right_expr = bound_comp_expr.right;
+				if (left_expr->type == ExpressionType::BOUND_COLUMN_REF &&
+				    right_expr->type == ExpressionType::BOUND_COLUMN_REF) {
+					auto &left_bound_col = left_expr->Cast<BoundColumnRefExpression>();
+					auto &right_bound_col = left_expr->Cast<BoundColumnRefExpression>();
+					if (left_bound_col.binding.table_index == right_bound_col.binding.table_index)
+						continue;
+				}
+			}
+			expressions.push_back(std::move(expr));
 		}
 		filters.clear();
 
