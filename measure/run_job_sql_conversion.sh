@@ -24,8 +24,8 @@ for sql in "${dir}"/*.sql; do
   echo "execute ${sql}" 2>&1|tee -a ${log_name};
   echo -ne ".read ${sql}" | duckdb ./imdb.db 2>&1 | tee -a "${log_name}"
 
-  # count the number of files with pattern `dd_sub_plan_*`
-  count=$(find "${PWD}" -maxdepth 1 -type f -name 'dd_sub_plan_*.sql' | wc -l)
+#  # count the number of files with pattern `dd_sub_plan_*`
+#  count=$(find "${PWD}" -maxdepth 1 -type f -name 'dd_sub_plan_*.sql' | wc -l)
 
 #  # skip if count is 1 and run the last sql separately
 #  if [ "$count" -gt 1 ]; then
@@ -38,12 +38,12 @@ for sql in "${dir}"/*.sql; do
 #  echo "execute ${sql}" 2>&1|tee -a ${log_name};
 #  echo -ne ".read ${PWD}/dd_sub_plan_${count}.sql" | duckdb ./imdb.db 2>&1 | tee -a "${log_name}"
 
-  # drop temp tables for counts > 1
-  if [ "${count}" -gt 1 ]; then
-    for i in $(seq 1 $((count - 1))); do
-      duckdb -c "drop table temp${i};" imdb.db
-    done
-  fi
+#  # drop temp tables for counts > 1
+#  if [ "${count}" -gt 1 ]; then
+#    for i in $(seq 1 $((count - 1))); do
+#      duckdb -c "drop table temp${i};" imdb.db
+#    done
+#  fi
 done
 
 

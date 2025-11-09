@@ -7,7 +7,7 @@ iteration=15 # 5 warm up, 10 runs
 LOG_NAME=time_log.csv
 
 rm -rf *${LOG_NAME}
-rm -rf convert_job_sql/*${LOG_NAME}
+rm -rf convert_job_complex_sql/*${LOG_NAME}
 
 
 ###### compile
@@ -33,4 +33,4 @@ done
 mv ${LOG_NAME} duckdb_sql_conversion_breakdown_${LOG_NAME}
 
 
-mv *${LOG_NAME} convert_job_sql/.
+mv *${LOG_NAME} convert_job_complex_sql/.
