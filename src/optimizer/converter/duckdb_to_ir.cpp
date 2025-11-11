@@ -24,6 +24,16 @@ unique_ptr<SimplestStmt> duckdb::DuckToIRConverter::ConstructSimplestStmt(
 			auto simplest_agg_group = ConstructSimplestAggGroup(agg_group_op, std::move(left_child));
 			return unique_ptr_cast<SimplestAggregate, SimplestStmt>(std::move(simplest_agg_group));
 		}
+		case LogicalOperatorType::LOGICAL_ORDER_BY: {
+			auto &order_by_op = duckdb_plan_pointer->Cast<LogicalOrder>();
+			auto simplest_order_by = ConstructSimplestOrderBy(order_by_op, std::move(left_child));
+			return unique_ptr_cast<SimplestOrderBy, SimplestStmt>(std::move(simplest_order_by));
+		}
+		case LogicalOperatorType::LOGICAL_LIMIT: {
+			auto &limit_op = duckdb_plan_pointer->Cast<LogicalLimit>();
+			auto simplest_limit = ConstructSimplestLimit(limit_op, std::move(left_child));
+			return unique_ptr_cast<SimplestLimit, SimplestStmt>(std::move(simplest_limit));
+		}
 		case LogicalOperatorType::LOGICAL_FILTER: {
 			auto &filter_op = duckdb_plan_pointer->Cast<LogicalFilter>();
 			auto simplest_filter = ConstructSimplestFilter(filter_op, std::move(left_child));
@@ -106,8 +116,17 @@ unique_ptr<SimplestAggregate> DuckToIRConverter::ConstructSimplestAggGroup(Logic
 	std::vector<unique_ptr<SimplestAttr>> target_list;
 
 	// add table_expr of group by
+	unique_ptr<SimplestAttr> simplest_attr;
+	std::vector<unique_ptr<SimplestAttr>> groups;
 	for (const auto &group_expr : agg_group_op.groups) {
-		// todo
+#ifdef DEBUG
+		D_ASSERT(ExpressionType::BOUND_COLUMN_REF == group_expr->type);
+#endif
+		auto &column_ref_expr = group_expr->Cast<BoundColumnRefExpression>();
+		simplest_attr =
+		    make_uniq<SimplestAttr>(ConvertVarType(column_ref_expr.return_type), column_ref_expr.binding.table_index,
+		                            column_ref_expr.binding.column_index, column_ref_expr.alias);
+		groups.emplace_back(std::move(simplest_attr));
 	}
 
 	// set agg_index and group_index
@@ -123,7 +142,6 @@ unique_ptr<SimplestAggregate> DuckToIRConverter::ConstructSimplestAggGroup(Logic
 #endif
 		auto &aggregate_expr = agg_expr->Cast<BoundAggregateExpression>();
 		std::string agg_fn_type = aggregate_expr.function.name;
-		unique_ptr<SimplestAttr> simplest_attr;
 		for (const auto &expr : aggregate_expr.children) {
 #ifdef DEBUG
 			D_ASSERT(ExpressionType::BOUND_COLUMN_REF == expr->type);
@@ -139,9 +157,92 @@ unique_ptr<SimplestAggregate> DuckToIRConverter::ConstructSimplestAggGroup(Logic
 	auto base_stmt =
 	    make_uniq<SimplestStmt>(std::move(children), std::move(target_list), SimplestNodeType::AggregateNode);
 
-	auto simplest_aggregate =
-	    make_uniq<SimplestAggregate>(std::move(base_stmt), std::move(agg_fns), agg_index, group_index);
+	unique_ptr<SimplestAggregate> simplest_aggregate;
+	if (groups.empty()) {
+		simplest_aggregate =
+		    make_uniq<SimplestAggregate>(std::move(base_stmt), std::move(agg_fns), agg_index, group_index);
+	} else {
+		simplest_aggregate = make_uniq<SimplestAggregate>(std::move(base_stmt), std::move(agg_fns), std::move(groups),
+		                                                  agg_index, group_index);
+	}
 	return simplest_aggregate;
+}
+
+unique_ptr<SimplestOrderBy> DuckToIRConverter::ConstructSimplestOrderBy(LogicalOrder &order_op,
+                                                                        unique_ptr<SimplestStmt> child) {
+	std::vector<unique_ptr<SimplestStmt>> children;
+	children.emplace_back(std::move(child));
+
+	// todo: add target list
+	std::vector<unique_ptr<SimplestAttr>> target_list;
+
+	std::vector<OrderStruct> orders;
+	OrderStruct order_struct;
+	unique_ptr<SimplestAttr> simplest_attr;
+	for (auto &order : order_op.orders) {
+		order_struct.order_type = ConvertOrderType(order.type);
+#ifdef DEBUG
+		D_ASSERT(order.expression->type == ExpressionType::BOUND_COLUMN_REF);
+#endif
+		auto &column_ref_expr = order.expression->Cast<BoundColumnRefExpression>();
+		simplest_attr =
+		    make_uniq<SimplestAttr>(ConvertVarType(column_ref_expr.return_type), column_ref_expr.binding.table_index,
+		                            column_ref_expr.binding.column_index, column_ref_expr.alias);
+		order_struct.attr = std::move(simplest_attr);
+		orders.emplace_back(std::move(order_struct));
+	}
+	auto base_stmt = make_uniq<SimplestStmt>(std::move(children), std::move(target_list), SimplestNodeType::OrderNode);
+
+	auto simplest_order_by = make_uniq<SimplestOrderBy>(std::move(base_stmt), std::move(orders));
+	return simplest_order_by;
+}
+
+unique_ptr<SimplestLimit> DuckToIRConverter::ConstructSimplestLimit(LogicalLimit &limit_op,
+                                                                    unique_ptr<SimplestStmt> child) {
+	std::vector<unique_ptr<SimplestStmt>> children;
+	children.emplace_back(std::move(child));
+
+	// todo: add target list
+	std::vector<unique_ptr<SimplestAttr>> target_list;
+
+	std::vector<OrderStruct> orders;
+	OrderStruct order_struct;
+	unique_ptr<SimplestAttr> simplest_attr;
+	LimitVal limit_val, offset_val;
+	switch (limit_op.limit_val.Type()) {
+	case LimitNodeType::UNSET:
+		Printer::Print("Unset limit node type!");
+		D_ASSERT(false);
+		exit(-1);
+	case LimitNodeType::CONSTANT_VALUE: {
+		limit_val.type = SimplestLimitType::CONSTANT_VALUE;
+		limit_val.val = limit_op.limit_val.GetConstantValue();
+		break;
+	}
+	default:
+		Printer::Print("Unsupport limit type!!!");
+		D_ASSERT(false);
+	}
+	switch (limit_op.offset_val.Type()) {
+	case LimitNodeType::UNSET: {
+		offset_val.type = SimplestLimitType::UNSET;
+		offset_val.val = 0;
+		break;
+	}
+	case LimitNodeType::CONSTANT_VALUE: {
+		offset_val.type = SimplestLimitType::CONSTANT_VALUE;
+		offset_val.val = limit_op.offset_val.GetConstantValue();
+		break;
+	}
+	default:
+		Printer::Print("Unsupport limit type!!!");
+		D_ASSERT(false);
+	}
+
+	auto base_stmt = make_uniq<SimplestStmt>(std::move(children), SimplestNodeType::LimitNode);
+
+	auto simplest_limit = make_uniq<SimplestLimit>(std::move(base_stmt), limit_val, offset_val);
+	return simplest_limit;
 }
 
 unique_ptr<SimplestCrossProduct> DuckToIRConverter::ConstructSimplestCrossProduct(
@@ -351,9 +452,13 @@ SimplestVarType DuckToIRConverter::ConvertVarType(LogicalType type) {
 	case LogicalTypeId::INTEGER:
 		return SimplestVarType::IntVar;
 	case LogicalTypeId::FLOAT:
+	case LogicalTypeId::DECIMAL:
+	case LogicalTypeId::DOUBLE:
 		return SimplestVarType::FloatVar;
 	case LogicalTypeId::VARCHAR:
 		return SimplestVarType::StringVar;
+	case LogicalTypeId::DATE:
+		return SimplestVarType::Date;
 	default:
 		Printer::Print("Invalid postgres var type!");
 		return SimplestVarType::InvalidVarType;
@@ -373,6 +478,19 @@ SimplestAggFnType DuckToIRConverter::ConvertAggFnType(std::string agg_fn_type) {
 		return SimplestAggFnType::InvalidAggType;
 }
 
+SimplestOrderType DuckToIRConverter::ConvertOrderType(OrderType type) {
+	switch (type) {
+	case OrderType::INVALID:
+		return SimplestOrderType::INVALID;
+	case OrderType::ORDER_DEFAULT:
+		return SimplestOrderType::ORDER_DEFAULT;
+	case OrderType::ASCENDING:
+		return SimplestOrderType::Ascending;
+	case OrderType::DESCENDING:
+		return SimplestOrderType::Descending;
+	}
+}
+
 unique_ptr<SimplestAttr> DuckToIRConverter::ConvertAttr(const unique_ptr<Expression> &expr) {
 	TableExpr table_expr = GetConstTableExpr(expr);
 	auto simplest_attr = make_uniq<SimplestAttr>(ConvertVarType(table_expr.return_type), table_expr.table_idx,
@@ -384,7 +502,14 @@ unique_ptr<SimplestConstVar> DuckToIRConverter::ConvertConstVar(const BoundConst
                                                                 std::string appendix) {
 	unique_ptr<SimplestConstVar> simplest_attr;
 	switch (expr.value.type().id()) {
-	case LogicalTypeId::VARCHAR: {
+	case LogicalTypeId::VARCHAR:
+	case LogicalTypeId::DECIMAL:
+	case LogicalTypeId::FLOAT:
+	case LogicalTypeId::DOUBLE:
+	case LogicalTypeId::TINYINT:
+	case LogicalTypeId::SMALLINT:
+	case LogicalTypeId::INTEGER:
+	case LogicalTypeId::BIGINT: {
 		std::string str = prefix;
 		str += expr.value.ToString();
 		str += appendix;

@@ -32,6 +32,7 @@
 #include "duckdb/planner/operator/logical_cross_product.hpp"
 #include "duckdb/planner/operator/logical_filter.hpp"
 #include "duckdb/planner/operator/logical_get.hpp"
+#include "duckdb/planner/operator/logical_limit.hpp"
 #include "duckdb/planner/operator/logical_order.hpp"
 #include "duckdb/planner/operator/logical_projection.hpp"
 #include "read.hpp"
@@ -55,11 +56,19 @@ private:
 	unique_ptr<SimplestScan> ConstructSimplestScan(LogicalGet &get_op);
 	unique_ptr<SimplestScan> ConstructSimplestScan(LogicalColumnDataGet &get_op, std::string intermediate_table_name);
 	unique_ptr<SimplestChunk> ConstructSimplestChunk(LogicalColumnDataGet &column_data_get_op);
+	unique_ptr<SimplestCrossProduct> ConstructSimplestCrossProduct(LogicalCrossProduct &cross_product_op,
+	                                                               unique_ptr<SimplestStmt> left_child,
+	                                                               unique_ptr<SimplestStmt> right_child);
+	unique_ptr<SimplestAggregate> ConstructSimplestAggGroup(LogicalAggregate &agg_group_op,
+	                                                        unique_ptr<SimplestStmt> child);
+	unique_ptr<SimplestOrderBy> ConstructSimplestOrderBy(LogicalOrder &order_op, unique_ptr<SimplestStmt> child);
+	unique_ptr<SimplestLimit> ConstructSimplestLimit(LogicalLimit &limit_op, unique_ptr<SimplestStmt> child);
 
 	SimplestExprType ConvertCompType(ExpressionType type);
 	SimplestVarType ConvertVarType(LogicalType type);
 	SimplestAggFnType ConvertAggFnType(std::string agg_fn_type);
 	SimplestLogicalOp ConvertLogicalType(ExpressionType type);
+	SimplestOrderType ConvertOrderType(OrderType type);
 	unique_ptr<SimplestAttr> ConvertAttr(const unique_ptr<Expression> &expr);
 	unique_ptr<SimplestConstVar> ConvertConstVar(const BoundConstantExpression &expr, std::string prefix = "",
 	                                             std::string appendix = "");
@@ -71,11 +80,6 @@ private:
 
 	Binder &binder;
 	ClientContext &context;
-	unique_ptr<SimplestCrossProduct> ConstructSimplestCrossProduct(LogicalCrossProduct &cross_product_op,
-	                                                               unique_ptr<SimplestStmt> left_child,
-	                                                               unique_ptr<SimplestStmt> right_child);
-	unique_ptr<SimplestAggregate> ConstructSimplestAggGroup(LogicalAggregate &agg_group_op,
-	                                                        unique_ptr<SimplestStmt> child);
 };
 
 } // namespace duckdb

@@ -9,16 +9,19 @@
 #pragma once
 
 #include "duckdb/common/printer.hpp"
+#include "duckdb/optimizer/query_split/query_split_util.h"
 
 #include <memory>
 
 namespace duckdb {
 
-enum SimplestVarType { InvalidVarType = 0, BoolVar, IntVar, FloatVar, StringVar, StringVarArr };
+enum SimplestVarType { InvalidVarType = 0, BoolVar, IntVar, FloatVar, StringVar, StringVarArr, Date };
 enum SimplestJoinType { InvalidJoinType = 0, Inner, Left, Full, Right, Mark, Semi, Anti, UniqueOuter, UniqueInner };
 enum SimplestLogicalOp { InvalidLogicalOp = 0, LogicalAnd, LogicalOr, LogicalNot };
 enum SimplestTextOrder { InvalidTextOrder = 0, DefaultTextOrder, UTF8, C };
 enum SimplestAggFnType { InvalidAggType = 0, Min, Max, Sum, Average };
+enum SimplestOrderType { INVALID = 0, ORDER_DEFAULT, Ascending, Descending };
+enum SimplestLimitType { UNSET = 0, CONSTANT_VALUE, CONSTANT_PERCENTAGE, EXPRESSION_VALUE, EXPRESSION_PERCENTAGE };
 enum SimplestExprType {
 	InvalidExprType = 0,
 	Equal,
@@ -51,6 +54,8 @@ enum SimplestNodeType {
 	StmtNode,
 	ProjectionNode,
 	AggregateNode,
+	OrderNode,
+	LimitNode,
 	JoinNode,
 	CrossProductNode,
 	FilterNode,
@@ -762,6 +767,10 @@ public:
 	                  unsigned int group_index)
 	    : SimplestStmt(std::move(base_stmt), AggregateNode), agg_fns(std::move(agg_fns)), agg_index(agg_index),
 	      group_index(group_index) {};
+	SimplestAggregate(unique_ptr<SimplestStmt> base_stmt, agg_fn_pair agg_fns,
+	                  std::vector<unique_ptr<SimplestAttr>> groups, unsigned int agg_index, unsigned int group_index)
+	    : SimplestStmt(std::move(base_stmt), AggregateNode), agg_fns(std::move(agg_fns)), groups(std::move(groups)),
+	      agg_index(agg_index), group_index(group_index) {};
 	~SimplestAggregate() = default;
 
 	std::string Print(bool print = true) override {
@@ -790,10 +799,21 @@ public:
 			agg_fn_str += agg_fn.first->Print(false);
 			agg_fn_str += ")\n";
 		}
+
+		std::string group_by_str;
+		if (!groups.empty()) {
+			group_by_str = "\nGroup By:\n";
+			for (const auto &group : groups) {
+				group_by_str += group->Print(false);
+				group_by_str += "\n";
+			}
+		}
+
 		str += "╔══════════════════╗\n";
 
 		str += "Aggregate:\n";
 		str += agg_fn_str;
+		str += group_by_str;
 
 		str += SimplestStmt::Print(false);
 
@@ -813,11 +833,124 @@ public:
 	}
 
 	agg_fn_pair agg_fns;
+	std::vector<unique_ptr<SimplestAttr>> groups;
 
 private:
 	//! these are only used for DuckDB
 	unsigned int agg_index;
 	unsigned int group_index;
+};
+
+struct OrderStruct {
+	SimplestOrderType order_type;
+	unique_ptr<SimplestAttr> attr;
+};
+
+class SimplestOrderBy : public SimplestStmt {
+public:
+	SimplestOrderBy(unique_ptr<SimplestStmt> base_stmt, std::vector<OrderStruct> orders)
+	    : SimplestStmt(std::move(base_stmt), OrderNode), orders(std::move(orders)) {};
+	~SimplestOrderBy() = default;
+
+	std::string Print(bool print = true) override {
+		std::string str = "\n";
+
+		std::string order_str = "\n";
+		for (const auto &order : orders) {
+			order_str += order.attr->Print(false);
+			switch (order.order_type) {
+			case SimplestOrderType::INVALID:
+				Printer::Print("Invalid order Type!!!");
+				return str;
+			case SimplestOrderType::ORDER_DEFAULT:
+				break;
+			case SimplestOrderType::Ascending:
+				order_str += " ascending";
+				break;
+			case SimplestOrderType::Descending:
+				order_str += " descending";
+				break;
+			}
+			order_str += "\n";
+		}
+		str += "╔══════════════════╗\n";
+
+		str += "Order By:\n";
+		str += order_str;
+
+		str += SimplestStmt::Print(false);
+
+		str += "╚══════════════════╝\n";
+
+		if (print)
+			Printer::Print(str);
+
+		return str;
+	}
+
+	std::vector<idx_t> projections;
+	std::vector<OrderStruct> orders;
+};
+
+struct LimitVal {
+	SimplestLimitType type;
+	idx_t val;
+};
+
+class SimplestLimit : public SimplestStmt {
+public:
+	SimplestLimit(unique_ptr<SimplestStmt> base_stmt, LimitVal limit_val, LimitVal offset_val)
+	    : SimplestStmt(std::move(base_stmt), LimitNode), limit_val(limit_val), offset_val(offset_val) {};
+	~SimplestLimit() = default;
+
+	std::string Print(bool print = true) override {
+		std::string str = "\n";
+
+		std::string limit_str = "\n";
+		switch (limit_val.type) {
+		case SimplestLimitType::UNSET:
+			Printer::Print("unset limit type!!!");
+			return str;
+		case SimplestLimitType::CONSTANT_VALUE:
+			limit_str += std::to_string(limit_val.val);
+			break;
+		default:
+			Printer::Print("Unsupport limit type!!!");
+			D_ASSERT(false);
+		}
+
+		if (offset_val.type != SimplestLimitType::UNSET) {
+			limit_str += " ";
+			switch (offset_val.type) {
+			case SimplestLimitType::UNSET:
+				Printer::Print("unset limit type!!!");
+				return str;
+			case SimplestLimitType::CONSTANT_VALUE:
+				limit_str += std::to_string(offset_val.val);
+				break;
+			default:
+				Printer::Print("Unsupport limit type!!!");
+				D_ASSERT(false);
+			}
+		}
+
+		str += "╔══════════════════╗\n";
+
+		str += "Limit:\n";
+		str += limit_str;
+
+		str += SimplestStmt::Print(false);
+
+		str += "╚══════════════════╝\n";
+
+		if (print)
+			Printer::Print(str);
+
+		return str;
+	}
+
+	LimitVal limit_val;
+	LimitVal offset_val;
 };
 
 class SimplestJoin : public SimplestStmt {

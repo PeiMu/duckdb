@@ -46,6 +46,29 @@ std::string IRToSQLConverter::LogicalPlanToSQL(const unique_ptr<SimplestStmt> &p
 	if (!join_field.empty())
 		sql_code.erase(sql_code.size() - 5);
 
+	if (!group_by_field.empty()) {
+		sql_code += "\nGROUP BY\n";
+		for (auto group : group_by_field) {
+			group += ",\n";
+			sql_code += group;
+		}
+		sql_code.erase(sql_code.size() - 2);
+	}
+
+	if (!order_by_field.empty()) {
+		sql_code += "\nORDER BY\n";
+		for (auto order : order_by_field) {
+			order += ",\n";
+			sql_code += order;
+		}
+		sql_code.erase(sql_code.size() - 2);
+	}
+
+	if (!limit_field.empty()) {
+		sql_code += "\n";
+		sql_code += limit_field;
+	}
+
 	sql_code += ";";
 #ifdef DEBUG
 	Printer::Print(StringUtil::Format("current SQL code is:\n%s", sql_code));
@@ -86,6 +109,8 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 						}
 						std::string agg_fn_type = TranslateSimplestAggFnType(agg_op.agg_fns[agg_fn_index].second);
 						unsigned int table_idx = agg_op.agg_fns[agg_fn_index].first->GetTableIndex();
+						proj_table_to_real_table.emplace(
+						    std::make_pair(target->GetTableIndex(), target->GetColumnIndex()), table_idx);
 						auto table_name = table_names[table_idx] + "_" + std::to_string(table_idx);
 						std::string orig_col_name = agg_op.agg_fns[agg_fn_index].first->GetColumnName();
 						unsigned int col_idx = agg_op.agg_fns[agg_fn_index].first->GetColumnIndex();
@@ -93,6 +118,16 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 						std::string select_str = table_name + "." + actual_col_name;
 						select_str = agg_fn_type + "(" + select_str + ")";
 						select_field.emplace_back(select_str);
+					} else if (target_table_index == agg_op.GetGroupIndex()) {
+						unsigned int col_idx = target->GetColumnIndex();
+						unsigned int table_idx = group_by_vec[col_idx]->GetTableIndex();
+						proj_table_to_real_table.emplace(
+						    std::make_pair(target->GetTableIndex(), target->GetColumnIndex()), table_idx);
+						auto table_name = table_names[table_idx] + "_" + std::to_string(table_idx);
+						std::string orig_col_name = group_by_vec[col_idx]->GetColumnName();
+						std::string actual_col_name = GetActualColumnName(table_name, orig_col_name, col_idx);
+						std::string select_str = table_name + "." + actual_col_name;
+						group_by_field.emplace_back(select_str);
 					} else {
 						// todo
 						Printer::Print("TODO!");
@@ -114,6 +149,11 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 				if (find_select_str != agg_field.end()) {
 					select_str = find_select_str->second + "(" + select_str + ")";
 				}
+				if (!group_by_vec.empty()) {
+					// todo
+					Printer::Print("TODO!");
+					D_ASSERT(false);
+				}
 				select_field.emplace_back(select_str);
 			}
 		}
@@ -126,6 +166,94 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 			    std::make_pair(agg_field_key(agg_fn.first->GetTableIndex(), agg_fn.first->GetColumnIndex()),
 			                   TranslateSimplestAggFnType(agg_fn.second)));
 		}
+		if (!agg_op.groups.empty()) {
+			group_by_vec = std::move(agg_op.groups);
+		}
+		break;
+	}
+	case SimplestNodeType::OrderNode: {
+		auto &order_by_op = op->Cast<SimplestOrderBy>();
+		auto &child_op = order_by_op.children[0];
+		idx_t proj_id;
+		std::vector<std::pair<idx_t, idx_t>> proj_target_list_ids;
+		if (SimplestNodeType::ProjectionNode == child_op->GetNodeType()) {
+			auto &proj_op = child_op->Cast<SimplestProjection>();
+			proj_id = proj_op.GetIndex();
+			for (const auto &target : proj_op.target_list) {
+				proj_target_list_ids.emplace_back(std::make_pair(target->GetTableIndex(), target->GetColumnIndex()));
+			}
+		} else {
+			Printer::Print(StringUtil::Format("Do not support yet, child_op node type:  %s", child_op->GetNodeType()));
+			D_ASSERT(false);
+		}
+		for (const auto &order : order_by_op.orders) {
+			std::string order_by_str = order.attr->GetColumnName();
+			auto table_id = order.attr->GetTableIndex();
+#ifdef DEBUG
+			D_ASSERT(table_id == proj_id);
+#endif
+			auto column_id = order.attr->GetColumnIndex();
+			auto real_table_column_pair = proj_target_list_ids[column_id];
+			auto find = proj_table_to_real_table.find(real_table_column_pair);
+#ifdef DEBUG
+			D_ASSERT(find != proj_table_to_real_table.end());
+#endif
+			auto real_table_idx = find->second;
+			size_t pos = order_by_str.find('.');
+#ifdef DEBUG
+			D_ASSERT(pos != order_by_str.npos);
+#endif
+			std::string table_id_str = "_" + std::to_string(real_table_idx);
+			order_by_str.insert(pos, table_id_str);
+			switch (order.order_type) {
+			case SimplestOrderType::INVALID:
+				Printer::Print("Invalid order Type!!!");
+				D_ASSERT(false);
+				exit(-1);
+			case SimplestOrderType::ORDER_DEFAULT:
+				break;
+			case SimplestOrderType::Ascending:
+				order_by_str += " ASC";
+				break;
+			case SimplestOrderType::Descending:
+				order_by_str += " DESC";
+				break;
+			}
+			order_by_field.emplace_back(order_by_str);
+		}
+		break;
+	}
+	case SimplestNodeType::LimitNode: {
+		auto &limit_op = op->Cast<SimplestLimit>();
+		auto limit_val = limit_op.limit_val;
+		auto offset_val = limit_op.offset_val;
+		switch (limit_val.type) {
+		case SimplestLimitType::UNSET:
+			Printer::Print("Unset limit node type!");
+			D_ASSERT(false);
+			exit(-1);
+		case SimplestLimitType::CONSTANT_VALUE: {
+			limit_field += "limit ";
+			limit_field += std::to_string(limit_val.val);
+			break;
+		}
+		default:
+			Printer::Print("Unsupport limit type!!!");
+			D_ASSERT(false);
+		}
+		if (SimplestLimitType::UNSET != offset_val.type) {
+			switch (offset_val.type) {
+			case SimplestLimitType::CONSTANT_VALUE: {
+				limit_field += "offset ";
+				limit_field += std::to_string(offset_val.val);
+				break;
+			}
+			default:
+				Printer::Print("Unsupport limit type!!!");
+				D_ASSERT(false);
+			}
+		}
+
 		break;
 	}
 	case SimplestNodeType::FilterNode: {
@@ -160,8 +288,8 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 			for (const auto &cond : conditions) {
 				auto &var_comp = cond->Cast<SimplestVarComparison>();
 				auto &left_var_attr = var_comp.left_attr;
-				auto left_table_name = table_names[left_var_attr->GetTableIndex()] + "_" +
-				                       std::to_string(left_var_attr->GetTableIndex());
+				auto left_table_name =
+				    table_names[left_var_attr->GetTableIndex()] + "_" + std::to_string(left_var_attr->GetTableIndex());
 				std::string left_orig_col = left_var_attr->GetColumnName();
 				unsigned int left_col_idx = left_var_attr->GetColumnIndex();
 				std::string left_actual_col = GetActualColumnName(left_table_name, left_orig_col, left_col_idx);
@@ -183,8 +311,8 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 			for (const auto &cond : conditions) {
 				auto &var_comp = cond->Cast<SimplestVarComparison>();
 				auto &left_var_attr = var_comp.left_attr;
-				auto table_name = table_names[left_var_attr->GetTableIndex()] + "_" +
-				                  std::to_string(left_var_attr->GetTableIndex());
+				auto table_name =
+				    table_names[left_var_attr->GetTableIndex()] + "_" + std::to_string(left_var_attr->GetTableIndex());
 				std::string orig_col = left_var_attr->GetColumnName();
 				unsigned int col_idx = left_var_attr->GetColumnIndex();
 				std::string actual_col = GetActualColumnName(table_name, orig_col, col_idx);
@@ -342,6 +470,9 @@ std::string IRToSQLConverter::CollectFilter(const unique_ptr<SimplestExpr> &qual
 			const_attr_str += ")";
 			break;
 		}
+		case SimplestVarType::Date:
+			const_attr_str = std::to_string(const_attr->GetIntValue());
+			break;
 		}
 		ret_str += const_attr_str;
 		return ret_str;
@@ -425,8 +556,7 @@ std::string IRToSQLConverter::CollectFilter(const unique_ptr<SimplestExpr> &qual
 	return ret_str;
 }
 
-std::string IRToSQLConverter::GetActualColumnName(const std::string &table_name,
-                                                  const std::string &original_col_name,
+std::string IRToSQLConverter::GetActualColumnName(const std::string &table_name, const std::string &original_col_name,
                                                   unsigned int col_position) {
 	// Check if this is an intermediate table with renamed columns
 	if (table_column_mappings.count(table_name) > 0) {

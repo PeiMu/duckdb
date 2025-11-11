@@ -39,13 +39,17 @@ private:
 	std::unordered_map<unsigned int, std::string> agg_field;
 	std::vector<std::string> filter_field;
 	std::vector<std::string> join_field;
-	std::vector<std::string> group_by;
-	std::vector<std::string> order_by;
+	std::vector<unique_ptr<SimplestAttr>> group_by_vec;
+	std::vector<std::string> group_by_field;
+	std::vector<std::string> order_by_field;
+	std::string limit_field;
 
 	std::unordered_map<unsigned int, std::string> table_names;
 	std::unordered_map<unsigned int, std::vector<std::string>> chunk_contents;
 
 	// mapping from table_name -> actual column names in created table
 	std::unordered_map<std::string, std::vector<std::string>> table_column_mappings;
+
+	std::unordered_map<std::pair<idx_t, idx_t>, idx_t, pair_hash> proj_table_to_real_table;
 };
 } // namespace duckdb
