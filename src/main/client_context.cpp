@@ -530,8 +530,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		};
 
 		// set cardinality for created temp table
-		std::function<void(unique_ptr<LogicalOperator> & plan)> set_temp_table_card;
-		set_temp_table_card = [&set_temp_table_card, &temp_table_card](unique_ptr<LogicalOperator> &plan) {
+		std::function<void(unique_ptr<LogicalOperator> & plan, bool &set)> set_temp_table_card;
+		set_temp_table_card = [&set_temp_table_card, &temp_table_card](unique_ptr<LogicalOperator> &plan, bool &set) {
+			if (nullptr == plan)
+				return;
 			if (LogicalOperatorType::LOGICAL_GET == plan->type) {
 				auto &get_op = plan->Cast<LogicalGet>();
 				auto table_name = get_op.function.to_string(get_op.bind_data.get());
@@ -539,10 +541,11 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				if (find_table_name != temp_table_card.end()) {
 					get_op.estimated_cardinality = find_table_name->second;
 					get_op.has_estimated_cardinality = true;
+					set = true;
 				}
 			}
 			for (auto &child : plan->children) {
-				set_temp_table_card(child);
+				set_temp_table_card(child, set);
 			}
 		};
 
@@ -761,7 +764,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 						sub_plan = std::move(planner.plan);
 						sub_plan = optimizer.PreOptimize(std::move(sub_plan));
-						set_temp_table_card(sub_plan);
+						if (!temp_table_card.empty()) {
+							bool set = false;
+							set_temp_table_card(sub_plan, set);
+						}
 						// #if REORDER_DATACHUNK && ENABLE_REORDER_PLAN
 						//						sub_plan = reorder_get.Optimize(std::move(sub_plan));
 						//						table_card_order = reorder_get.GetTableCardOrder();
@@ -1015,6 +1021,13 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				//					timer = chrono_tic();
 				//				}
 				//  #endif
+				if (!temp_table_card.empty()) {
+					bool set = false;
+					set_temp_table_card(subqueries.front()[0], set);
+					if (!set && subqueries.front().size() > 1) {
+						set_temp_table_card(subqueries.front()[1], set);
+					}
+				}
 			} else {
 				previous_result_card =
 				    subquery_preparer.MergeDataChunk(subqueries.front(), std::move(subquery_result), estimated_card);
@@ -1079,13 +1092,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 #endif
 #if ENABLE_DEBUG_PRINT
 			Printer::Print("after MergeDataChunk");
-			if (config.convert_ir_to_sql) {
-				Printer::Print("We don't print the plan with SQL conversion mode.");
-			} else {
-				subqueries.front()[0]->Print();
-				if (subqueries.front().size() == 2) {
-					subqueries.front()[1]->Print();
-				}
+			subqueries.front()[0]->Print();
+			if (subqueries.front().size() == 2) {
+				subqueries.front()[1]->Print();
 			}
 #endif
 			subquery_preparer.UpdateSubqueriesIndex(subqueries);
@@ -1250,7 +1259,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 					plan = std::move(planner.plan);
 					plan = optimizer.PreOptimize(std::move(plan));
-					set_temp_table_card(plan);
+					if (!temp_table_card.empty()) {
+						bool set = false;
+						set_temp_table_card(plan, set);
+					}
 					// #if REORDER_DATACHUNK && ENABLE_REORDER_PLAN
 					//					plan = reorder_get.Optimize(std::move(plan));
 					//					table_card_order = reorder_get.GetTableCardOrder();
@@ -1290,7 +1302,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				auto explain_converted_sub_plan = plan->Copy(*this);
 				explain_converted_sub_plan =
 				    make_uniq<LogicalExplain>(std::move(explain_converted_sub_plan), ExplainType::EXPLAIN_ANALYZE);
-				set_temp_table_card(explain_converted_sub_plan);
 				explain_converted_sub_plan = optimizer.PostOptimize(std::move(explain_converted_sub_plan));
 #if ENABLE_DEBUG_PRINT
 				// debug: print subquery

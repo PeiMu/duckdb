@@ -15,12 +15,16 @@ void LogicalOperator::Serialize(Serializer &serializer) const {
 	serializer.WriteProperty<LogicalOperatorType>(100, "type", type);
 	serializer.WritePropertyWithDefault<vector<unique_ptr<LogicalOperator>>>(101, "children", children);
 	serializer.WriteProperty<int>(102, "split_index", split_index);
+	serializer.WriteProperty<idx_t>(103, "estimated_cardinality", estimated_cardinality);
+	serializer.WriteProperty<bool>(104, "has_estimated_cardinality", has_estimated_cardinality);
 }
 
 unique_ptr<LogicalOperator> LogicalOperator::Deserialize(Deserializer &deserializer) {
 	auto type = deserializer.ReadProperty<LogicalOperatorType>(100, "type");
 	auto children = deserializer.ReadPropertyWithDefault<vector<unique_ptr<LogicalOperator>>>(101, "children");
 	auto split_index = deserializer.ReadProperty<int>(102, "split_index");
+	auto estimated_cardinality = deserializer.ReadProperty<idx_t>(103, "estimated_cardinality");
+	auto has_estimated_cardinality = deserializer.ReadProperty<bool>(104, "has_estimated_cardinality");
 	deserializer.Set<LogicalOperatorType>(type);
 	unique_ptr<LogicalOperator> result;
 	switch (type) {
@@ -183,6 +187,8 @@ unique_ptr<LogicalOperator> LogicalOperator::Deserialize(Deserializer &deseriali
 	deserializer.Unset<LogicalOperatorType>();
 	result->children = std::move(children);
 	result->split_index = split_index;
+	result->estimated_cardinality = estimated_cardinality;
+	result->has_estimated_cardinality = has_estimated_cardinality;
 	return result;
 }
 
