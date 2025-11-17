@@ -500,7 +500,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		std::deque<std::pair<idx_t, idx_t>> table_card_order;
 		int64_t previous_result_card;
 
-		std::unordered_map<std::string, std::vector<std::string>> table_column_mappings;
+		std::unordered_map<std::pair<idx_t, idx_t>, std::string, pair_hash> table_column_mappings;
 		// std::string intermediate_table_name, int64_t created_table_size
 		std::unordered_map<std::string, int64_t> temp_table_card;
 
@@ -686,7 +686,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			}
 #endif
 
-			if (config.convert_duckdb_to_ir) {
+			if (config.convert_duckdb_to_ir && execute_plan) {
 				// export the selected sub-plan, aka the `sub_plan`
 #if ENABLE_DEBUG_PRINT
 				Printer::Print("Exported sub_plan");
@@ -711,6 +711,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 				if (config.convert_ir_to_sql) {
 					IRToSQLConverter ir_to_sql_converter;
+					ir_to_sql_converter.SetTableColumnMappings(table_column_mappings);
 					std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(simplest_ir);
 					std::string sql_file_name = "/dev/shm/dd_sub_plan_" + std::to_string(subquery_index) + ".sql";
 					std::ofstream sql_file(sql_file_name);
@@ -941,7 +942,6 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 				// Track used column names to handle duplicates
 				case_insensitive_set_t used_column_names;
-				std::vector<std::string> actual_column_names;
 
 				// add column names and types
 				auto &simplest_proj = simplest_ir->Cast<SimplestProjection>();
@@ -955,10 +955,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 						suffix++;
 					}
 					used_column_names.insert(unique_column_name);
-					actual_column_names.emplace_back(unique_column_name);
 					info->columns.AddColumn(ColumnDefinition(unique_column_name, types[i]));
+					table_column_mappings.emplace(std::make_pair(data_chunk_index, i), std::move(unique_column_name));
 				}
-				table_column_mappings[intermediate_table_name] = std::move(actual_column_names);
 
 				auto created_table = catalog.CreateTable(*this, std::move(info));
 				auto &created_table_entry = created_table->Cast<TableCatalogEntry>();

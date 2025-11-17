@@ -114,7 +114,7 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 						auto table_name = table_names[table_idx] + "_" + std::to_string(table_idx);
 						std::string orig_col_name = agg_op.agg_fns[agg_fn_index].first->GetColumnName();
 						unsigned int col_idx = agg_op.agg_fns[agg_fn_index].first->GetColumnIndex();
-						std::string actual_col_name = GetActualColumnName(table_name, orig_col_name, col_idx);
+						std::string actual_col_name = GetActualColumnName(table_idx, col_idx, orig_col_name);
 						std::string select_str = table_name + "." + actual_col_name;
 						select_str = agg_fn_type + "(" + select_str + ")";
 						select_field.emplace_back(select_str);
@@ -125,7 +125,7 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 						    std::make_pair(target->GetTableIndex(), target->GetColumnIndex()), table_idx);
 						auto table_name = table_names[table_idx] + "_" + std::to_string(table_idx);
 						std::string orig_col_name = group_by_vec[col_idx]->GetColumnName();
-						std::string actual_col_name = GetActualColumnName(table_name, orig_col_name, col_idx);
+						std::string actual_col_name = GetActualColumnName(table_idx, col_idx, orig_col_name);
 						std::string select_str = table_name + "." + actual_col_name;
 						group_by_field.emplace_back(select_str);
 					} else {
@@ -143,7 +143,8 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 				auto table_name = table_names[target_table_index] + "_" + std::to_string(target_table_index);
 				std::string orig_col_name = target->GetColumnName();
 				unsigned int col_idx = target->GetColumnIndex();
-				std::string actual_col_name = GetActualColumnName(table_name, orig_col_name, col_idx);
+				unsigned int table_idx = target->GetTableIndex();
+				std::string actual_col_name = GetActualColumnName(table_idx, col_idx, orig_col_name);
 				std::string select_str = table_name + "." + actual_col_name;
 				auto find_select_str = agg_field.find(agg_field_key(target_table_index, target->GetColumnIndex()));
 				if (find_select_str != agg_field.end()) {
@@ -292,7 +293,8 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 				    table_names[left_var_attr->GetTableIndex()] + "_" + std::to_string(left_var_attr->GetTableIndex());
 				std::string left_orig_col = left_var_attr->GetColumnName();
 				unsigned int left_col_idx = left_var_attr->GetColumnIndex();
-				std::string left_actual_col = GetActualColumnName(left_table_name, left_orig_col, left_col_idx);
+				unsigned int left_table_idx = left_var_attr->GetTableIndex();
+				std::string left_actual_col = GetActualColumnName(left_table_idx, left_col_idx, left_orig_col);
 				auto join_str = left_table_name + "." + left_actual_col;
 				join_str += " = ";
 				auto &right_var_attr = var_comp.right_attr;
@@ -300,7 +302,8 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 				                        std::to_string(right_var_attr->GetTableIndex());
 				std::string right_orig_col = right_var_attr->GetColumnName();
 				unsigned int right_col_idx = right_var_attr->GetColumnIndex();
-				std::string right_actual_col = GetActualColumnName(right_table_name, right_orig_col, right_col_idx);
+				unsigned int right_table_idx = right_var_attr->GetTableIndex();
+				std::string right_actual_col = GetActualColumnName(right_table_idx, right_col_idx, right_orig_col);
 				join_str += right_table_name + "." + right_actual_col;
 				join_field.emplace_back(join_str);
 			}
@@ -315,7 +318,8 @@ void IRToSQLConverter::GenerateSQL(const unique_ptr<SimplestStmt> &op) {
 				    table_names[left_var_attr->GetTableIndex()] + "_" + std::to_string(left_var_attr->GetTableIndex());
 				std::string orig_col = left_var_attr->GetColumnName();
 				unsigned int col_idx = left_var_attr->GetColumnIndex();
-				std::string actual_col = GetActualColumnName(table_name, orig_col, col_idx);
+				unsigned int table_idx = left_var_attr->GetColumnIndex();
+				std::string actual_col = GetActualColumnName(table_idx, col_idx, orig_col);
 				auto filter_str = table_name + "." + actual_col;
 
 				auto &right_var_attr = var_comp.right_attr;
@@ -402,7 +406,8 @@ std::string IRToSQLConverter::CollectFilter(const unique_ptr<SimplestExpr> &qual
 		auto table_name = table_names[var_attr->GetTableIndex()] + "_" + std::to_string(var_attr->GetTableIndex());
 		std::string orig_col_name = var_attr->GetColumnName();
 		unsigned int col_idx = var_attr->GetColumnIndex();
-		std::string actual_col_name = GetActualColumnName(table_name, orig_col_name, col_idx);
+		unsigned int table_idx = var_attr->GetTableIndex();
+		std::string actual_col_name = GetActualColumnName(table_idx, col_idx, orig_col_name);
 		ret_str = table_name + "." + actual_col_name;
 		auto &const_attr = var_const_comp.const_var;
 
@@ -528,7 +533,8 @@ std::string IRToSQLConverter::CollectFilter(const unique_ptr<SimplestExpr> &qual
 		auto table_name = table_names[var_attr->GetTableIndex()] + "_" + std::to_string(var_attr->GetTableIndex());
 		std::string orig_col_name = var_attr->GetColumnName();
 		unsigned int col_idx = var_attr->GetColumnIndex();
-		std::string actual_col_name = GetActualColumnName(table_name, orig_col_name, col_idx);
+		unsigned int table_idx = var_attr->GetColumnIndex();
+		std::string actual_col_name = GetActualColumnName(table_idx, col_idx, orig_col_name);
 		ret_str = table_name + "." + actual_col_name;
 		switch (is_null_expr.GetSimplestExprType()) {
 		case SimplestExprType::InvalidExprType:
@@ -556,14 +562,13 @@ std::string IRToSQLConverter::CollectFilter(const unique_ptr<SimplestExpr> &qual
 	return ret_str;
 }
 
-std::string IRToSQLConverter::GetActualColumnName(const std::string &table_name, const std::string &original_col_name,
-                                                  unsigned int col_position) {
+std::string IRToSQLConverter::GetActualColumnName(idx_t table_index, idx_t column_index,
+                                                  const std::string &original_col_name) {
 	// Check if this is an intermediate table with renamed columns
-	if (table_column_mappings.count(table_name) > 0) {
-		auto &actual_columns = table_column_mappings[table_name];
-		if (col_position < actual_columns.size()) {
-			return actual_columns[col_position];
-		}
+	auto match_key = std::make_pair(table_index, column_index);
+	if (table_column_mappings.count(match_key) > 0) {
+		auto actual_columns = table_column_mappings[match_key];
+		return actual_columns;
 	}
 
 	// Not an intermediate table or position out of bounds, use original name

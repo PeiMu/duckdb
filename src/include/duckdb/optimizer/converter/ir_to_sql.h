@@ -18,7 +18,8 @@ public:
 
 	std::string LogicalPlanToSQL(const unique_ptr<SimplestStmt> &plan);
 
-	void SetTableColumnMappings(const std::unordered_map<std::string, std::vector<std::string>> &mappings) {
+	void SetTableColumnMappings(
+	    const std::unordered_map<std::pair<idx_t, idx_t>, std::string, pair_hash> &mappings) {
 		table_column_mappings = mappings;
 	}
 
@@ -27,8 +28,7 @@ private:
 	std::string TranslateSimplestAggFnType(SimplestAggFnType agg_fn_type);
 	std::string CollectFilter(const unique_ptr<SimplestExpr> &qual_expr);
 
-	std::string GetActualColumnName(const std::string &table_name, const std::string &original_col_name,
-	                                unsigned int col_position);
+	std::string GetActualColumnName(idx_t table_index, idx_t column_index, const std::string &original_col_name);
 
 	unsigned int agg_field_key(unsigned int table_idx, unsigned int column_idx) {
 		return std::hash<unsigned int>()(table_idx) ^ std::hash<unsigned int>()(column_idx);
@@ -48,7 +48,7 @@ private:
 	std::unordered_map<unsigned int, std::vector<std::string>> chunk_contents;
 
 	// mapping from table_name -> actual column names in created table
-	std::unordered_map<std::string, std::vector<std::string>> table_column_mappings;
+	std::unordered_map<std::pair<idx_t, idx_t>, std::string, pair_hash> table_column_mappings;
 
 	std::unordered_map<std::pair<idx_t, idx_t>, idx_t, pair_hash> proj_table_to_real_table;
 };

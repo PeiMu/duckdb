@@ -191,9 +191,6 @@ int64_t SubqueryPreparer::MergeDataChunk(std::vector<unique_ptr<LogicalOperator>
 
 	int64_t chunk_size = previous_result->Count();
 
-	// generate an unused table index by the binder
-	new_table_idx = binder.GenerateTableIndex();
-
 	if (nullptr == chunk_scan) {
 		chunk_scan =
 		    make_uniq<LogicalColumnDataGet>(new_table_idx, previous_result->Types(), std::move(previous_result));
@@ -246,9 +243,6 @@ SubqueryPreparer::MergeCreatedTable(std::vector<unique_ptr<LogicalOperator>> &cu
 		created_return_types.push_back(col.Type());
 		created_return_names.push_back(col.Name());
 	}
-
-	// generate an unused table index by the binder
-	new_table_idx = binder.GenerateTableIndex();
 
 	auto created_logical_get = make_uniq<LogicalGet>(new_table_idx, scan_function, std::move(bind_data),
 	                                                 std::move(created_return_types), std::move(created_return_names));
