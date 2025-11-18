@@ -7,7 +7,7 @@ iteration=15 # 5 warm up, 10 runs
 LOG_NAME=time_log.csv
 
 rm -rf *${LOG_NAME}
-rm -rf convert_job_complex_sql/*${LOG_NAME}
+rm -rf convert_job_sql/*${LOG_NAME}
 
 
 ###### compile
@@ -19,18 +19,18 @@ for sql in "${dir}"/*.sql; do
   for i in $(eval echo {1.."${iteration}"}); do
     echo -ne ".read ${sql}" | duckdb ./imdb.db;
 
-    # count the number of files with pattern `dd_sub_plan_*`
-    count=$(find "${PWD}" -maxdepth 1 -type f -name 'dd_sub_plan_*.sql' | wc -l)
-    # drop temp tables for counts > 1
-    if [ "${count}" -gt 1 ]; then
-      for j in $(seq 1 $((count - 1))); do
-        duckdb -c "drop table temp${j};" imdb.db
-      done
-    fi
+#    # count the number of files with pattern `dd_sub_plan_*`
+#    count=$(find "${PWD}" -maxdepth 1 -type f -name 'dd_sub_plan_*.sql' | wc -l)
+#    # drop temp tables for counts > 1
+#    if [ "${count}" -gt 1 ]; then
+#      for j in $(seq 1 $((count - 1))); do
+#        duckdb -c "drop table temp${j};" imdb.db
+#      done
+#    fi
 
   done
 done
 mv ${LOG_NAME} duckdb_sql_conversion_breakdown_${LOG_NAME}
 
 
-mv *${LOG_NAME} convert_job_complex_sql/.
+mv *${LOG_NAME} convert_job_sql/.
