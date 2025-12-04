@@ -131,7 +131,7 @@ public:
 			}
 
 			// we have space: write the string
-			UpdateStringStats(stats, source_data[source_idx]);
+//			UpdateStringStats(stats, source_data[source_idx]);
 
 			if (DUCKDB_UNLIKELY(use_overflow_block)) {
 				// write to overflow blocks
