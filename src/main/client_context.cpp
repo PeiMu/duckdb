@@ -713,6 +713,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 					IRToSQLConverter ir_to_sql_converter;
 					ir_to_sql_converter.SetTableColumnMappings(table_column_mappings);
 					std::string sql_code = ir_to_sql_converter.LogicalPlanToSQL(simplest_ir);
+#if MIDDLEWARE_READ_WRITE_QUERY
 					std::string sql_file_name = "/dev/shm/dd_sub_plan_" + std::to_string(subquery_index) + ".sql";
 					std::ofstream sql_file(sql_file_name);
 					sql_file << sql_code;
@@ -731,6 +732,9 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 					// read and parse the SQL, then continue the duckdb process
 					std::string sub_sql = ReadSQLFile(sql_file_name);
+#else
+					std::string sub_sql = sql_code;
+#endif
 					// #if ENABLE_MEASURE_EXE_TIME
 					//					if (execute_plan) {
 					//						auto execute_time = chrono_toc(&timer, "Read SQL time is\n", false);
