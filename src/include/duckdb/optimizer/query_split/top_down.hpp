@@ -21,10 +21,17 @@
 #include "duckdb/planner/expression/bound_operator_expression.hpp"
 #include "duckdb/planner/filter/conjunction_filter.hpp"
 #include "duckdb/planner/operator/logical_cross_product.hpp"
+#include "duckdb/planner/operator/logical_comparison_join.hpp"
+#include "duckdb/planner/operator/logical_get.hpp"
+#include "duckdb/planner/operator/logical_filter.hpp"
+#include "duckdb/planner/operator/logical_projection.hpp"
+#include "duckdb/planner/operator/logical_column_data_get.hpp"
+#include "duckdb/planner/operator/logical_aggregate.hpp"
+#include "duckdb/planner/expression/bound_aggregate_expression.hpp"
 
 namespace duckdb {
 
-#define SPLIT_FILTER true
+#define SPLIT_FILTER false
 
 //! Based on the DAG of the logical plan, we generate the subqueries bottom-up
 class TopDownSplit : public SplitAlgorithm {

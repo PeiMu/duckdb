@@ -231,6 +231,7 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 				break;
 			}
 #endif
+			break;
 		}
 		case LogicalOperatorType::LOGICAL_COMPARISON_JOIN: {
 			// we skip the SEMI JOIN or MARK JOIN
