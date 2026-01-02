@@ -34,7 +34,7 @@ public:
 	virtual unique_ptr<LogicalOperator> Split(unique_ptr<LogicalOperator> plan, bool follow_pipeline_breaker) {
 		return plan;
 	};
-	void Clear() {
+	virtual void Clear() {
 		subqueries.clear();
 	}
 
