@@ -1,116 +1,116 @@
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query013/query013_0.sql"" ./dsb_100.db",10.69373497834,0.24435039574815906,10.57884074854,7.933774419999999,2.7592966600000004,10.54001165904,11.28241538304
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query013/query013_0.sql"" ./dsb_100.db",10.262685343560001,0.032024398341791445,10.25533136676,7.53541276,2.7262977,10.235823037760001,10.335000372760001
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query018/query018_0.sql"" ./dsb_100.db",4.12373329344,0.011173937913467746,4.12269077944,2.74897714,1.3741937199999998,4.11054080444,4.14816069244
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query018/query018_0.sql"" ./dsb_100.db",4.06038183918,0.01416065314634667,4.059544258479999,2.6933970599999997,1.36661688,4.03078524798,4.08543612998
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query019/query019_0.sql"" ./dsb_100.db",0.29569664162000003,0.0025182408488430984,0.29578199132,0.24376366,0.051824419999999996,0.29248895932,0.30044238732
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query019/query019_0.sql"" ./dsb_100.db",0.30222581102,0.0027280261171291325,0.30165446452,0.24498936000000002,0.057132800000000004,0.29902686702000003,0.30735317702000003
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query025/query025_0.sql"" ./dsb_100.db",9.887352795,0.03873667118826119,9.8881254892,7.5576916,2.32897186,9.828120303199999,9.955417236199999
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query025/query025_0.sql"" ./dsb_100.db",9.67910728288,0.029329665078022316,9.678511687780002,7.325146360000001,2.35303516,9.64393568128,9.72941115928
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query027/query027_0.sql"" ./dsb_100.db",6.587564315420001,0.020052807604303155,6.58224415062,4.507106139999999,2.0799914,6.56066677262,6.62072637462
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query027/query027_0.sql"" ./dsb_100.db",6.39976038262,0.13627911201856963,6.36035548432,4.330686160000001,2.0684268,6.33177846682,6.78473332582
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query040/query040_0.sql"" ./dsb_100.db",0.37338904862,0.004007698001014053,0.37206951362,0.24800023999999996,0.12529355999999997,0.36915302812,0.38087205512
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query040/query040_0.sql"" ./dsb_100.db",0.37500400446000004,0.006269974139303835,0.37276678936,0.25198448,0.1228969,0.37048761036000005,0.39123730936000006
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query050/query050_0.sql"" ./dsb_100.db",23.04175517898,0.0536128187571741,23.04545745228,20.386579419999997,2.65411036,22.96355298528,23.15162264028
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query050/query050_0.sql"" ./dsb_100.db",22.8266211654,0.04325443920695549,22.8150313501,20.1716919,2.6525676799999998,22.7656482536,22.8969891956
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query084/query084_0.sql"" ./dsb_100.db",1.7744248186,0.004476849153714689,1.7728920035,1.61319012,0.1610892,1.7694708075,1.7840597685000001
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query084/query084_0.sql"" ./dsb_100.db",1.7571136839600001,0.00559269706214606,1.75585437716,1.6032131399999998,0.15373026,1.7518132536600002,1.76906844566
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query085/query085_0.sql"" ./dsb_100.db",7.658472269639999,0.04431837621676454,7.65170586544,6.1769543,1.4810870599999997,7.604590512440001,7.73576968244
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query085/query085_0.sql"" ./dsb_100.db",7.60924284954,0.05855844786671658,7.60750579904,6.14968994,1.45877998,7.53985035954,7.73301846654
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query091/query091_0.sql"" ./dsb_100.db",0.10482759850000001,0.0004220296710576937,0.1048988903,0.07506455999999999,0.029663979999999996,0.10405101230000001,0.1053812063
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query091/query091_0.sql"" ./dsb_100.db",0.13907740376,0.0021451474656750697,0.13815279896000002,0.10366043999999999,0.0353094,0.13731038096,0.14294888696000002
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query099/query099_0.sql"" ./dsb_100.db",0.08068789528000002,0.0018989930446945958,0.07990905758000001,0.06202897999999999,0.018553399999999998,0.07935163058000001,0.08427888458
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query099/query099_0.sql"" ./dsb_100.db",0.08047434276000001,0.002246755339388903,0.07935750236000001,0.059002219999999994,0.021370939999999995,0.07861835786000002,0.08459195286000001
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query100/query100_0.sql"" ./dsb_100.db",0.09242960596000002,0.0027759909737371203,0.09146615716,0.07204400000000001,0.02028266,0.09097101116,0.10017199816000001
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query100/query100_0.sql"" ./dsb_100.db",0.09217151727999999,0.0022463313413483886,0.09121816518,0.06854023999999999,0.023529639999999998,0.08974868868,0.09582650368
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query101/query101_0.sql"" ./dsb_100.db",10.397825649320001,0.013394185321693505,10.39769553902,8.975507359999998,1.42165132,10.38105005602,10.42880185202
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query101/query101_0.sql"" ./dsb_100.db",0.13650737284000003,0.0033170026873338815,0.13496877554,0.11342703999999999,0.022963760000000003,0.13286332604,0.14158706504000002
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query102/query102_0.sql"" ./dsb_100.db",0.24314738258000004,0.0015083640144926587,0.24284965178,0.20338332,0.03965922000000001,0.24092587478,0.24596388678
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query102/query102_0.sql"" ./dsb_100.db",0.22671790958000004,0.003989772671482,0.22459070328000003,0.17771164,0.04889358,0.22302170178000003,0.23300755178000002
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query013_spj/query013_spj_0.sql"" ./dsb_100.db",10.594814419799999,0.053123462766554067,10.5808745476,7.894846459999999,2.69897958,10.5447267281,10.730329513100001
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query013_spj/query013_spj_0.sql"" ./dsb_100.db",10.267782320679999,0.02100152287250089,10.275087650379998,7.512273760000001,2.7541466,10.23109265888,10.29418378688
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query018_spj/query018_spj_0.sql"" ./dsb_100.db",4.144049258279999,0.07757017482067229,4.116881730879999,2.77980928,1.36371506,4.10269768138,4.3615076973799995
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query018_spj/query018_spj_0.sql"" ./dsb_100.db",4.089995543340001,0.08764305855049051,4.063554459840001,2.71849842,1.37118498,4.03821965184,4.33459063684
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query019_spj/query019_spj_0.sql"" ./dsb_100.db",0.2949019962,0.0033379131915132858,0.29437771890000003,0.248752,0.04603898,0.2908230704,0.3017548854
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query019_spj/query019_spj_0.sql"" ./dsb_100.db",0.29957455087999996,0.0021953963821445916,0.29975512938000004,0.25139776,0.0480823,0.29649613988,0.30268717488
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query025_spj/query025_spj_0.sql"" ./dsb_100.db",10.891705098080001,0.0215245219964589,10.88793769858,8.43458368,2.45630122,10.86015862958,10.926911436580001
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query025_spj/query025_spj_0.sql"" ./dsb_100.db",10.64710398838,0.043827429838133834,10.63084478318,8.1842308,2.46220342,10.59434105068,10.74668587668
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query027_spj/query027_spj_0.sql"" ./dsb_100.db",6.981725719219999,0.020928698373544205,6.97661052472,4.850815339999999,2.1303414399999996,6.95654433772,7.01143604272
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query027_spj/query027_spj_0.sql"" ./dsb_100.db",6.6931211695,0.019424858832714,6.687880395500001,4.58902102,2.10327918,6.6638011935,6.7229165795000005
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query040_spj/query040_spj_0.sql"" ./dsb_100.db",0.29569012748,0.0030792917302788774,0.29517670268,0.21498688000000002,0.0805893,0.29258211968000003,0.30347875768
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query040_spj/query040_spj_0.sql"" ./dsb_100.db",0.29754756494000006,0.0020975143540578915,0.29750656974,0.20511316000000002,0.0923148,0.29449899274,0.30167199874000006
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query050_spj/query050_spj_0.sql"" ./dsb_100.db",15.572124521360001,0.08334269706732902,15.54847728946,13.933855499999998,1.63752688,15.49279523996,15.76873407596
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query050_spj/query050_spj_0.sql"" ./dsb_100.db",14.756503333660001,0.04955088440933039,14.742838708259999,13.098923280000003,1.6568423799999998,14.67783616126,14.83909693826
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query072_spj/query072_spj_0.sql"" ./dsb_100.db",0.08894930114,0.0015338491179921945,0.08858266974000001,0.07014915999999999,0.01870206,0.08794154724,0.09310800224
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query072_spj/query072_spj_0.sql"" ./dsb_100.db",0.11107896596,0.0018595790680352743,0.11051163806,0.08192864,0.02903832,0.10955177056,0.11583065356000001
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query084_spj/query084_spj_0.sql"" ./dsb_100.db",2.1225457666,0.00926928138827465,2.1198564726,1.84141016,0.28084035999999996,2.1143024806,2.1467699046
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query084_spj/query084_spj_0.sql"" ./dsb_100.db",2.08829665634,0.005906893382294634,2.09020036824,1.81243668,0.27562498,2.07998233124,2.09582437524
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query085_spj/query085_spj_0.sql"" ./dsb_100.db",7.333819435960001,0.07450984193799225,7.30819834226,5.964767339999999,1.36851412,7.243592803259999,7.49763127826
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query085_spj/query085_spj_0.sql"" ./dsb_100.db",7.23446489764,0.02492347516228538,7.2277792526399995,5.894614259999999,1.33899778,7.203024590639999,7.281458875639999
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query091_spj/query091_spj_0.sql"" ./dsb_100.db",0.10247965106000001,0.0024186939338155097,0.10153085536,0.08015394,0.022216439999999997,0.10030256686000001,0.10608374686000001
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query091_spj/query091_spj_0.sql"" ./dsb_100.db",0.14019335970000002,0.002656615115382653,0.1394212606,0.10950514,0.030565359999999996,0.1367094171,0.1439305841
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query099_spj/query099_spj_0.sql"" ./dsb_100.db",0.08226510328,0.002303903268205456,0.08309127078,0.058767139999999995,0.02340002,0.07900537428,0.08504701528
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query099_spj/query099_spj_0.sql"" ./dsb_100.db",0.08076541188,0.001994273014087761,0.08066896758,0.06134086,0.01930436,0.07855490658,0.08338735258
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query100_spj/query100_spj_0.sql"" ./dsb_100.db",0.09155310796000002,0.0004548910355279972,0.09150863616000002,0.06995002000000002,0.02149748,0.09101657116000002,0.09251351516000002
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query100_spj/query100_spj_0.sql"" ./dsb_100.db",0.09196897840000001,0.002042103354364655,0.0911915093,0.06546434,0.026398659999999997,0.09016286280000001,0.0954519208
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query101_spj/query101_spj_0.sql"" ./dsb_100.db",10.41353288458,0.03089787797944889,10.39814150288,8.997709679999998,1.4150883200000002,10.38725348088,10.478011647879999
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query101_spj/query101_spj_0.sql"" ./dsb_100.db",0.13478814118000002,0.0024322916397527066,0.13401604568,0.10867457999999999,0.025996599999999998,0.13256119718,0.13965221118
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query102_spj/query102_spj_0.sql"" ./dsb_100.db",0.2117722095,0.0008573367253110753,0.2116014833,0.17426478,0.03739311999999999,0.2107774108,0.2133894518
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/1/query102_spj/query102_spj_0.sql"" ./dsb_100.db",0.19583107568,0.002953486532683572,0.19545105658,0.1564157,0.0392961,0.19240245158,0.20071307658
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query013/query013_0.sql"" ./dsb_100.db",10.566318187979999,0.03291330249581946,10.55884286258,7.83695556,2.7285136999999997,10.526616557579999,10.61626067958
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query013/query013_0.sql"" ./dsb_100.db",10.307696351859999,0.02397633892957282,10.307399403959998,7.513519020000001,2.79322658,10.27906786896,10.34161928796
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query018/query018_0.sql"" ./dsb_100.db",4.12744529124,0.009548097641810598,4.12669665384,2.7633769200000002,1.3636924400000001,4.112863452839999,4.14241250884
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query018/query018_0.sql"" ./dsb_100.db",4.11626162706,0.12635404360735789,4.06454108066,2.7615742199999995,1.3544048399999997,4.04258396116,4.42887908216
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query019/query019_0.sql"" ./dsb_100.db",0.29815212658000007,0.008190472544186415,0.29528008388000004,0.24770519999999996,0.04846372,0.29273675838,0.32027453638000003
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query019/query019_0.sql"" ./dsb_100.db",0.3030470175400001,0.0067151153171075145,0.30071299624000003,0.25322659999999997,0.049702659999999996,0.29704769074000004,0.31999519074000005
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query025/query025_0.sql"" ./dsb_100.db",9.87766490062,0.022296022920660016,9.87668161852,7.55462854,2.32202688,9.84608129252,9.91712430552
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query025/query025_0.sql"" ./dsb_100.db",9.702087153799999,0.029010014509552068,9.706932330699999,7.36394684,2.3364825799999998,9.6681475167,9.7595825217
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query027/query027_0.sql"" ./dsb_100.db",6.627956661960001,0.07174963407651187,6.60639556986,4.56398552,2.0634980599999997,6.57122144686,6.80972330586
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query027/query027_0.sql"" ./dsb_100.db",6.353070582719999,0.012344148885549704,6.34802554532,4.29377888,2.0584309800000007,6.342233365319999,6.37521607232
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query040/query040_0.sql"" ./dsb_100.db",0.3720320617600001,0.005347800174469913,0.37031765406000006,0.24441552,0.12750135999999998,0.36947322006000005,0.38706255306000004
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query040/query040_0.sql"" ./dsb_100.db",0.3764255748600001,0.0030370321497796763,0.37653849386000005,0.24526031999999995,0.13103466000000003,0.37097960136,0.38029056636
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query050/query050_0.sql"" ./dsb_100.db",23.07552055402,0.06465969192536622,23.06804903892,20.40895762,2.66436398,23.00294464892,23.19054956492
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query050/query050_0.sql"" ./dsb_100.db",22.83286571416,0.09267680343452889,22.81959661936,20.166834259999998,2.66428928,22.70366974436,22.98339231736
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query084/query084_0.sql"" ./dsb_100.db",1.7769324718,0.00683110656530017,1.7778735556000003,1.62519154,0.15160981999999998,1.7668702291000002,1.7882987451
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query084/query084_0.sql"" ./dsb_100.db",1.7545120286,0.006381193213430518,1.7547508176,1.6066824199999998,0.14767705999999997,1.7452413221,1.7636545361
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query085/query085_0.sql"" ./dsb_100.db",7.6358883328600005,0.04129072133767858,7.62950731766,6.193949299999998,1.4414668800000003,7.59643174016,7.73046080616
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query085/query085_0.sql"" ./dsb_100.db",7.583165451239999,0.023218329829403268,7.578287230140001,6.146943579999999,1.43552812,7.55528868114,7.63250729014
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query091/query091_0.sql"" ./dsb_100.db",0.10497950262,0.0006675533917808026,0.10499310362,0.07688414000000002,0.027998280000000004,0.10398303812000001,0.10617823312
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query091/query091_0.sql"" ./dsb_100.db",0.13918339544,0.0017217543371918422,0.13887049854,0.1099667,0.029096659999999996,0.13771425204,0.14353301104
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query099/query099_0.sql"" ./dsb_100.db",0.08017228575999999,0.0015036061368199256,0.07965245766000001,0.058479460000000004,0.021591480000000003,0.07922071066,0.08425971766
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query099/query099_0.sql"" ./dsb_100.db",0.080627902,0.0018682540030116324,0.0795871149,0.058057000000000004,0.02247852,0.0789616919,0.0838431149
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query100/query100_0.sql"" ./dsb_100.db",0.09277679398000001,0.001985844578965958,0.09184128908,0.07327890000000001,0.019399559999999996,0.09130300358000001,0.09651534458
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query100/query100_0.sql"" ./dsb_100.db",0.09221308150000002,0.002358795961798551,0.09113887540000001,0.07065448,0.021444959999999996,0.09006342490000001,0.0959395359
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query101/query101_0.sql"" ./dsb_100.db",10.41833580936,0.020486397680736776,10.425225256160001,9.019968780000001,1.3970002199999998,10.39066706766,10.44963289366
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query101/query101_0.sql"" ./dsb_100.db",0.1358938446,0.0019073936463519564,0.13515805770000003,0.10506229999999998,0.03070946,0.13443019120000002,0.1395217042
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query102/query102_0.sql"" ./dsb_100.db",0.24193958412,0.001377193843405675,0.24178140562,0.19898396000000002,0.0428217,0.23994719862000002,0.24419749862
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query102/query102_0.sql"" ./dsb_100.db",0.22642003242,0.0033439778161530563,0.22516886512,0.17407635999999999,0.05224248,0.22293198762000002,0.23142082462000002
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query013_spj/query013_spj_0.sql"" ./dsb_100.db",10.586419020400001,0.041733423947635864,10.582544833,7.82997144,2.7554135599999996,10.529265601,10.670134538000001
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query013_spj/query013_spj_0.sql"" ./dsb_100.db",10.28014132486,0.030329730679180936,10.27598938816,7.52276902,2.74776724,10.231055054659999,10.335920029659999
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query018_spj/query018_spj_0.sql"" ./dsb_100.db",4.12192494734,0.018667880270661866,4.119972001240001,2.75375554,1.3678147600000001,4.09597928224,4.16053500024
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query018_spj/query018_spj_0.sql"" ./dsb_100.db",4.053065934779999,0.009687386439198356,4.05591923168,2.6755014799999994,1.37721714,4.0363330706800005,4.063102181680001
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query019_spj/query019_spj_0.sql"" ./dsb_100.db",0.29270639942,0.001124588516359879,0.29272664752,0.24294003999999997,0.04965151999999999,0.29021111852000003,0.29419055252
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query019_spj/query019_spj_0.sql"" ./dsb_100.db",0.29683907398000003,0.0017840334283007163,0.29656573278,0.25085654,0.045871619999999995,0.29404149778,0.30013819978
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query025_spj/query025_spj_0.sql"" ./dsb_100.db",10.899462368619998,0.038100656971282634,10.903589373620001,8.47626178,2.4223924199999995,10.82773072962,10.94780342962
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query025_spj/query025_spj_0.sql"" ./dsb_100.db",10.63854571066,0.03507830383201515,10.63197921066,8.16898446,2.46879358,10.596288704160001,10.706355465160001
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query027_spj/query027_spj_0.sql"" ./dsb_100.db",6.9953329794,0.022499446571546334,6.9905292789999995,4.88569942,2.1091442600000003,6.9716678325,7.0383265344999995
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query027_spj/query027_spj_0.sql"" ./dsb_100.db",6.695294972499999,0.017569177388014456,6.695188667,4.572160619999999,2.1224793399999995,6.6708005754999995,6.7297999875
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query040_spj/query040_spj_0.sql"" ./dsb_100.db",0.29578671428000003,0.0037168281973383385,0.29478390618,0.21608918,0.07958528000000001,0.29242694868,0.30545451168
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query040_spj/query040_spj_0.sql"" ./dsb_100.db",0.29878825532,0.002166638814832186,0.29829094341999995,0.20898586,0.0896566,0.29666916042,0.30412134042
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query050_spj/query050_spj_0.sql"" ./dsb_100.db",15.551907826699999,0.03950672508070394,15.5546847607,13.925336640000001,1.6253205599999998,15.483776092700001,15.6168825107
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query050_spj/query050_spj_0.sql"" ./dsb_100.db",14.761130154399998,0.05326480248554225,14.7567744904,13.125804219999997,1.63468944,14.6791306334,14.8638083564
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query072_spj/query072_spj_0.sql"" ./dsb_100.db",0.08908215106000002,0.0013679544125363955,0.08852301586000001,0.06805217999999999,0.02092222,0.08804867136000001,0.09264469536000002
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query072_spj/query072_spj_0.sql"" ./dsb_100.db",0.11083850483999999,0.00043322827649123694,0.11074858614,0.08088451999999999,0.029834740000000005,0.11014511914,0.11146983114
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query084_spj/query084_spj_0.sql"" ./dsb_100.db",2.114466709,0.006296961136901892,2.1141879275,1.8424196800000001,0.27178518,2.104101269,2.122662429
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query084_spj/query084_spj_0.sql"" ./dsb_100.db",2.0994695196799995,0.00890093480306927,2.1008470174799996,1.7958700799999998,0.30343615999999995,2.08690662648,2.1179912384799997
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query085_spj/query085_spj_0.sql"" ./dsb_100.db",7.297793483880001,0.03166957098398577,7.3023171724800005,5.919890239999999,1.3774492799999998,7.25832382498,7.34463014498
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query085_spj/query085_spj_0.sql"" ./dsb_100.db",7.273815807460001,0.04766848716068035,7.2755450243599995,5.91760328,1.3553801800000003,7.20875816636,7.37063831836
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query091_spj/query091_spj_0.sql"" ./dsb_100.db",0.10179272442000001,0.0015050275674945276,0.10124178982000001,0.07942083999999999,0.02228658,0.10054363682,0.10567851582000001
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query091_spj/query091_spj_0.sql"" ./dsb_100.db",0.1403547362,0.0017828665279363868,0.140185588,0.10349938,0.036756660000000003,0.137974418,0.143819228
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query099_spj/query099_spj_0.sql"" ./dsb_100.db",0.08023913924000001,0.0017356957781913065,0.07969058504000001,0.06292052000000001,0.01721484,0.07903803954000001,0.08500224954
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query099_spj/query099_spj_0.sql"" ./dsb_100.db",0.0806958383,0.00230031976776718,0.0796707468,0.05613768,0.024442039999999998,0.0780739583,0.0840172483
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query100_spj/query100_spj_0.sql"" ./dsb_100.db",0.0920953447,0.0010443622356287063,0.09168136170000002,0.06523795999999998,0.02674764,0.09105478520000002,0.09367720220000002
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query100_spj/query100_spj_0.sql"" ./dsb_100.db",0.09134915176,0.001454539749857988,0.09068378686,0.06946021999999999,0.02177346,0.09015517836,0.09430297436000001
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query101_spj/query101_spj_0.sql"" ./dsb_100.db",10.42683580824,0.03210529891296958,10.41941382974,9.000965859999999,1.42515714,10.37966125574,10.474975003740001
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query101_spj/query101_spj_0.sql"" ./dsb_100.db",0.13451341675999998,0.0017413275741664225,0.13429901066,0.10566784,0.028710560000000003,0.13257376666,0.13863834266
 command,mean,stddev,median,user,system,min,max
-"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query102_spj/query102_spj_0.sql"" ./dsb_100.db",0.21394140079999996,0.0012503732010648693,0.2140565294,0.17839637999999997,0.035440559999999996,0.2120645439,0.2158046719
+"duckdb -c "".read /home/pei/Project/benchmarks/dsb-postgres/code/tools/1_instance_out_wo_multi_block/2/query102_spj/query102_spj_0.sql"" ./dsb_100.db",0.19666960726,0.0025767067397361332,0.19590143826,0.16087578,0.03568002,0.19386178976000001,0.20143830976000002
