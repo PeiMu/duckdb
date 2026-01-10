@@ -265,6 +265,12 @@ void TopDownSplit::VisitOperator(LogicalOperator &op) {
 				auto child_exprs = GetFilterTableExpr(inner_filter);
 				table_exprs.insert(child_exprs.begin(), child_exprs.end());
 			}
+			// also check the right child for FILTER nodes
+			if (child->children.size() > 1 && LogicalOperatorType::LOGICAL_FILTER == child->children[1]->type) {
+				auto &inner_filter = child->children[1]->Cast<LogicalFilter>();
+				auto child_exprs = GetFilterTableExpr(inner_filter);
+				table_exprs.insert(child_exprs.begin(), child_exprs.end());
+			}
 			top_most = false;
 			break;
 		}
