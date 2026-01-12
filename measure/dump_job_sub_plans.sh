@@ -18,13 +18,22 @@ sed -i 's/#define ENABLE_OPTIMIZER_COMPARISON\s\+true/#define ENABLE_OPTIMIZER_C
 
 for i in $(eval echo {1.."${iteration}"}); do
   for sql in "${dir}"/*; do
+    filename=${sql%/}        # remove trailing /
+    filename=${filename##*/} # remove everything before last /
+    id=${filename%.sql}      # remove .sql
+    rm -rf ${PWD}/job_result/${id}/
+  done
+done
+
+for i in $(eval echo {1.."${iteration}"}); do
+  for sql in "${dir}"/*; do
     echo "execute ${sql}" 2>&1|tee -a ${log_name};
     echo -ne ".read ${sql}" | duckdb ./imdb.db 2>&1|tee -a ${log_name};
     filename=${sql%/}        # remove trailing /
     filename=${filename##*/} # remove everything before last /
     id=${filename%.sql}      # remove .sql
     echo "sql id is: ${id}"
-    mkdir -p ${PWD}/job_result/${id}/
+    mkdir ${PWD}/job_result/${id}/
     mv *.bin ${PWD}/job_result/${id}/
   done
 done
