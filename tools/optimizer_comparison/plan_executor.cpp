@@ -66,7 +66,7 @@ int main(int argc, char **argv) {
 		return a.split_index < b.split_index;
 	});
 
-	std::cout << "Version, SplitIndex, ExecutionTime(ms), Status\n";
+	std::cout << "Version, SplitIndex, ExecutionTime(us), Status\n";
 
 	unique_ptr<QueryResult> final_result;
 
@@ -124,7 +124,12 @@ int main(int argc, char **argv) {
 			auto timer = chrono_tic();
 			auto result = conn.context->Execute("", prepared, values, false);
 
-			auto execute_time = chrono_toc(&timer, "Optimizer Comparison Tool Execute time is, ", true);
+			auto execute_time = chrono_toc(&timer, "Optimizer Comparison Tool Execute time is, ", false);
+			// save time to a file
+			std::ofstream log_file;
+			log_file.open("optimizer_comparison_time_log.csv", std::ios_base::app);
+			log_file << std::to_string(execute_time / 1000) + ", ";
+			log_file.close();
 
 			if (result->HasError()) {
 				std::cout << plan_meta.version << ", " << plan_meta.split_index << ", "
@@ -172,6 +177,12 @@ int main(int argc, char **argv) {
 	if (final_result && !final_result->HasError()) {
 		std::cout << "\n=== FINAL QUERY RESULT ===\n";
 		final_result->Print();
+
+		// save \n to the file
+		std::ofstream log_file;
+		log_file.open("optimizer_comparison_time_log.csv", std::ios_base::app);
+		log_file << "\n";
+		log_file.close();
 	}
 
 	return 0;
