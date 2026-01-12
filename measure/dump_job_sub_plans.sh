@@ -22,7 +22,7 @@ for i in $(eval echo {1.."${iteration}"}); do
     filename=${sql%/}        # remove trailing /
     filename=${filename##*/} # remove everything before last /
     id=${filename%.sql}      # remove .sql
-    rm -rf ${PWD}/job_result/0.10.1/${id}/
+    rm -rf ${PWD}/job_result/1.3.2/${id}/
   done
 done
 
