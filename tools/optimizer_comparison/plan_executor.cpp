@@ -60,25 +60,22 @@ int main(int argc, char **argv) {
 
 	// Sort by version, then split_index
 	std::sort(plans.begin(), plans.end(), [](const PlanMetadata &a, const PlanMetadata &b) {
-		if (a.version != b.version) return a.version < b.version;
+		if (a.version != b.version) {
+			return a.version < b.version;
+		}
 		return a.split_index < b.split_index;
 	});
 
-	std::cout << "Version,SplitIndex,DeserializeTime(ms),ExecutionTime(ms),"
-	          << "EstimatedCard,PlanType,Status\n";
+	std::cout << "Version, SplitIndex, ExecutionTime(ms), Status\n";
 
 	unique_ptr<QueryResult> final_result;
 
 	for (const auto &plan_meta : plans) {
 		try {
-			auto &fs = FileSystem::GetFileSystem(*conn.context);
-
 			// Start transaction for deserialization (needed for catalog access)
 			conn.BeginTransaction();
 
 			// Deserialize
-			auto deser_start = std::chrono::high_resolution_clock::now();
-
 			BufferedFileReader reader(fs, plan_meta.filename.c_str());
 			BinaryDeserializer deserializer(reader);
 			deserializer.Set<ClientContext &>(*conn.context);
@@ -87,16 +84,8 @@ int main(int argc, char **argv) {
 			auto logical_plan = LogicalOperator::Deserialize(deserializer);
 			deserializer.End();
 
-			auto deser_end = std::chrono::high_resolution_clock::now();
-			double deser_time =
-			    std::chrono::duration<double, std::milli>(deser_end - deser_start).count();
-
 			// Resolve types
 			logical_plan->ResolveOperatorTypes();
-
-			// Get plan metadata
-			idx_t estimated_card = logical_plan->estimated_cardinality;
-			std::string plan_type = LogicalOperatorToString(logical_plan->type);
 
 			// Get column names and types from the plan
 			vector<string> names;
@@ -114,8 +103,6 @@ int main(int argc, char **argv) {
 			}
 
 			// Generate physical plan WITHOUT running optimizer
-			auto exec_start = std::chrono::high_resolution_clock::now();
-
 			PhysicalPlanGenerator physical_planner(*conn.context);
 			auto physical_plan = physical_planner.Plan(std::move(logical_plan));
 
@@ -133,18 +120,15 @@ int main(int argc, char **argv) {
 
 			// Execute the prepared statement (commits the transaction)
 			case_insensitive_map_t<BoundParameterData> values;
+			// todo: provide correct SQL string by the IR_SQL_Converter
+			auto timer = chrono_tic();
 			auto result = conn.context->Execute("", prepared, values, false);
 
-			auto exec_end = std::chrono::high_resolution_clock::now();
-			double exec_time = std::chrono::duration<double, std::milli>(exec_end - exec_start).count();
+			auto execute_time = chrono_toc(&timer, "Optimizer Comparison Tool Execute time is, ", true);
 
 			if (result->HasError()) {
-				std::cout << plan_meta.version << ","
-				          << plan_meta.split_index << ","
-				          << deser_time << ","
-				          << "ERROR,"
-				          << estimated_card << ","
-				          << plan_type << ","
+				std::cout << plan_meta.version << ", " << plan_meta.split_index << ", "
+				          << "ERROR, "
 				          << "\"" << result->GetError() << "\"\n";
 
 				// Rollback on error
@@ -154,12 +138,7 @@ int main(int argc, char **argv) {
 					// Ignore rollback errors
 				}
 			} else {
-				std::cout << plan_meta.version << ","
-				          << plan_meta.split_index << ","
-				          << deser_time << ","
-				          << exec_time << ","
-				          << estimated_card << ","
-				          << plan_type << ","
+				std::cout << plan_meta.version << ", " << plan_meta.split_index << ", " << execute_time << ", "
 				          << "SUCCESS\n";
 
 				// Save the last successful result for final output
@@ -174,8 +153,7 @@ int main(int argc, char **argv) {
 			}
 
 		} catch (std::exception &e) {
-			std::cerr << "Error processing " << plan_meta.filename
-			          << ": " << e.what() << std::endl;
+			std::cerr << "Error processing " << plan_meta.filename << ": " << e.what() << '\n';
 
 			// Try to rollback if we're in a transaction
 			try {
@@ -184,8 +162,7 @@ int main(int argc, char **argv) {
 				// Ignore rollback errors
 			}
 
-			std::cout << plan_meta.version << ","
-			          << plan_meta.split_index << ","
+			std::cout << plan_meta.version << "," << plan_meta.split_index << ","
 			          << "0,ERROR,0,UNKNOWN,"
 			          << "\"" << e.what() << "\"\n";
 		}
