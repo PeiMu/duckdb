@@ -9,7 +9,7 @@ log_name=duckdb_job_result_$1.txt
 rm -rf ${log_name}
 rm -rf job_result/${log_name}
 mkdir -p job_result/
-mkdir -p job_result/0.10.1/
+mkdir -p job_result/1.3.2/
 
 # change `ENABLE_OPTIMIZER_COMPARISON` to true
 sed -i 's/#define ENABLE_OPTIMIZER_COMPARISON\s\+false/#define ENABLE_OPTIMIZER_COMPARISON true/' ${PWD}/../src/include/duckdb/optimizer/query_split/query_split.hpp
@@ -34,8 +34,8 @@ for i in $(eval echo {1.."${iteration}"}); do
     filename=${filename##*/} # remove everything before last /
     id=${filename%.sql}      # remove .sql
     echo "sql id is: ${id}"
-    mkdir ${PWD}/job_result/0.10.1/${id}/
-    mv *.bin ${PWD}/job_result/0.10.1/${id}/
+    mkdir ${PWD}/job_result/1.3.2/${id}/
+    mv *.bin ${PWD}/job_result/1.3.2/${id}/
   done
 done
 
