@@ -54,6 +54,11 @@
 #include "duckdb/planner/operator/logical_explain.hpp"
 #include "duckdb/storage/data_table.hpp"
 
+#if ENABLE_OPTIMIZER_COMPARISON
+#include "duckdb/common/serializer/buffered_file_writer.hpp"
+#include "duckdb/common/serializer/binary_serializer.hpp"
+#endif
+
 namespace duckdb {
 
 struct ActiveQueryContext {
@@ -536,6 +541,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		std::deque<std::pair<idx_t, idx_t>> table_card_order;
 		idx_t previous_result_card;
 
+#if ENABLE_OPTIMIZER_COMPARISON
+		static size_t global_split_counter = 0;
+#endif
+
 #if ENABLE_MERGE_BACK_PLAN
 		unique_ptr<LogicalOperator> whole_plan;
 #endif
@@ -747,6 +756,22 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			sub_plan->Print();
 
 			Planner::VerifyPlan(optimizer.context, sub_plan);
+#endif
+#if ENABLE_OPTIMIZER_COMPARISON
+			// Serialize the logical plan to binary file
+			std::string filename = "logical_plan_v1.3.2_split_" + std::to_string(global_split_counter) + ".bin";
+
+			BufferedFileWriter writer(FileSystem::GetFileSystem(*this), filename);
+			BinarySerializer serializer(writer);
+
+			serializer.Begin();
+			sub_plan->Serialize(serializer);
+			serializer.End();
+
+			writer.Sync();
+
+			std::cout << "[Serialized] " << filename << std::endl;
+			global_split_counter++;
 #endif
 
 			idx_t estimated_card = 0;
@@ -979,6 +1004,24 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			// debug: print subquery
 			Printer::Print("After the last PostOptimization");
 			logical_plan->Print();
+		}
+#endif
+#if ENABLE_OPTIMIZER_COMPARISON
+		if (execute_plan) {
+			// Serialize the logical plan to binary file
+			std::string filename = "logical_plan_v1.3.2_split_" + std::to_string(global_split_counter) + ".bin";
+
+			BufferedFileWriter writer(FileSystem::GetFileSystem(*this), filename);
+			BinarySerializer serializer(writer);
+
+			serializer.Begin();
+			logical_plan->Serialize(serializer);
+			serializer.End();
+
+			writer.Sync();
+
+			std::cout << "[Serialized] " << filename << std::endl;
+			global_split_counter++;
 		}
 #endif
 #if ENABLE_MERGE_BACK_PLAN
