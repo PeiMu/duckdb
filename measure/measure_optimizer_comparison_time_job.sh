@@ -22,12 +22,12 @@ for sql in "${dir}"/*; do
   filename=${filename##*/} # remove everything before last /
   id=${filename%.sql}      # remove .sql
   echo "sql id is: ${id}"
-  if [[ ! -d "${PWD}/job_result/${id}/" ]]; then
-    echo "${PWD}/job_result/${id}/ doesn't exists!!!"
+  if [[ ! -d "${PWD}/job_result/$1/${id}/" ]]; then
+    echo "${PWD}/job_result/$1/${id}/ doesn't exists!!!"
     exit 1
   fi
   for i in $(eval echo {1.."${iteration}"}); do
-    optimizer_comparison ${PWD}/imdb.db ${PWD}/job_result/${id}/
+    optimizer_comparison ${PWD}/imdb.db ${PWD}/job_result/$1/${id}/
   done
 done
 mv ${LOG_NAME} duckdb_$1_${LOG_NAME}
