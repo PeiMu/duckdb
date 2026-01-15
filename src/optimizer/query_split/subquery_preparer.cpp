@@ -796,6 +796,7 @@ void SubqueryPreparer::ExplainAnalyzeSubQuery(ClientContextLock &lock,
 	case LogicalOperatorType::LOGICAL_PROJECTION:
 	case LogicalOperatorType::LOGICAL_ORDER_BY:
 	case LogicalOperatorType::LOGICAL_LIMIT:
+	case LogicalOperatorType::LOGICAL_TOP_N:
 		break;
 	default:
 		return;
