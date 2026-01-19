@@ -619,7 +619,6 @@ if (EXISTS ${IR_CONVERTER_ROOT})
   # Include IR_SQL_Converter headers
   include_directories(
           ${IR_CONVERTER_ROOT}/inc
-          ${IR_CONVERTER_ROOT}/third_party/libpg_query/include
   )
 
   # Find IR_SQL_Converter library (prefer shared library to avoid -fPIC issues)
