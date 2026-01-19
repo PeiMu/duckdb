@@ -226,8 +226,8 @@ int main(int argc, char **argv) {
 
 			// Convert SimplestIR back to DuckDB logical plan
 			auto binder = Binder::CreateBinder(*conn.context);
-			auto logical_plan =
-			    ir_sql_converter::ConvertIRToDuckDBPlan(*binder, *conn.context, simplest_ir, &intermediate_results);
+			auto logical_plan = ir_sql_converter::ConvertIRToDuckDBPlan(*binder, *conn.context, simplest_ir,
+			                                                            &intermediate_results, true);
 #ifdef DEBUG
 			// print out
 			Printer::Print("ConvertIRToDuckDBPlan:");
