@@ -180,9 +180,6 @@ idx_t SubqueryPreparer::MergeDataChunk(subquery_queue &old_subqueries, unique_pt
 
 	idx_t chunk_size = previous_result->Count();
 
-	// generate an unused table index by the binder
-	new_table_idx = binder.GenerateTableIndex();
-
 	unique_ptr<LogicalColumnDataGet> chunk_scan =
 	    make_uniq<LogicalColumnDataGet>(new_table_idx, previous_result->Types(), std::move(previous_result));
 

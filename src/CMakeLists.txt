@@ -109,6 +109,11 @@ else()
       duckdb_yyjson
       duckdb_zstd)
 
+  # Add IR_SQL_Converter library if available
+  if (HAVE_IR_CONVERTER)
+      list(APPEND DUCKDB_LINK_LIBS ${IR_CONVERTER_LIB})
+  endif()
+
   add_library(duckdb SHARED ${ALL_OBJECT_FILES})
 
   if(WIN32 AND NOT MINGW)

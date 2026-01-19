@@ -7,7 +7,7 @@ fi
 
 # execute queries
 dir="$JOB_PATH/queries"
-iteration=15 # 5 warm up, 10 runs
+iteration=1 # 5 warm up, 10 runs
 
 LOG_NAME=optimizer_comparison_time_log.csv
 
@@ -15,6 +15,7 @@ rm -rf *${LOG_NAME}
 rm -rf job_result/*${LOG_NAME}
 
 
+cd ../../IR_SQL_Converter/build_duckdb_132/ && make clean && make -j32 && cd ../../duckdb_132/measure/
 cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=0 ENABLE_CROSS_PRODUCT_REWRITE=0 VERBOSE=1 make >> compile.log 2>&1 && cd measure/
 for sql in "${dir}"/*; do
   echo "execute ${sql}" >> ${LOG_NAME};
@@ -27,9 +28,9 @@ for sql in "${dir}"/*; do
     exit 1
   fi
   for i in $(eval echo {1.."${iteration}"}); do
-    optimizer_comparison ${PWD}/imdb.db ${PWD}/job_result/$1/${id}/
+    ../build/release/optimizer_comparison ${PWD}/imdb.db ${PWD}/job_result/$1/${id}/
   done
 done
 mv ${LOG_NAME} duckdb_$1_${LOG_NAME}
 
-mv ${LOG_NAME} job_result/.
+mv duckdb_$1_${LOG_NAME} job_result/.

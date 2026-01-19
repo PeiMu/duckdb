@@ -93,6 +93,10 @@ public:
 		old_table_idx.clear();
 	}
 
+	void SetNewTableIndex(idx_t idx) {
+		new_table_idx = idx;
+	}
+
 private:
 	//! Because the `chunk_scan` will create a new table index and contains the result of all tables (SEQ SCAN) of the
 	//! current level, it is necessary to replace the index of the related expressions

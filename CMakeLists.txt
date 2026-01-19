@@ -750,6 +750,38 @@ include_directories(third_party/yyjson/include)
 include_directories(third_party/zstd/include)
 include_directories(third_party/libpg_query/include)
 
+# IR_SQL_Converter (for optimizer comparison)
+set(IR_CONVERTER_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../IR_SQL_Converter" CACHE PATH "IR_SQL_Converter source path")
+if (EXISTS ${IR_CONVERTER_ROOT})
+    message(STATUS "Found IR_SQL_Converter at: ${IR_CONVERTER_ROOT}")
+
+    # Include IR_SQL_Converter headers
+    include_directories(
+            ${IR_CONVERTER_ROOT}/inc
+            ${IR_CONVERTER_ROOT}/third_party/libpg_query/include
+    )
+
+    # Find IR_SQL_Converter library (prefer shared library to avoid -fPIC issues)
+    find_library(IR_CONVERTER_LIB
+            NAMES IR_SQL_Converter libIR_SQL_Converter
+            PATHS
+            ${IR_CONVERTER_ROOT}/lib
+            ${IR_CONVERTER_ROOT}/build/lib
+            NO_DEFAULT_PATH
+    )
+
+    if (IR_CONVERTER_LIB)
+        message(STATUS "Found IR_SQL_Converter library at: ${IR_CONVERTER_LIB}")
+        set(HAVE_IR_CONVERTER TRUE)
+    else()
+        message(WARNING "IR_SQL_Converter library not found")
+        set(HAVE_IR_CONVERTER FALSE)
+    endif()
+else()
+    message(STATUS "IR_SQL_Converter not found at ${IR_CONVERTER_ROOT}")
+    set(HAVE_IR_CONVERTER FALSE)
+endif()
+
 # todo only regenerate ub file if one of the input files changed hack alert
 function(enable_unity_build UB_SUFFIX SOURCE_VARIABLE_NAME)
   set(files ${${SOURCE_VARIABLE_NAME}})
