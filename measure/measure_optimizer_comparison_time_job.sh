@@ -12,7 +12,7 @@ iteration=1 # 5 warm up, 10 runs
 LOG_NAME=optimizer_comparison_time_log.csv
 
 rm -rf *${LOG_NAME}
-rm -rf job_result/*${LOG_NAME}
+rm -rf job_result/duckdb_$1_${LOG_NAME}
 
 
 cd ../../IR_SQL_Converter/build_duckdb_132/ && make clean && make -j32 && cd ../../duckdb_132/measure/
