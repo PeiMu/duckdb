@@ -8,12 +8,13 @@
 
 #pragma once
 
-#include "duckdb/optimizer/expression_rewriter.hpp"
-#include "duckdb/planner/logical_operator.hpp"
-#include "duckdb/planner/logical_operator_visitor.hpp"
 #include "duckdb/common/enums/optimizer_type.hpp"
+#include "duckdb/optimizer/expression_rewriter.hpp"
 #include "duckdb/optimizer/query_split/query_split.hpp"
 #include "duckdb/optimizer/reorder_get.h"
+#include "duckdb/planner/column_binding_map.hpp"
+#include "duckdb/planner/logical_operator.hpp"
+#include "duckdb/planner/logical_operator_visitor.hpp"
 
 #include <functional>
 
