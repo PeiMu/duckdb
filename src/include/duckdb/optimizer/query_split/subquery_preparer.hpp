@@ -89,6 +89,10 @@ public:
 		old_table_idx.clear();
 	}
 
+	void SetNewTableIndex(idx_t idx) {
+		new_table_idx = idx;
+	}
+
 private:
 	//! 1. find the insert point and insert the `ColumnDataGet` node to the logical plan;
 	//! 2. update the table_idx and column_idx

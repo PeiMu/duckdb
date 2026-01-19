@@ -93,6 +93,11 @@ else()
       duckdb_skiplistlib
       duckdb_mbedtls)
 
+  # Add IR_SQL_Converter library if available
+  if (HAVE_IR_CONVERTER)
+    list(APPEND DUCKDB_LINK_LIBS ${IR_CONVERTER_LIB})
+  endif()
+
   add_library(duckdb SHARED ${ALL_OBJECT_FILES})
   target_link_libraries(duckdb ${DUCKDB_LINK_LIBS})
   link_threads(duckdb)

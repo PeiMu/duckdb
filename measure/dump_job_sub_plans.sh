@@ -11,11 +11,12 @@ rm -rf job_result/${log_name}
 mkdir -p job_result/
 mkdir -p job_result/0.10.1/
 
-# change `ENABLE_OPTIMIZER_COMPARISON` to true
-sed -i 's/#define ENABLE_OPTIMIZER_COMPARISON\s\+false/#define ENABLE_OPTIMIZER_COMPARISON true/' ${PWD}/../src/include/duckdb/optimizer/query_split/query_split.hpp
+cd ../../IR_SQL_Converter/build_duckdb_010/ && make clean && make -j32 && cd ../../duckdb_010/measure/
+# change `ENABLE_SERIALIZE_IR` to true
+sed -i 's/#define ENABLE_SERIALIZE_IR\s\+false/#define ENABLE_SERIALIZE_IR true/' ${PWD}/../src/include/duckdb/optimizer/query_split/query_split.hpp
 cd ../ && make clean && GEN=ninja ENABLE_QUERY_SPLIT=1 ENABLE_CROSS_PRODUCT_REWRITE=1 VERBOSE=1 make >> compile.log 2>&1 && cd measure/
 # rest
-sed -i 's/#define ENABLE_OPTIMIZER_COMPARISON\s\+true/#define ENABLE_OPTIMIZER_COMPARISON false/' ${PWD}/../src/include/duckdb/optimizer/query_split/query_split.hpp
+sed -i 's/#define ENABLE_SERIALIZE_IR\s\+true/#define ENABLE_SERIALIZE_IR false/' ${PWD}/../src/include/duckdb/optimizer/query_split/query_split.hpp
 
 for i in $(eval echo {1.."${iteration}"}); do
   for sql in "${dir}"/*; do
@@ -29,13 +30,13 @@ done
 for i in $(eval echo {1.."${iteration}"}); do
   for sql in "${dir}"/*; do
     echo "execute ${sql}" 2>&1|tee -a ${log_name};
-    echo -ne ".read ${sql}" | duckdb ./imdb.db 2>&1|tee -a ${log_name};
+    echo -ne ".read ${sql}" | ../build/release/duckdb ./imdb.db 2>&1|tee -a ${log_name};
     filename=${sql%/}        # remove trailing /
     filename=${filename##*/} # remove everything before last /
     id=${filename%.sql}      # remove .sql
     echo "sql id is: ${id}"
-    mkdir ${PWD}/job_result/0.10.1/${id}/
-    mv *.bin ${PWD}/job_result/0.10.1/${id}/
+    mkdir -p ${PWD}/job_result/0.10.1/${id}/
+    mv *.ir ${PWD}/job_result/0.10.1/${id}/
   done
 done
 

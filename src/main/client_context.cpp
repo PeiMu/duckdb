@@ -55,9 +55,15 @@
 
 #include <unistd.h>
 
-#if ENABLE_OPTIMIZER_COMPARISON
+#if ENABLE_SERIALIZE_BINARY
 #include "duckdb/common/serializer/binary_serializer.hpp"
 #include "duckdb/common/serializer/buffered_file_writer.hpp"
+#endif
+
+#if ENABLE_SERIALIZE_IR
+#include "cpp_interface.h"
+#include "duckdb_plan_to_ir.h"
+#include "simplest_ir.h"
 #endif
 
 namespace duckdb {
@@ -497,8 +503,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		ReorderGet reorder_get(*this);
 		std::deque<std::pair<idx_t, idx_t>> table_card_order;
 		int64_t previous_result_card;
-#if ENABLE_OPTIMIZER_COMPARISON
+#if ENABLE_SERIALIZE_IR || ENABLE_SERIALIZE_BINARY
 		static size_t global_split_counter = 0;
+		// intermediate result chunk index, name
+		std::unordered_map<unsigned int, std::string> intermediate_table_map;
 #endif
 
 #if ENABLE_MERGE_BACK_PLAN
@@ -675,7 +683,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 			Planner::VerifyPlan(optimizer.context, sub_plan);
 #endif
-#if ENABLE_OPTIMIZER_COMPARISON
+#if ENABLE_SERIALIZE_BINARY
 			// Serialize the logical plan to binary file
 			std::string filename = "logical_plan_v0.10.1_split_" + std::to_string(global_split_counter) + ".bin";
 
@@ -690,6 +698,27 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 			std::cout << "[Serialized] " << filename << std::endl;
 			global_split_counter++;
+#endif
+			// generate an unused table index by the binder
+			auto new_table_idx = planner.binder->GenerateTableIndex();
+			subquery_preparer.SetNewTableIndex(new_table_idx);
+#if ENABLE_SERIALIZE_IR
+			// Convert logical plan to SimplestIR and save to file
+			std::string filename = "logical_plan_v0.10.1_split_" + std::to_string(global_split_counter) + ".ir";
+
+			try {
+				// Convert DuckDB plan to SimplestIR
+				intermediate_table_map[new_table_idx] = "temp_" + std::to_string(global_split_counter);
+				auto simplest_ir = ir_sql_converter::ConvertDuckDBPlanToIR(*planner.binder, *this, sub_plan.get(),
+				                                                           intermediate_table_map);
+
+				// Save SimplestIR to file
+				ir_sql_converter::SaveSimplestIRToFile(simplest_ir, filename);
+				std::cout << "[Saved IR] " << filename << std::endl;
+				global_split_counter++;
+			} catch (std::exception &e) {
+				std::cerr << "[Error] Failed to convert plan to IR: " << e.what() << std::endl;
+			}
 #endif
 
 			idx_t estimated_card = 0;
@@ -928,7 +957,7 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 			plan->Print();
 		}
 #endif
-#if ENABLE_OPTIMIZER_COMPARISON
+#if ENABLE_SERIALIZE_BINARY
 		if (execute_plan) {
 			// Serialize the logical plan to binary file
 			std::string filename = "logical_plan_v0.10.1_split_" + std::to_string(global_split_counter) + ".bin";
@@ -944,6 +973,25 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 
 			std::cout << "[Serialized] " << filename << std::endl;
 			global_split_counter++;
+		}
+#endif
+#if ENABLE_SERIALIZE_IR
+		if (execute_plan) {
+			// Convert logical plan to SimplestIR and save to file
+			std::string filename = "logical_plan_v0.10.1_split_" + std::to_string(global_split_counter) + ".ir";
+
+			try {
+				// Convert DuckDB plan to SimplestIR
+				auto simplest_ir =
+				    ir_sql_converter::ConvertDuckDBPlanToIR(*planner.binder, *this, plan.get(), intermediate_table_map);
+
+				// Save SimplestIR to file
+				ir_sql_converter::SaveSimplestIRToFile(simplest_ir, filename);
+				std::cout << "[Saved IR] " << filename << std::endl;
+				global_split_counter++;
+			} catch (std::exception &e) {
+				std::cerr << "[Error] Failed to convert plan to IR: " << e.what() << std::endl;
+			}
 		}
 #endif
 
