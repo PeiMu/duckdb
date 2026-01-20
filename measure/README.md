@@ -58,3 +58,13 @@ diff dsb_10_result/duckdb_result_dsb_10_official.txt dsb_10_result/duckdb_result
 bash ./check_result_dsb.sh 100
 diff dsb_100_result/duckdb_result_dsb_100_official.txt dsb_100_result/duckdb_result_dsb_100_rsj.txt
 ```
+
+## Feed duckdb 0.10.1's plan to 1.3.2
+```bash
+# currently hard coded in bash script
+# whole_query: ENABLE_QUERY_SPLIT=0
+bash ./dump_job_sub_plans.sh
+# query_split: ENABLE_QUERY_SPLIT=1
+bash ./dump_job_sub_plans.sh
+# then move dumped IR to duckdb 1.3.2's dir
+```
