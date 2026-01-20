@@ -1,0 +1,211 @@
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/10a.sql
+84, 239, 1507, 0, 1, 357, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/10b.sql
+92, 253, 1484, 285, 0, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/10c.sql
+129, 509, 1579, 283, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11a.sql
+33, 1, 235, 0, 57, 50, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11b.sql
+231, 0, 57, 49, 33, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11c.sql
+239, 68, 27, 39, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/11d.sql
+239, 68, 51, 40, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/12a.sql
+33, 158, 15, 285, 522, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/12b.sql
+129, 338, 30, 479, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/12c.sql
+35, 154, 418, 585, 8, 14, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13a.sql
+102, 35, 5, 250, 552, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13b.sql
+159, 34, 539, 2, 7, 473, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13c.sql
+161, 34, 265, 1, 7, 477, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/13d.sql
+153, 34, 489, 240, 28, 25, 35, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14a.sql
+42, 234, 682, 12, 7, 37, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14b.sql
+38, 338, 664, 22, 6, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/14c.sql
+41, 256, 665, 33, 71, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/15a.sql
+211, 543, 239, 1, 37, 24, 6, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/15b.sql
+198, 37, 240, 538, 0, 0, 23, 6, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/15c.sql
+129, 591, 238, 38, 11, 23, 6, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/15d.sql
+130, 588, 431, 40, 12, 30, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16a.sql
+34, 126, 247, 0, 569, 90, 385, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16b.sql
+34, 126, 10, 727, 356, 1597, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16c.sql
+34, 125, 381, 4, 679, 121, 445, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/16d.sql
+35, 129, 348, 3, 707, 113, 437, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17a.sql
+40, 131, 10, 1253, 24, 246, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17b.sql
+34, 1020, 68, 26, 233, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17c.sql
+34, 992, 57, 22, 225, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17d.sql
+34, 72, 30, 1435, 226, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17e.sql
+34, 125, 10, 235, 708, 534, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/17f.sql
+34, 73, 29, 1645, 310, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/18a.sql
+37, 470, 11, 1153, 0, 230, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/18b.sql
+33, 251, 515, 848, 401, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/18c.sql
+38, 661, 12, 1505, 234, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19a.sql
+290, 746, 334, 538, 846, 286, 17, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19b.sql
+872, 440, 220, 31, 732, 283, 87, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19c.sql
+132, 746, 430, 540, 841, 293, 2, 4, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/19d.sql
+128, 454, 605, 486, 871, 40, 339, 53, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1a.sql
+30, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1b.sql
+31, 236, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1c.sql
+31, 230, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/1d.sql
+31, 234, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/20a.sql
+279, 53, 835, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/20b.sql
+264, 36, 8, 654, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/20c.sql
+263, 36, 8, 652, 683, 399, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21a.sql
+33, 1, 233, 0, 58, 50, 653, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21b.sql
+32, 1, 237, 0, 57, 49, 513, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/21c.sql
+32, 1, 238, 0, 57, 50, 658, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22a.sql
+43, 248, 596, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22b.sql
+40, 244, 594, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22c.sql
+40, 254, 669, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/22d.sql
+41, 252, 660, 25, 179, 7, 32, 24, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/23a.sql
+136, 1, 393, 4, 575, 0, 23, 6, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/23b.sql
+541, 124, 4, 384, 0, 1, 0, 22, 6, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/23c.sql
+129, 1, 436, 8, 571, 1, 23, 6, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/24a.sql
+128, 749, 321, 555, 847, 288, 34, 0, 2, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/24b.sql
+80, 226, 732, 23, 7, 841, 447, 0, 285, 89, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/25a.sql
+486, 35, 6, 45, 848, 399, 237, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/25b.sql
+490, 223, 30, 23, 8, 847, 393, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/25c.sql
+37, 666, 12, 42, 1460, 227, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26a.sql
+37, 402, 2, 26, 7, 606, 673, 390, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26b.sql
+33, 3, 355, 23, 6, 568, 706, 394, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/26c.sql
+37, 400, 4, 35, 8, 638, 686, 402, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/27a.sql
+33, 1, 0, 237, 0, 58, 51, 582, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/27b.sql
+33, 236, 0, 1, 57, 52, 575, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/27c.sql
+33, 1, 0, 241, 0, 59, 51, 663, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/28a.sql
+43, 414, 5, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/28b.sql
+37, 357, 3, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/28c.sql
+42, 360, 5, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29a.sql
+226, 0, 0, 84, 1033, 439, 0, 737, 0, 29, 244, 88, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29b.sql
+227, 564, 0, 0, 0, 85, 1037, 0, 441, 29, 241, 86, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/29c.sql
+31, 1, 240, 125, 0, 2, 743, 855, 486, 88, 247, 286, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2a.sql
+35, 97, 2, 239, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2b.sql
+34, 88, 1, 233, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2c.sql
+35, 78, 0, 1, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/2d.sql
+34, 127, 10, 240, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30a.sql
+37, 401, 3, 502, 25, 7, 843, 391, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30b.sql
+434, 30, 514, 23, 8, 847, 387, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/30c.sql
+37, 7, 243, 659, 50, 1432, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31a.sql
+37, 78, 2, 520, 25, 7, 844, 393, 224, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31b.sql
+196, 422, 30, 513, 23, 7, 841, 393, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/31c.sql
+37, 79, 2, 669, 26, 7, 235, 893, 392, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/32a.sql
+30, 0, 0, 1, 0, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/32b.sql
+34, 2, 243, 195, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/33a.sql
+35, 158, 285, 0, 0, 27, 194, 47, 19, 3, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/33b.sql
+252, 32, 0, 27, 194, 76, 46, 19, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/33c.sql
+36, 1, 256, 0, 28, 197, 2, 53, 23, 47, 19, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/3a.sql
+465, 658, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/3b.sql
+353, 473, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/3c.sql
+602, 670, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/4a.sql
+39, 370, 45, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/4b.sql
+30, 231, 23, 14, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/4c.sql
+42, 475, 58, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/5a.sql
+539, 1, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/5b.sql
+463, 3, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/5c.sql
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6a.sql
+30, 237, 573, 610, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6b.sql
+258, 1174, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6c.sql
+30, 227, 577, 624, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6d.sql
+533, 1642, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6e.sql
+30, 233, 578, 609, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/6f.sql
+534, 1439, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/7a.sql
+248, 404, 125, 277, 570, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/7b.sql
+250, 124, 392, 574, 1, 242, 0, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/7c.sql
+616, 270, 443, 903, 6, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8a.sql
+567, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8b.sql
+818, execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8c.sql
+131, 909, 118, 1654, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/8d.sql
+148, 812, 25, 432, 261, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9a.sql
+287, 385, 524, 836, 0, 285, 0, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9b.sql
+592, 251, 297, 454, 284, 87, 0, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9c.sql
+129, 1297, 9, 286, 230, 90, 
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries/9d.sql
+130, 613, 874, 61, 369, 292, 

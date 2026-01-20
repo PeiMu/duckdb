@@ -1,0 +1,874 @@
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/10a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────────────────┬───────────────┐
+│ uncredited_voiced_character │ russian_movie │
+│           varchar           │    varchar    │
+├─────────────────────────────┼───────────────┤
+│ Actor                       │ 12 Rounds     │
+└─────────────────────────────┴───────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/10b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────┬─────────────────────────────────┐
+│ character │ russian_mov_with_actor_producer │
+│  varchar  │             varchar             │
+├───────────┼─────────────────────────────────┤
+│ NULL      │ NULL                            │
+└───────────┴─────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/10c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────┬──────────────────────────────┐
+│ character │ movie_with_american_producer │
+│  varchar  │           varchar            │
+├───────────┼──────────────────────────────┤
+│ Himself   │ Evil Eyes: Behind the Scenes │
+└───────────┴──────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/11a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────┬─────────────────┬─────────────────────────┐
+│  from_company   │ movie_link_type │ non_polish_sequel_movie │
+│     varchar     │     varchar     │         varchar         │
+├─────────────────┼─────────────────┼─────────────────────────┤
+│ Churchill Films │ followed by     │ Batman Beyond           │
+└─────────────────┴─────────────────┴─────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/11b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────────────────┬─────────────────┬───────────────┐
+│        from_company        │ movie_link_type │ sequel_movie  │
+│          varchar           │     varchar     │    varchar    │
+├────────────────────────────┼─────────────────┼───────────────┤
+│ Filmlance International AB │ follows         │ The Money Man │
+└────────────────────────────┴─────────────────┴───────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/11c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────────────────────────┬─────────────────────────────────────┬─────────────────────┐
+│            from_company             │           production_note           │ movie_based_on_book │
+│               varchar               │               varchar               │       varchar       │
+├─────────────────────────────────────┼─────────────────────────────────────┼─────────────────────┤
+│ 20th Century Fox Home Entertainment │ (1997-2002) (worldwide) (all media) │ 24                  │
+└─────────────────────────────────────┴─────────────────────────────────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/11d.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────┬──────────────────┬───────────────────────────────────────┐
+│ from_company │ production_note  │          movie_based_on_book          │
+│   varchar    │     varchar      │                varchar                │
+├──────────────┼──────────────────┼───────────────────────────────────────┤
+│ 13th Street  │ (1954) (UK) (TV) │ ...denn sie wissen nicht, was sie tun │
+└──────────────┴──────────────────┴───────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/12a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────────────────┬─────────┬────────────────────┐
+│      movie_company       │ rating  │ drama_horror_movie │
+│         varchar          │ varchar │      varchar       │
+├──────────────────────────┼─────────┼────────────────────┤
+│ 10th Grade Reunion Films │ 8.1     │ 3:20               │
+└──────────────────────────┴─────────┴────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/12b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────┬────────────────────────────┐
+│ budget  │    unsuccsessful_movie     │
+│ varchar │          varchar           │
+├─────────┼────────────────────────────┤
+│ $10,000 │ Birdemic: Shock and Terror │
+└─────────┴────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/12c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────┬─────────┬──────────────────┐
+│ movie_company  │ rating  │ mainstream_movie │
+│    varchar     │ varchar │     varchar      │
+├────────────────┼─────────┼──────────────────┤
+│ "Oh That Gus!" │ 7.1     │ $1.11            │
+└────────────────┴─────────┴──────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/13a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────────────────┬─────────┬──────────────┐
+│       release_date       │ rating  │ german_movie │
+│         varchar          │ varchar │   varchar    │
+├──────────────────────────┼─────────┼──────────────┤
+│ Afghanistan:24 June 2012 │ 1.0     │ &Me          │
+└──────────────────────────┴─────────┴──────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/13b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────┬─────────┬─────────────────────┐
+│ producing_company │ rating  │ movie_about_winning │
+│      varchar      │ varchar │       varchar       │
+├───────────────────┼─────────┼─────────────────────┤
+│ 501audio          │ 1.8     │ 5 Time Champion     │
+└───────────────────┴─────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/13c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────┬─────────┬─────────────────────┐
+│ producing_company │ rating  │ movie_about_winning │
+│      varchar      │ varchar │       varchar       │
+├───────────────────┼─────────┼─────────────────────┤
+│ DL Sites          │ 1.8     │ Champion            │
+└───────────────────┴─────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/13d.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────┬─────────┬───────────────┐
+│ producing_company │ rating  │     movie     │
+│      varchar      │ varchar │    varchar    │
+├───────────────────┼─────────┼───────────────┤
+│ "O" Films         │ 1.0     │ #54 Meets #47 │
+└───────────────────┴─────────┴───────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/14a.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────┬─────────────────────┐
+│ rating  │ northern_dark_movie │
+│ varchar │       varchar       │
+├─────────┼─────────────────────┤
+│ 1.0     │ $lowdown            │
+└─────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/14b.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────┬─────────────────────────┐
+│ rating  │ western_dark_production │
+│ varchar │         varchar         │
+├─────────┼─────────────────────────┤
+│ 6.4     │ Of Dolls and Murder     │
+└─────────┴─────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/14c.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────┬────────────────────────────────┐
+│ rating  │ north_european_dark_production │
+│ varchar │            varchar             │
+├─────────┼────────────────────────────────┤
+│ 1.0     │ $lowdown                       │
+└─────────┴────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/15a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────┬──────────────────────────────────────┐
+│  release_date   │            internet_movie            │
+│     varchar     │               varchar                │
+├─────────────────┼──────────────────────────────────────┤
+│ USA:1 June 2007 │ Battlestar Galactica: The Resistance │
+└─────────────────┴──────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/15b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────┬───────────────────────┐
+│   release_date    │     youtube_movie     │
+│      varchar      │        varchar        │
+├───────────────────┼───────────────────────┤
+│ USA:27 April 2007 │ RoboCop vs Terminator │
+└───────────────────┴───────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/15c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────────┬────────────────────────────────┐
+│   release_date   │ modern_american_internet_movie │
+│     varchar      │            varchar             │
+├──────────────────┼────────────────────────────────┤
+│ USA:1 April 2003 │ 24: Day Six - Debrief          │
+└──────────────────┴────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/15d.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────────────┬──────────────────────┐
+│       aka_title        │ internet_movie_title │
+│        varchar         │       varchar        │
+├────────────────────────┼──────────────────────┤
+│ (Not So) Instant Photo │ 06/05                │
+└────────────────────────┴──────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/16a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────────────┬───────────────────────────────────┐
+│ cool_actor_pseudonym │      series_named_after_char      │
+│       varchar        │              varchar              │
+├──────────────────────┼───────────────────────────────────┤
+│ Adams, Stan          │ Carol Burnett vs. Anthony Perkins │
+└──────────────────────┴───────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/16b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────────────┬─────────────────────────┐
+│ cool_actor_pseudonym │ series_named_after_char │
+│       varchar        │         varchar         │
+├──────────────────────┼─────────────────────────┤
+│ !!!, Toy             │ & Teller                │
+└──────────────────────┴─────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/16c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────────┬─────────────────────────┐
+│ cool_actor_pseudonym  │ series_named_after_char │
+│        varchar        │         varchar         │
+├───────────────────────┼─────────────────────────┤
+│ "Brooklyn" Tony Danza │ (#1.5)                  │
+└───────────────────────┴─────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/16d.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────────┬─────────────────────────┐
+│ cool_actor_pseudonym  │ series_named_after_char │
+│        varchar        │         varchar         │
+├───────────────────────┼─────────────────────────┤
+│ "Brooklyn" Tony Danza │ (#1.5)                  │
+└───────────────────────┴─────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/17a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────────────────────────┬─────────┐
+│ member_in_charnamed_american_movie │   a1    │
+│              varchar               │ varchar │
+├────────────────────────────────────┼─────────┤
+│ B, Khaz                            │ B, Khaz │
+└────────────────────────────────────┴─────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/17b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────────────┬───────────────┐
+│ member_in_charnamed_movie │      a1       │
+│          varchar          │    varchar    │
+├───────────────────────────┼───────────────┤
+│ Z'Dar, Robert             │ Z'Dar, Robert │
+└───────────────────────────┴───────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/17c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────────────┬──────────────────┐
+│ member_in_charnamed_movie │        a1        │
+│          varchar          │     varchar      │
+├───────────────────────────┼──────────────────┤
+│ X'Volaitis, John          │ X'Volaitis, John │
+└───────────────────────────┴──────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/17d.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────────────┐
+│ member_in_charnamed_movie │
+│          varchar          │
+├───────────────────────────┤
+│ Abrahamsson, Bertil       │
+└───────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/17e.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────────────┐
+│ member_in_charnamed_movie │
+│          varchar          │
+├───────────────────────────┤
+│ $hort, Too                │
+└───────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/17f.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────────────────────┐
+│    member_in_charnamed_movie    │
+│             varchar             │
+├─────────────────────────────────┤
+│ 'El Galgo PornoStar', Blanquito │
+└─────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/18a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────┬─────────────┬───────────────────────┐
+│ movie_budget │ movie_votes │      movie_title      │
+│   varchar    │   varchar   │        varchar        │
+├──────────────┼─────────────┼───────────────────────┤
+│ $1,000       │ 10          │ 40 Days and 40 Nights │
+└──────────────┴─────────────┴───────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/18b.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────┬─────────────┬─────────────┐
+│ movie_budget │ movie_votes │ movie_title │
+│   varchar    │   varchar   │   varchar   │
+├──────────────┼─────────────┼─────────────┤
+│ Horror       │ 8.1         │ Agorable    │
+└──────────────┴─────────────┴─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/18c.sql
+embed data
+target_list.size()=1
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────┬─────────────┬─────────────┐
+│ movie_budget │ movie_votes │ movie_title │
+│   varchar    │   varchar   │   varchar   │
+├──────────────┼─────────────┼─────────────┤
+│ Action       │ 10          │ #PostModem  │
+└──────────────┴─────────────┴─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/19a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────────┬──────────────┐
+│ voicing_actress  │ voiced_movie │
+│     varchar      │   varchar    │
+├──────────────────┼──────────────┤
+│ Angeline, Moriah │ Blue Harvest │
+└──────────────────┴──────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/19b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────┬───────────────┐
+│ voicing_actress │ kung_fu_panda │
+│     varchar     │    varchar    │
+├─────────────────┼───────────────┤
+│ Jolie, Angelina │ Kung Fu Panda │
+└─────────────────┴───────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/19c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────────┬───────────────────────────┐
+│  voicing_actress   │   jap_engl_voiced_movie   │
+│      varchar       │          varchar          │
+├────────────────────┼───────────────────────────┤
+│ Alborg, Ana Esther │ .hack//Akusei heni vol. 2 │
+└────────────────────┴───────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/19d.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────┬───────────────────────┐
+│ voicing_actress │ jap_engl_voiced_movie │
+│     varchar     │        varchar        │
+├─────────────────┼───────────────────────┤
+│ Aaron, Caroline │ $9.99                 │
+└─────────────────┴───────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/20c.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────┬─────────────────────────────┐
+│   cast_member   │ complete_dynamic_hero_movie │
+│     varchar     │           varchar           │
+├─────────────────┼─────────────────────────────┤
+│ Abell, Alistair │ ...And Then I...            │
+└─────────────────┴─────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/21a.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────────────┬─────────────┬─────────────────────────────────────┐
+│      company_name       │  link_type  │          western_follow_up          │
+│         varchar         │   varchar   │               varchar               │
+├─────────────────────────┼─────────────┼─────────────────────────────────────┤
+│ Det Danske Filminstitut │ followed by │ Der Serienkiller - Klinge des Todes │
+└─────────────────────────┴─────────────┴─────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/21b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────────────────┬─────────────┬──────────────────┐
+│        company_name        │  link_type  │ german_follow_up │
+│          varchar           │   varchar   │     varchar      │
+├────────────────────────────┼─────────────┼──────────────────┤
+│ Filmlance International AB │ followed by │ Hämndens pris    │
+└────────────────────────────┴─────────────┴──────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/21c.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────┬─────────────┬───────────────────┐
+│  company_name   │  link_type  │ western_follow_up │
+│     varchar     │   varchar   │      varchar      │
+├─────────────────┼─────────────┼───────────────────┤
+│ Churchill Films │ followed by │ Batman Beyond     │
+└─────────────────┴─────────────┴───────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/22d.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────┬─────────┬───────────────────────┐
+│  movie_company  │ rating  │ western_violent_movie │
+│     varchar     │ varchar │        varchar        │
+├─────────────────┼─────────┼───────────────────────┤
+│ 01 Distribution │ 1.6     │ (#1.1)                │
+└─────────────────┴─────────┴───────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/23a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────┬────────────────────────────┐
+│ movie_kind │ complete_us_internet_movie │
+│  varchar   │          varchar           │
+├────────────┼────────────────────────────┤
+│ movie      │ The Analysts               │
+└────────────┴────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/23b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────┬───────────────────────────────┐
+│ movie_kind │ complete_nerdy_internet_movie │
+│  varchar   │            varchar            │
+├────────────┼───────────────────────────────┤
+│ movie      │ The Big Mope                  │
+└────────────┴───────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/23c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────┬────────────────────────────┐
+│ movie_kind │ complete_us_internet_movie │
+│  varchar   │          varchar           │
+├────────────┼────────────────────────────┤
+│ movie      │ Dirt Merchant              │
+└────────────┴────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/24a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────┬──────────────────────┬─────────────────────────────┐
+│ voiced_char_name  │ voicing_actress_name │ voiced_action_movie_jap_eng │
+│      varchar      │       varchar        │           varchar           │
+├───────────────────┼──────────────────────┼─────────────────────────────┤
+│ Additional Voices │ Baker, Andrea        │ Baiohazâdo 6                │
+└───────────────────┴──────────────────────┴─────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/24b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────────┬──────────────────────┬─────────────────┐
+│ voiced_char_name │ voicing_actress_name │  kung_fu_panda  │
+│     varchar      │       varchar        │     varchar     │
+├──────────────────┼──────────────────────┼─────────────────┤
+│ Tigress          │ Jolie, Angelina      │ Kung Fu Panda 2 │
+└──────────────────┴──────────────────────┴─────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/25a.sql
+embed data
+target_list.size()=1
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────┬─────────────┬─────────────────┬──────────────────────────────────┐
+│ movie_budget │ movie_votes │   male_writer   │       violent_movie_title        │
+│   varchar    │   varchar   │     varchar     │             varchar              │
+├──────────────┼─────────────┼─────────────────┼──────────────────────────────────┤
+│ Horror       │ 10          │ Abdallah, Damon │ -- And Now the Screaming Starts! │
+└──────────────┴─────────────┴─────────────────┴──────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/25b.sql
+embed data
+target_list.size()=1
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────┬─────────────┬────────────────────┬─────────────────────┐
+│ movie_budget │ movie_votes │    male_writer     │ violent_movie_title │
+│   varchar    │   varchar   │      varchar       │       varchar       │
+├──────────────┼─────────────┼────────────────────┼─────────────────────┤
+│ Horror       │ 138         │ Campbell, Jeremiah │ Vampire Boys        │
+└──────────────┴─────────────┴────────────────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/25c.sql
+embed data
+target_list.size()=1
+embed data
+target_list.size()=1
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────┬─────────────┬───────────────────┬─────────────────────┐
+│ movie_budget │ movie_votes │    male_writer    │ violent_movie_title │
+│   varchar    │   varchar   │      varchar      │       varchar       │
+├──────────────┼─────────────┼───────────────────┼─────────────────────┤
+│ Action       │ 10          │ Aakeson, Kim Fupz │ $                   │
+└──────────────┴─────────────┴───────────────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/26a.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────┬─────────┬─────────────────┬─────────────────────┐
+│ character_name │ rating  │  playing_actor  │ complete_hero_movie │
+│    varchar     │ varchar │     varchar     │       varchar       │
+├────────────────┼─────────┼─────────────────┼─────────────────────┤
+│ 'Agua' Man     │ 7.1     │ Acereda, Hermie │ 3:10 to Yuma        │
+└────────────────┴─────────┴─────────────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/26b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────┬─────────┬─────────────────────┐
+│ character_name │ rating  │ complete_hero_movie │
+│    varchar     │ varchar │       varchar       │
+├────────────────┼─────────┼─────────────────────┤
+│ Bank Manager   │ 8.2     │ Inception           │
+└────────────────┴─────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/26c.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────┬─────────┬─────────────────────┐
+│ character_name │ rating  │ complete_hero_movie │
+│    varchar     │ varchar │       varchar       │
+├────────────────┼─────────┼─────────────────────┤
+│ 'Agua' Man     │ 1.9     │ 12 Rounds           │
+└────────────────┴─────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/27a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────────────┬─────────────┬─────────────────────────┐
+│    producing_company    │  link_type  │ complete_western_sequel │
+│         varchar         │   varchar   │         varchar         │
+├─────────────────────────┼─────────────┼─────────────────────────┤
+│ Det Danske Filminstitut │ followed by │ Spår i mörker           │
+└─────────────────────────┴─────────────┴─────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/27b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────────────────┬─────────────┬─────────────────────────┐
+│     producing_company      │  link_type  │ complete_western_sequel │
+│          varchar           │   varchar   │         varchar         │
+├────────────────────────────┼─────────────┼─────────────────────────┤
+│ Filmlance International AB │ followed by │ Vita nätter             │
+└────────────────────────────┴─────────────┴─────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/27c.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────────────┬─────────────┬─────────────────────────┐
+│    producing_company    │  link_type  │ complete_western_sequel │
+│         varchar         │   varchar   │         varchar         │
+├─────────────────────────┼─────────────┼─────────────────────────┤
+│ Det Danske Filminstitut │ followed by │ Spår i mörker           │
+└─────────────────────────┴─────────────┴─────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/29a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────┬─────────────────┬──────────────────┐
+│ voiced_char │ voicing_actress │ voiced_animation │
+│   varchar   │     varchar     │     varchar      │
+├─────────────┼─────────────────┼──────────────────┤
+│ Queen       │ Andrews, Julie  │ Shrek 2          │
+└─────────────┴─────────────────┴──────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/29b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────┬─────────────────┬──────────────────┐
+│ voiced_char │ voicing_actress │ voiced_animation │
+│   varchar   │     varchar     │     varchar      │
+├─────────────┼─────────────────┼──────────────────┤
+│ Queen       │ Andrews, Julie  │ Shrek 2          │
+└─────────────┴─────────────────┴──────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/29c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────┬─────────────────┬──────────────────┐
+│ voiced_char │ voicing_actress │ voiced_animation │
+│   varchar   │     varchar     │     varchar      │
+├─────────────┼─────────────────┼──────────────────┤
+│ Lola        │ Andrews, Julie  │ Hoodwinked!      │
+└─────────────┴─────────────────┴──────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/2a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│ 'Doc'       │
+└─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/2b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│ 'Doc'       │
+└─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/2c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│ NULL        │
+└─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/2d.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│ & Teller    │
+└─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/30a.sql
+embed data
+target_list.size()=1
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────┬─────────────┬──────────────┬────────────────────────┐
+│ movie_budget │ movie_votes │    writer    │ complete_violent_movie │
+│   varchar    │   varchar   │   varchar    │        varchar         │
+├──────────────┼─────────────┼──────────────┼────────────────────────┤
+│ Horror       │ 100356      │ Abrams, J.J. │ 16 Blocks              │
+└──────────────┴─────────────┴──────────────┴────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/30b.sql
+embed data
+target_list.size()=1
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────┬─────────────┬─────────────────┬─────────────────────┐
+│ movie_budget │ movie_votes │     writer      │ complete_gore_movie │
+│   varchar    │   varchar   │     varchar     │       varchar       │
+├──────────────┼─────────────┼─────────────────┼─────────────────────┤
+│ Horror       │ 194782      │ Shannon, Damian │ Freddy vs. Jason    │
+└──────────────┴─────────────┴─────────────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/30c.sql
+embed data
+target_list.size()=1
+embed data
+target_list.size()=1
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────┬─────────────┬──────────────────┬────────────────────────┐
+│ movie_budget │ movie_votes │      writer      │ complete_violent_movie │
+│   varchar    │   varchar   │     varchar      │        varchar         │
+├──────────────┼─────────────┼──────────────────┼────────────────────────┤
+│ Action       │ 100356      │ Abernathy, Lewis │ $                      │
+└──────────────┴─────────────┴──────────────────┴────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/31a.sql
+embed data
+target_list.size()=1
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────┬─────────────┬────────────┬────────────────────────┐
+│ movie_budget │ movie_votes │   writer   │ violent_liongate_movie │
+│   varchar    │   varchar   │  varchar   │        varchar         │
+├──────────────┼─────────────┼────────────┼────────────────────────┤
+│ Horror       │ 1040        │ Agnew, Jim │ 2001 Maniacs           │
+└──────────────┴─────────────┴────────────┴────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/31b.sql
+embed data
+target_list.size()=1
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────┬─────────────┬──────────────────────┬────────────────────────┐
+│ movie_budget │ movie_votes │        writer        │ violent_liongate_movie │
+│   varchar    │   varchar   │       varchar        │        varchar         │
+├──────────────┼─────────────┼──────────────────────┼────────────────────────┤
+│ Horror       │ 129755      │ Bousman, Darren Lynn │ Saw                    │
+└──────────────┴─────────────┴──────────────────────┴────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/31c.sql
+embed data
+target_list.size()=1
+embed data
+target_list.size()=1
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────┬─────────────┬───────────────┬────────────────────────┐
+│ movie_budget │ movie_votes │    writer     │ violent_liongate_movie │
+│   varchar    │   varchar   │    varchar    │        varchar         │
+├──────────────┼─────────────┼───────────────┼────────────────────────┤
+│ Action       │ 1008        │ Abraham, Brad │ 11:14                  │
+└──────────────┴─────────────┴───────────────┴────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/32a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────┬─────────────┬──────────────┐
+│ link_type │ first_movie │ second_movie │
+│  varchar  │   varchar   │   varchar    │
+├───────────┼─────────────┼──────────────┤
+│ NULL      │ NULL        │ NULL         │
+└───────────┴─────────────┴──────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/32b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────────────────┬──────────────┬────────────────────────────┐
+│           link_type           │ first_movie  │        second_movie        │
+│            varchar            │   varchar    │          varchar           │
+├───────────────────────────────┼──────────────┼────────────────────────────┤
+│ alternate language version of │ 12 oz. Mouse │ 'Angel': Season 2 Overview │
+└───────────────────────────────┴──────────────┴────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/33a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────┬─────────────────┬──────────────┬───────────────┬───────────────────────┬──────────────────────────────────┐
+│  first_company  │ second_company  │ first_rating │ second_rating │      first_movie      │           second_movie           │
+│     varchar     │     varchar     │   varchar    │    varchar    │        varchar        │             varchar              │
+├─────────────────┼─────────────────┼──────────────┼───────────────┼───────────────────────┼──────────────────────────────────┤
+│ 495 Productions │ 495 Productions │ 3.3          │ 2.7           │ A Double Shot at Love │ A Shot at Love with Tila Tequila │
+└─────────────────┴─────────────────┴──────────────┴───────────────┴───────────────────────┴──────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/33b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────┬─────────────────┬──────────────┬───────────────┬───────────────────────┬──────────────────────────────────┐
+│  first_company  │ second_company  │ first_rating │ second_rating │      first_movie      │           second_movie           │
+│     varchar     │     varchar     │   varchar    │    varchar    │        varchar        │             varchar              │
+├─────────────────┼─────────────────┼──────────────┼───────────────┼───────────────────────┼──────────────────────────────────┤
+│ MTV Netherlands │ 495 Productions │ 3.3          │ 2.7           │ A Double Shot at Love │ A Shot at Love with Tila Tequila │
+└─────────────────┴─────────────────┴──────────────┴───────────────┴───────────────────────┴──────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/33c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────┬─────────────────┬──────────────┬───────────────┬───────────────────────┬───────────────────────┐
+│ first_company │ second_company  │ first_rating │ second_rating │      first_movie      │     second_movie      │
+│    varchar    │     varchar     │   varchar    │    varchar    │        varchar        │        varchar        │
+├───────────────┼─────────────────┼──────────────┼───────────────┼───────────────────────┼───────────────────────┤
+│ 2BE           │ 495 Productions │ 1.3          │ 1.0           │ A Double Shot at Love │ A Double Shot at Love │
+└───────────────┴─────────────────┴──────────────┴───────────────┴───────────────────────┴───────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/3a.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────────┐
+│    movie_title     │
+│      varchar       │
+├────────────────────┤
+│ 2 Days in New York │
+└────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/3b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────────────┐
+│      movie_title       │
+│        varchar         │
+├────────────────────────┤
+│ 300: Rise of an Empire │
+└────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/3c.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────┐
+│ movie_title │
+│   varchar   │
+├─────────────┤
+│ & Teller 2  │
+└─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/4a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────┬─────────────┐
+│ rating  │ movie_title │
+│ varchar │   varchar   │
+├─────────┼─────────────┤
+│ 5.1     │ & Teller 2  │
+└─────────┴─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/4b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────┬─────────────────────┐
+│ rating  │     movie_title     │
+│ varchar │       varchar       │
+├─────────┼─────────────────────┤
+│ 9.1     │ Batman: Arkham City │
+└─────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/4c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────┬─────────────┐
+│ rating  │ movie_title │
+│ varchar │   varchar   │
+├─────────┼─────────────┤
+│ 2.1     │ & Teller 2  │
+└─────────┴─────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/5a.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────────────┐
+│ typical_european_movie │
+│        varchar         │
+├────────────────────────┤
+│ NULL                   │
+└────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/5b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────────┐
+│ american_vhs_movie │
+│      varchar       │
+├────────────────────┤
+│ NULL               │
+└────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/5c.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────┐
+│ american_movie │
+│    varchar     │
+├────────────────┤
+│ 11,830,420     │
+└────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/6a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────────────┬────────────────────┬──────────────┐
+│       movie_keyword       │     actor_name     │ marvel_movie │
+│          varchar          │      varchar       │   varchar    │
+├───────────────────────────┼────────────────────┼──────────────┤
+│ marvel-cinematic-universe │ Downey Jr., Robert │ Iron Man 3   │
+└───────────────────────────┴────────────────────┴──────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/6b.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────┬────────────────────┬────────────────┐
+│ movie_keyword  │     actor_name     │   hero_movie   │
+│    varchar     │      varchar       │    varchar     │
+├────────────────┼────────────────────┼────────────────┤
+│ based-on-comic │ Downey Jr., Robert │ The Avengers 2 │
+└────────────────┴────────────────────┴────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/6c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────────────┬────────────────────┬────────────────┐
+│       movie_keyword       │     actor_name     │  marvel_movie  │
+│          varchar          │      varchar       │    varchar     │
+├───────────────────────────┼────────────────────┼────────────────┤
+│ marvel-cinematic-universe │ Downey Jr., Robert │ The Avengers 2 │
+└───────────────────────────┴────────────────────┴────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/6d.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────┬────────────────────┬───────────────────────┐
+│ movie_keyword  │     actor_name     │      hero_movie       │
+│    varchar     │      varchar       │        varchar        │
+├────────────────┼────────────────────┼───────────────────────┤
+│ based-on-comic │ Downey Jr., Robert │ 2008 MTV Movie Awards │
+└────────────────┴────────────────────┴───────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/6e.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌───────────────────────────┬────────────────────┬──────────────┐
+│       movie_keyword       │     actor_name     │ marvel_movie │
+│          varchar          │      varchar       │   varchar    │
+├───────────────────────────┼────────────────────┼──────────────┤
+│ marvel-cinematic-universe │ Downey Jr., Robert │ Iron Man 3   │
+└───────────────────────────┴────────────────────┴──────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/6f.sql
+embed data
+target_list.size()=1
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────┬─────────────────────────────────┬────────────┐
+│ movie_keyword  │           actor_name            │ hero_movie │
+│    varchar     │             varchar             │  varchar   │
+├────────────────┼─────────────────────────────────┼────────────┤
+│ based-on-comic │ "Steff", Stefanie Oxmann Mcgaha │ & Teller 2 │
+└────────────────┴─────────────────────────────────┴────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/7a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────────────┬─────────────────┐
+│        of_person        │ biography_movie │
+│         varchar         │     varchar     │
+├─────────────────────────┼─────────────────┤
+│ Antonioni, Michelangelo │ Dressed to Kill │
+└─────────────────────────┴─────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/7b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────┬─────────────────┐
+│    of_person    │ biography_movie │
+│     varchar     │     varchar     │
+├─────────────────┼─────────────────┤
+│ De Palma, Brian │ Dressed to Kill │
+└─────────────────┴─────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/7c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ cast_member_name │                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           cast_member_info                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            │
+│     varchar      │                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                varchar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                │
+├──────────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 50 Cent          │ "Boo" Arnold was born Earl Arnold in Hattiesburg, Mississippi in 1966. His father gave him the nickname 'Boo' early in life and it stuck through grade school, high school, and college. He is still known as "Boo" to family and friends.  Raised in central Texas, Arnold played baseball at Texas Tech University where he graduated with a BA in Advertising and Marketing. While at Texas Tech he was also a member of the Texas Epsilon chapter of Phi Delta Theta fraternity. After college he worked with Young Life, an outreach to high school students, in San Antonio, Texas.  While with Young Life Arnold began taking extension courses through Fuller Theological Seminary and ultimately went full-time to Gordon-Conwell Theological Seminary in Boston, Massachusetts. At Gordon-Conwell he completed a Master's Degree in Divinity studying Theology, Philosophy, Church History, Biblical Languages (Hebrew & Greek), and Exegetical Methods. Following seminary he was involved with reconciliation efforts in the former Yugoslavia shortly after the war ended there in1995.  Arnold started acting in his early thirties in Texas. After an encouraging visit to Los Angeles where he spent time with childhood friend George Eads (of CSI Las Vegas) he decided to move to Los Angeles in 2001 to pursue acting full-time. While in Los Angeles he has studied acting with Judith Weston at Judith Weston Studio for Actors and Directors.  Arnold's acting career has been one of steady development, booking co-star and guest-star roles in nighttime television. He guest-starred opposite of Jane Seymour on the night time television drama Justice. He played the lead, Michael Hollister, in the film The Seer, written and directed by Patrick Masset (Friday Night Lights).  He was nominated Best Actor in the168 Film Festival for the role of Phil Stevens in the short-film Useless. In Useless he played a US Marshal who must choose between mercy and justice as he confronts the man who murdered his father. Arnold's performance in Useless confirmed his ability to carry lead roles, and he continues to work toward solidifying himself as a male lead in film and television.  Arnold married fellow Texan Stacy Rudd of San Antonio in 2003 and they are now raising their three children in the Los Angeles area. │
+└──────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/8c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌────────────────────┬─────────────────────┐
+│ writer_pseudo_name │     movie_title     │
+│      varchar       │       varchar       │
+├────────────────────┼─────────────────────┤
+│ "A.J."             │ #1 Cheerleader Camp │
+└────────────────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/8d.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌─────────────────────────┬─────────────────────┐
+│ costume_designer_pseudo │ movie_with_costumes │
+│         varchar         │       varchar       │
+├─────────────────────────┼─────────────────────┤
+│ "Jenny from the Block"  │ #1 Cheerleader Camp │
+└─────────────────────────┴─────────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/9a.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────────┬───────────────────┬──────────────┐
+│ alternative_name │  character_name   │    movie     │
+│     varchar      │      varchar      │   varchar    │
+├──────────────────┼───────────────────┼──────────────┤
+│ AJ               │ Airport Announcer │ Blue Harvest │
+└──────────────────┴───────────────────┴──────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/9b.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────────┬───────────────────┬─────────────────┬────────────────┐
+│ alternative_name │ voiced_character  │ voicing_actress │ american_movie │
+│     varchar      │      varchar      │     varchar     │    varchar     │
+├──────────────────┼───────────────────┼─────────────────┼────────────────┤
+│ AJ               │ Airport Announcer │ Bassett, Angela │ Blue Harvest   │
+└──────────────────┴───────────────────┴─────────────────┴────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/9c.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────────┬───────────────────────┬────────────────────┬────────────────┐
+│ alternative_name │ voiced_character_name │  voicing_actress   │ american_movie │
+│     varchar      │        varchar        │      varchar       │    varchar     │
+├──────────────────┼───────────────────────┼────────────────────┼────────────────┤
+│ 'Annette'        │ 2nd Balladeer         │ Alborg, Ana Esther │ (1975-01-20)   │
+└──────────────────┴───────────────────────┴────────────────────┴────────────────┘
+execute /home/pei/Project/benchmarks/imdb_job-postgres/queries_support_converter/9d.sql
+[Saved IR] logical_plan_v1.3.2_split_0.ir
+┌──────────────────┬──────────────────────────┬─────────────────┬──────────────────┐
+│ alternative_name │     voiced_char_name     │ voicing_actress │  american_movie  │
+│     varchar      │         varchar          │     varchar     │     varchar      │
+├──────────────────┼──────────────────────────┼─────────────────┼──────────────────┤
+│ !!!, Toy         │ "Cockamamie's" Salesgirl │ Aaron, Caroline │ $15,000.00 Error │
+└──────────────────┴──────────────────────────┴─────────────────┴──────────────────┘

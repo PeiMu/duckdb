@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # execute queries
-dir="$JOB_PATH/queries"
+dir="$JOB_PATH/queries_support_converter"
 iteration=1
 
 log_name=duckdb_job_result_$1.txt
