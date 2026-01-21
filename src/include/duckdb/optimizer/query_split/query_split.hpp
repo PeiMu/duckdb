@@ -18,7 +18,7 @@
 #define WHOLE_PLAN_EXPLAIN_ANALYZE false
 #define ALWAYS_SPLIT               true
 #define ENABLE_REORDER_PLAN        true
-#define ENABLE_SERIALIZE_IR        false
+#define ENABLE_SERIALIZE_IR false
 #define ENABLE_SERIALIZE_BINARY    false
 
 inline bool execute_plan = false;

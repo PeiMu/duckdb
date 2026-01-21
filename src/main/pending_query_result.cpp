@@ -120,6 +120,11 @@ unique_ptr<QueryResult> PendingQueryResult::Execute(ClientContextLock &lock) {
 	return ExecuteInternal(lock, true);
 }
 
+unique_ptr<ColumnDataCollection> PendingQueryResult::ExecuteRow() {
+	auto lock = LockContext();
+	return ExecuteRowInternal(*lock);
+}
+
 unique_ptr<ColumnDataCollection> PendingQueryResult::ExecuteRow(ClientContextLock &lock) {
 	return ExecuteRowInternal(lock, true);
 }

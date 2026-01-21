@@ -139,6 +139,14 @@ unique_ptr<QueryResult> PreparedStatement::Execute(ClientContextLock &lock, vect
 	return pending->Execute(lock);
 }
 
+unique_ptr<ColumnDataCollection> PreparedStatement::ExecuteRow(vector<Value> &values, bool allow_stream_result) {
+	auto pending = PendingQuery(values, allow_stream_result);
+	if (pending->HasError()) {
+		pending->GetErrorObject().Throw("has error with ");
+	}
+	return pending->ExecuteRow();
+}
+
 unique_ptr<ColumnDataCollection> PreparedStatement::ExecuteRow(ClientContextLock &lock, vector<Value> &values,
                                                                bool allow_stream_result) {
 	auto pending = PendingQuery(lock, values, allow_stream_result);

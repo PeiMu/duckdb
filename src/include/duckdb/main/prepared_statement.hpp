@@ -86,6 +86,7 @@ public:
 	DUCKDB_API unique_ptr<QueryResult> Execute(vector<Value> &values, bool allow_stream_result = true);
 	DUCKDB_API unique_ptr<QueryResult> Execute(ClientContextLock &lock, vector<Value> &values,
 											   bool allow_stream_result = true);
+	DUCKDB_API unique_ptr<ColumnDataCollection> ExecuteRow(vector<Value> &values, bool allow_stream_result = true);
 	DUCKDB_API unique_ptr<ColumnDataCollection> ExecuteRow(ClientContextLock &lock, vector<Value> &values,
 											   bool allow_stream_result = true);
 

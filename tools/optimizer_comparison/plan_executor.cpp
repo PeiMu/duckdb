@@ -4,11 +4,15 @@
 #include "duckdb/common/file_system.hpp"
 #include "duckdb/common/types/column/column_data_collection.hpp"
 #include "duckdb/main/prepared_statement_data.hpp"
+#include "duckdb/main/prepared_statement.hpp"
 #include "duckdb/main/materialized_query_result.hpp"
 #include "duckdb/execution/physical_plan_generator.hpp"
 #include "duckdb/parser/statement/select_statement.hpp"
 #include "duckdb/parser/query_node/select_node.hpp"
 #include "duckdb/planner/binder.hpp"
+#include "duckdb/planner/operator/logical_explain.hpp"
+#include "duckdb/main/client_context.hpp"
+#include "duckdb/optimizer/optimizer.hpp"
 #include "ir_to_duckdb_plan.h"
 #include "cpp_interface.h"
 #include "simplest_ir.h"
@@ -20,6 +24,8 @@
 using namespace duckdb;
 
 #define FROM_BINARY false
+#define PRINT_PHYSICAL_PLAN true
+#define RUN_EXPLAIN_ANALYZE false
 
 struct PlanMetadata {
 	std::string version;
@@ -55,6 +61,134 @@ unique_ptr<ColumnDataCollection> MaterializeResult(ClientContext &context, uniqu
 	}
 
 	return collection;
+}
+
+// Run EXPLAIN ANALYZE on a logical plan to get execution statistics
+void RunExplainAnalyze(Connection &conn, unique_ptr<LogicalOperator> logical_plan, const PlanMetadata &plan_meta) {
+	// Wrap the plan in LogicalExplain with EXPLAIN_ANALYZE
+	auto explain_plan = make_uniq<LogicalExplain>(std::move(logical_plan), ExplainType::EXPLAIN_ANALYZE,
+	                                               ExplainFormat::DEFAULT);
+
+	// Run through optimizer (PostOptimize) - need to create a Binder first
+	auto binder = Binder::CreateBinder(*conn.context);
+	Optimizer optimizer(*binder, *conn.context);
+	explain_plan = unique_ptr_cast<LogicalOperator, LogicalExplain>(optimizer.PostOptimize(std::move(explain_plan)));
+
+	// Resolve types
+	explain_plan->ResolveOperatorTypes();
+
+	// Get column names and types
+	vector<string> names = {"explain_key", "explain_value"};
+	vector<LogicalType> types = {LogicalType::VARCHAR, LogicalType::VARCHAR};
+
+	// Generate physical plan
+	PhysicalPlanGenerator physical_planner(*conn.context);
+	auto physical_plan = physical_planner.Plan(std::move(explain_plan));
+
+	// Create and execute
+	auto prepared = make_shared_ptr<PreparedStatementData>(StatementType::EXPLAIN_STATEMENT);
+	prepared->names = std::move(names);
+	prepared->types = std::move(types);
+	prepared->physical_plan = std::move(physical_plan);
+
+	auto select_stmt = make_uniq<SelectStatement>();
+	auto select_node = make_uniq<SelectNode>();
+	select_stmt->node = std::move(select_node);
+	prepared->unbound_statement = std::move(select_stmt);
+
+	case_insensitive_map_t<BoundParameterData> values;
+	auto result = conn.context->Execute("", prepared, values, false);
+
+	if (result && !result->HasError()) {
+		Printer::Print("=== EXPLAIN ANALYZE for " + plan_meta.version + " split " + std::to_string(plan_meta.split_index) + " ===");
+		result->Print();
+	} else if (result) {
+		std::cerr << "EXPLAIN ANALYZE error: " << result->GetError() << "\n";
+	}
+}
+
+unique_ptr<ColumnDataCollection> RunLogicalPlanWithExecuteRow(Connection &conn, unique_ptr<LogicalOperator> logical_plan,
+                                                              const PlanMetadata &plan_meta, bool print_physical_plan = false) {
+	// Resolve types
+	logical_plan->ResolveOperatorTypes();
+
+	// Get column names and types from the plan
+	vector<string> names;
+	vector<LogicalType> types;
+	for (auto &expr : logical_plan->expressions) {
+		names.push_back(expr->alias);
+		types.push_back(expr->return_type);
+	}
+	if (names.empty() && !logical_plan->types.empty()) {
+		// Fallback to plan types if no expressions
+		types = logical_plan->types;
+		for (idx_t i = 0; i < types.size(); i++) {
+			names.push_back("col" + std::to_string(i));
+		}
+	}
+
+	// Generate physical plan WITHOUT running optimizer
+	PhysicalPlanGenerator physical_planner(*conn.context);
+	auto physical_plan = physical_planner.Plan(std::move(logical_plan));
+
+	// Print physical plan before execution (if requested)
+	if (print_physical_plan) {
+		Printer::Print("=== Physical Plan for " + plan_meta.version + " split " + std::to_string(plan_meta.split_index) + " ===");
+		physical_plan->Root().Print();
+	}
+
+	// Create PreparedStatementData with the pre-built plan
+	auto prepared_data = make_shared_ptr<PreparedStatementData>(StatementType::SELECT_STATEMENT);
+	prepared_data->names = std::move(names);
+	prepared_data->types = std::move(types);
+	prepared_data->physical_plan = std::move(physical_plan);
+
+	// Create a dummy unbound_statement (required by PreparedStatementData)
+	auto select_stmt = make_uniq<SelectStatement>();
+	auto select_node = make_uniq<SelectNode>();
+	select_stmt->node = std::move(select_node);
+	prepared_data->unbound_statement = std::move(select_stmt);
+
+	// Create PreparedStatement object (like in client_context.cpp)
+	case_insensitive_map_t<idx_t> named_param_map;
+	auto prepared_stmt = make_uniq<PreparedStatement>(conn.context->shared_from_this(), std::move(prepared_data),
+	                                                  "", named_param_map);
+
+	// Execute using ExecuteRow (public API without lock)
+	duckdb::vector<Value> bound_values;
+
+	auto timer = chrono_tic();
+	unique_ptr<ColumnDataCollection> result = prepared_stmt->ExecuteRow(bound_values, false);
+	auto execute_time = chrono_toc(&timer, "Optimizer Comparison Tool Execute time is, ", false);
+
+	// save time to a file
+	std::ofstream log_file;
+	log_file.open("optimizer_comparison_time_log.csv", std::ios_base::app);
+	log_file << std::to_string(execute_time / 1000) + ", ";
+	log_file.close();
+
+	if (result) {
+		std::cout << plan_meta.version << ", " << plan_meta.split_index << ", " << execute_time << ", "
+		          << "SUCCESS, rows=" << result->Count() << "\n";
+
+		// Commit successful execution to close transaction
+		try {
+			conn.Commit();
+		} catch (...) {
+			// Transaction might be auto-committed, ignore errors
+		}
+	} else {
+		std::cout << plan_meta.version << ", " << plan_meta.split_index << ", "
+		          << "ERROR, null result\n";
+
+		// Rollback on error
+		try {
+			conn.Rollback();
+		} catch (...) {
+			// Ignore rollback errors
+		}
+	}
+	return result;
 }
 
 unique_ptr<QueryResult> RunLogicalPlan(Connection &conn, unique_ptr<LogicalOperator> logical_plan,
@@ -187,7 +321,7 @@ int main(int argc, char **argv) {
 
 	std::cout << "Version, SplitIndex, ExecutionTime(us), Status\n";
 
-	unique_ptr<QueryResult> final_result;
+	unique_ptr<ColumnDataCollection> final_result;
 
 	// Track intermediate results from previous subplans (same-engine execution)
 	std::unordered_map<idx_t, unique_ptr<ColumnDataCollection>> intermediate_results;
@@ -228,6 +362,14 @@ int main(int argc, char **argv) {
 			auto binder = Binder::CreateBinder(*conn.context);
 			auto logical_plan =
 			    ir_sql_converter::ConvertIRToDuckDBPlan(*binder, *conn.context, simplest_ir, &intermediate_results);
+
+			// fixme: necessary optimizer
+			Optimizer optimizer(*binder, *conn.context);
+			if ("v1.3.2" == plan_meta.version) {
+				logical_plan = optimizer.TestOptimize(std::move(logical_plan), false);
+			} else {
+				logical_plan = optimizer.TestOptimize(std::move(logical_plan), true);
+			}
 #ifdef DEBUG
 			// print out
 			Printer::Print("ConvertIRToDuckDBPlan:");
@@ -239,20 +381,29 @@ int main(int argc, char **argv) {
 			logical_plan->Print();
 #endif
 
-			// Execute the plan
-			auto result = RunLogicalPlan(conn, std::move(logical_plan), plan_meta);
+
+#if RUN_EXPLAIN_ANALYZE
+			// Run EXPLAIN ANALYZE on a copy to see execution statistics
+			{
+				auto explain_plan_copy = logical_plan->Copy(*conn.context);
+				RunExplainAnalyze(conn, std::move(explain_plan_copy), plan_meta);
+				// Commit and start new transaction for actual execution
+				try { conn.Commit(); } catch (...) {}
+				conn.BeginTransaction();
+			}
+#endif
+
+			// Execute the plan using ExecuteRow (returns ColumnDataCollection directly)
+			auto result = RunLogicalPlanWithExecuteRow(conn, std::move(logical_plan), plan_meta, PRINT_PHYSICAL_PLAN);
 
 			// If not the last subplan, store the result for next subplan
-			if (!is_last_subplan && result && !result->HasError()) {
-				auto collection = MaterializeResult(*conn.context, result);
-				if (collection) {
-					auto row_count = collection->Count();
-					intermediate_results[output_table_idx] = std::move(collection);
+			if (!is_last_subplan && result) {
+				auto row_count = result->Count();
+				intermediate_results[output_table_idx] = std::move(result);
 #ifdef DEBUG
-					Printer::Print("Stored intermediate result at table_index " + std::to_string(output_table_idx) +
-					               " with " + std::to_string(row_count) + " rows");
+				Printer::Print("Stored intermediate result at table_index " + std::to_string(output_table_idx) +
+				               " with " + std::to_string(row_count) + " rows");
 #endif
-				}
 			}
 
 			// Store the final result
@@ -277,7 +428,7 @@ int main(int argc, char **argv) {
 	}
 
 	// Print the final query result
-	if (final_result && !final_result->HasError()) {
+	if (final_result) {
 		std::cout << "\n=== FINAL QUERY RESULT ===\n";
 		final_result->Print();
 

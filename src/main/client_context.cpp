@@ -1112,6 +1112,8 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 	profiler.StartPhase(MetricsType::PHYSICAL_PLANNER);
 	PhysicalPlanGenerator physical_planner(*this);
 	result->physical_plan = physical_planner.Plan(std::move(logical_plan));
+	Printer::Print("Physical plan");
+	result->physical_plan->Root().Print();
 	profiler.EndPhase();
 	D_ASSERT(result->physical_plan);
 #if TIME_BREAK_DOWN

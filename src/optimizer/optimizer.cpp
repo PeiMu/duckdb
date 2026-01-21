@@ -723,6 +723,58 @@ void Optimizer::RunBuiltInPostOptimizers() {
 	});
 }
 
+void Optimizer::RunBuiltInTestOptimizers(bool old_version) {
+	switch (plan->type) {
+	case LogicalOperatorType::LOGICAL_TRANSACTION:
+	case LogicalOperatorType::LOGICAL_PRAGMA:
+	case LogicalOperatorType::LOGICAL_SET:
+	case LogicalOperatorType::LOGICAL_UPDATE_EXTENSIONS:
+	case LogicalOperatorType::LOGICAL_CREATE_SECRET:
+	case LogicalOperatorType::LOGICAL_EXTENSION_OPERATOR:
+		// skip optimizing simple & often-occurring plans unaffected by rewrites
+		if (plan->children.empty()) {
+			return;
+		}
+		break;
+	default:
+		break;
+	}
+
+	// removes unused columns
+	RunOptimizer(OptimizerType::UNUSED_COLUMNS, [&]() {
+		RemoveUnusedColumns unused(binder, context, true);
+		unused.VisitOperator(*plan);
+	});
+
+	// creates projection maps so unused columns are projected out early
+	RunOptimizer(OptimizerType::COLUMN_LIFETIME, [&]() {
+		ColumnLifetimeAnalyzer column_lifetime(*this, *plan, true);
+		column_lifetime.VisitOperator(*plan);
+	});
+
+	if (!old_version) {
+		// new
+		// try to use late materialization
+		RunOptimizer(OptimizerType::LATE_MATERIALIZATION, [&]() {
+			LateMaterialization late_materialization(*this);
+			plan = late_materialization.Optimize(std::move(plan));
+		});
+
+		// creates projection maps so unused columns are projected out early
+		RunOptimizer(OptimizerType::COLUMN_LIFETIME, [&]() {
+			ColumnLifetimeAnalyzer column_lifetime(*this, *plan, true);
+			column_lifetime.VisitOperator(*plan);
+		});
+
+		// new
+		// perform join filter pushdown after the dust has settled
+		RunOptimizer(OptimizerType::JOIN_FILTER_PUSHDOWN, [&]() {
+			JoinFilterPushdownOptimizer join_filter_pushdown(*this);
+			join_filter_pushdown.VisitOperator(*plan);
+		});
+	}
+}
+
 void Optimizer::RunBuiltInWholePlanOptimizers() {
 	switch (plan->type) {
 	case LogicalOperatorType::LOGICAL_TRANSACTION:
@@ -791,12 +843,12 @@ void Optimizer::RunBuiltInWholePlanOptimizers() {
 		plan = empty_result_pullup.Optimize(std::move(plan));
 	});
 
-//	// then we perform the join ordering optimization
-//	// this also rewrites cross products + filters into joins and performs filter pushdowns
-//	RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {
-//		JoinOrderOptimizer optimizer(context);
-//		plan = optimizer.Optimize(std::move(plan));
-//	});
+	//	// then we perform the join ordering optimization
+	//	// this also rewrites cross products + filters into joins and performs filter pushdowns
+	//	RunOptimizer(OptimizerType::JOIN_ORDER, [&]() {
+	//		JoinOrderOptimizer optimizer(context);
+	//		plan = optimizer.Optimize(std::move(plan));
+	//	});
 
 	// rewrites UNNESTs in DelimJoins by moving them to the projection
 	RunOptimizer(OptimizerType::UNNEST_REWRITER, [&]() {
@@ -828,12 +880,12 @@ void Optimizer::RunBuiltInWholePlanOptimizers() {
 		column_lifetime.VisitOperator(*plan);
 	});
 
-//	// Once we know the column lifetime, we have more information regarding
-//	// what relations should be the build side/probe side.
-//	RunOptimizer(OptimizerType::BUILD_SIDE_PROBE_SIDE, [&]() {
-//		BuildProbeSideOptimizer build_probe_side_optimizer(context, *plan);
-//		build_probe_side_optimizer.VisitOperator(*plan);
-//	});
+	//	// Once we know the column lifetime, we have more information regarding
+	//	// what relations should be the build side/probe side.
+	//	RunOptimizer(OptimizerType::BUILD_SIDE_PROBE_SIDE, [&]() {
+	//		BuildProbeSideOptimizer build_probe_side_optimizer(context, *plan);
+	//		build_probe_side_optimizer.VisitOperator(*plan);
+	//	});
 
 	// pushes LIMIT below PROJECTION
 	RunOptimizer(OptimizerType::LIMIT_PUSHDOWN, [&]() {
@@ -860,24 +912,24 @@ void Optimizer::RunBuiltInWholePlanOptimizers() {
 	});
 
 	// perform statistics propagation
-//	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
-//		StatisticsPropagator propagator(*this, *plan);
-//		propagator.PropagateStatistics(plan);
-//		// todo: need to double check once finsh collecting statistics from ColumnGet
-//		if (statistics_map.empty()) {
-//			statistics_map = propagator.GetStatisticsMap();
-//		} else {
-//			auto new_statistics_map = propagator.GetStatisticsMap();
-//			for (auto &ele : statistics_map) {
-//				for (const auto &new_ele : new_statistics_map) {
-//					if (ele.first.table_index == new_ele.first.table_index &&
-//					    ele.first.column_index == new_ele.first.column_index) {
-//						ele.second->Merge(*(new_ele.second));
-//					}
-//				}
-//			}
-//		}
-//	});
+	//	RunOptimizer(OptimizerType::STATISTICS_PROPAGATION, [&]() {
+	//		StatisticsPropagator propagator(*this, *plan);
+	//		propagator.PropagateStatistics(plan);
+	//		// todo: need to double check once finsh collecting statistics from ColumnGet
+	//		if (statistics_map.empty()) {
+	//			statistics_map = propagator.GetStatisticsMap();
+	//		} else {
+	//			auto new_statistics_map = propagator.GetStatisticsMap();
+	//			for (auto &ele : statistics_map) {
+	//				for (const auto &new_ele : new_statistics_map) {
+	//					if (ele.first.table_index == new_ele.first.table_index &&
+	//					    ele.first.column_index == new_ele.first.column_index) {
+	//						ele.second->Merge(*(new_ele.second));
+	//					}
+	//				}
+	//			}
+	//		}
+	//	});
 
 	// remove duplicate aggregates
 	RunOptimizer(OptimizerType::COMMON_AGGREGATE, [&]() {
@@ -988,6 +1040,29 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 	this->plan = std::move(plan_p);
 
 	RunBuiltInPostOptimizers();
+
+	for (auto &optimizer_extension : DBConfig::GetConfig(context).optimizer_extensions) {
+		RunOptimizer(OptimizerType::EXTENSION, [&]() {
+			OptimizerExtensionInput input {GetContext(), *this, optimizer_extension.optimizer_info.get()};
+			if (optimizer_extension.optimize_function) {
+				optimizer_extension.optimize_function(input, plan);
+			}
+		});
+	}
+
+	Planner::VerifyPlan(context, plan);
+
+	return std::move(plan);
+}
+
+unique_ptr<LogicalOperator> Optimizer::TestOptimize(unique_ptr<LogicalOperator> plan_p, bool old_version) {
+	if (!context.config.enable_dbshaker_query_split) {
+		Verify(*plan_p);
+	}
+
+	this->plan = std::move(plan_p);
+
+	RunBuiltInTestOptimizers(old_version);
 
 	for (auto &optimizer_extension : DBConfig::GetConfig(context).optimizer_extensions) {
 		RunOptimizer(OptimizerType::EXTENSION, [&]() {
