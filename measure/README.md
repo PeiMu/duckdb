@@ -61,12 +61,18 @@ diff dsb_100_result/duckdb_result_dsb_100_official.txt dsb_100_result/duckdb_res
 
 ## Feed duckdb 0.10.1's plan to 1.3.2
 ```bash
+# clean
+rm job_result/0.10.1/
+rm job_result/1.3.2/
+rm job_result/whole_query/
+rm job_result/query_split/
+mkdir -p job_result/whole_query/
+mkdir -p job_result/query_split/
 # currently hard coded in bash script
 # whole_query: ENABLE_QUERY_SPLIT=0
-bash ./dump_job_sub_plans.sh
+bash ./dump_job_sub_plans.sh && mv job_result/1.3.2/ job_result/whole_query/.
 # query_split: ENABLE_QUERY_SPLIT=1
-bash ./dump_job_sub_plans.sh
-# then move dumped IR to whole_query or query_split, e.g., cd job_result/ && mv 1.3.2/ whole_query/.
+bash ./dump_job_sub_plans.sh && mv job_result/1.3.2/ job_result/query_split/.
 
 # measure performance
 bash ./measure_optimizer_comparison_time_job.sh whole_query 0.10.1
