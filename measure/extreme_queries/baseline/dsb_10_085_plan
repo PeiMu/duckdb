@@ -1,0 +1,315 @@
+┌─────────────┴─────────────┐
+│           TOP_N           │
+│    ────────────────────   │
+│          Top: 100         │
+│                           │
+│         Order By:         │
+│  main."substring"(dsb_10  │
+│ .main.reason.r_reason_desc│
+│        , 1, 20) ASC       │
+│ avg(dsb_10.main.web_sales │
+│     .ws_quantity) ASC     │
+│      avg(dsb_10.main      │
+│.web_returns.wr_refunded_ca│
+│          sh) ASC          │
+│      avg(dsb_10.main      │
+│  .web_returns.wr_fee) ASC │
+│                           │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│ "substring"(r_reason_desc,│
+│           1, 20)          │
+│      avg(ws_quantity)     │
+│   avg(wr_refunded_cash)   │
+│        avg(wr_fee)        │
+│                           │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│       HASH_GROUP_BY       │
+│    ────────────────────   │
+│         Groups: #0        │
+│                           │
+│        Aggregates:        │
+│          avg(#1)          │
+│          avg(#2)          │
+│          avg(#3)          │
+│                           │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│       r_reason_desc       │
+│        ws_quantity        │
+│      wr_refunded_cash     │
+│           wr_fee          │
+│                           │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│             #0            │
+│             #1            │
+│             #2            │
+│             #3            │
+│__internal_compress_integra│
+│     l_utinyint(#4, 1)     │
+│                           │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        │
+│      ws_web_page_sk =     ├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│       wp_web_page_sk      │                                                                                                                                                                                            │
+│                           │                                                                                                                                                                                            │
+│           0 Rows          │                                                                                                                                                                                            │
+│          (0.00s)          │                                                                                                                                                                                            │
+└─────────────┬─────────────┘                                                                                                                                                                                            │
+┌─────────────┴─────────────┐                                                                                                                                                                              ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                                                                                                                                                                              │         TABLE_SCAN        │
+│    ────────────────────   │                                                                                                                                                                              │    ────────────────────   │
+│      Join Type: INNER     │                                                                                                                                                                              │      Table: web_page      │
+│                           │                                                                                                                                                                              │   Type: Sequential Scan   │
+│        Conditions:        │                                                                                                                                                                              │                           │
+│ wr_reason_sk = r_reason_sk├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐              │        Projections:       │
+│                           │                                                                                                                                                               │              │       wp_web_page_sk      │
+│                           │                                                                                                                                                               │              │                           │
+│           0 Rows          │                                                                                                                                                               │              │          200 Rows         │
+│          (0.00s)          │                                                                                                                                                               │              │          (0.00s)          │
+└─────────────┬─────────────┘                                                                                                                                                               │              └───────────────────────────┘
+┌─────────────┴─────────────┐                                                                                                                                                 ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                                                                                                                                                 │         TABLE_SCAN        │
+│    ────────────────────   │                                                                                                                                                 │    ────────────────────   │
+│      Join Type: INNER     │                                                                                                                                                 │       Table: reason       │
+│                           │                                                                                                                                                 │   Type: Sequential Scan   │
+│        Conditions:        │                                                                                                                                                 │                           │
+│  wr_returning_cdemo_sk =  │                                                                                                                                                 │        Projections:       │
+│         cd_demo_sk        │                                                                                                                                                 │        r_reason_sk        │
+│   cd_education_status =   ├──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐              │       r_reason_desc       │
+│     cd_education_status   │                                                                                                                                  │              │                           │
+│    cd_marital_status =    │                                                                                                                                  │              │                           │
+│      cd_marital_status    │                                                                                                                                  │              │                           │
+│                           │                                                                                                                                  │              │                           │
+│           0 Rows          │                                                                                                                                  │              │          45 Rows          │
+│          (0.19s)          │                                                                                                                                  │              │          (0.02s)          │
+└─────────────┬─────────────┘                                                                                                                                  │              └───────────────────────────┘
+┌─────────────┴─────────────┐                                                                                                                    ┌─────────────┴─────────────┐
+│         PROJECTION        │                                                                                                                    │         TABLE_SCAN        │
+│    ────────────────────   │                                                                                                                    │    ────────────────────   │
+│             #0            │                                                                                                                    │           Table:          │
+│             #2            │                                                                                                                    │   customer_demographics   │
+│             #3            │                                                                                                                    │                           │
+│             #4            │                                                                                                                    │   Type: Sequential Scan   │
+│             #5            │                                                                                                                    │                           │
+│             #6            │                                                                                                                    │        Projections:       │
+│             #7            │                                                                                                                    │         cd_demo_sk        │
+│             #8            │                                                                                                                    │     cd_marital_status     │
+│                           │                                                                                                                    │    cd_education_status    │
+│                           │                                                                                                                    │                           │
+│                           │                                                                                                                    │          Filters:         │
+│                           │                                                                                                                    │  cd_demo_sk<=1920790 AND  │
+│                           │                                                                                                                    │   cd_demo_sk IS NOT NULL  │
+│                           │                                                                                                                    │                           │
+│           0 Rows          │                                                                                                                    │        1920790 Rows       │
+│          (0.00s)          │                                                                                                                    │          (0.02s)          │
+└─────────────┬─────────────┘                                                                                                                    └───────────────────────────┘
+┌─────────────┴─────────────┐
+│           FILTER          │
+│    ────────────────────   │
+│ ((((ws_sales_price >= 100 │
+│ .00) AND (ws_sales_price <│
+│      = 150.00)) AND       │
+│ (cd_marital_status = 'S') │
+│  AND (cd_education_status │
+│    = 'Unknown')) OR ((    │
+│ (ws_sales_price >= 50.00) │
+│   AND (ws_sales_price <=  │
+│        100.00)) AND       │
+│ (cd_marital_status = 'D') │
+│  AND (cd_education_status │
+│ = 'Advanced Degree')) OR (│
+│ ((ws_sales_price >= 150.00│
+│  ) AND (ws_sales_price <= │
+│        200.00)) AND       │
+│ (cd_marital_status = 'M') │
+│  AND (cd_education_status │
+│      = 'Secondary')))     │
+│                           │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│             #0            │
+│             #1            │
+│             #2            │
+│             #3            │
+│             #4            │
+│             #5            │
+│             #6            │
+│__internal_decompress_strin│
+│           g(#7)           │
+│             #8            │
+│                           │
+│         2084 Rows         │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        │
+│   wr_refunded_cdemo_sk =  ├─────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│         cd_demo_sk        │                                                                                                     │
+│                           │                                                                                                     │
+│         2084 Rows         │                                                                                                     │
+│          (0.14s)          │                                                                                                     │
+└─────────────┬─────────────┘                                                                                                     │
+┌─────────────┴─────────────┐                                                                                       ┌─────────────┴─────────────┐
+│         PROJECTION        │                                                                                       │         PROJECTION        │
+│    ────────────────────   │                                                                                       │    ────────────────────   │
+│             #0            │                                                                                       │             #0            │
+│             #1            │                                                                                       │__internal_compress_string_│
+│             #3            │                                                                                       │        utinyint(#1)       │
+│             #4            │                                                                                       │             #2            │
+│             #5            │                                                                                       │                           │
+│             #6            │                                                                                       │                           │
+│             #7            │                                                                                       │                           │
+│             #8            │                                                                                       │                           │
+│                           │                                                                                       │                           │
+│         2139 Rows         │                                                                                       │        1920790 Rows       │
+│          (0.00s)          │                                                                                       │          (0.00s)          │
+└─────────────┬─────────────┘                                                                                       └─────────────┬─────────────┘
+┌─────────────┴─────────────┐                                                                                       ┌─────────────┴─────────────┐
+│           FILTER          │                                                                                       │         TABLE_SCAN        │
+│    ────────────────────   │                                                                                       │    ────────────────────   │
+│  ((((ws_net_profit >= 100 │                                                                                       │           Table:          │
+│ .00) AND (ws_net_profit <=│                                                                                       │   customer_demographics   │
+│  200.00)) AND ((ca_state =│                                                                                       │                           │
+│  'KS') OR (ca_state = 'ND'│                                                                                       │   Type: Sequential Scan   │
+│  ) OR (ca_state = 'OK'))) │                                                                                       │                           │
+│   OR (((ws_net_profit >=  │                                                                                       │        Projections:       │
+│        150.00) AND        │                                                                                       │         cd_demo_sk        │
+│ (ws_net_profit <= 300.00))│                                                                                       │     cd_marital_status     │
+│  AND ((ca_state = 'GA') OR│                                                                                       │    cd_education_status    │
+│    (ca_state = 'LA') OR   │                                                                                       │                           │
+│ (ca_state = 'NC'))) OR (( │                                                                                       │          Filters:         │
+│  (ws_net_profit >= 50.00) │                                                                                       │  cd_demo_sk<=1920790 AND  │
+│  AND (ws_net_profit <= 250│                                                                                       │   cd_demo_sk IS NOT NULL  │
+│ .00)) AND ((ca_state = 'IL│                                                                                       │                           │
+│ ') OR (ca_state = 'ME') OR│                                                                                       │                           │
+│    (ca_state = 'MI'))))   │                                                                                       │                           │
+│                           │                                                                                       │                           │
+│         2139 Rows         │                                                                                       │        1920790 Rows       │
+│          (0.01s)          │                                                                                       │          (0.00s)          │
+└─────────────┬─────────────┘                                                                                       └───────────────────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│             #0            │
+│             #1            │
+│             #2            │
+│             #3            │
+│             #4            │
+│             #5            │
+│__internal_decompress_integ│
+│     ral_integer(#6, 1)    │
+│             #7            │
+│             #8            │
+│__internal_decompress_strin│
+│           g(#9)           │
+│                           │
+│        179079 Rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        │
+│  ws_item_sk = wr_item_sk  ├───────────────────────────────────────────┐
+│     ws_order_number =     │                                           │
+│       wr_order_number     │                                           │
+│                           │                                           │
+│        179079 Rows        │                                           │
+│          (0.12s)          │                                           │
+└─────────────┬─────────────┘                                           │
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                             │         PROJECTION        │
+│    ────────────────────   │                             │    ────────────────────   │
+│      Join Type: INNER     │                             │             #0            │
+│                           │                             │             #1            │
+│        Conditions:        │                             │             #2            │
+│ws_sold_date_sk = d_date_sk│                             │             #3            │
+│                           │                             │__internal_compress_integra│
+│                           ├──────────────┐              │     l_utinyint(#4, 1)     │
+│                           │              │              │             #5            │
+│                           │              │              │             #6            │
+│                           │              │              │__internal_compress_string_│
+│                           │              │              │        uinteger(#7)       │
+│                           │              │              │                           │
+│        969016 Rows        │              │              │        1334838 Rows       │
+│          (0.00s)          │              │              │          (0.01s)          │
+└─────────────┬─────────────┘              │              └─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││           FILTER          ││         HASH_JOIN         │
+│    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
+│      Table: web_sales     ││ (d_date_sk BETWEEN 2450815││      Join Type: INNER     │
+│   Type: Sequential Scan   ││        AND 2452949)       ││                           │
+│                           ││                           ││        Conditions:        │
+│        Projections:       ││                           ││   wr_refunded_addr_sk =   │
+│       ws_web_page_sk      ││                           ││        ca_address_sk      │
+│         ws_item_sk        ││                           ││                           │
+│      ws_order_number      ││                           ││                           ├──────────────┐
+│      ws_sold_date_sk      ││                           ││                           │              │
+│       ws_sales_price      ││                           ││                           │              │
+│       ws_net_profit       ││                           ││                           │              │
+│        ws_quantity        ││                           ││                           │              │
+│                           ││                           ││                           │              │
+│        969016 Rows        ││          365 Rows         ││        1334838 Rows       │              │
+│          (0.02s)          ││          (0.00s)          ││          (0.01s)          │              │
+└───────────────────────────┘└─────────────┬─────────────┘└─────────────┬─────────────┘              │
+                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                             │         TABLE_SCAN        ││         TABLE_SCAN        ││         TABLE_SCAN        │
+                             │    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
+                             │      Table: date_dim      ││     Table: web_returns    ││           Table:          │
+                             │   Type: Sequential Scan   ││   Type: Sequential Scan   ││      customer_address     │
+                             │                           ││                           ││                           │
+                             │        Projections:       ││        Projections:       ││   Type: Sequential Scan   │
+                             │         d_date_sk         ││         wr_item_sk        ││                           │
+                             │                           ││      wr_order_number      ││        Projections:       │
+                             │          Filters:         ││    wr_refunded_cdemo_sk   ││       ca_address_sk       │
+                             │ d_year=2002 AND d_year IS ││   wr_returning_cdemo_sk   ││          ca_state         │
+                             │          NOT NULL         ││    wr_refunded_addr_sk    ││                           │
+                             │                           ││        wr_reason_sk       ││          Filters:         │
+                             │                           ││      wr_refunded_cash     ││ ca_country='United States'│
+                             │                           ││           wr_fee          ││ AND ca_country IS NOT NULL│
+                             │                           ││                           ││                           │
+                             │          365 Rows         ││        1375498 Rows       ││        242502 Rows        │
+                             │          (0.00s)          ││          (0.03s)          ││          (0.05s)          │
+                             └───────────────────────────┘└───────────────────────────┘└───────────────────────────┘
+]
+
+┌────────────────────────────────────────┬──────────────────┬───────────────────────┬─────────────┐
+│ main."substring"(r_reason_desc, 1, 20) │ avg(ws_quantity) │ avg(wr_refunded_cash) │ avg(wr_fee) │
+│                varchar                 │      double      │        double         │   double    │
+├────────────────────────────────────────┴──────────────────┴───────────────────────┴─────────────┤
+│                                             0 rows                                              │
+└─────────────────────────────────────────────────────────────────────────────────────────────────┘

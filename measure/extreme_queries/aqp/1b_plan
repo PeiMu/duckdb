@@ -1,0 +1,236 @@
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0008s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│          movie_id         │
+│                           │
+│          10 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│     info_type_id = id     │              │
+│                           │              │
+│          10 Rows          │              │
+│          (0.00s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││           FILTER          │
+│    ────────────────────   ││    ────────────────────   │
+│   Table: movie_info_idx   ││         (id >= 99)        │
+│   Type: Sequential Scan   ││                           │
+│                           ││                           │
+│        Projections:       ││                           │
+│          movie_id         ││                           │
+│        info_type_id       ││                           │
+│                           ││                           │
+│          10 Rows          ││           1 Rows          │
+│          (0.00s)          ││          (0.00s)          │
+└───────────────────────────┘└─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐
+                             │         TABLE_SCAN        │
+                             │    ────────────────────   │
+                             │      Table: info_type     │
+                             │   Type: Sequential Scan   │
+                             │      Projections: id      │
+                             │                           │
+                             │          Filters:         │
+                             │ info='bottom 10 rank' AND │
+                             │      info IS NOT NULL     │
+                             │                           │
+                             │           1 Rows          │
+                             │          (0.00s)          │
+                             └───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(mc.note) AS production_note,        MIN(t.title) AS movie_title,        MIN(t.production_year) AS movie_year FROM company_type AS ct,      info_type AS it,      movie_companies AS mc,      movie_info_idx AS mi_idx,      title AS t WHERE ct.kind = 'production companies'   AND it.info = 'bottom 10 rank'   AND mc.note NOT LIKE '%(as Metro-Goldwyn-Mayer Pictures)%'   AND t.production_year BETWEEN 2005 AND 2010   AND ct.id = mc.company_type_id   AND t.id = mc.movie_id   AND t.id = mi_idx.movie_id   AND mc.movie_id = mi_idx.movie_id   AND it.id = mi_idx.info_type_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0205s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│      production_year      │
+│          movie_id         │
+│           title           │
+│                           │
+│           4 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│       id = movie_id       │              │
+│                           │              │
+│           4 Rows          │              │
+│          (0.00s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││      COLUMN_DATA_SCAN     │
+│    ────────────────────   ││                           │
+│        Table: title       ││                           │
+│   Type: Sequential Scan   ││                           │
+│                           ││                           │
+│        Projections:       ││                           │
+│      production_year      ││                           │
+│             id            ││                           │
+│           title           ││                           │
+│                           ││                           │
+│          Filters:         ││                           │
+│ production_year>=2005 AND ││                           │
+│  production_year<=2010 AND││                           │
+│   production_year IS NOT  ││                           │
+│            NULL           ││                           │
+│                           ││                           │
+│        177528 Rows        ││          10 Rows          │
+│          (0.02s)          ││          (0.00s)          │
+└───────────────────────────┘└───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(mc.note) AS production_note,        MIN(t.title) AS movie_title,        MIN(t.production_year) AS movie_year FROM company_type AS ct,      info_type AS it,      movie_companies AS mc,      movie_info_idx AS mi_idx,      title AS t WHERE ct.kind = 'production companies'   AND it.info = 'bottom 10 rank'   AND mc.note NOT LIKE '%(as Metro-Goldwyn-Mayer Pictures)%'   AND t.production_year BETWEEN 2005 AND 2010   AND ct.id = mc.company_type_id   AND t.id = mc.movie_id   AND t.id = mi_idx.movie_id   AND mc.movie_id = mi_idx.movie_id   AND it.id = mi_idx.info_type_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0168s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│    UNGROUPED_AGGREGATE    │
+│    ────────────────────   │
+│        Aggregates:        │
+│          min(#0)          │
+│          min(#1)          │
+│          min(#2)          │
+│                           │
+│           1 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│            note           │
+│           title           │
+│      production_year      │
+│                           │
+│           3 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├───────────────────────────────────────────┐
+│    company_type_id = id   │                                           │
+│                           │                                           │
+│           3 Rows          │                                           │
+│          (0.00s)          │                                           │
+└─────────────┬─────────────┘                                           │
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                             │           FILTER          │
+│    ────────────────────   │                             │    ────────────────────   │
+│      Join Type: INNER     │                             │         (id <= 2)         │
+│                           │                             │                           │
+│        Conditions:        ├──────────────┐              │                           │
+│    movie_id = movie_id    │              │              │                           │
+│                           │              │              │                           │
+│           3 Rows          │              │              │           1 Rows          │
+│          (0.00s)          │              │              │          (0.00s)          │
+└─────────────┬─────────────┘              │              └─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│           FILTER          ││      COLUMN_DATA_SCAN     ││         TABLE_SCAN        │
+│    ────────────────────   ││                           ││    ────────────────────   │
+│  (NOT contains(note, '(as ││                           ││    Table: company_type    │
+│     Metro-Goldwyn-Mayer   ││                           ││   Type: Sequential Scan   │
+│        Pictures)'))       ││                           ││      Projections: id      │
+│                           ││                           ││                           │
+│                           ││                           ││          Filters:         │
+│                           ││                           ││ kind='production companies│
+│                           ││                           ││   ' AND kind IS NOT NULL  │
+│                           ││                           ││                           │
+│         69059 Rows        ││           4 Rows          ││           1 Rows          │
+│          (0.01s)          ││          (0.00s)          ││          (0.00s)          │
+└─────────────┬─────────────┘└───────────────────────────┘└───────────────────────────┘
+┌─────────────┴─────────────┐
+│         TABLE_SCAN        │
+│    ────────────────────   │
+│           Table:          │
+│      movie_companies      │
+│                           │
+│   Type: Sequential Scan   │
+│                           │
+│        Projections:       │
+│            note           │
+│      company_type_id      │
+│          movie_id         │
+│                           │
+│        608879 Rows        │
+│          (0.01s)          │
+└───────────────────────────┘
+]
+
+┌───────────────────────────────────────┬────────────────┬────────────┐
+│            production_note            │  movie_title   │ movie_year │
+│                varchar                │    varchar     │   int32    │
+├───────────────────────────────────────┼────────────────┼────────────┤
+│ (Set Decoration Rentals) (uncredited) │ Disaster Movie │    2008    │
+└───────────────────────────────────────┴────────────────┴────────────┘
