@@ -24,7 +24,7 @@
 using namespace duckdb;
 
 #define FROM_BINARY false
-#define PRINT_PHYSICAL_PLAN true
+#define PRINT_PHYSICAL_PLAN false
 #define RUN_EXPLAIN_ANALYZE false
 
 struct PlanMetadata {
