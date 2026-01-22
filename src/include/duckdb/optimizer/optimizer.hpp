@@ -29,12 +29,13 @@ public:
 	unique_ptr<LogicalOperator> Optimize(unique_ptr<LogicalOperator> plan);
 	//! Optimize a plan by running specialized optimizers before join order optimization
 	unique_ptr<LogicalOperator> PreOptimize(unique_ptr<LogicalOperator> plan_p);
+	//! Optimize the sub-plan before split
 	unique_ptr<LogicalOperator> MiddleOptimize(unique_ptr<LogicalOperator> plan_p);
 	//! Optimize a plan by running specialized optimizers when enable split_jop config
 	unique_ptr<LogicalOperator> ReorderGetOptimize(unique_ptr<LogicalOperator> plan_p);
 	//! Optimize a plan by running specialized optimizers after join order optimization
 	unique_ptr<LogicalOperator> PostOptimize(unique_ptr<LogicalOperator> plan);
-	// fixme
+	//! Optimize for the tools/optimizer_comparison/plan_executor
 	unique_ptr<LogicalOperator> TestOptimize(unique_ptr<LogicalOperator> plan, bool old_version);
 	//! Optimize the whole plan after merging back
 	unique_ptr<LogicalOperator> WholePlanOptimize(unique_ptr<LogicalOperator> plan);
@@ -54,8 +55,10 @@ private:
 	void RunBuiltInPreOptimizers();
 	void RunBuiltInMiddleOptimizers();
 	void RunBuiltInPostOptimizers();
-	// fixme
+	// for the tools/optimizer_comparison/plan_executor.cpp, we need to call again some passes to add missing info,
+	//  especially JOIN_FILTER_PUSHDOWN
 	void RunBuiltInTestOptimizers(bool old_version);
+	// for ENABLE_MERGE_BACK_PLAN, and we comment out the passes that change the join order
 	void RunBuiltInWholePlanOptimizers();
 	void RunOptimizer(OptimizerType type, const std::function<void()> &callback);
 	void Verify(LogicalOperator &op);

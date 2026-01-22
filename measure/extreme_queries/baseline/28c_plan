@@ -1,0 +1,417 @@
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(cn.name) AS movie_company,        MIN(mi_idx.info) AS rating,        MIN(t.title) AS complete_euro_dark_movie FROM complete_cast AS cc,      comp_cast_type AS cct1,      comp_cast_type AS cct2,      company_name AS cn,      company_type AS ct,      info_type AS it1,      info_type AS it2,      keyword AS k,      kind_type AS kt,      movie_companies AS mc,      movie_info AS mi,      movie_info_idx AS mi_idx,      movie_keyword AS mk,      title AS t WHERE cct1.kind = 'cast'   AND cct2.kind = 'complete'   AND cn.country_code != '[us]'   AND it1.info = 'countries'   AND it2.info = 'rating'   AND k.keyword IN ('murder',                     'murder-in-title',                     'blood',                     'violence')   AND kt.kind IN ('movie',                   'episode')   AND mc.note NOT LIKE '%(USA)%'   AND mc.note LIKE '%(200%)%'   AND mi.info IN ('Sweden',                   'Norway',                   'Germany',                   'Denmark',                   'Swedish',                   'Danish',                   'Norwegian',                   'German',                   'USA',                   'American')   AND mi_idx.info < '8.5'   AND t.production_year > 2005   AND kt.id = t.kind_id   AND t.id = mi.movie_id   AND t.id = mk.movie_id   AND t.id = mi_idx.movie_id   AND t.id = mc.movie_id   AND t.id = cc.movie_id   AND mk.movie_id = mi.movie_id   AND mk.movie_id = mi_idx.movie_id   AND mk.movie_id = mc.movie_id   AND mk.movie_id = cc.movie_id   AND mi.movie_id = mi_idx.movie_id   AND mi.movie_id = mc.movie_id   AND mi.movie_id = cc.movie_id   AND mc.movie_id = mi_idx.movie_id   AND mc.movie_id = cc.movie_id   AND mi_idx.movie_id = cc.movie_id   AND k.id = mk.keyword_id   AND it1.id = mi.info_type_id   AND it2.id = mi_idx.info_type_id   AND ct.id = mc.company_type_id   AND cn.id = mc.company_id   AND cct1.id = cc.subject_id   AND cct2.id = cc.status_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.468s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌─────────────┐
+│    QUERY    │
+└──────┬──────┘
+┌──────┴──────┐
+│EXPLAIN_...  │
+│    ──────   │
+│    0 Rows   │
+│   (0.00s)   │
+└──────┬──────┘
+┌──────┴──────┐
+│UNGROUPE...  │
+│    ──────   │
+│ Aggregates: │
+│   min(#0)   │
+│   min(#1)   │
+│   min(#2)   │
+│             │
+│    1 Rows   │
+│   (0.00s)   │
+└──────┬──────┘
+┌──────┴──────┐
+│  PROJECTION │
+│    ──────   │
+│     name    │
+│     info    │
+│    title    │
+│             │
+│  8373 Rows  │
+│   (0.00s)   │
+└──────┬──────┘
+┌──────┴──────┐
+│  HASH_JOIN  │
+│    ──────   │
+│  Join Type: │
+│    INNER    │
+│             │
+│ Conditions: ├──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ keyword_id =│                                                                                                                                                                                                          │
+│      id     │                                                                                                                                                                                                          │
+│             │                                                                                                                                                                                                          │
+│  8373 Rows  │                                                                                                                                                                                                          │
+│   (0.00s)   │                                                                                                                                                                                                          │
+└──────┬──────┘                                                                                                                                                                                                          │
+┌──────┴──────┐                                                                                                                                                                                                   ┌──────┴──────┐
+│  HASH_JOIN  │                                                                                                                                                                                                   │  PROJECTION │
+│    ──────   │                                                                                                                                                                                                   │    ──────   │
+│  Join Type: │                                                                                                                                                                                                   │      #1     │
+│    INNER    │                                                                                                                                                                                                   │             │
+│             │                                                                                                                                                                                                   │             │
+│ Conditions: ├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐       │             │
+│id = movie_id│                                                                                                                                                                                           │       │             │
+│             │                                                                                                                                                                                           │       │             │
+│ 1151351 Rows│                                                                                                                                                                                           │       │    3 Rows   │
+│   (0.15s)   │                                                                                                                                                                                           │       │   (0.00s)   │
+└──────┬──────┘                                                                                                                                                                                           │       └──────┬──────┘
+┌──────┴──────┐                                                                                                                                                                                    ┌──────┴──────┐┌──────┴──────┐
+│  HASH_JOIN  │                                                                                                                                                                                    │  TABLE_SCAN ││    FILTER   │
+│    ──────   │                                                                                                                                                                                    │    ──────   ││    ──────   │
+│  Join Type: │                                                                                                                                                                                    │    Table:   ││ ((keyword = │
+│    INNER    │                                                                                                                                                                                    │movie_keyword││ 'murder') OR│
+│             │                                                                                                                                                                                    │             ││  (keyword = │
+│ Conditions: │                                                                                                                                                                                    │    Type:    ││  'murder-in │
+│ info_type_id│                                                                                                                                                                                    │  Sequential ││ -title') OR │
+│     = id    │                                                                                                                                                                                    │     Scan    ││ (keyword =  │
+│             │                                                                                                                                                                                    │             ││ 'blood') OR │
+│             │                                                                                                                                                                                    │ Projections:││ (keyword =  │
+│             │                                                                                                                                                                                    │   movie_id  ││ 'violence'))│
+│             ├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐       │  keyword_id ││             │
+│             │                                                                                                                                                                            │       │             ││             │
+│             │                                                                                                                                                                            │       │   Filters:  ││             │
+│             │                                                                                                                                                                            │       │  movie_id>  ││             │
+│             │                                                                                                                                                                            │       │   =285 AND  ││             │
+│             │                                                                                                                                                                            │       │   movie_id< ││             │
+│             │                                                                                                                                                                            │       │ =2525745 AND││             │
+│             │                                                                                                                                                                            │       │  movie_id IS││             │
+│             │                                                                                                                                                                            │       │   NOT NULL  ││             │
+│             │                                                                                                                                                                            │       │             ││             │
+│  11455 Rows │                                                                                                                                                                            │       │ 4523775 Rows││    3 Rows   │
+│   (0.00s)   │                                                                                                                                                                            │       │   (0.01s)   ││   (0.00s)   │
+└──────┬──────┘                                                                                                                                                                            │       └─────────────┘└──────┬──────┘
+┌──────┴──────┐                                                                                                                                                                     ┌──────┴──────┐               ┌──────┴──────┐
+│  PROJECTION │                                                                                                                                                                     │    FILTER   │               │  TABLE_SCAN │
+│    ──────   │                                                                                                                                                                     │    ──────   │               │    ──────   │
+│      #0     │                                                                                                                                                                     │ (id <= 110) │               │    Table:   │
+│      #1     │                                                                                                                                                                     │             │               │   keyword   │
+│      #2     │                                                                                                                                                                     │             │               │             │
+│      #3     │                                                                                                                                                                     │             │               │    Type:    │
+│__internal_de│                                                                                                                                                                     │             │               │  Sequential │
+│compress_stri│                                                                                                                                                                     │             │               │     Scan    │
+│    ng(#4)   │                                                                                                                                                                     │             │               │             │
+│             │                                                                                                                                                                     │             │               │ Projections:│
+│             │                                                                                                                                                                     │             │               │   keyword   │
+│             │                                                                                                                                                                     │             │               │      id     │
+│             │                                                                                                                                                                     │             │               │             │
+│  11455 Rows │                                                                                                                                                                     │    1 Rows   │               │ 134170 Rows │
+│   (0.00s)   │                                                                                                                                                                     │   (0.00s)   │               │   (0.00s)   │
+└──────┬──────┘                                                                                                                                                                     └──────┬──────┘               └─────────────┘
+┌──────┴──────┐                                                                                                                                                                     ┌──────┴──────┐
+│  HASH_JOIN  │                                                                                                                                                                     │  TABLE_SCAN │
+│    ──────   │                                                                                                                                                                     │    ──────   │
+│  Join Type: │                                                                                                                                                                     │    Table:   │
+│    INNER    │                                                                                                                                                                     │  info_type  │
+│             │                                                                                                                                                                     │             │
+│ Conditions: │                                                                                                                                                                     │    Type:    │
+│movie_id = id│                                                                                                                                                                     │  Sequential │
+│             │                                                                                                                                                                     │     Scan    │
+│             │                                                                                                                                                                     │             │
+│             ├──────────────────────┐                                                                                                                                              │ Projections:│
+│             │                      │                                                                                                                                              │      id     │
+│             │                      │                                                                                                                                              │             │
+│             │                      │                                                                                                                                              │   Filters:  │
+│             │                      │                                                                                                                                              │info='countri│
+│             │                      │                                                                                                                                              │ es' AND info│
+│             │                      │                                                                                                                                              │  IS NOT NULL│
+│             │                      │                                                                                                                                              │             │
+│  11455 Rows │                      │                                                                                                                                              │    1 Rows   │
+│   (0.01s)   │                      │                                                                                                                                              │   (0.00s)   │
+└──────┬──────┘                      │                                                                                                                                              └─────────────┘
+┌──────┴──────┐               ┌──────┴──────┐
+│    FILTER   │               │  PROJECTION │
+│    ──────   │               │    ──────   │
+│  (movie_id  │               │      #3     │
+│  BETWEEN 285│               │      #2     │
+│ AND 2525745)│               │      #0     │
+│             │               │__internal_co│
+│             │               │mpress_string│
+│             │               │_uhugeint(#1)│
+│             │               │__internal_co│
+│             │               │mpress_integr│
+│             │               │ al_utinyint(│
+│             │               │    #4, 1)   │
+│             │               │             │
+│ 613615 Rows │               │  12856 Rows │
+│   (0.00s)   │               │   (0.00s)   │
+└──────┬──────┘               └──────┬──────┘
+┌──────┴──────┐               ┌──────┴──────┐
+│  PROJECTION │               │  HASH_JOIN  │
+│    ──────   │               │    ──────   │
+│      #0     │               │  Join Type: │
+│      #1     │               │    INNER    │
+│             │               │             │
+│             │               │ Conditions: ├───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│             │               │company_type_│                                                                                                                               │
+│             │               │   id = id   │                                                                                                                               │
+│             │               │             │                                                                                                                               │
+│ 613615 Rows │               │  12856 Rows │                                                                                                                               │
+│   (0.00s)   │               │   (0.00s)   │                                                                                                                               │
+└──────┬──────┘               └──────┬──────┘                                                                                                                               │
+┌──────┴──────┐               ┌──────┴──────┐                                                                                                                        ┌──────┴──────┐
+│    FILTER   │               │  HASH_JOIN  │                                                                                                                        │  TABLE_SCAN │
+│    ──────   │               │    ──────   │                                                                                                                        │    ──────   │
+│   IN (...)  │               │  Join Type: │                                                                                                                        │    Table:   │
+│             │               │    INNER    │                                                                                                                        │ company_type│
+│             │               │             │                                                                                                                        │             │
+│             │               │ Conditions: │                                                                                                                        │    Type:    │
+│             │               │ status_id = │                                                                                                                        │  Sequential │
+│             │               │      id     │                                                                                                                        │     Scan    │
+│             │               │             │                                                                                                                        │             │
+│             │               │             ├────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐       │ Projections:│
+│             │               │             │                                                                                                                │       │      id     │
+│             │               │             │                                                                                                                │       │             │
+│             │               │             │                                                                                                                │       │   Filters:  │
+│             │               │             │                                                                                                                │       │ id<=2 AND id│
+│             │               │             │                                                                                                                │       │  IS NOT NULL│
+│             │               │             │                                                                                                                │       │             │
+│ 613615 Rows │               │  12856 Rows │                                                                                                                │       │    2 Rows   │
+│   (0.00s)   │               │   (0.00s)   │                                                                                                                │       │   (0.00s)   │
+└──────┬──────┘               └──────┬──────┘                                                                                                                │       └─────────────┘
+┌──────┴──────┐               ┌──────┴──────┐                                                                                                         ┌──────┴──────┐
+│  HASH_JOIN  │               │  HASH_JOIN  │                                                                                                         │    FILTER   │
+│    ──────   │               │    ──────   │                                                                                                         │    ──────   │
+│  Join Type: │               │  Join Type: │                                                                                                         │  (id >= 3)  │
+│     MARK    │               │    INNER    │                                                                                                         │             │
+│             │               │             │                                                                                                         │             │
+│ Conditions: ├───────┐       │ Conditions: ├─────────────────────────────────────────────────────────────────────────────────────────────────┐       │             │
+│  info = #0  │       │       │ subject_id =│                                                                                                 │       │             │
+│             │       │       │      id     │                                                                                                 │       │             │
+│             │       │       │             │                                                                                                 │       │             │
+│ 1322171 Rows│       │       │  18121 Rows │                                                                                                 │       │    1 Rows   │
+│   (0.02s)   │       │       │   (0.00s)   │                                                                                                 │       │   (0.00s)   │
+└──────┬──────┘       │       └──────┬──────┘                                                                                                 │       └──────┬──────┘
+┌──────┴──────┐┌──────┴──────┐┌──────┴──────┐                                                                                          ┌──────┴──────┐┌──────┴──────┐
+│  TABLE_SCAN ││COLUMN_D...  ││  HASH_JOIN  │                                                                                          │    FILTER   ││  TABLE_SCAN │
+│    ──────   ││             ││    ──────   │                                                                                          │    ──────   ││    ──────   │
+│    Table:   ││             ││  Join Type: │                                                                                          │  (id <= 2)  ││    Table:   │
+│  movie_info ││             ││    INNER    │                                                                                          │             ││comp_cast_typ│
+│             ││             ││             │                                                                                          │             ││      e      │
+│    Type:    ││             ││ Conditions: │                                                                                          │             ││             │
+│  Sequential ││             ││ company_id =│                                                                                          │             ││    Type:    │
+│     Scan    ││             ││      id     │                                                                                          │             ││  Sequential │
+│             ││             ││             │                                                                                          │             ││     Scan    │
+│ Projections:││             ││             │                                                                                          │             ││             │
+│     info    ││             ││             ├──────────────────────────────────────────────────────────────────────────────────┐       │             ││ Projections:│
+│   movie_id  ││             ││             │                                                                                  │       │             ││      id     │
+│ info_type_id││             ││             │                                                                                  │       │             ││             │
+│             ││             ││             │                                                                                  │       │             ││   Filters:  │
+│             ││             ││             │                                                                                  │       │             ││kind='complet│
+│             ││             ││             │                                                                                  │       │             ││ e' AND kind │
+│             ││             ││             │                                                                                  │       │             ││  IS NOT NULL│
+│             ││             ││             │                                                                                  │       │             ││             │
+│ 1322171 Rows││   10 Rows   ││  22710 Rows │                                                                                  │       │    1 Rows   ││    1 Rows   │
+│   (0.01s)   ││   (0.00s)   ││   (0.00s)   │                                                                                  │       │   (0.00s)   ││   (0.00s)   │
+└─────────────┘└─────────────┘└──────┬──────┘                                                                                  │       └──────┬──────┘└─────────────┘
+                              ┌──────┴──────┐                                                                           ┌──────┴──────┐┌──────┴──────┐
+                              │  PROJECTION │                                                                           │  PROJECTION ││  TABLE_SCAN │
+                              │    ──────   │                                                                           │    ──────   ││    ──────   │
+                              │      #0     │                                                                           │      #1     ││    Table:   │
+                              │      #1     │                                                                           │      #2     ││comp_cast_typ│
+                              │      #2     │                                                                           │             ││      e      │
+                              │      #3     │                                                                           │             ││             │
+                              │      #4     │                                                                           │             ││    Type:    │
+                              │__internal_de│                                                                           │             ││  Sequential │
+                              │compress_inte│                                                                           │             ││     Scan    │
+                              │ gral_integer│                                                                           │             ││             │
+                              │   (#5, 1)   │                                                                           │             ││ Projections:│
+                              │      #6     │                                                                           │             ││      id     │
+                              │             │                                                                           │             ││             │
+                              │             │                                                                           │             ││   Filters:  │
+                              │             │                                                                           │             ││ kind='cast' │
+                              │             │                                                                           │             ││  AND kind IS│
+                              │             │                                                                           │             ││   NOT NULL  │
+                              │             │                                                                           │             ││             │
+                              │  23710 Rows │                                                                           │ 126230 Rows ││    1 Rows   │
+                              │   (0.00s)   │                                                                           │   (0.00s)   ││   (0.00s)   │
+                              └──────┬──────┘                                                                           └──────┬──────┘└─────────────┘
+                              ┌──────┴──────┐                                                                           ┌──────┴──────┐
+                              │  HASH_JOIN  │                                                                           │    FILTER   │
+                              │    ──────   │                                                                           │    ──────   │
+                              │  Join Type: │                                                                           │(country_code│
+                              │    INNER    │                                                                           │  != '[us]') │
+                              │             │                                                                           │             │
+                              │ Conditions: ├───────────────────────────────────────────────────────────────────┐       │             │
+                              │id = movie_id│                                                                   │       │             │
+                              │             │                                                                   │       │             │
+                              │  23710 Rows │                                                                   │       │ 126230 Rows │
+                              │   (0.01s)   │                                                                   │       │   (0.00s)   │
+                              └──────┬──────┘                                                                   │       └──────┬──────┘
+                              ┌──────┴──────┐                                                            ┌──────┴──────┐┌──────┴──────┐
+                              │  HASH_JOIN  │                                                            │  PROJECTION ││  TABLE_SCAN │
+                              │    ──────   │                                                            │    ──────   ││    ──────   │
+                              │  Join Type: │                                                            │      #0     ││    Table:   │
+                              │    INNER    │                                                            │__internal_co││ company_name│
+                              │             │                                                            │mpress_integr││             │
+                              │ Conditions: │                                                            │ al_utinyint(││    Type:    │
+                              │ kind_id = id│                                                            │    #1, 1)   ││  Sequential │
+                              │             │                                                            │      #2     ││     Scan    │
+                              │             ├────────────────────────────────────────────────────┐       │             ││             │
+                              │             │                                                    │       │             ││ Projections:│
+                              │             │                                                    │       │             ││ country_code│
+                              │             │                                                    │       │             ││      id     │
+                              │             │                                                    │       │             ││     name    │
+                              │             │                                                    │       │             ││             │
+                              │  10771 Rows │                                                    │       │ 303264 Rows ││ 234997 Rows │
+                              │   (0.00s)   │                                                    │       │   (0.00s)   ││   (0.01s)   │
+                              └──────┬──────┘                                                    │       └──────┬──────┘└─────────────┘
+                              ┌──────┴──────┐                                             ┌──────┴──────┐┌──────┴──────┐
+                              │  PROJECTION │                                             │  PROJECTION ││    FILTER   │
+                              │    ──────   │                                             │    ──────   ││    ──────   │
+                              │      #0     │                                             │      #1     ││ (movie_id >=│
+                              │      #1     │                                             │             ││     285)    │
+                              │      #2     │                                             │             ││             │
+                              │__internal_de│                                             │             ││             │
+                              │compress_inte│                                             │             ││             │
+                              │ gral_integer│                                             │             ││             │
+                              │   (#4, 1)   │                                             │             ││             │
+                              │__internal_de│                                             │             ││             │
+                              │compress_inte│                                             │             ││             │
+                              │ gral_integer│                                             │             ││             │
+                              │   (#5, 3)   │                                             │             ││             │
+                              │__internal_de│                                             │             ││             │
+                              │compress_stri│                                             │             ││             │
+                              │    ng(#3)   │                                             │             ││             │
+                              │             │                                             │             ││             │
+                              │  11792 Rows │                                             │    2 Rows   ││ 303264 Rows │
+                              │   (0.00s)   │                                             │   (0.00s)   ││   (0.00s)   │
+                              └──────┬──────┘                                             └──────┬──────┘└──────┬──────┘
+                              ┌──────┴──────┐                                             ┌──────┴──────┐┌──────┴──────┐
+                              │  HASH_JOIN  │                                             │    FILTER   ││  PROJECTION │
+                              │    ──────   │                                             │    ──────   ││    ──────   │
+                              │  Join Type: │                                             │  ((kind =   ││      #1     │
+                              │    INNER    │                                             │ 'movie') OR ││      #2     │
+                              │             │                                             │   (kind =   ││      #3     │
+                              │ Conditions: ├───────┐                                     │ 'episode')) ││             │
+                              │id = movie_id│       │                                     │             ││             │
+                              │             │       │                                     │             ││             │
+                              │  11792 Rows │       │                                     │    2 Rows   ││ 303271 Rows │
+                              │   (0.02s)   │       │                                     │   (0.00s)   ││   (0.00s)   │
+                              └──────┬──────┘       │                                     └──────┬──────┘└──────┬──────┘
+                              ┌──────┴──────┐┌──────┴──────┐                              ┌──────┴──────┐┌──────┴──────┐
+                              │    FILTER   ││  PROJECTION │                              │  TABLE_SCAN ││    FILTER   │
+                              │    ──────   ││    ──────   │                              │    ──────   ││    ──────   │
+                              │ (id BETWEEN ││__internal_co│                              │    Table:   ││ ((note ~~ '%│
+                              │    285 AND  ││mpress_string│                              │  kind_type  ││  (200%)%')  │
+                              │   2525745)  ││_uhugeint(#0)│                              │             ││   AND (NOT  │
+                              │             ││      #1     │                              │    Type:    ││   contains  │
+                              │             ││__internal_co│                              │  Sequential ││ (note, '(USA│
+                              │             ││mpress_integr│                              │     Scan    ││    )')))    │
+                              │             ││ al_utinyint(│                              │             ││             │
+                              │             ││    #2, 1)   │                              │ Projections:││             │
+                              │             ││__internal_co│                              │     kind    ││             │
+                              │             ││mpress_integr│                              │      id     ││             │
+                              │             ││ al_utinyint(│                              │             ││             │
+                              │             ││    #3, 3)   │                              │             ││             │
+                              │             ││             │                              │             ││             │
+                              │ 1012470 Rows││  94130 Rows │                              │    7 Rows   ││ 303271 Rows │
+                              │   (0.00s)   ││   (0.00s)   │                              │   (0.00s)   ││   (0.05s)   │
+                              └──────┬──────┘└──────┬──────┘                              └─────────────┘└──────┬──────┘
+                              ┌──────┴──────┐┌──────┴──────┐                                             ┌──────┴──────┐
+                              │  TABLE_SCAN ││  HASH_JOIN  │                                             │  TABLE_SCAN │
+                              │    ──────   ││    ──────   │                                             │    ──────   │
+                              │    Table:   ││  Join Type: │                                             │    Table:   │
+                              │    title    ││    INNER    │                                             │movie_compani│
+                              │             ││             │                                             │      es     │
+                              │    Type:    ││ Conditions: │                                             │             │
+                              │  Sequential ││  movie_id = │                                             │    Type:    │
+                              │     Scan    ││   movie_id  │                                             │  Sequential │
+                              │             ││             │                                             │     Scan    │
+                              │ Projections:││             │                                             │             │
+                              │   kind_id   ││             │                                             │ Projections:│
+                              │      id     ││             ├──────────────────────┐                      │     note    │
+                              │    title    ││             │                      │                      │   movie_id  │
+                              │             ││             │                      │                      │company_type_│
+                              │   Filters:  ││             │                      │                      │      id     │
+                              │production_ye││             │                      │                      │  company_id │
+                              │ ar>2005 AND ││             │                      │                      │             │
+                              │ production_y││             │                      │                      │             │
+                              │  ear IS NOT ││             │                      │                      │             │
+                              │     NULL    ││             │                      │                      │             │
+                              │             ││             │                      │                      │             │
+                              │ 1012470 Rows││  94130 Rows │                      │                      │ 2609129 Rows│
+                              │   (0.06s)   ││   (0.01s)   │                      │                      │   (0.05s)   │
+                              └─────────────┘└──────┬──────┘                      │                      └─────────────┘
+                                             ┌──────┴──────┐               ┌──────┴──────┐
+                                             │  HASH_JOIN  │               │    FILTER   │
+                                             │    ──────   │               │    ──────   │
+                                             │  Join Type: │               │ ((movie_id <│
+                                             │    INNER    │               │  = 2525745) │
+                                             │             │               │ AND (movie_i│
+                                             │ Conditions: ├───────┐       │ d <= 2525745│
+                                             │ info_type_id│       │       │      ))     │
+                                             │     = id    │       │       │             │
+                                             │             │       │       │             │
+                                             │ 454183 Rows │       │       │ 132439 Rows │
+                                             │   (0.00s)   │       │       │   (0.00s)   │
+                                             └──────┬──────┘       │       └──────┬──────┘
+                                             ┌──────┴──────┐┌──────┴──────┐┌──────┴──────┐
+                                             │    FILTER   ││    FILTER   ││  TABLE_SCAN │
+                                             │    ──────   ││    ──────   ││    ──────   │
+                                             │  (movie_id  ││  (id >= 99) ││    Table:   │
+                                             │  BETWEEN 285││             ││complete_cast│
+                                             │ AND 2525745)││             ││             │
+                                             │             ││             ││    Type:    │
+                                             │             ││             ││  Sequential │
+                                             │             ││             ││     Scan    │
+                                             │             ││             ││             │
+                                             │             ││             ││ Projections:│
+                                             │             ││             ││   movie_id  │
+                                             │             ││             ││  subject_id │
+                                             │             ││             ││  status_id  │
+                                             │             ││             ││             │
+                                             │             ││             ││   Filters:  │
+                                             │             ││             ││  movie_id<  │
+                                             │             ││             ││ =2525793 AND│
+                                             │             ││             ││  movie_id IS│
+                                             │             ││             ││   NOT NULL  │
+                                             │             ││             ││             │
+                                             │ 454183 Rows ││    1 Rows   ││ 132439 Rows │
+                                             │   (0.00s)   ││   (0.00s)   ││   (0.00s)   │
+                                             └──────┬──────┘└──────┬──────┘└─────────────┘
+                                             ┌──────┴──────┐┌──────┴──────┐
+                                             │  TABLE_SCAN ││  TABLE_SCAN │
+                                             │    ──────   ││    ──────   │
+                                             │    Table:   ││    Table:   │
+                                             │movie_info_id││  info_type  │
+                                             │      x      ││             │
+                                             │             ││    Type:    │
+                                             │    Type:    ││  Sequential │
+                                             │  Sequential ││     Scan    │
+                                             │     Scan    ││             │
+                                             │             ││ Projections:│
+                                             │ Projections:││      id     │
+                                             │     info    ││             │
+                                             │   movie_id  ││   Filters:  │
+                                             │ info_type_id││ info='rating│
+                                             │             ││  ' AND info │
+                                             │   Filters:  ││  IS NOT NULL│
+                                             │  info<'8.5' ││             │
+                                             │  AND info IS││             │
+                                             │   NOT NULL  ││             │
+                                             │             ││             │
+                                             │ 454183 Rows ││    1 Rows   │
+                                             │   (0.02s)   ││   (0.00s)   │
+                                             └─────────────┘└─────────────┘
+]
+
+┌──────────────────┬─────────┬──────────────────────────┐
+│  movie_company   │ rating  │ complete_euro_dark_movie │
+│     varchar      │ varchar │         varchar          │
+├──────────────────┼─────────┼──────────────────────────┤
+│ 01 Distribuzione │ 1.9     │ (#1.1)                   │
+└──────────────────┴─────────┴──────────────────────────┘
