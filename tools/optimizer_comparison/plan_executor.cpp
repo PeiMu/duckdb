@@ -13,13 +13,15 @@
 #include "duckdb/planner/operator/logical_explain.hpp"
 #include "duckdb/main/client_context.hpp"
 #include "duckdb/optimizer/optimizer.hpp"
-#include "ir_to_duckdb_plan.h"
 #include "cpp_interface.h"
 #include "simplest_ir.h"
 #include <chrono>
 #include <iostream>
 #include <regex>
 #include <memory>
+
+// todo: fix the compilation without IR_SQL_Converter
+#include "ir_to_duckdb_plan.h"
 
 using namespace duckdb;
 
