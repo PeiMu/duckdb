@@ -1,0 +1,362 @@
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(cn.name) AS from_company,        MIN(mc.note) AS production_note,        MIN(t.title) AS movie_based_on_book FROM company_name AS cn,      company_type AS ct,      keyword AS k,      link_type AS lt,      movie_companies AS mc,      movie_keyword AS mk,      movie_link AS ml,      title AS t WHERE cn.country_code !='[pl]'   AND ct.kind != 'production companies'   AND ct.kind IS NOT NULL   AND k.keyword IN ('sequel',                     'revenge',                     'based-on-novel')   AND mc.note IS NOT NULL   AND t.production_year > 1950   AND lt.id = ml.link_type_id   AND ml.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_type_id = ct.id   AND mc.company_id = cn.id   AND ml.movie_id = mk.movie_id   AND ml.movie_id = mc.movie_id   AND mk.movie_id = mc.movie_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0118s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│        link_type_id       │
+│             id            │
+│           title           │
+│                           │
+│         29726 Rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│       id = movie_id       │              │
+│                           │              │
+│         29726 Rows        │              │
+│          (0.00s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│           FILTER          ││         TABLE_SCAN        │
+│    ────────────────────   ││    ────────────────────   │
+│ (id BETWEEN 2 AND 186175) ││     Table: movie_link     │
+│                           ││   Type: Sequential Scan   │
+│                           ││                           │
+│                           ││        Projections:       │
+│                           ││        link_type_id       │
+│                           ││          movie_id         │
+│                           ││                           │
+│        177923 Rows        ││         29997 Rows        │
+│          (0.00s)          ││          (0.00s)          │
+└─────────────┬─────────────┘└───────────────────────────┘
+┌─────────────┴─────────────┐
+│         TABLE_SCAN        │
+│    ────────────────────   │
+│        Table: title       │
+│   Type: Sequential Scan   │
+│                           │
+│        Projections:       │
+│             id            │
+│           title           │
+│                           │
+│          Filters:         │
+│  production_year>1950 AND │
+│   production_year IS NOT  │
+│            NULL           │
+│                           │
+│        177923 Rows        │
+│          (0.01s)          │
+└───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(cn.name) AS from_company,        MIN(mc.note) AS production_note,        MIN(t.title) AS movie_based_on_book FROM company_name AS cn,      company_type AS ct,      keyword AS k,      link_type AS lt,      movie_companies AS mc,      movie_keyword AS mk,      movie_link AS ml,      title AS t WHERE cn.country_code !='[pl]'   AND ct.kind != 'production companies'   AND ct.kind IS NOT NULL   AND k.keyword IN ('sequel',                     'revenge',                     'based-on-novel')   AND mc.note IS NOT NULL   AND t.production_year > 1950   AND lt.id = ml.link_type_id   AND ml.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_type_id = ct.id   AND mc.company_id = cn.id   AND ml.movie_id = mk.movie_id   AND ml.movie_id = mc.movie_id   AND mk.movie_id = mc.movie_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0080s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│       movie_id = id       │              │
+│                           │              │
+│        104935 Rows        │              │
+│          (0.00s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│           FILTER          ││      COLUMN_DATA_SCAN     │
+│    ────────────────────   ││                           │
+│     (note IS NOT NULL)    ││                           │
+│                           ││                           │
+│         50735 Rows        ││         29726 Rows        │
+│          (0.00s)          ││          (0.00s)          │
+└─────────────┬─────────────┘└───────────────────────────┘
+┌─────────────┴─────────────┐
+│         TABLE_SCAN        │
+│    ────────────────────   │
+│           Table:          │
+│      movie_companies      │
+│                           │
+│   Type: Sequential Scan   │
+│                           │
+│        Projections:       │
+│            note           │
+│          movie_id         │
+│      company_type_id      │
+│         company_id        │
+│                           │
+│         99876 Rows        │
+│          (0.00s)          │
+└───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(cn.name) AS from_company,        MIN(mc.note) AS production_note,        MIN(t.title) AS movie_based_on_book FROM company_name AS cn,      company_type AS ct,      keyword AS k,      link_type AS lt,      movie_companies AS mc,      movie_keyword AS mk,      movie_link AS ml,      title AS t WHERE cn.country_code !='[pl]'   AND ct.kind != 'production companies'   AND ct.kind IS NOT NULL   AND k.keyword IN ('sequel',                     'revenge',                     'based-on-novel')   AND mc.note IS NOT NULL   AND t.production_year > 1950   AND lt.id = ml.link_type_id   AND ml.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_type_id = ct.id   AND mc.company_id = cn.id   AND ml.movie_id = mk.movie_id   AND ml.movie_id = mc.movie_id   AND mk.movie_id = mc.movie_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0219s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│            name           │
+│            note           │
+│          movie_id         │
+│           title           │
+│                           │
+│         95870 Rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├────────────────────────────────────────────────────────────────────────┐
+│     link_type_id = id     │                                                                        │
+│                           │                                                                        │
+│         95870 Rows        │                                                                        │
+│          (0.00s)          │                                                                        │
+└─────────────┬─────────────┘                                                                        │
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                                                          │         TABLE_SCAN        │
+│    ────────────────────   │                                                          │    ────────────────────   │
+│      Join Type: INNER     │                                                          │      Table: link_type     │
+│                           │                                                          │   Type: Sequential Scan   │
+│        Conditions:        ├───────────────────────────────────────────┐              │      Projections: id      │
+│    company_type_id = id   │                                           │              │                           │
+│                           │                                           │              │                           │
+│         95870 Rows        │                                           │              │          18 Rows          │
+│          (0.00s)          │                                           │              │          (0.00s)          │
+└─────────────┬─────────────┘                                           │              └───────────────────────────┘
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                             │         PROJECTION        │
+│    ────────────────────   │                             │    ────────────────────   │
+│      Join Type: INNER     │                             │             #1            │
+│                           │                             │                           │
+│        Conditions:        ├──────────────┐              │                           │
+│      company_id = id      │              │              │                           │
+│                           │              │              │                           │
+│        103282 Rows        │              │              │           3 Rows          │
+│          (0.01s)          │              │              │          (0.00s)          │
+└─────────────┬─────────────┘              │              └─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│      COLUMN_DATA_SCAN     ││         PROJECTION        ││           FILTER          │
+│                           ││    ────────────────────   ││    ────────────────────   │
+│                           ││             #1            ││    (kind != 'production   │
+│                           ││             #2            ││         companies')       │
+│                           ││                           ││                           │
+│        104935 Rows        ││        210031 Rows        ││           3 Rows          │
+│          (0.00s)          ││          (0.00s)          ││          (0.00s)          │
+└───────────────────────────┘└─────────────┬─────────────┘└─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                             │           FILTER          ││         TABLE_SCAN        │
+                             │    ────────────────────   ││    ────────────────────   │
+                             │  (country_code != '[pl]') ││    Table: company_type    │
+                             │                           ││   Type: Sequential Scan   │
+                             │                           ││                           │
+                             │                           ││        Projections:       │
+                             │                           ││            kind           │
+                             │                           ││             id            │
+                             │                           ││                           │
+                             │        210031 Rows        ││           4 Rows          │
+                             │          (0.00s)          ││          (0.00s)          │
+                             └─────────────┬─────────────┘└───────────────────────────┘
+                             ┌─────────────┴─────────────┐
+                             │         TABLE_SCAN        │
+                             │    ────────────────────   │
+                             │    Table: company_name    │
+                             │   Type: Sequential Scan   │
+                             │                           │
+                             │        Projections:       │
+                             │        country_code       │
+                             │             id            │
+                             │            name           │
+                             │                           │
+                             │        234997 Rows        │
+                             │          (0.01s)          │
+                             └───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(cn.name) AS from_company,        MIN(mc.note) AS production_note,        MIN(t.title) AS movie_based_on_book FROM company_name AS cn,      company_type AS ct,      keyword AS k,      link_type AS lt,      movie_companies AS mc,      movie_keyword AS mk,      movie_link AS ml,      title AS t WHERE cn.country_code !='[pl]'   AND ct.kind != 'production companies'   AND ct.kind IS NOT NULL   AND k.keyword IN ('sequel',                     'revenge',                     'based-on-novel')   AND mc.note IS NOT NULL   AND t.production_year > 1950   AND lt.id = ml.link_type_id   AND ml.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_type_id = ct.id   AND mc.company_id = cn.id   AND ml.movie_id = mk.movie_id   AND ml.movie_id = mc.movie_id   AND mk.movie_id = mc.movie_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0132s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│    UNGROUPED_AGGREGATE    │
+│    ────────────────────   │
+│        Aggregates:        │
+│          min(#0)          │
+│          min(#1)          │
+│          min(#2)          │
+│                           │
+│           1 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│            name           │
+│            note           │
+│           title           │
+│                           │
+│         14899 Rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├───────────────────────────────────────────┐
+│    movie_id = movie_id    │                                           │
+│                           │                                           │
+│         14899 Rows        │                                           │
+│          (0.01s)          │                                           │
+└─────────────┬─────────────┘                                           │
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                             │      COLUMN_DATA_SCAN     │
+│    ────────────────────   │                             │                           │
+│      Join Type: INNER     │                             │                           │
+│                           │                             │                           │
+│        Conditions:        ├──────────────┐              │                           │
+│      keyword_id = id      │              │              │                           │
+│                           │              │              │                           │
+│          480 Rows         │              │              │         95870 Rows        │
+│          (0.00s)          │              │              │          (0.00s)          │
+└─────────────┬─────────────┘              │              └───────────────────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││         PROJECTION        │
+│    ────────────────────   ││    ────────────────────   │
+│    Table: movie_keyword   ││             #1            │
+│   Type: Sequential Scan   ││                           │
+│                           ││                           │
+│        Projections:       ││                           │
+│          movie_id         ││                           │
+│         keyword_id        ││                           │
+│                           ││                           │
+│         1393 Rows         ││           3 Rows          │
+│          (0.00s)          ││          (0.00s)          │
+└───────────────────────────┘└─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐
+                             │           FILTER          │
+                             │    ────────────────────   │
+                             │ ((keyword = 'sequel') OR  │
+                             │ (keyword = 'revenge') OR  │
+                             │ (keyword = 'based-on-novel│
+                             │            '))            │
+                             │                           │
+                             │           3 Rows          │
+                             │          (0.00s)          │
+                             └─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐
+                             │         TABLE_SCAN        │
+                             │    ────────────────────   │
+                             │       Table: keyword      │
+                             │   Type: Sequential Scan   │
+                             │                           │
+                             │        Projections:       │
+                             │          keyword          │
+                             │             id            │
+                             │                           │
+                             │        134170 Rows        │
+                             │          (0.00s)          │
+                             └───────────────────────────┘
+]
+
+┌──────────────┬──────────────────┬───────────────────────────────────────┐
+│ from_company │ production_note  │          movie_based_on_book          │
+│   varchar    │     varchar      │                varchar                │
+├──────────────┼──────────────────┼───────────────────────────────────────┤
+│ 13th Street  │ (1954) (UK) (TV) │ ...denn sie wissen nicht, was sie tun │
+└──────────────┴──────────────────┴───────────────────────────────────────┘
