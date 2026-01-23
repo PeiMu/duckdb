@@ -4,12 +4,12 @@ add_executable(optimizer_comparison plan_executor.cpp)
 
 # Add IR_SQL_Converter include directory
 target_include_directories(optimizer_comparison PRIVATE
-    /home/pei/Project/IR_SQL_Converter/inc)
+    ../../IR_SQL_Converter/inc)
 
 # Link against DuckDB library and IR_SQL_Converter
 target_link_libraries(optimizer_comparison
     duckdb_static
-    /home/pei/Project/IR_SQL_Converter/lib/libIR_SQL_Converter_static.a)
+    ../../IR_SQL_Converter/lib/libIR_SQL_Converter_static.a)
 
 # Link threads (required by DuckDB)
 link_threads(optimizer_comparison "")
