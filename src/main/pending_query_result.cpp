@@ -116,6 +116,11 @@ unique_ptr<ColumnDataCollection> PendingQueryResult::ExecuteRow(ClientContextLoc
 	return ExecuteRowInternal(lock, true);
 }
 
+unique_ptr<ColumnDataCollection> PendingQueryResult::ExecuteRow() {
+	auto lock = LockContext();
+	return ExecuteRowInternal(*lock);
+}
+
 void PendingQueryResult::Close() {
 	context.reset();
 }

@@ -14,3 +14,5 @@ endif()
 if(BUILD_PYTHON_PKG)
   add_subdirectory(pythonpkg)
 endif()
+
+add_subdirectory(optimizer_comparison)

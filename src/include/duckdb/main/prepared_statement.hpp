@@ -89,6 +89,7 @@ public:
 	                                           bool allow_stream_result = true);
 	DUCKDB_API unique_ptr<ColumnDataCollection> ExecuteRow(ClientContextLock &lock, vector<Value> &values,
 	                                           bool allow_stream_result = true);
+	DUCKDB_API unique_ptr<ColumnDataCollection> ExecuteRow(vector<Value> &values, bool allow_stream_result = true);
 
 	//! Execute the prepared statement with the given set of named+unnamed values
 	DUCKDB_API unique_ptr<QueryResult> Execute(case_insensitive_map_t<Value> &named_values,
