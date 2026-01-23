@@ -1,3 +1,11 @@
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘
+
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘
+
 EXPLAIN ANALYZE:
 ColumnDataCollection - [1 Chunks, 1 Rows]
 Chunk 0 - [Rows 0 - 1]
@@ -11,7 +19,7 @@ Chunk - [2 Columns]
 SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM cast_info AS ci,      company_name AS cn,      keyword AS k,      movie_companies AS mc,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword ='character-name-in-title'   AND n.name LIKE 'X%'   AND n.id = ci.person_id   AND ci.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_id = cn.id   AND ci.movie_id = mc.movie_id   AND ci.movie_id = mk.movie_id   AND mc.movie_id = mk.movie_id;
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.0185s             ││
+││              Total Time: 0.0182s             ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -59,6 +67,38 @@ SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM c
 └───────────────────────────┘└───────────────────────────┘
 ]
 
+┌───────────────────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│          movie_id         │
+│                           │
+│          ~34 Rows         │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│      keyword_id = id      │              │
+│                           │              │
+│          ~34 Rows         │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         SEQ_SCAN          ││         SEQ_SCAN          │
+│    ────────────────────   ││    ────────────────────   │
+│    Table: movie_keyword   ││       Table: keyword      │
+│   Type: Sequential Scan   ││   Type: Sequential Scan   │
+│                           ││      Projections: id      │
+│        Projections:       ││                           │
+│          movie_id         ││          Filters:         │
+│         keyword_id        ││ keyword='character-name-in│
+│                           ││ -title' AND keyword IS NOT│
+│                           ││            NULL           │
+│                           ││                           │
+│       ~4523930 Rows       ││          ~1 Rows          │
+└───────────────────────────┘└───────────────────────────┘
+
 EXPLAIN ANALYZE:
 ColumnDataCollection - [1 Chunks, 1 Rows]
 Chunk 0 - [Rows 0 - 1]
@@ -72,7 +112,7 @@ Chunk - [2 Columns]
 SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM cast_info AS ci,      company_name AS cn,      keyword AS k,      movie_companies AS mc,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword ='character-name-in-title'   AND n.name LIKE 'X%'   AND n.id = ci.person_id   AND ci.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_id = cn.id   AND ci.movie_id = mc.movie_id   AND ci.movie_id = mk.movie_id   AND mc.movie_id = mk.movie_id;
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.386s              ││
+││              Total Time: 0.402s              ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -93,7 +133,7 @@ SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM c
 │       person_id = id      │                                           │
 │                           │                                           │
 │          250 Rows         │                                           │
-│          (0.00s)          │                                           │
+│          (0.01s)          │                                           │
 └─────────────┬─────────────┘                                           │
 ┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
 │         HASH_JOIN         │                             │           FILTER          │
@@ -104,7 +144,7 @@ SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM c
 │    movie_id = movie_id    │              │              │                           │
 │                           │              │              │                           │
 │        489251 Rows        │              │              │         2608 Rows         │
-│          (0.16s)          │              │              │          (0.00s)          │
+│          (0.18s)          │              │              │          (0.00s)          │
 └─────────────┬─────────────┘              │              └─────────────┬─────────────┘
 ┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
 │         TABLE_SCAN        ││      COLUMN_DATA_SCAN     ││         TABLE_SCAN        │
@@ -125,6 +165,63 @@ SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM c
 └───────────────────────────┘└───────────────────────────┘└───────────────────────────┘
 ]
 
+┌───────────────────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│          movie_id         │
+│            name           │
+│                           │
+│         ~1214 Rows        │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├───────────────────────────────────────────┐
+│    movie_id = movie_id    │                                           │
+│                           │                                           │
+│         ~1214 Rows        │                                           │
+└─────────────┬─────────────┘                                           │
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                             │      COLUMN_DATA_SCAN     │
+│    ────────────────────   │                             │    ────────────────────   │
+│      Join Type: INNER     │                             │                           │
+│                           │                             │                           │
+│        Conditions:        ├──────────────┐              │                           │
+│       person_id = id      │              │              │                           │
+│                           │              │              │                           │
+│        ~58437 Rows        │              │              │        ~41840 Rows        │
+└─────────────┬─────────────┘              │              └───────────────────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         SEQ_SCAN          ││           FILTER          │
+│    ────────────────────   ││    ────────────────────   │
+│      Table: cast_info     ││    ((id <= 4061926) AND   │
+│   Type: Sequential Scan   ││     prefix(name, 'X'))    │
+│                           ││                           │
+│        Projections:       ││                           │
+│         person_id         ││                           │
+│          movie_id         ││                           │
+│                           ││                           │
+│       ~36244344 Rows      ││        ~33339 Rows        │
+└───────────────────────────┘└─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐
+                             │         SEQ_SCAN          │
+                             │    ────────────────────   │
+                             │        Table: name        │
+                             │   Type: Sequential Scan   │
+                             │                           │
+                             │        Projections:       │
+                             │            name           │
+                             │             id            │
+                             │                           │
+                             │          Filters:         │
+                             │ name>='X' AND name<'Y' AND│
+                             │      name IS NOT NULL     │
+                             │                           │
+                             │        ~33339 Rows        │
+                             └───────────────────────────┘
+
 EXPLAIN ANALYZE:
 ColumnDataCollection - [1 Chunks, 1 Rows]
 Chunk 0 - [Rows 0 - 1]
@@ -138,7 +235,7 @@ Chunk - [2 Columns]
 SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM cast_info AS ci,      company_name AS cn,      keyword AS k,      movie_companies AS mc,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword ='character-name-in-title'   AND n.name LIKE 'X%'   AND n.id = ci.person_id   AND ci.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_id = cn.id   AND ci.movie_id = mc.movie_id   AND ci.movie_id = mk.movie_id   AND mc.movie_id = mk.movie_id;
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.0174s             ││
+││              Total Time: 0.0186s             ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -178,6 +275,31 @@ SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM c
 └───────────────────────────┘└───────────────────────────┘
 ]
 
+┌───────────────────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│    movie_id = movie_id    │              │
+│                           │              │
+│         ~650 Rows         │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         SEQ_SCAN          ││      COLUMN_DATA_SCAN     │
+│    ────────────────────   ││    ────────────────────   │
+│           Table:          ││                           │
+│      movie_companies      ││                           │
+│                           ││                           │
+│   Type: Sequential Scan   ││                           │
+│                           ││                           │
+│        Projections:       ││                           │
+│          movie_id         ││                           │
+│         company_id        ││                           │
+│                           ││                           │
+│       ~2609129 Rows       ││         ~250 Rows         │
+└───────────────────────────┘└───────────────────────────┘
+
 EXPLAIN ANALYZE:
 ColumnDataCollection - [1 Chunks, 1 Rows]
 Chunk 0 - [Rows 0 - 1]
@@ -191,7 +313,7 @@ Chunk - [2 Columns]
 SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM cast_info AS ci,      company_name AS cn,      keyword AS k,      movie_companies AS mc,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword ='character-name-in-title'   AND n.name LIKE 'X%'   AND n.id = ci.person_id   AND ci.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_id = cn.id   AND ci.movie_id = mc.movie_id   AND ci.movie_id = mk.movie_id   AND mc.movie_id = mk.movie_id;
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.0018s             ││
+││              Total Time: 0.0019s             ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -235,6 +357,34 @@ SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM c
 └───────────────────────────┘└───────────────────────────┘
 ]
 
+┌───────────────────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│          movie_id         │
+│            name           │
+│                           │
+│         ~1933 Rows        │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│      id = company_id      │              │
+│                           │              │
+│         ~1933 Rows        │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         SEQ_SCAN          ││      COLUMN_DATA_SCAN     │
+│    ────────────────────   ││    ────────────────────   │
+│    Table: company_name    ││                           │
+│   Type: Sequential Scan   ││                           │
+│      Projections: id      ││                           │
+│                           ││                           │
+│        ~234997 Rows       ││         ~1918 Rows        │
+└───────────────────────────┘└───────────────────────────┘
+
 EXPLAIN ANALYZE:
 ColumnDataCollection - [1 Chunks, 1 Rows]
 Chunk 0 - [Rows 0 - 1]
@@ -248,7 +398,7 @@ Chunk - [2 Columns]
 SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM cast_info AS ci,      company_name AS cn,      keyword AS k,      movie_companies AS mc,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword ='character-name-in-title'   AND n.name LIKE 'X%'   AND n.id = ci.person_id   AND ci.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_id = cn.id   AND ci.movie_id = mc.movie_id   AND ci.movie_id = mk.movie_id   AND mc.movie_id = mk.movie_id;
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.0109s             ││
+││              Total Time: 0.0120s             ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -307,6 +457,46 @@ SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM c
 │          (0.00s)          ││          (0.00s)          │
 └───────────────────────────┘└───────────────────────────┘
 ]
+
+┌───────────────────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│ member_in_charnamed_movie │
+│             a1            │
+│                           │
+│          ~1 Rows          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│    UNGROUPED_AGGREGATE    │
+│    ────────────────────   │
+│    Aggregates: min(#0)    │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│            name           │
+│                           │
+│         ~2621 Rows        │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│       id = movie_id       │              │
+│                           │              │
+│         ~2621 Rows        │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         SEQ_SCAN          ││      COLUMN_DATA_SCAN     │
+│    ────────────────────   ││    ────────────────────   │
+│        Table: title       ││                           │
+│   Type: Sequential Scan   ││                           │
+│      Projections: id      ││                           │
+│                           ││                           │
+│       ~2528312 Rows       ││         ~1918 Rows        │
+└───────────────────────────┘└───────────────────────────┘
 
 ┌───────────────────────────┬──────────────────┐
 │ member_in_charnamed_movie │        a1        │
