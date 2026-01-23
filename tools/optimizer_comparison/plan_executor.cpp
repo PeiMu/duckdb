@@ -12,7 +12,9 @@
 #include "duckdb/optimizer/optimizer.hpp"
 #include "duckdb/parser/query_node/select_node.hpp"
 #include "duckdb/parser/statement/select_statement.hpp"
+#include "duckdb/parser/tableref/emptytableref.hpp"
 #include "duckdb/planner/binder.hpp"
+#include "duckdb/catalog/catalog.hpp"
 #include "duckdb/planner/operator/logical_explain.hpp"
 
 #include <chrono>
@@ -23,7 +25,7 @@
 using namespace duckdb;
 
 #define FROM_BINARY         false
-#define PRINT_PHYSICAL_PLAN true
+#define PRINT_PHYSICAL_PLAN false
 #define RUN_EXPLAIN_ANALYZE false
 
 struct PlanMetadata {
@@ -106,9 +108,14 @@ unique_ptr<ColumnDataCollection> RunLogicalPlanWithExecuteRow(Connection &conn,
 	prepared_data->types = std::move(types);
 	prepared_data->plan = std::move(physical_plan);
 
+	// Set properties to prevent rebinding (we have a pre-built physical plan)
+	prepared_data->properties.bound_all_parameters = true;
+	prepared_data->catalog_version = Catalog::GetSystemCatalog(*conn.context).GetCatalogVersion();
+
 	// Create a dummy unbound_statement (required by PreparedStatementData)
 	auto select_stmt = make_uniq<SelectStatement>();
 	auto select_node = make_uniq<SelectNode>();
+	select_node->from_table = make_uniq<EmptyTableRef>();
 	select_stmt->node = std::move(select_node);
 	prepared_data->unbound_statement = std::move(select_stmt);
 
@@ -185,9 +192,14 @@ unique_ptr<QueryResult> RunLogicalPlan(Connection &conn, unique_ptr<LogicalOpera
 	prepared->types = std::move(types);
 	prepared->plan = std::move(physical_plan);
 
+	// Set properties to prevent rebinding (we have a pre-built physical plan)
+	prepared->properties.bound_all_parameters = true;
+	prepared->catalog_version = Catalog::GetSystemCatalog(*conn.context).GetCatalogVersion();
+
 	// Create a dummy unbound_statement (required by PreparedStatementData)
 	auto select_stmt = make_uniq<SelectStatement>();
 	auto select_node = make_uniq<SelectNode>();
+	select_node->from_table = make_uniq<EmptyTableRef>();
 	select_stmt->node = std::move(select_node);
 	prepared->unbound_statement = std::move(select_stmt);
 
