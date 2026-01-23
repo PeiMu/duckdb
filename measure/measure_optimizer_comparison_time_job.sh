@@ -5,7 +5,7 @@ if [ -z "$1" ]; then
   exit 1
 fi
 if [ -z "$2" ]; then
-  echo "Please enter DuckDB version, e.g., 0.6.1, 0.10.1, 1.3.2, etc.!"
+  echo "Please enter the optimizer of DuckDB version, e.g., 0.6.1, 0.10.1, 1.3.2, etc.!"
   exit 1
 fi
 
