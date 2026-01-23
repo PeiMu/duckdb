@@ -1,0 +1,667 @@
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(cn.name) AS movie_company,        MIN(mi_idx.info) AS rating,        MIN(t.title) AS complete_euro_dark_movie FROM complete_cast AS cc,      comp_cast_type AS cct1,      comp_cast_type AS cct2,      company_name AS cn,      company_type AS ct,      info_type AS it1,      info_type AS it2,      keyword AS k,      kind_type AS kt,      movie_companies AS mc,      movie_info AS mi,      movie_info_idx AS mi_idx,      movie_keyword AS mk,      title AS t WHERE cct1.kind = 'crew'   AND cct2.kind != 'complete+verified'   AND cn.country_code != '[us]'   AND it1.info = 'countries'   AND it2.info = 'rating'   AND k.keyword IN ('murder',                     'murder-in-title',                     'blood',                     'violence')   AND kt.kind IN ('movie',                   'episode')   AND mc.note NOT LIKE '%(USA)%'   AND mc.note LIKE '%(200%)%'   AND mi.info IN ('Sweden',                   'Norway',                   'Germany',                   'Denmark',                   'Swedish',                   'Danish',                   'Norwegian',                   'German',                   'USA',                   'American')   AND mi_idx.info < '8.5'   AND t.production_year > 2000   AND kt.id = t.kind_id   AND t.id = mi.movie_id   AND t.id = mk.movie_id   AND t.id = mi_idx.movie_id   AND t.id = mc.movie_id   AND t.id = cc.movie_id   AND mk.movie_id = mi.movie_id   AND mk.movie_id = mi_idx.movie_id   AND mk.movie_id = mc.movie_id   AND mk.movie_id = cc.movie_id   AND mi.movie_id = mi_idx.movie_id   AND mi.movie_id = mc.movie_id   AND mi.movie_id = cc.movie_id   AND mc.movie_id = mi_idx.movie_id   AND mc.movie_id = cc.movie_id   AND mi_idx.movie_id = cc.movie_id   AND k.id = mk.keyword_id   AND it1.id = mi.info_type_id   AND it2.id = mi_idx.info_type_id   AND ct.id = mc.company_type_id   AND cn.id = mc.company_id   AND cct1.id = cc.subject_id   AND cct2.id = cc.status_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0253s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│            info           │
+│          movie_id         │
+│                           │
+│        454230 Rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│     info_type_id = id     │              │
+│                           │              │
+│        454230 Rows        │              │
+│          (0.00s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││           FILTER          │
+│    ────────────────────   ││    ────────────────────   │
+│   Table: movie_info_idx   ││         (id >= 99)        │
+│   Type: Sequential Scan   ││                           │
+│                           ││                           │
+│        Projections:       ││                           │
+│            info           ││                           │
+│          movie_id         ││                           │
+│        info_type_id       ││                           │
+│                           ││                           │
+│          Filters:         ││                           │
+│ info<'8.5' AND info IS NOT││                           │
+│            NULL           ││                           │
+│                           ││                           │
+│        454230 Rows        ││           1 Rows          │
+│          (0.02s)          ││          (0.00s)          │
+└───────────────────────────┘└─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐
+                             │         TABLE_SCAN        │
+                             │    ────────────────────   │
+                             │      Table: info_type     │
+                             │   Type: Sequential Scan   │
+                             │      Projections: id      │
+                             │                           │
+                             │          Filters:         │
+                             │ info='rating' AND info IS │
+                             │          NOT NULL         │
+                             │                           │
+                             │           1 Rows          │
+                             │          (0.00s)          │
+                             └───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(cn.name) AS movie_company,        MIN(mi_idx.info) AS rating,        MIN(t.title) AS complete_euro_dark_movie FROM complete_cast AS cc,      comp_cast_type AS cct1,      comp_cast_type AS cct2,      company_name AS cn,      company_type AS ct,      info_type AS it1,      info_type AS it2,      keyword AS k,      kind_type AS kt,      movie_companies AS mc,      movie_info AS mi,      movie_info_idx AS mi_idx,      movie_keyword AS mk,      title AS t WHERE cct1.kind = 'crew'   AND cct2.kind != 'complete+verified'   AND cn.country_code != '[us]'   AND it1.info = 'countries'   AND it2.info = 'rating'   AND k.keyword IN ('murder',                     'murder-in-title',                     'blood',                     'violence')   AND kt.kind IN ('movie',                   'episode')   AND mc.note NOT LIKE '%(USA)%'   AND mc.note LIKE '%(200%)%'   AND mi.info IN ('Sweden',                   'Norway',                   'Germany',                   'Denmark',                   'Swedish',                   'Danish',                   'Norwegian',                   'German',                   'USA',                   'American')   AND mi_idx.info < '8.5'   AND t.production_year > 2000   AND kt.id = t.kind_id   AND t.id = mi.movie_id   AND t.id = mk.movie_id   AND t.id = mi_idx.movie_id   AND t.id = mc.movie_id   AND t.id = cc.movie_id   AND mk.movie_id = mi.movie_id   AND mk.movie_id = mi_idx.movie_id   AND mk.movie_id = mc.movie_id   AND mk.movie_id = cc.movie_id   AND mi.movie_id = mi_idx.movie_id   AND mi.movie_id = mc.movie_id   AND mi.movie_id = cc.movie_id   AND mc.movie_id = mi_idx.movie_id   AND mc.movie_id = cc.movie_id   AND mi_idx.movie_id = cc.movie_id   AND k.id = mk.keyword_id   AND it1.id = mi.info_type_id   AND it2.id = mi_idx.info_type_id   AND ct.id = mc.company_type_id   AND cn.id = mc.company_id   AND cct1.id = cc.subject_id   AND cct2.id = cc.status_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0894s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│         subject_id        │
+│         status_id         │
+│          movie_id         │
+│           title           │
+│                           │
+│         35038 Rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├───────────────────────────────────────────┐
+│        kind_id = id       │                                           │
+│                           │                                           │
+│         35038 Rows        │                                           │
+│          (0.00s)          │                                           │
+└─────────────┬─────────────┘                                           │
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                             │         PROJECTION        │
+│    ────────────────────   │                             │    ────────────────────   │
+│      Join Type: INNER     │                             │             #1            │
+│                           │                             │                           │
+│        Conditions:        ├──────────────┐              │                           │
+│       id = movie_id       │              │              │                           │
+│                           │              │              │                           │
+│         38722 Rows        │              │              │           2 Rows          │
+│          (0.02s)          │              │              │          (0.00s)          │
+└─────────────┬─────────────┘              │              └─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│           FILTER          ││         TABLE_SCAN        ││           FILTER          │
+│    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
+│        (id >= 285)        ││    Table: complete_cast   ││ ((kind = 'movie') OR (kind│
+│                           ││   Type: Sequential Scan   ││        = 'episode'))      │
+│                           ││                           ││                           │
+│                           ││        Projections:       ││                           │
+│                           ││          movie_id         ││                           │
+│                           ││         subject_id        ││                           │
+│                           ││         status_id         ││                           │
+│                           ││                           ││                           │
+│        1381201 Rows       ││        135086 Rows        ││           2 Rows          │
+│          (0.00s)          ││          (0.00s)          ││          (0.00s)          │
+└─────────────┬─────────────┘└───────────────────────────┘└─────────────┬─────────────┘
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│         TABLE_SCAN        │                             │         TABLE_SCAN        │
+│    ────────────────────   │                             │    ────────────────────   │
+│        Table: title       │                             │      Table: kind_type     │
+│   Type: Sequential Scan   │                             │   Type: Sequential Scan   │
+│                           │                             │                           │
+│        Projections:       │                             │        Projections:       │
+│          kind_id          │                             │            kind           │
+│             id            │                             │             id            │
+│           title           │                             │                           │
+│                           │                             │                           │
+│          Filters:         │                             │                           │
+│  production_year>2000 AND │                             │                           │
+│   production_year IS NOT  │                             │                           │
+│            NULL           │                             │                           │
+│                           │                             │                           │
+│        1381201 Rows       │                             │           7 Rows          │
+│          (0.07s)          │                             │          (0.00s)          │
+└───────────────────────────┘                             └───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(cn.name) AS movie_company,        MIN(mi_idx.info) AS rating,        MIN(t.title) AS complete_euro_dark_movie FROM complete_cast AS cc,      comp_cast_type AS cct1,      comp_cast_type AS cct2,      company_name AS cn,      company_type AS ct,      info_type AS it1,      info_type AS it2,      keyword AS k,      kind_type AS kt,      movie_companies AS mc,      movie_info AS mi,      movie_info_idx AS mi_idx,      movie_keyword AS mk,      title AS t WHERE cct1.kind = 'crew'   AND cct2.kind != 'complete+verified'   AND cn.country_code != '[us]'   AND it1.info = 'countries'   AND it2.info = 'rating'   AND k.keyword IN ('murder',                     'murder-in-title',                     'blood',                     'violence')   AND kt.kind IN ('movie',                   'episode')   AND mc.note NOT LIKE '%(USA)%'   AND mc.note LIKE '%(200%)%'   AND mi.info IN ('Sweden',                   'Norway',                   'Germany',                   'Denmark',                   'Swedish',                   'Danish',                   'Norwegian',                   'German',                   'USA',                   'American')   AND mi_idx.info < '8.5'   AND t.production_year > 2000   AND kt.id = t.kind_id   AND t.id = mi.movie_id   AND t.id = mk.movie_id   AND t.id = mi_idx.movie_id   AND t.id = mc.movie_id   AND t.id = cc.movie_id   AND mk.movie_id = mi.movie_id   AND mk.movie_id = mi_idx.movie_id   AND mk.movie_id = mc.movie_id   AND mk.movie_id = cc.movie_id   AND mi.movie_id = mi_idx.movie_id   AND mi.movie_id = mc.movie_id   AND mi.movie_id = cc.movie_id   AND mc.movie_id = mi_idx.movie_id   AND mc.movie_id = cc.movie_id   AND mi_idx.movie_id = cc.movie_id   AND k.id = mk.keyword_id   AND it1.id = mi.info_type_id   AND it2.id = mi_idx.info_type_id   AND ct.id = mc.company_type_id   AND cn.id = mc.company_id   AND cct1.id = cc.subject_id   AND cct2.id = cc.status_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0047s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│    movie_id = movie_id    │              │
+│                           │              │
+│         16813 Rows        │              │
+│          (0.00s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│      COLUMN_DATA_SCAN     ││      COLUMN_DATA_SCAN     │
+│        454230 Rows        ││         35038 Rows        │
+│          (0.00s)          ││          (0.00s)          │
+└───────────────────────────┘└───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(cn.name) AS movie_company,        MIN(mi_idx.info) AS rating,        MIN(t.title) AS complete_euro_dark_movie FROM complete_cast AS cc,      comp_cast_type AS cct1,      comp_cast_type AS cct2,      company_name AS cn,      company_type AS ct,      info_type AS it1,      info_type AS it2,      keyword AS k,      kind_type AS kt,      movie_companies AS mc,      movie_info AS mi,      movie_info_idx AS mi_idx,      movie_keyword AS mk,      title AS t WHERE cct1.kind = 'crew'   AND cct2.kind != 'complete+verified'   AND cn.country_code != '[us]'   AND it1.info = 'countries'   AND it2.info = 'rating'   AND k.keyword IN ('murder',                     'murder-in-title',                     'blood',                     'violence')   AND kt.kind IN ('movie',                   'episode')   AND mc.note NOT LIKE '%(USA)%'   AND mc.note LIKE '%(200%)%'   AND mi.info IN ('Sweden',                   'Norway',                   'Germany',                   'Denmark',                   'Swedish',                   'Danish',                   'Norwegian',                   'German',                   'USA',                   'American')   AND mi_idx.info < '8.5'   AND t.production_year > 2000   AND kt.id = t.kind_id   AND t.id = mi.movie_id   AND t.id = mk.movie_id   AND t.id = mi_idx.movie_id   AND t.id = mc.movie_id   AND t.id = cc.movie_id   AND mk.movie_id = mi.movie_id   AND mk.movie_id = mi_idx.movie_id   AND mk.movie_id = mc.movie_id   AND mk.movie_id = cc.movie_id   AND mi.movie_id = mi_idx.movie_id   AND mi.movie_id = mc.movie_id   AND mi.movie_id = cc.movie_id   AND mc.movie_id = mi_idx.movie_id   AND mc.movie_id = cc.movie_id   AND mi_idx.movie_id = cc.movie_id   AND k.id = mk.keyword_id   AND it1.id = mi.info_type_id   AND it2.id = mi_idx.info_type_id   AND ct.id = mc.company_type_id   AND cn.id = mc.company_id   AND cct1.id = cc.subject_id   AND cct2.id = cc.status_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.109s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│       movie_id = id       │              │
+│                           │              │
+│         50243 Rows        │              │
+│          (0.00s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         PROJECTION        ││      COLUMN_DATA_SCAN     │
+│    ────────────────────   ││                           │
+│             #1            ││                           │
+│             #2            ││                           │
+│             #3            ││                           │
+│                           ││                           │
+│        303012 Rows        ││         16813 Rows        │
+│          (0.00s)          ││          (0.00s)          │
+└─────────────┬─────────────┘└───────────────────────────┘
+┌─────────────┴─────────────┐
+│           FILTER          │
+│    ────────────────────   │
+│ ((note ~~ '%(200%)%') AND │
+│ (NOT contains(note, '(USA)│
+│            ')))           │
+│                           │
+│        303012 Rows        │
+│          (0.05s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         TABLE_SCAN        │
+│    ────────────────────   │
+│           Table:          │
+│      movie_companies      │
+│                           │
+│   Type: Sequential Scan   │
+│                           │
+│        Projections:       │
+│            note           │
+│          movie_id         │
+│      company_type_id      │
+│         company_id        │
+│                           │
+│        2606619 Rows       │
+│          (0.05s)          │
+└───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(cn.name) AS movie_company,        MIN(mi_idx.info) AS rating,        MIN(t.title) AS complete_euro_dark_movie FROM complete_cast AS cc,      comp_cast_type AS cct1,      comp_cast_type AS cct2,      company_name AS cn,      company_type AS ct,      info_type AS it1,      info_type AS it2,      keyword AS k,      kind_type AS kt,      movie_companies AS mc,      movie_info AS mi,      movie_info_idx AS mi_idx,      movie_keyword AS mk,      title AS t WHERE cct1.kind = 'crew'   AND cct2.kind != 'complete+verified'   AND cn.country_code != '[us]'   AND it1.info = 'countries'   AND it2.info = 'rating'   AND k.keyword IN ('murder',                     'murder-in-title',                     'blood',                     'violence')   AND kt.kind IN ('movie',                   'episode')   AND mc.note NOT LIKE '%(USA)%'   AND mc.note LIKE '%(200%)%'   AND mi.info IN ('Sweden',                   'Norway',                   'Germany',                   'Denmark',                   'Swedish',                   'Danish',                   'Norwegian',                   'German',                   'USA',                   'American')   AND mi_idx.info < '8.5'   AND t.production_year > 2000   AND kt.id = t.kind_id   AND t.id = mi.movie_id   AND t.id = mk.movie_id   AND t.id = mi_idx.movie_id   AND t.id = mc.movie_id   AND t.id = cc.movie_id   AND mk.movie_id = mi.movie_id   AND mk.movie_id = mi_idx.movie_id   AND mk.movie_id = mc.movie_id   AND mk.movie_id = cc.movie_id   AND mi.movie_id = mi_idx.movie_id   AND mi.movie_id = mc.movie_id   AND mi.movie_id = cc.movie_id   AND mc.movie_id = mi_idx.movie_id   AND mc.movie_id = cc.movie_id   AND mi_idx.movie_id = cc.movie_id   AND k.id = mk.keyword_id   AND it1.id = mi.info_type_id   AND it2.id = mi_idx.info_type_id   AND ct.id = mc.company_type_id   AND cn.id = mc.company_id   AND cct1.id = cc.subject_id   AND cct2.id = cc.status_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0175s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│            name           │
+│             id            │
+│      company_type_id      │
+│            info           │
+│           title           │
+│                           │
+│         9491 Rows         │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├────────────────────────────────────────────────────────────────────────┐
+│       status_id = id      │                                                                        │
+│                           │                                                                        │
+│         9491 Rows         │                                                                        │
+│          (0.00s)          │                                                                        │
+└─────────────┬─────────────┘                                                                        │
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                                                          │         PROJECTION        │
+│    ────────────────────   │                                                          │    ────────────────────   │
+│      Join Type: INNER     │                                                          │             #1            │
+│                           │                                                          │                           │
+│        Conditions:        ├───────────────────────────────────────────┐              │                           │
+│      subject_id = id      │                                           │              │                           │
+│                           │                                           │              │                           │
+│         10551 Rows        │                                           │              │           3 Rows          │
+│          (0.00s)          │                                           │              │          (0.00s)          │
+└─────────────┬─────────────┘                                           │              └─────────────┬─────────────┘
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         HASH_JOIN         │                             │         TABLE_SCAN        ││           FILTER          │
+│    ────────────────────   │                             │    ────────────────────   ││    ────────────────────   │
+│      Join Type: INNER     │                             │   Table: comp_cast_type   ││     (kind != 'complete    │
+│                           │                             │   Type: Sequential Scan   ││        +verified')        │
+│        Conditions:        │                             │      Projections: id      ││                           │
+│      company_id = id      │                             │                           ││                           │
+│                           ├──────────────┐              │          Filters:         ││                           │
+│                           │              │              │  kind='crew' AND kind IS  ││                           │
+│                           │              │              │          NOT NULL         ││                           │
+│                           │              │              │                           ││                           │
+│         48252 Rows        │              │              │           1 Rows          ││           3 Rows          │
+│          (0.00s)          │              │              │          (0.00s)          ││          (0.00s)          │
+└─────────────┬─────────────┘              │              └───────────────────────────┘└─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│      COLUMN_DATA_SCAN     ││         PROJECTION        │                             │         TABLE_SCAN        │
+│                           ││    ────────────────────   │                             │    ────────────────────   │
+│                           ││             #1            │                             │   Table: comp_cast_type   │
+│                           ││             #2            │                             │   Type: Sequential Scan   │
+│                           ││                           │                             │                           │
+│                           ││                           │                             │        Projections:       │
+│                           ││                           │                             │            kind           │
+│                           ││                           │                             │             id            │
+│                           ││                           │                             │                           │
+│         50243 Rows        ││        126230 Rows        │                             │           4 Rows          │
+│          (0.00s)          ││          (0.00s)          │                             │          (0.00s)          │
+└───────────────────────────┘└─────────────┬─────────────┘                             └───────────────────────────┘
+                             ┌─────────────┴─────────────┐
+                             │           FILTER          │
+                             │    ────────────────────   │
+                             │  (country_code != '[us]') │
+                             │                           │
+                             │        126230 Rows        │
+                             │          (0.00s)          │
+                             └─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐
+                             │         TABLE_SCAN        │
+                             │    ────────────────────   │
+                             │    Table: company_name    │
+                             │   Type: Sequential Scan   │
+                             │                           │
+                             │        Projections:       │
+                             │        country_code       │
+                             │             id            │
+                             │            name           │
+                             │                           │
+                             │        234997 Rows        │
+                             │          (0.01s)          │
+                             └───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(cn.name) AS movie_company,        MIN(mi_idx.info) AS rating,        MIN(t.title) AS complete_euro_dark_movie FROM complete_cast AS cc,      comp_cast_type AS cct1,      comp_cast_type AS cct2,      company_name AS cn,      company_type AS ct,      info_type AS it1,      info_type AS it2,      keyword AS k,      kind_type AS kt,      movie_companies AS mc,      movie_info AS mi,      movie_info_idx AS mi_idx,      movie_keyword AS mk,      title AS t WHERE cct1.kind = 'crew'   AND cct2.kind != 'complete+verified'   AND cn.country_code != '[us]'   AND it1.info = 'countries'   AND it2.info = 'rating'   AND k.keyword IN ('murder',                     'murder-in-title',                     'blood',                     'violence')   AND kt.kind IN ('movie',                   'episode')   AND mc.note NOT LIKE '%(USA)%'   AND mc.note LIKE '%(200%)%'   AND mi.info IN ('Sweden',                   'Norway',                   'Germany',                   'Denmark',                   'Swedish',                   'Danish',                   'Norwegian',                   'German',                   'USA',                   'American')   AND mi_idx.info < '8.5'   AND t.production_year > 2000   AND kt.id = t.kind_id   AND t.id = mi.movie_id   AND t.id = mk.movie_id   AND t.id = mi_idx.movie_id   AND t.id = mc.movie_id   AND t.id = cc.movie_id   AND mk.movie_id = mi.movie_id   AND mk.movie_id = mi_idx.movie_id   AND mk.movie_id = mc.movie_id   AND mk.movie_id = cc.movie_id   AND mi.movie_id = mi_idx.movie_id   AND mi.movie_id = mc.movie_id   AND mi.movie_id = cc.movie_id   AND mc.movie_id = mi_idx.movie_id   AND mc.movie_id = cc.movie_id   AND mi_idx.movie_id = cc.movie_id   AND k.id = mk.keyword_id   AND it1.id = mi.info_type_id   AND it2.id = mi_idx.info_type_id   AND ct.id = mc.company_type_id   AND cn.id = mc.company_id   AND cct1.id = cc.subject_id   AND cct2.id = cc.status_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0361s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│             id            │
+│            name           │
+│      company_type_id      │
+│            info           │
+│           title           │
+│                           │
+│         8650 Rows         │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├────────────────────────────────────────────────────────────────────────┐
+│     info_type_id = id     │                                                                        │
+│                           │                                                                        │
+│         8650 Rows         │                                                                        │
+│          (0.00s)          │                                                                        │
+└─────────────┬─────────────┘                                                                        │
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                                                          │           FILTER          │
+│    ────────────────────   │                                                          │    ────────────────────   │
+│      Join Type: INNER     │                                                          │        (id <= 110)        │
+│                           │                                                          │                           │
+│        Conditions:        ├───────────────────────────────────────────┐              │                           │
+│       movie_id = id       │                                           │              │                           │
+│                           │                                           │              │                           │
+│         8650 Rows         │                                           │              │           1 Rows          │
+│          (0.00s)          │                                           │              │          (0.00s)          │
+└─────────────┬─────────────┘                                           │              └─────────────┬─────────────┘
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         PROJECTION        │                             │      COLUMN_DATA_SCAN     ││         TABLE_SCAN        │
+│    ────────────────────   │                             │                           ││    ────────────────────   │
+│             #0            │                             │                           ││      Table: info_type     │
+│             #1            │                             │                           ││   Type: Sequential Scan   │
+│                           │                             │                           ││      Projections: id      │
+│                           │                             │                           ││                           │
+│                           │                             │                           ││          Filters:         │
+│                           │                             │                           ││ info='countries' AND info │
+│                           │                             │                           ││         IS NOT NULL       │
+│                           │                             │                           ││                           │
+│        613193 Rows        │                             │         9491 Rows         ││           1 Rows          │
+│          (0.00s)          │                             │          (0.00s)          ││          (0.00s)          │
+└─────────────┬─────────────┘                             └───────────────────────────┘└───────────────────────────┘
+┌─────────────┴─────────────┐
+│           FILTER          │
+│    ────────────────────   │
+│          IN (...)         │
+│                           │
+│        613193 Rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: MARK      │
+│   Conditions: info = #0   ├──────────────┐
+│                           │              │
+│        1320343 Rows       │              │
+│          (0.02s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││      COLUMN_DATA_SCAN     │
+│    ────────────────────   ││                           │
+│     Table: movie_info     ││                           │
+│   Type: Sequential Scan   ││                           │
+│                           ││                           │
+│        Projections:       ││                           │
+│            info           ││                           │
+│          movie_id         ││                           │
+│        info_type_id       ││                           │
+│                           ││                           │
+│        1320343 Rows       ││          10 Rows          │
+│          (0.01s)          ││          (0.00s)          │
+└───────────────────────────┘└───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(cn.name) AS movie_company,        MIN(mi_idx.info) AS rating,        MIN(t.title) AS complete_euro_dark_movie FROM complete_cast AS cc,      comp_cast_type AS cct1,      comp_cast_type AS cct2,      company_name AS cn,      company_type AS ct,      info_type AS it1,      info_type AS it2,      keyword AS k,      kind_type AS kt,      movie_companies AS mc,      movie_info AS mi,      movie_info_idx AS mi_idx,      movie_keyword AS mk,      title AS t WHERE cct1.kind = 'crew'   AND cct2.kind != 'complete+verified'   AND cn.country_code != '[us]'   AND it1.info = 'countries'   AND it2.info = 'rating'   AND k.keyword IN ('murder',                     'murder-in-title',                     'blood',                     'violence')   AND kt.kind IN ('movie',                   'episode')   AND mc.note NOT LIKE '%(USA)%'   AND mc.note LIKE '%(200%)%'   AND mi.info IN ('Sweden',                   'Norway',                   'Germany',                   'Denmark',                   'Swedish',                   'Danish',                   'Norwegian',                   'German',                   'USA',                   'American')   AND mi_idx.info < '8.5'   AND t.production_year > 2000   AND kt.id = t.kind_id   AND t.id = mi.movie_id   AND t.id = mk.movie_id   AND t.id = mi_idx.movie_id   AND t.id = mc.movie_id   AND t.id = cc.movie_id   AND mk.movie_id = mi.movie_id   AND mk.movie_id = mi_idx.movie_id   AND mk.movie_id = mc.movie_id   AND mk.movie_id = cc.movie_id   AND mi.movie_id = mi_idx.movie_id   AND mi.movie_id = mc.movie_id   AND mi.movie_id = cc.movie_id   AND mc.movie_id = mi_idx.movie_id   AND mc.movie_id = cc.movie_id   AND mi_idx.movie_id = cc.movie_id   AND k.id = mk.keyword_id   AND it1.id = mi.info_type_id   AND it2.id = mi_idx.info_type_id   AND ct.id = mc.company_type_id   AND cn.id = mc.company_id   AND cct1.id = cc.subject_id   AND cct2.id = cc.status_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0004s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│             id            │
+│            name           │
+│            info           │
+│           title           │
+│                           │
+│         8650 Rows         │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│    company_type_id = id   │              │
+│                           │              │
+│         8650 Rows         │              │
+│          (0.00s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│      COLUMN_DATA_SCAN     ││         TABLE_SCAN        │
+│                           ││    ────────────────────   │
+│                           ││    Table: company_type    │
+│                           ││   Type: Sequential Scan   │
+│                           ││      Projections: id      │
+│                           ││                           │
+│         8650 Rows         ││           4 Rows          │
+│          (0.00s)          ││          (0.00s)          │
+└───────────────────────────┘└───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(cn.name) AS movie_company,        MIN(mi_idx.info) AS rating,        MIN(t.title) AS complete_euro_dark_movie FROM complete_cast AS cc,      comp_cast_type AS cct1,      comp_cast_type AS cct2,      company_name AS cn,      company_type AS ct,      info_type AS it1,      info_type AS it2,      keyword AS k,      kind_type AS kt,      movie_companies AS mc,      movie_info AS mi,      movie_info_idx AS mi_idx,      movie_keyword AS mk,      title AS t WHERE cct1.kind = 'crew'   AND cct2.kind != 'complete+verified'   AND cn.country_code != '[us]'   AND it1.info = 'countries'   AND it2.info = 'rating'   AND k.keyword IN ('murder',                     'murder-in-title',                     'blood',                     'violence')   AND kt.kind IN ('movie',                   'episode')   AND mc.note NOT LIKE '%(USA)%'   AND mc.note LIKE '%(200%)%'   AND mi.info IN ('Sweden',                   'Norway',                   'Germany',                   'Denmark',                   'Swedish',                   'Danish',                   'Norwegian',                   'German',                   'USA',                   'American')   AND mi_idx.info < '8.5'   AND t.production_year > 2000   AND kt.id = t.kind_id   AND t.id = mi.movie_id   AND t.id = mk.movie_id   AND t.id = mi_idx.movie_id   AND t.id = mc.movie_id   AND t.id = cc.movie_id   AND mk.movie_id = mi.movie_id   AND mk.movie_id = mi_idx.movie_id   AND mk.movie_id = mc.movie_id   AND mk.movie_id = cc.movie_id   AND mi.movie_id = mi_idx.movie_id   AND mi.movie_id = mc.movie_id   AND mi.movie_id = cc.movie_id   AND mc.movie_id = mi_idx.movie_id   AND mc.movie_id = cc.movie_id   AND mi_idx.movie_id = cc.movie_id   AND k.id = mk.keyword_id   AND it1.id = mi.info_type_id   AND it2.id = mi_idx.info_type_id   AND ct.id = mc.company_type_id   AND cn.id = mc.company_id   AND cct1.id = cc.subject_id   AND cct2.id = cc.status_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0294s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│    UNGROUPED_AGGREGATE    │
+│    ────────────────────   │
+│        Aggregates:        │
+│          min(#0)          │
+│          min(#1)          │
+│          min(#2)          │
+│                           │
+│           1 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│            name           │
+│            info           │
+│           title           │
+│                           │
+│         4803 Rows         │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├───────────────────────────────────────────┐
+│      keyword_id = id      │                                           │
+│                           │                                           │
+│         4803 Rows         │                                           │
+│          (0.00s)          │                                           │
+└─────────────┬─────────────┘                                           │
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                             │         PROJECTION        │
+│    ────────────────────   │                             │    ────────────────────   │
+│      Join Type: INNER     │                             │             #1            │
+│                           │                             │                           │
+│        Conditions:        ├──────────────┐              │                           │
+│       movie_id = id       │              │              │                           │
+│                           │              │              │                           │
+│        104068 Rows        │              │              │           3 Rows          │
+│          (0.01s)          │              │              │          (0.00s)          │
+└─────────────┬─────────────┘              │              └─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││      COLUMN_DATA_SCAN     ││           FILTER          │
+│    ────────────────────   ││                           ││    ────────────────────   │
+│    Table: movie_keyword   ││                           ││ ((keyword = 'murder') OR  │
+│   Type: Sequential Scan   ││                           ││   (keyword = 'murder-in   │
+│                           ││                           ││  -title') OR (keyword =   │
+│        Projections:       ││                           ││  'blood') OR (keyword =   │
+│          movie_id         ││                           ││        'violence'))       │
+│         keyword_id        ││                           ││                           │
+│                           ││                           ││                           │
+│        751431 Rows        ││         8650 Rows         ││           3 Rows          │
+│          (0.02s)          ││          (0.00s)          ││          (0.00s)          │
+└───────────────────────────┘└───────────────────────────┘└─────────────┬─────────────┘
+                                                          ┌─────────────┴─────────────┐
+                                                          │         TABLE_SCAN        │
+                                                          │    ────────────────────   │
+                                                          │       Table: keyword      │
+                                                          │   Type: Sequential Scan   │
+                                                          │                           │
+                                                          │        Projections:       │
+                                                          │          keyword          │
+                                                          │             id            │
+                                                          │                           │
+                                                          │        134170 Rows        │
+                                                          │          (0.00s)          │
+                                                          └───────────────────────────┘
+]
+
+┌──────────────────┬─────────┬──────────────────────────┐
+│  movie_company   │ rating  │ complete_euro_dark_movie │
+│     varchar      │ varchar │         varchar          │
+├──────────────────┼─────────┼──────────────────────────┤
+│ 01 Distribuzione │ 2.9     │ (#1.1)                   │
+└──────────────────┴─────────┴──────────────────────────┘

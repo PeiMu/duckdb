@@ -1,0 +1,316 @@
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM cast_info AS ci,      company_name AS cn,      keyword AS k,      movie_companies AS mc,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword ='character-name-in-title'   AND n.name LIKE 'X%'   AND n.id = ci.person_id   AND ci.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_id = cn.id   AND ci.movie_id = mc.movie_id   AND ci.movie_id = mk.movie_id   AND mc.movie_id = mk.movie_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0184s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│          movie_id         │
+│                           │
+│         41840 Rows        │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│      keyword_id = id      │              │
+│                           │              │
+│         41840 Rows        │              │
+│          (0.00s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││         TABLE_SCAN        │
+│    ────────────────────   ││    ────────────────────   │
+│    Table: movie_keyword   ││       Table: keyword      │
+│   Type: Sequential Scan   ││   Type: Sequential Scan   │
+│                           ││      Projections: id      │
+│        Projections:       ││                           │
+│          movie_id         ││          Filters:         │
+│         keyword_id        ││ keyword='character-name-in│
+│                           ││ -title' AND keyword IS NOT│
+│                           ││            NULL           │
+│                           ││                           │
+│         41840 Rows        ││           1 Rows          │
+│          (0.01s)          ││          (0.00s)          │
+└───────────────────────────┘└───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM cast_info AS ci,      company_name AS cn,      keyword AS k,      movie_companies AS mc,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword ='character-name-in-title'   AND n.name LIKE 'X%'   AND n.id = ci.person_id   AND ci.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_id = cn.id   AND ci.movie_id = mc.movie_id   AND ci.movie_id = mk.movie_id   AND mc.movie_id = mk.movie_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.389s              ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├───────────────────────────────────────────┐
+│       person_id = id      │                                           │
+│                           │                                           │
+│          250 Rows         │                                           │
+│          (0.00s)          │                                           │
+└─────────────┬─────────────┘                                           │
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                             │           FILTER          │
+│    ────────────────────   │                             │    ────────────────────   │
+│      Join Type: INNER     │                             │    ((id <= 4061926) AND   │
+│                           │                             │     prefix(name, 'X'))    │
+│        Conditions:        ├──────────────┐              │                           │
+│    movie_id = movie_id    │              │              │                           │
+│                           │              │              │                           │
+│        489251 Rows        │              │              │         2608 Rows         │
+│          (0.16s)          │              │              │          (0.00s)          │
+└─────────────┬─────────────┘              │              └─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││      COLUMN_DATA_SCAN     ││         TABLE_SCAN        │
+│    ────────────────────   ││                           ││    ────────────────────   │
+│      Table: cast_info     ││                           ││        Table: name        │
+│   Type: Sequential Scan   ││                           ││   Type: Sequential Scan   │
+│                           ││                           ││                           │
+│        Projections:       ││                           ││        Projections:       │
+│         person_id         ││                           ││            name           │
+│          movie_id         ││                           ││             id            │
+│                           ││                           ││                           │
+│                           ││                           ││          Filters:         │
+│                           ││                           ││ name>='X' AND name<'Y' AND│
+│                           ││                           ││      name IS NOT NULL     │
+│                           ││                           ││                           │
+│       18952445 Rows       ││         41840 Rows        ││         2664 Rows         │
+│          (0.13s)          ││          (0.00s)          ││          (0.09s)          │
+└───────────────────────────┘└───────────────────────────┘└───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM cast_info AS ci,      company_name AS cn,      keyword AS k,      movie_companies AS mc,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword ='character-name-in-title'   AND n.name LIKE 'X%'   AND n.id = ci.person_id   AND ci.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_id = cn.id   AND ci.movie_id = mc.movie_id   AND ci.movie_id = mk.movie_id   AND mc.movie_id = mk.movie_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0167s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│    movie_id = movie_id    │              │
+│                           │              │
+│         1918 Rows         │              │
+│          (0.01s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││      COLUMN_DATA_SCAN     │
+│    ────────────────────   ││                           │
+│           Table:          ││                           │
+│      movie_companies      ││                           │
+│                           ││                           │
+│   Type: Sequential Scan   ││                           │
+│                           ││                           │
+│        Projections:       ││                           │
+│          movie_id         ││                           │
+│         company_id        ││                           │
+│                           ││                           │
+│        2573667 Rows       ││          250 Rows         │
+│          (0.01s)          ││          (0.00s)          │
+└───────────────────────────┘└───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM cast_info AS ci,      company_name AS cn,      keyword AS k,      movie_companies AS mc,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword ='character-name-in-title'   AND n.name LIKE 'X%'   AND n.id = ci.person_id   AND ci.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_id = cn.id   AND ci.movie_id = mc.movie_id   AND ci.movie_id = mk.movie_id   AND mc.movie_id = mk.movie_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0018s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│          movie_id         │
+│            name           │
+│                           │
+│         1918 Rows         │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│      id = company_id      │              │
+│                           │              │
+│         1918 Rows         │              │
+│          (0.00s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││      COLUMN_DATA_SCAN     │
+│    ────────────────────   ││                           │
+│    Table: company_name    ││                           │
+│   Type: Sequential Scan   ││                           │
+│      Projections: id      ││                           │
+│                           ││                           │
+│        233270 Rows        ││         1918 Rows         │
+│          (0.00s)          ││          (0.00s)          │
+└───────────────────────────┘└───────────────────────────┘
+]
+
+EXPLAIN ANALYZE:
+ColumnDataCollection - [1 Chunks, 1 Rows]
+Chunk 0 - [Rows 0 - 1]
+Chunk - [2 Columns]
+- FLAT VARCHAR: 1 = [ analyzed_plan]
+- FLAT VARCHAR: 1 = [ ┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM cast_info AS ci,      company_name AS cn,      keyword AS k,      movie_companies AS mc,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword ='character-name-in-title'   AND n.name LIKE 'X%'   AND n.id = ci.person_id   AND ci.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_id = cn.id   AND ci.movie_id = mc.movie_id   AND ci.movie_id = mk.movie_id   AND mc.movie_id = mk.movie_id;
+┌────────────────────────────────────────────────┐
+│┌──────────────────────────────────────────────┐│
+││              Total Time: 0.0106s             ││
+│└──────────────────────────────────────────────┘│
+└────────────────────────────────────────────────┘
+┌───────────────────────────┐
+│           QUERY           │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      EXPLAIN_ANALYZE      │
+│    ────────────────────   │
+│           0 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│ member_in_charnamed_movie │
+│             a1            │
+│                           │
+│           1 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│    UNGROUPED_AGGREGATE    │
+│    ────────────────────   │
+│    Aggregates: min(#0)    │
+│                           │
+│           1 Rows          │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│            name           │
+│                           │
+│         1918 Rows         │
+│          (0.00s)          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│       id = movie_id       │              │
+│                           │              │
+│         1918 Rows         │              │
+│          (0.01s)          │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         TABLE_SCAN        ││      COLUMN_DATA_SCAN     │
+│    ────────────────────   ││                           │
+│        Table: title       ││                           │
+│   Type: Sequential Scan   ││                           │
+│      Projections: id      ││                           │
+│                           ││                           │
+│        2475662 Rows       ││         1918 Rows         │
+│          (0.00s)          ││          (0.00s)          │
+└───────────────────────────┘└───────────────────────────┘
+]
+
+┌───────────────────────────┬──────────────────┐
+│ member_in_charnamed_movie │        a1        │
+│          varchar          │     varchar      │
+├───────────────────────────┼──────────────────┤
+│ X'Volaitis, John          │ X'Volaitis, John │
+└───────────────────────────┴──────────────────┘
