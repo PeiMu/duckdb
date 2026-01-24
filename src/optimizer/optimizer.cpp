@@ -362,4 +362,37 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 	return std::move(plan);
 }
 
+unique_ptr<LogicalOperator> Optimizer::CompensateOptimize(unique_ptr<LogicalOperator> plan_p) {
+#ifdef DEBUG
+	Verify(*plan_p);
+#endif
+
+	switch (plan_p->type) {
+	case LogicalOperatorType::LOGICAL_TRANSACTION:
+		return plan_p; // skip optimizing simple & often-occurring plans unaffected by rewrites
+	default:
+		break;
+	}
+
+	this->plan = std::move(plan_p);
+
+	// removes unused columns
+	RunOptimizer(OptimizerType::UNUSED_COLUMNS, [&]() {
+		RemoveUnusedColumns unused(binder, context, true);
+		unused.VisitOperator(*plan);
+	});
+
+	// creates projection maps so unused columns are projected out early
+	RunOptimizer(OptimizerType::COLUMN_LIFETIME, [&]() {
+		ColumnLifetimeAnalyzer column_lifetime(true);
+		column_lifetime.VisitOperator(*plan);
+	});
+
+#ifdef DEBUG
+	Planner::VerifyPlan(context, plan);
+#endif
+
+	return std::move(plan);
+}
+
 } // namespace duckdb

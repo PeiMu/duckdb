@@ -339,6 +339,10 @@ int main(int argc, char **argv) {
 			auto logical_plan =
 			    ir_sql_converter::ConvertIRToDuckDBPlan(*binder, *conn.context, simplest_ir, &intermediate_results);
 
+			// compensate necessary optimizer for missing info from IR
+			Optimizer optimizer(*binder, *conn.context);
+			logical_plan = optimizer.CompensateOptimize(std::move(logical_plan));
+
 #ifdef DEBUG
 			// print out
 			Printer::Print("ConvertIRToDuckDBPlan:");
