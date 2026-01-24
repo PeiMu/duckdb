@@ -723,7 +723,7 @@ void Optimizer::RunBuiltInPostOptimizers() {
 	});
 }
 
-void Optimizer::RunBuiltInTestOptimizers(bool old_version) {
+void Optimizer::RunBuiltInCompensateOptimizers(bool old_version) {
 	switch (plan->type) {
 	case LogicalOperatorType::LOGICAL_TRANSACTION:
 	case LogicalOperatorType::LOGICAL_PRAGMA:
@@ -1055,14 +1055,14 @@ unique_ptr<LogicalOperator> Optimizer::PostOptimize(unique_ptr<LogicalOperator> 
 	return std::move(plan);
 }
 
-unique_ptr<LogicalOperator> Optimizer::TestOptimize(unique_ptr<LogicalOperator> plan_p, bool old_version) {
+unique_ptr<LogicalOperator> Optimizer::CompensateOptimize(unique_ptr<LogicalOperator> plan_p, bool old_version) {
 	if (!context.config.enable_dbshaker_query_split) {
 		Verify(*plan_p);
 	}
 
 	this->plan = std::move(plan_p);
 
-	RunBuiltInTestOptimizers(old_version);
+	RunBuiltInCompensateOptimizers(old_version);
 
 	for (auto &optimizer_extension : DBConfig::GetConfig(context).optimizer_extensions) {
 		RunOptimizer(OptimizerType::EXTENSION, [&]() {
