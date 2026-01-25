@@ -8,6 +8,84 @@ Sub physical plan
 │        TRANSACTION        │
 └───────────────────────────┘
 
+Sub physical plan
+┌───────────────────────────┐
+│           PRAGMA          │
+└───────────────────────────┘
+
+Sub physical plan
+┌───────────────────────────┐
+│           PRAGMA          │
+└───────────────────────────┘
+
+After PostOptimization of explain analyze
+┌───────────────────────────┐
+│          EXPLAIN          │
+│    ────────────────────   │
+│          ~3 Rows          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│        Expressions:       │
+│          keyword          │
+│             id            │
+│           title           │
+│                           │
+│        ~254736 Rows       │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      COMPARISON_JOIN      │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├────────────────────────────────────────────────────────────────────────┐
+│      (movie_id = id)      │                                                                        │
+│                           │                                                                        │
+│        ~254736 Rows       │                                                                        │
+└─────────────┬─────────────┘                                                                        │
+┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+│      COMPARISON_JOIN      │                                                          │           FILTER          │
+│    ────────────────────   │                                                          │    ────────────────────   │
+│      Join Type: INNER     │                                                          │        Expressions:       │
+│                           │                                                          │ (id BETWEEN 2 AND 2525971)│
+│        Conditions:        ├──────────────┐                                           │                           │
+│     (keyword_id = id)     │              │                                           │                           │
+│                           │              │                                           │                           │
+│        ~932045 Rows       │              │                                           │        ~505662 Rows       │
+└─────────────┬─────────────┘              │                                           └─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│          SEQ_SCAN         ││           FILTER          │                             │          SEQ_SCAN         │
+│    ────────────────────   ││    ────────────────────   │                             │    ────────────────────   │
+│    Table: movie_keyword   ││   Expressions: IN (...)   │                             │          Filters:         │
+│   Type: Sequential Scan   ││                           │                             │  production_year>2000 AND │
+│                           ││                           │                             │   production_year IS NOT  │
+│                           ││                           │                             │            NULL           │
+│                           ││                           │                             │                           │
+│                           ││                           │                             │        Table: title       │
+│                           ││                           │                             │   Type: Sequential Scan   │
+│                           ││                           │                             │                           │
+│       ~4523930 Rows       ││        ~26834 Rows        │                             │        ~505662 Rows       │
+└───────────────────────────┘└─────────────┬─────────────┘                             └───────────────────────────┘
+                             ┌─────────────┴─────────────┐
+                             │      COMPARISON_JOIN      │
+                             │    ────────────────────   │
+                             │      Join Type: MARK      │
+                             │                           │
+                             │        Conditions:        ├──────────────┐
+                             │    (keyword = #[11.0])    │              │
+                             │                           │              │
+                             │        ~134170 Rows       │              │
+                             └─────────────┬─────────────┘              │
+                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                             │          SEQ_SCAN         ││         CHUNK_GET         │
+                             │    ────────────────────   ││    ────────────────────   │
+                             │       Table: keyword      ││                           │
+                             │   Type: Sequential Scan   ││                           │
+                             │                           ││                           │
+                             │        ~134170 Rows       ││          ~8 Rows          │
+                             └───────────────────────────┘└───────────────────────────┘
+
 EXPLAIN ANALYZE:
 ColumnDataCollection - [1 Chunks, 1 Rows]
 Chunk 0 - [Rows 0 - 1]
@@ -117,6 +195,61 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
                              └───────────────────────────┘└───────────────────────────┘
 ]
 
+After PostOptimization
+┌───────────────────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│        Expressions:       │
+│          keyword          │
+│             id            │
+│           title           │
+│                           │
+│        ~50947 Rows        │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      COMPARISON_JOIN      │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├───────────────────────────────────────────┐
+│     (keyword_id = id)     │                                           │
+│                           │                                           │
+│        ~50947 Rows        │                                           │
+└─────────────┬─────────────┘                                           │
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│      COMPARISON_JOIN      │                             │           FILTER          │
+│    ────────────────────   │                             │    ────────────────────   │
+│      Join Type: INNER     │                             │   Expressions: IN (...)   │
+│                           │                             │                           │
+│        Conditions:        ├──────────────┐              │                           │
+│      (movie_id = id)      │              │              │                           │
+│                           │              │              │                           │
+│        ~247285 Rows       │              │              │        ~26834 Rows        │
+└─────────────┬─────────────┘              │              └─────────────┬─────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│          SEQ_SCAN         ││           FILTER          ││      COMPARISON_JOIN      │
+│    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
+│    Table: movie_keyword   ││        Expressions:       ││      Join Type: MARK      │
+│   Type: Sequential Scan   ││ (id BETWEEN 2 AND 2525971)││                           │
+│                           ││                           ││        Conditions:        ├──────────────┐
+│                           ││                           ││    (keyword = #[11.0])    │              │
+│                           ││                           ││                           │              │
+│       ~4523930 Rows       ││        ~101132 Rows       ││        ~134170 Rows       │              │
+└───────────────────────────┘└─────────────┬─────────────┘└─────────────┬─────────────┘              │
+                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                             │          SEQ_SCAN         ││          SEQ_SCAN         ││         CHUNK_GET         │
+                             │    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
+                             │          Filters:         ││       Table: keyword      ││                           │
+                             │  production_year>2000 AND ││   Type: Sequential Scan   ││                           │
+                             │   production_year IS NOT  ││                           ││                           │
+                             │            NULL           ││                           ││                           │
+                             │                           ││                           ││                           │
+                             │        Table: title       ││                           ││                           │
+                             │   Type: Sequential Scan   ││                           ││                           │
+                             │                           ││                           ││                           │
+                             │        ~101132 Rows       ││        ~134170 Rows       ││          ~8 Rows          │
+                             └───────────────────────────┘└───────────────────────────┘└───────────────────────────┘
+
 Sub physical plan
 ┌───────────────────────────┐
 │         PROJECTION        │
@@ -189,6 +322,73 @@ Sub physical plan
                                                           │        ~134170 Rows       ││          ~8 Rows          │
                                                           └───────────────────────────┘└───────────────────────────┘
 
+After the last PostOptimization of explain analyze
+┌───────────────────────────┐
+│          EXPLAIN          │
+│    ────────────────────   │
+│          ~3 Rows          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│        Expressions:       │
+│       movie_keyword       │
+│         actor_name        │
+│         hero_movie        │
+│                           │
+│          ~1 Rows          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         AGGREGATE         │
+│    ────────────────────   │
+│        Expressions:       │
+│        min(keyword)       │
+│         min(name)         │
+│         min(title)        │
+│                           │
+│          ~1 Rows          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│      COMPARISON_JOIN      │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├───────────────────────────────────────────┐
+│      (movie_id = id)      │                                           │
+│                           │                                           │
+│       ~16410319 Rows      │                                           │
+└─────────────┬─────────────┘                                           │
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│      COMPARISON_JOIN      │                             │         CHUNK_GET         │
+│    ────────────────────   │                             │    ────────────────────   │
+│      Join Type: INNER     │                             │                           │
+│                           │                             │                           │
+│        Conditions:        ├──────────────┐              │                           │
+│      (person_id = id)     │              │              │                           │
+│                           │              │              │                           │
+│       ~7305788 Rows       │              │              │       ~4523930 Rows       │
+└─────────────┬─────────────┘              │              └───────────────────────────┘
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│          SEQ_SCAN         ││           FILTER          │
+│    ────────────────────   ││    ────────────────────   │
+│      Table: cast_info     ││        Expressions:       │
+│   Type: Sequential Scan   ││(name ~~ '%Downey%Robert%')│
+│                           ││                           │
+│       ~36244344 Rows      ││       ~4167491 Rows       │
+└───────────────────────────┘└─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐
+                             │          SEQ_SCAN         │
+                             │    ────────────────────   │
+                             │          Filters:         │
+                             │ id<=4061926 AND id IS NOT │
+                             │            NULL           │
+                             │                           │
+                             │        Table: name        │
+                             │   Type: Sequential Scan   │
+                             │                           │
+                             │       ~4167491 Rows       │
+                             └───────────────────────────┘
+
 EXPLAIN ANALYZE:
 ColumnDataCollection - [1 Chunks, 1 Rows]
 Chunk 0 - [Rows 0 - 1]
@@ -202,7 +402,7 @@ Chunk - [2 Columns]
 SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,        MIN(t.title) AS hero_movie FROM cast_info AS ci,      keyword AS k,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword IN ('superhero',                     'sequel',                     'second-part',                     'marvel-comics',                     'based-on-comic',                     'tv-special',                     'fight',                     'violence')   AND n.name LIKE '%Downey%Robert%'   AND t.production_year > 2000   AND k.id = mk.keyword_id   AND t.id = mk.movie_id   AND t.id = ci.movie_id   AND ci.movie_id = mk.movie_id   AND n.id = ci.person_id;
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.777s              ││
+││              Total Time: 0.179s              ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -240,100 +440,51 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │    ────────────────────   │
 │      Join Type: INNER     │
 │                           │
-│        Conditions:        ├──────────────┐
-│       id = person_id      │              │
-│                           │              │
-│          88 Rows          │              │
-│          (0.06s)          │              │
-└─────────────┬─────────────┘              │
+│        Conditions:        ├───────────────────────────────────────────┐
+│       movie_id = id       │                                           │
+│                           │                                           │
+│          88 Rows          │                                           │
+│          (0.00s)          │                                           │
+└─────────────┬─────────────┘                                           │
+┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
+│         HASH_JOIN         │                             │      COLUMN_DATA_SCAN     │
+│    ────────────────────   │                             │                           │
+│      Join Type: INNER     │                             │                           │
+│                           │                             │                           │
+│        Conditions:        ├──────────────┐              │                           │
+│       person_id = id      │              │              │                           │
+│                           │              │              │                           │
+│          486 Rows         │              │              │         14165 Rows        │
+│          (0.00s)          │              │              │          (0.00s)          │
+└─────────────┬─────────────┘              │              └───────────────────────────┘
 ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-│           FILTER          ││         HASH_JOIN         │
+│         TABLE_SCAN        ││           FILTER          │
 │    ────────────────────   ││    ────────────────────   │
-│(name ~~ '%Downey%Robert%')││      Join Type: INNER     │
+│      Table: cast_info     ││(name ~~ '%Downey%Robert%')│
+│   Type: Sequential Scan   ││                           │
 │                           ││                           │
-│                           ││        Conditions:        ├──────────────┐
-│                           ││       movie_id = id       │              │
-│                           ││                           │              │
-│           2 Rows          ││        785477 Rows        │              │
-│          (0.04s)          ││          (0.36s)          │              │
-└─────────────┬─────────────┘└─────────────┬─────────────┘              │
-┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-│         TABLE_SCAN        ││         TABLE_SCAN        ││      COLUMN_DATA_SCAN     │
-│    ────────────────────   ││    ────────────────────   ││                           │
-│        Table: name        ││      Table: cast_info     ││                           │
-│   Type: Sequential Scan   ││   Type: Sequential Scan   ││                           │
-│                           ││                           ││                           │
-│        Projections:       ││        Projections:       ││                           │
-│            name           ││          movie_id         ││                           │
-│             id            ││         person_id         ││                           │
-│                           ││                           ││                           │
-│          Filters:         ││                           ││                           │
-│ id<=4061926 AND id IS NOT ││                           ││                           │
-│            NULL           ││                           ││                           │
-│                           ││                           ││                           │
-│        4061909 Rows       ││       36225356 Rows       ││         14165 Rows        │
-│          (0.10s)          ││          (0.20s)          ││          (0.00s)          │
-└───────────────────────────┘└───────────────────────────┘└───────────────────────────┘
+│        Projections:       ││                           │
+│          movie_id         ││                           │
+│         person_id         ││                           │
+│                           ││                           │
+│          486 Rows         ││           2 Rows          │
+│          (0.03s)          ││          (0.04s)          │
+└───────────────────────────┘└─────────────┬─────────────┘
+                             ┌─────────────┴─────────────┐
+                             │         TABLE_SCAN        │
+                             │    ────────────────────   │
+                             │        Table: name        │
+                             │   Type: Sequential Scan   │
+                             │                           │
+                             │        Projections:       │
+                             │            name           │
+                             │             id            │
+                             │                           │
+                             │          Filters:         │
+                             │ id<=4061926 AND id IS NOT │
+                             │            NULL           │
+                             │                           │
+                             │        4061926 Rows       │
+                             │          (0.10s)          │
+                             └───────────────────────────┘
 ]
-
-Sub physical plan
-┌───────────────────────────┐
-│    UNGROUPED_AGGREGATE    │
-│    ────────────────────   │
-│        Aggregates:        │
-│          min(#0)          │
-│          min(#1)          │
-│          min(#2)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│          keyword          │
-│            name           │
-│           title           │
-│                           │
-│        ~51382 Rows        │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         HASH_JOIN         │
-│    ────────────────────   │
-│      Join Type: INNER     │
-│                           │
-│        Conditions:        ├──────────────┐
-│       id = person_id      │              │
-│                           │              │
-│        ~51382 Rows        │              │
-└─────────────┬─────────────┘              │
-┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-│           FILTER          ││         HASH_JOIN         │
-│    ────────────────────   ││    ────────────────────   │
-│(name ~~ '%Downey%Robert%')││      Join Type: INNER     │
-│                           ││                           │
-│                           ││        Conditions:        ├──────────────┐
-│                           ││       movie_id = id       │              │
-│                           ││                           │              │
-│       ~4167491 Rows       ││        ~254912 Rows       │              │
-└─────────────┬─────────────┘└─────────────┬─────────────┘              │
-┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-│         SEQ_SCAN          ││         SEQ_SCAN          ││      COLUMN_DATA_SCAN     │
-│    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
-│        Table: name        ││      Table: cast_info     ││                           │
-│   Type: Sequential Scan   ││   Type: Sequential Scan   ││                           │
-│                           ││                           ││                           │
-│        Projections:       ││        Projections:       ││                           │
-│            name           ││          movie_id         ││                           │
-│             id            ││         person_id         ││                           │
-│                           ││                           ││                           │
-│          Filters:         ││                           ││                           │
-│ id<=4061926 AND id IS NOT ││                           ││                           │
-│            NULL           ││                           ││                           │
-│                           ││                           ││                           │
-│       ~4167491 Rows       ││       ~36244344 Rows      ││        ~14165 Rows        │
-└───────────────────────────┘└───────────────────────────┘└───────────────────────────┘
-
-┌────────────────┬────────────────────┬───────────────────────┐
-│ movie_keyword  │     actor_name     │      hero_movie       │
-│    varchar     │      varchar       │        varchar        │
-├────────────────┼────────────────────┼───────────────────────┤
-│ based-on-comic │ Downey Jr., Robert │ 2008 MTV Movie Awards │
-└────────────────┴────────────────────┴───────────────────────┘
