@@ -849,6 +849,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 				log_file.close();
 			}
 #endif
+#if ENABLE_DEBUG_PRINT
+                        Printer::Print("Sub physical plan");
+                        physical_plan->Root().Print();
+#endif
 
 			subquery_stmt->physical_plan = std::move(physical_plan);
 
@@ -1127,6 +1131,10 @@ ClientContext::CreatePreparedStatementInternal(ClientContextLock &lock, const st
 		log_file << std::to_string(execute_time / 1000) + ", ";
 		log_file.close();
 	}
+#endif
+#if ENABLE_DEBUG_PRINT
+                        Printer::Print("Sub physical plan");
+                        result->physical_plan->Root().Print();
 #endif
 	return result;
 }
