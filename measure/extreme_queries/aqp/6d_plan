@@ -1,7 +1,9 @@
+Sub physical plan
 ┌───────────────────────────┐
 │        TRANSACTION        │
 └───────────────────────────┘
 
+Sub physical plan
 ┌───────────────────────────┐
 │        TRANSACTION        │
 └───────────────────────────┘
@@ -16,10 +18,10 @@ Chunk - [2 Columns]
 ││    Query Profiling Information    ││
 │└───────────────────────────────────┘│
 └─────────────────────────────────────┘
-SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,        MIN(t.title) AS hero_movie FROM cast_info AS ci,      keyword AS k,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword IN ('superhero',                     'sequel',                     'second-part',                     'marvel-comics',                     'based-on-comic',                     'tv-special',                     'fight',                     'violence')   AND n.name LIKE '%Downey%Robert%'   AND t.production_year > 2014   AND k.id = mk.keyword_id   AND t.id = mk.movie_id   AND t.id = ci.movie_id   AND ci.movie_id = mk.movie_id   AND n.id = ci.person_id;
+SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,        MIN(t.title) AS hero_movie FROM cast_info AS ci,      keyword AS k,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword IN ('superhero',                     'sequel',                     'second-part',                     'marvel-comics',                     'based-on-comic',                     'tv-special',                     'fight',                     'violence')   AND n.name LIKE '%Downey%Robert%'   AND t.production_year > 2000   AND k.id = mk.keyword_id   AND t.id = mk.movie_id   AND t.id = ci.movie_id   AND ci.movie_id = mk.movie_id   AND n.id = ci.person_id;
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.0471s             ││
+││              Total Time: 0.177s              ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -38,7 +40,7 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │             id            │
 │           title           │
 │                           │
-│          36 Rows          │
+│         14165 Rows        │
 │          (0.00s)          │
 └─────────────┬─────────────┘
 ┌─────────────┴─────────────┐
@@ -49,8 +51,8 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │        Conditions:        ├────────────────────────────────────────────────────────────────────────┐
 │       movie_id = id       │                                                                        │
 │                           │                                                                        │
-│          36 Rows          │                                                                        │
-│          (0.00s)          │                                                                        │
+│         14165 Rows        │                                                                        │
+│          (0.08s)          │                                                                        │
 └─────────────┬─────────────┘                                                                        │
 ┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
 │         HASH_JOIN         │                                                          │           FILTER          │
@@ -60,7 +62,7 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │        Conditions:        ├──────────────┐                                           │                           │
 │      keyword_id = id      │              │                                           │                           │
 │                           │              │                                           │                           │
-│         35002 Rows        │              │                                           │          438 Rows         │
+│         35548 Rows        │              │                                           │        1381132 Rows       │
 │          (0.00s)          │              │                                           │          (0.00s)          │
 └─────────────┬─────────────┘              │                                           └─────────────┬─────────────┘
 ┌─────────────┴─────────────┐┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
@@ -74,12 +76,12 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │          movie_id         ││                           │                             │           title           │
 │                           ││                           │                             │                           │
 │                           ││                           │                             │          Filters:         │
-│                           ││                           │                             │  production_year>2014 AND │
+│                           ││                           │                             │  production_year>2000 AND │
 │                           ││                           │                             │   production_year IS NOT  │
 │                           ││                           │                             │            NULL           │
 │                           ││                           │                             │                           │
-│        2186289 Rows       ││           8 Rows          │                             │          438 Rows         │
-│          (0.02s)          ││          (0.00s)          │                             │          (0.01s)          │
+│        2251574 Rows       ││           8 Rows          │                             │        1381453 Rows       │
+│          (0.02s)          ││          (0.00s)          │                             │          (0.06s)          │
 └───────────────────────────┘└─────────────┬─────────────┘                             └───────────────────────────┘
                              ┌─────────────┴─────────────┐
                              │           FILTER          │
@@ -115,6 +117,7 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
                              └───────────────────────────┘└───────────────────────────┘
 ]
 
+Sub physical plan
 ┌───────────────────────────┐
 │         PROJECTION        │
 │    ────────────────────   │
@@ -167,7 +170,7 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
                              │           title           ││                           ├──────────────┐
                              │                           ││                           │              │
                              │          Filters:         ││                           │              │
-                             │  production_year>2014 AND ││                           │              │
+                             │  production_year>2000 AND ││                           │              │
                              │   production_year IS NOT  ││                           │              │
                              │            NULL           ││                           │              │
                              │                           ││                           │              │
@@ -196,10 +199,10 @@ Chunk - [2 Columns]
 ││    Query Profiling Information    ││
 │└───────────────────────────────────┘│
 └─────────────────────────────────────┘
-SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,        MIN(t.title) AS hero_movie FROM cast_info AS ci,      keyword AS k,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword IN ('superhero',                     'sequel',                     'second-part',                     'marvel-comics',                     'based-on-comic',                     'tv-special',                     'fight',                     'violence')   AND n.name LIKE '%Downey%Robert%'   AND t.production_year > 2014   AND k.id = mk.keyword_id   AND t.id = mk.movie_id   AND t.id = ci.movie_id   AND ci.movie_id = mk.movie_id   AND n.id = ci.person_id;
+SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,        MIN(t.title) AS hero_movie FROM cast_info AS ci,      keyword AS k,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword IN ('superhero',                     'sequel',                     'second-part',                     'marvel-comics',                     'based-on-comic',                     'tv-special',                     'fight',                     'violence')   AND n.name LIKE '%Downey%Robert%'   AND t.production_year > 2000   AND k.id = mk.keyword_id   AND t.id = mk.movie_id   AND t.id = ci.movie_id   AND ci.movie_id = mk.movie_id   AND n.id = ci.person_id;
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.346s              ││
+││              Total Time: 0.779s              ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -229,7 +232,7 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │            name           │
 │           title           │
 │                           │
-│          12 Rows          │
+│          88 Rows          │
 │          (0.00s)          │
 └─────────────┬─────────────┘
 ┌─────────────┴─────────────┐
@@ -240,8 +243,8 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │        Conditions:        ├──────────────┐
 │       id = person_id      │              │
 │                           │              │
-│          12 Rows          │              │
-│          (0.00s)          │              │
+│          88 Rows          │              │
+│          (0.07s)          │              │
 └─────────────┬─────────────┘              │
 ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
 │           FILTER          ││         HASH_JOIN         │
@@ -251,8 +254,8 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │                           ││        Conditions:        ├──────────────┐
 │                           ││       movie_id = id       │              │
 │                           ││                           │              │
-│           2 Rows          ││          383 Rows         │              │
-│          (0.04s)          ││          (0.04s)          │              │
+│           2 Rows          ││        785477 Rows        │              │
+│          (0.04s)          ││          (0.36s)          │              │
 └─────────────┬─────────────┘└─────────────┬─────────────┘              │
 ┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
 │         TABLE_SCAN        ││         TABLE_SCAN        ││      COLUMN_DATA_SCAN     │
@@ -268,11 +271,12 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │ id<=4061926 AND id IS NOT ││                           ││                           │
 │            NULL           ││                           ││                           │
 │                           ││                           ││                           │
-│        4022057 Rows       ││       10839820 Rows       ││          36 Rows          │
-│          (0.11s)          ││          (0.16s)          ││          (0.00s)          │
+│        4061909 Rows       ││       36225356 Rows       ││         14165 Rows        │
+│          (0.10s)          ││          (0.20s)          ││          (0.00s)          │
 └───────────────────────────┘└───────────────────────────┘└───────────────────────────┘
 ]
 
+Sub physical plan
 ┌───────────────────────────┐
 │    UNGROUPED_AGGREGATE    │
 │    ────────────────────   │
@@ -288,7 +292,7 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │            name           │
 │           title           │
 │                           │
-│         ~130 Rows         │
+│        ~51382 Rows        │
 └─────────────┬─────────────┘
 ┌─────────────┴─────────────┐
 │         HASH_JOIN         │
@@ -298,7 +302,7 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │        Conditions:        ├──────────────┐
 │       id = person_id      │              │
 │                           │              │
-│         ~130 Rows         │              │
+│        ~51382 Rows        │              │
 └─────────────┬─────────────┘              │
 ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
 │           FILTER          ││         HASH_JOIN         │
@@ -308,7 +312,7 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │                           ││        Conditions:        ├──────────────┐
 │                           ││       movie_id = id       │              │
 │                           ││                           │              │
-│       ~4167491 Rows       ││         ~647 Rows         │              │
+│       ~4167491 Rows       ││        ~254912 Rows       │              │
 └─────────────┬─────────────┘└─────────────┬─────────────┘              │
 ┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
 │         SEQ_SCAN          ││         SEQ_SCAN          ││      COLUMN_DATA_SCAN     │
@@ -324,12 +328,13 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │ id<=4061926 AND id IS NOT ││                           ││                           │
 │            NULL           ││                           ││                           │
 │                           ││                           ││                           │
-│       ~4167491 Rows       ││       ~36244344 Rows      ││          ~36 Rows         │
+│       ~4167491 Rows       ││       ~36244344 Rows      ││        ~14165 Rows        │
 └───────────────────────────┘└───────────────────────────┘└───────────────────────────┘
 
-┌────────────────┬────────────────────┬────────────────┐
-│ movie_keyword  │     actor_name     │   hero_movie   │
-│    varchar     │      varchar       │    varchar     │
-├────────────────┼────────────────────┼────────────────┤
-│ based-on-comic │ Downey Jr., Robert │ The Avengers 2 │
-└────────────────┴────────────────────┴────────────────┘
+┌────────────────┬────────────────────┬───────────────────────┐
+│ movie_keyword  │     actor_name     │      hero_movie       │
+│    varchar     │      varchar       │        varchar        │
+├────────────────┼────────────────────┼───────────────────────┤
+│ based-on-comic │ Downey Jr., Robert │ 2008 MTV Movie Awards │
+└────────────────┴────────────────────┴───────────────────────┘
+

@@ -1,11 +1,3 @@
-┌───────────────────────────┐
-│        TRANSACTION        │
-└───────────────────────────┘
-
-┌───────────────────────────┐
-│        TRANSACTION        │
-└───────────────────────────┘
-
 EXPLAIN ANALYZE:
 ColumnDataCollection - [1 Chunks, 1 Rows]
 Chunk 0 - [Rows 0 - 1]
@@ -19,7 +11,7 @@ Chunk - [2 Columns]
 SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,        MIN(t.title) AS hero_movie FROM cast_info AS ci,      keyword AS k,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword IN ('superhero',                     'sequel',                     'second-part',                     'marvel-comics',                     'based-on-comic',                     'tv-special',                     'fight',                     'violence')   AND n.name LIKE '%Downey%Robert%'   AND t.production_year > 2014   AND k.id = mk.keyword_id   AND t.id = mk.movie_id   AND t.id = ci.movie_id   AND ci.movie_id = mk.movie_id   AND n.id = ci.person_id;
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.0471s             ││
+││              Total Time: 0.0423s             ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -60,8 +52,8 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │        Conditions:        ├──────────────┐                                           │                           │
 │      keyword_id = id      │              │                                           │                           │
 │                           │              │                                           │                           │
-│         35002 Rows        │              │                                           │          438 Rows         │
-│          (0.00s)          │              │                                           │          (0.00s)          │
+│         35548 Rows        │              │                                           │          438 Rows         │
+│          (0.01s)          │              │                                           │          (0.00s)          │
 └─────────────┬─────────────┘              │                                           └─────────────┬─────────────┘
 ┌─────────────┴─────────────┐┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
 │         TABLE_SCAN        ││         PROJECTION        │                             │         TABLE_SCAN        │
@@ -78,8 +70,8 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │                           ││                           │                             │   production_year IS NOT  │
 │                           ││                           │                             │            NULL           │
 │                           ││                           │                             │                           │
-│        2186289 Rows       ││           8 Rows          │                             │          438 Rows         │
-│          (0.02s)          ││          (0.00s)          │                             │          (0.01s)          │
+│        4523930 Rows       ││           8 Rows          │                             │          438 Rows         │
+│          (0.01s)          ││          (0.00s)          │                             │          (0.01s)          │
 └───────────────────────────┘└─────────────┬─────────────┘                             └───────────────────────────┘
                              ┌─────────────┴─────────────┐
                              │           FILTER          │
@@ -115,77 +107,6 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
                              └───────────────────────────┘└───────────────────────────┘
 ]
 
-┌───────────────────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│          keyword          │
-│             id            │
-│           title           │
-│                           │
-│        ~50947 Rows        │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         HASH_JOIN         │
-│    ────────────────────   │
-│      Join Type: INNER     │
-│                           │
-│        Conditions:        ├───────────────────────────────────────────┐
-│      keyword_id = id      │                                           │
-│                           │                                           │
-│        ~50947 Rows        │                                           │
-└─────────────┬─────────────┘                                           │
-┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
-│         HASH_JOIN         │                             │         PROJECTION        │
-│    ────────────────────   │                             │    ────────────────────   │
-│      Join Type: INNER     │                             │             #0            │
-│                           │                             │             #1            │
-│        Conditions:        ├──────────────┐              │                           │
-│       movie_id = id       │              │              │                           │
-│                           │              │              │                           │
-│        ~247285 Rows       │              │              │        ~26834 Rows        │
-└─────────────┬─────────────┘              │              └─────────────┬─────────────┘
-┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-│         SEQ_SCAN          ││           FILTER          ││           FILTER          │
-│    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
-│    Table: movie_keyword   ││ (id BETWEEN 2 AND 2525971)││          IN (...)         │
-│   Type: Sequential Scan   ││                           ││                           │
-│                           ││                           ││                           │
-│        Projections:       ││                           ││                           │
-│         keyword_id        ││                           ││                           │
-│          movie_id         ││                           ││                           │
-│                           ││                           ││                           │
-│       ~4523930 Rows       ││        ~101132 Rows       ││        ~26834 Rows        │
-└───────────────────────────┘└─────────────┬─────────────┘└─────────────┬─────────────┘
-                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-                             │         SEQ_SCAN          ││         HASH_JOIN         │
-                             │    ────────────────────   ││    ────────────────────   │
-                             │        Table: title       ││      Join Type: MARK      │
-                             │   Type: Sequential Scan   ││                           │
-                             │                           ││        Conditions:        │
-                             │        Projections:       ││        keyword = #0       │
-                             │             id            ││                           │
-                             │           title           ││                           ├──────────────┐
-                             │                           ││                           │              │
-                             │          Filters:         ││                           │              │
-                             │  production_year>2014 AND ││                           │              │
-                             │   production_year IS NOT  ││                           │              │
-                             │            NULL           ││                           │              │
-                             │                           ││                           │              │
-                             │        ~101132 Rows       ││        ~134170 Rows       │              │
-                             └───────────────────────────┘└─────────────┬─────────────┘              │
-                                                          ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-                                                          │         SEQ_SCAN          ││      COLUMN_DATA_SCAN     │
-                                                          │    ────────────────────   ││    ────────────────────   │
-                                                          │       Table: keyword      ││                           │
-                                                          │   Type: Sequential Scan   ││                           │
-                                                          │                           ││                           │
-                                                          │        Projections:       ││                           │
-                                                          │          keyword          ││                           │
-                                                          │             id            ││                           │
-                                                          │                           ││                           │
-                                                          │        ~134170 Rows       ││          ~8 Rows          │
-                                                          └───────────────────────────┘└───────────────────────────┘
-
 EXPLAIN ANALYZE:
 ColumnDataCollection - [1 Chunks, 1 Rows]
 Chunk 0 - [Rows 0 - 1]
@@ -199,7 +120,7 @@ Chunk - [2 Columns]
 SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,        MIN(t.title) AS hero_movie FROM cast_info AS ci,      keyword AS k,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword IN ('superhero',                     'sequel',                     'second-part',                     'marvel-comics',                     'based-on-comic',                     'tv-special',                     'fight',                     'violence')   AND n.name LIKE '%Downey%Robert%'   AND t.production_year > 2014   AND k.id = mk.keyword_id   AND t.id = mk.movie_id   AND t.id = ci.movie_id   AND ci.movie_id = mk.movie_id   AND n.id = ci.person_id;
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.346s              ││
+││              Total Time: 0.345s              ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -252,7 +173,7 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │                           ││       movie_id = id       │              │
 │                           ││                           │              │
 │           2 Rows          ││          383 Rows         │              │
-│          (0.04s)          ││          (0.04s)          │              │
+│          (0.04s)          ││          (0.07s)          │              │
 └─────────────┬─────────────┘└─────────────┬─────────────┘              │
 ┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
 │         TABLE_SCAN        ││         TABLE_SCAN        ││      COLUMN_DATA_SCAN     │
@@ -268,68 +189,14 @@ SELECT MIN(k.keyword) AS movie_keyword,        MIN(n.name) AS actor_name,       
 │ id<=4061926 AND id IS NOT ││                           ││                           │
 │            NULL           ││                           ││                           │
 │                           ││                           ││                           │
-│        4022057 Rows       ││       10839820 Rows       ││          36 Rows          │
-│          (0.11s)          ││          (0.16s)          ││          (0.00s)          │
+│        4061926 Rows       ││       36244344 Rows       ││          36 Rows          │
+│          (0.10s)          ││          (0.12s)          ││          (0.00s)          │
 └───────────────────────────┘└───────────────────────────┘└───────────────────────────┘
 ]
-
-┌───────────────────────────┐
-│    UNGROUPED_AGGREGATE    │
-│    ────────────────────   │
-│        Aggregates:        │
-│          min(#0)          │
-│          min(#1)          │
-│          min(#2)          │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         PROJECTION        │
-│    ────────────────────   │
-│          keyword          │
-│            name           │
-│           title           │
-│                           │
-│         ~130 Rows         │
-└─────────────┬─────────────┘
-┌─────────────┴─────────────┐
-│         HASH_JOIN         │
-│    ────────────────────   │
-│      Join Type: INNER     │
-│                           │
-│        Conditions:        ├──────────────┐
-│       id = person_id      │              │
-│                           │              │
-│         ~130 Rows         │              │
-└─────────────┬─────────────┘              │
-┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-│           FILTER          ││         HASH_JOIN         │
-│    ────────────────────   ││    ────────────────────   │
-│(name ~~ '%Downey%Robert%')││      Join Type: INNER     │
-│                           ││                           │
-│                           ││        Conditions:        ├──────────────┐
-│                           ││       movie_id = id       │              │
-│                           ││                           │              │
-│       ~4167491 Rows       ││         ~647 Rows         │              │
-└─────────────┬─────────────┘└─────────────┬─────────────┘              │
-┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
-│         SEQ_SCAN          ││         SEQ_SCAN          ││      COLUMN_DATA_SCAN     │
-│    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
-│        Table: name        ││      Table: cast_info     ││                           │
-│   Type: Sequential Scan   ││   Type: Sequential Scan   ││                           │
-│                           ││                           ││                           │
-│        Projections:       ││        Projections:       ││                           │
-│            name           ││          movie_id         ││                           │
-│             id            ││         person_id         ││                           │
-│                           ││                           ││                           │
-│          Filters:         ││                           ││                           │
-│ id<=4061926 AND id IS NOT ││                           ││                           │
-│            NULL           ││                           ││                           │
-│                           ││                           ││                           │
-│       ~4167491 Rows       ││       ~36244344 Rows      ││          ~36 Rows         │
-└───────────────────────────┘└───────────────────────────┘└───────────────────────────┘
 
 ┌────────────────┬────────────────────┬────────────────┐
 │ movie_keyword  │     actor_name     │   hero_movie   │
 │    varchar     │      varchar       │    varchar     │
 ├────────────────┼────────────────────┼────────────────┤
 │ based-on-comic │ Downey Jr., Robert │ The Avengers 2 │
-└────────────────┴────────────────────┴────────────────┘
+

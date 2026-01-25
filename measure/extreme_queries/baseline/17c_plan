@@ -1,3 +1,11 @@
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘
+
+┌───────────────────────────┐
+│        TRANSACTION        │
+└───────────────────────────┘
+
 EXPLAIN ANALYZE:
 ColumnDataCollection - [1 Chunks, 1 Rows]
 Chunk 0 - [Rows 0 - 1]
@@ -11,7 +19,7 @@ Chunk - [2 Columns]
 SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM cast_info AS ci,      company_name AS cn,      keyword AS k,      movie_companies AS mc,      movie_keyword AS mk,      name AS n,      title AS t WHERE k.keyword ='character-name-in-title'   AND n.name LIKE 'X%'   AND n.id = ci.person_id   AND ci.movie_id = t.id   AND t.id = mk.movie_id   AND mk.keyword_id = k.id   AND t.id = mc.movie_id   AND mc.company_id = cn.id   AND ci.movie_id = mc.movie_id   AND ci.movie_id = mk.movie_id   AND mc.movie_id = mk.movie_id;
 ┌────────────────────────────────────────────────┐
 │┌──────────────────────────────────────────────┐│
-││              Total Time: 0.689s              ││
+││              Total Time: 0.713s              ││
 │└──────────────────────────────────────────────┘│
 └────────────────────────────────────────────────┘
 ┌───────────────────────────┐
@@ -108,7 +116,7 @@ SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM c
 │    movie_id = movie_id    │              │                                           │                           │
 │                           │              │                                           │                           │
 │        489246 Rows        │              │                                           │         2608 Rows         │
-│          (0.16s)          │              │                                           │          (0.00s)          │
+│          (0.18s)          │              │                                           │          (0.00s)          │
 └─────────────┬─────────────┘              │                                           └─────────────┬─────────────┘
 ┌─────────────┴─────────────┐┌─────────────┴─────────────┐                             ┌─────────────┴─────────────┐
 │           FILTER          ││         HASH_JOIN         │                             │         TABLE_SCAN        │
@@ -146,6 +154,117 @@ SELECT MIN(n.name) AS member_in_charnamed_movie,        MIN(n.name) AS a1 FROM c
 │          (0.19s)          ││          (0.01s)          ││          (0.00s)          │
 └───────────────────────────┘└───────────────────────────┘└───────────────────────────┘
 ]
+
+┌───────────────────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│ member_in_charnamed_movie │
+│             a1            │
+│                           │
+│          ~1 Rows          │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│    UNGROUPED_AGGREGATE    │
+│    ────────────────────   │
+│    Aggregates: min(#0)    │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         PROJECTION        │
+│    ────────────────────   │
+│            name           │
+│                           │
+│          ~82 Rows         │
+└─────────────┬─────────────┘
+┌─────────────┴─────────────┐
+│         HASH_JOIN         │
+│    ────────────────────   │
+│      Join Type: INNER     │
+│                           │
+│        Conditions:        ├──────────────┐
+│       id = movie_id       │              │
+│                           │              │
+│          ~82 Rows         │              │
+└─────────────┬─────────────┘              │
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+│         SEQ_SCAN          ││         HASH_JOIN         │
+│    ────────────────────   ││    ────────────────────   │
+│        Table: title       ││      Join Type: INNER     │
+│   Type: Sequential Scan   ││                           │
+│      Projections: id      ││        Conditions:        │
+│                           ││      id = company_id      ├──────────────┐
+│          Filters:         ││                           │              │
+│ id>=2 AND id<=2525745 AND ││                           │              │
+│       id IS NOT NULL      ││                           │              │
+│                           ││                           │              │
+│       ~2528312 Rows       ││          ~65 Rows         │              │
+└───────────────────────────┘└─────────────┬─────────────┘              │
+                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                             │         SEQ_SCAN          ││         HASH_JOIN         │
+                             │    ────────────────────   ││    ────────────────────   │
+                             │    Table: company_name    ││      Join Type: INNER     │
+                             │   Type: Sequential Scan   ││                           │
+                             │      Projections: id      ││        Conditions:        ├──────────────┐
+                             │                           ││    movie_id = movie_id    │              │
+                             │                           ││                           │              │
+                             │        ~234997 Rows       ││          ~65 Rows         │              │
+                             └───────────────────────────┘└─────────────┬─────────────┘              │
+                                                          ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                          │         SEQ_SCAN          ││         HASH_JOIN         │
+                                                          │    ────────────────────   ││    ────────────────────   │
+                                                          │           Table:          ││      Join Type: INNER     │
+                                                          │      movie_companies      ││                           │
+                                                          │                           ││        Conditions:        │
+                                                          │   Type: Sequential Scan   ││       id = person_id      │
+                                                          │                           ││                           ├──────────────┐
+                                                          │        Projections:       ││                           │              │
+                                                          │          movie_id         ││                           │              │
+                                                          │         company_id        ││                           │              │
+                                                          │                           ││                           │              │
+                                                          │       ~2609129 Rows       ││          ~50 Rows         │              │
+                                                          └───────────────────────────┘└─────────────┬─────────────┘              │
+                                                                                       ┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                       │           FILTER          ││         HASH_JOIN         │
+                                                                                       │    ────────────────────   ││    ────────────────────   │
+                                                                                       │    ((id <= 4061926) AND   ││      Join Type: INNER     │
+                                                                                       │     prefix(name, 'X'))    ││                           │
+                                                                                       │                           ││        Conditions:        ├──────────────┐
+                                                                                       │                           ││    movie_id = movie_id    │              │
+                                                                                       │                           ││                           │              │
+                                                                                       │        ~833498 Rows       ││         ~1250 Rows        │              │
+                                                                                       └─────────────┬─────────────┘└─────────────┬─────────────┘              │
+                                                                                       ┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                       │         SEQ_SCAN          ││           FILTER          ││         HASH_JOIN         │
+                                                                                       │    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
+                                                                                       │        Table: name        ││   (movie_id <= 2525745)   ││      Join Type: INNER     │
+                                                                                       │   Type: Sequential Scan   ││                           ││                           │
+                                                                                       │                           ││                           ││        Conditions:        │
+                                                                                       │        Projections:       ││                           ││      keyword_id = id      │
+                                                                                       │            name           ││                           ││                           │
+                                                                                       │             id            ││                           ││                           ├──────────────┐
+                                                                                       │                           ││                           ││                           │              │
+                                                                                       │          Filters:         ││                           ││                           │              │
+                                                                                       │ name>='X' AND name<'Y' AND││                           ││                           │              │
+                                                                                       │      name IS NOT NULL     ││                           ││                           │              │
+                                                                                       │                           ││                           ││                           │              │
+                                                                                       │        ~833498 Rows       ││       ~36244344 Rows      ││          ~69 Rows         │              │
+                                                                                       └───────────────────────────┘└─────────────┬─────────────┘└─────────────┬─────────────┘              │
+                                                                                                                    ┌─────────────┴─────────────┐┌─────────────┴─────────────┐┌─────────────┴─────────────┐
+                                                                                                                    │         SEQ_SCAN          ││         SEQ_SCAN          ││         SEQ_SCAN          │
+                                                                                                                    │    ────────────────────   ││    ────────────────────   ││    ────────────────────   │
+                                                                                                                    │      Table: cast_info     ││    Table: movie_keyword   ││       Table: keyword      │
+                                                                                                                    │   Type: Sequential Scan   ││   Type: Sequential Scan   ││   Type: Sequential Scan   │
+                                                                                                                    │                           ││                           ││      Projections: id      │
+                                                                                                                    │        Projections:       ││        Projections:       ││                           │
+                                                                                                                    │         person_id         ││          movie_id         ││          Filters:         │
+                                                                                                                    │          movie_id         ││         keyword_id        ││ keyword='character-name-in│
+                                                                                                                    │                           ││                           ││ -title' AND keyword IS NOT│
+                                                                                                                    │          Filters:         ││          Filters:         ││            NULL           │
+                                                                                                                    │ movie_id>=2 AND movie_id< ││   movie_id<=2525745 AND   ││                           │
+                                                                                                                    │  =2525971 AND movie_id IS ││    movie_id IS NOT NULL   ││                           │
+                                                                                                                    │          NOT NULL         ││                           ││                           │
+                                                                                                                    │                           ││                           ││                           │
+                                                                                                                    │       ~36244344 Rows      ││       ~4523930 Rows       ││          ~2 Rows          │
+                                                                                                                    └───────────────────────────┘└───────────────────────────┘└───────────────────────────┘
 
 ┌───────────────────────────┬──────────────────┐
 │ member_in_charnamed_movie │        a1        │

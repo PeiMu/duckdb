@@ -218,3 +218,284 @@ final physical plan
                                                           │         EC: 73049         ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                             
                                                           │                           ││          EC: 1305         │                             
                                                           └───────────────────────────┘└───────────────────────────┘
+
+
+
+
+
+
+
+
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││    Query Profiling Information    ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+explain analyze select     s_store_name   ,s_company_id   ,s_street_number   ,s_street_name   ,s_street_type   ,s_suite_number   ,s_city   ,s_county   ,s_state   ,s_zip   ,sum(case when (sr_returned_date_sk - ss_sold_date_sk <= 30 ) then 1 else 0 end)  as "30 days"   ,sum(case when (sr_returned_date_sk - ss_sold_date_sk > 30) and                  (sr_returned_date_sk - ss_sold_date_sk <= 60) then 1 else 0 end )  as "31-60 days"   ,sum(case when (sr_returned_date_sk - ss_sold_date_sk > 60) and                  (sr_returned_date_sk - ss_sold_date_sk <= 90) then 1 else 0 end)  as "61-90 days"   ,sum(case when (sr_returned_date_sk - ss_sold_date_sk > 90) and                  (sr_returned_date_sk - ss_sold_date_sk <= 120) then 1 else 0 end)  as "91-120 days"   ,sum(case when (sr_returned_date_sk - ss_sold_date_sk  > 120) then 1 else 0 end)  as ">120 days" from    store_sales   ,store_returns   ,store   ,date_dim d1   ,date_dim d2 where     d2.d_year = 1999 and d2.d_moy  = 4 and ss_ticket_number = sr_ticket_number and ss_item_sk = sr_item_sk and ss_sold_date_sk   = d1.d_date_sk and sr_returned_date_sk   = d2.d_date_sk and ss_customer_sk = sr_customer_sk and ss_store_sk = s_store_sk and d1.d_date between (d2.d_date - interval '120 day')                and d2.d_date group by    s_store_name   ,s_company_id   ,s_street_number   ,s_street_name   ,s_street_type   ,s_suite_number   ,s_city   ,s_county   ,s_state   ,s_zip order by s_store_name         ,s_company_id         ,s_street_number         ,s_street_name         ,s_street_type         ,s_suite_number         ,s_city         ,s_county         ,s_state         ,s_zip limit 100;
+┌─────────────────────────────────────┐
+│┌───────────────────────────────────┐│
+││        Total Time: 3770.68s       ││
+│└───────────────────────────────────┘│
+└─────────────────────────────────────┘
+┌───────────────────────────┐                                                                                                                    
+│      RESULT_COLLECTOR     │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│             0             │                                                                                                                    
+│          (0.00s)          │                                                                                                                    
+└─────────────┬─────────────┘                                                                                                                                                 
+┌─────────────┴─────────────┐                                                                                                                    
+│      EXPLAIN_ANALYZE      │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│             0             │                                                                                                                    
+│          (0.00s)          │                                                                                                                    
+└─────────────┬─────────────┘                                                                                                                                                 
+┌─────────────┴─────────────┐                                                                                                                    
+│           TOP_N           │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│          Top 100          │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│   store.s_store_name ASC  │                                                                                                                    
+│   store.s_company_id ASC  │                                                                                                                    
+│ store.s_street_number ASC │                                                                                                                    
+│  store.s_street_name ASC  │                                                                                                                    
+│  store.s_street_type ASC  │                                                                                                                    
+│  store.s_suite_number ASC │                                                                                                                    
+│      store.s_city ASC     │                                                                                                                    
+│     store.s_county ASC    │                                                                                                                    
+│     store.s_state ASC     │                                                                                                                    
+│      store.s_zip ASC      │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│            100            │                                                                                                                    
+│          (0.03s)          │                                                                                                                    
+└─────────────┬─────────────┘                                                                                                                                                 
+┌─────────────┴─────────────┐                                                                                                                    
+│         PROJECTION        │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│__internal_decompress_strin│                                                                                                                    
+│           g(#0)           │                                                                                                                    
+│__internal_decompress_integ│                                                                                                                    
+│     ral_integer(#1, 1)    │                                                                                                                    
+│__internal_decompress_strin│                                                                                                                    
+│           g(#2)           │                                                                                                                    
+│             #3            │                                                                                                                    
+│__internal_decompress_strin│                                                                                                                    
+│           g(#4)           │                                                                                                                    
+│__internal_decompress_strin│                                                                                                                    
+│           g(#5)           │                                                                                                                    
+│__internal_decompress_strin│                                                                                                                    
+│           g(#6)           │                                                                                                                    
+│             #7            │                                                                                                                    
+│__internal_decompress_strin│                                                                                                                    
+│           g(#8)           │                                                                                                                    
+│__internal_decompress_strin│                                                                                                                    
+│           g(#9)           │                                                                                                                    
+│            #10            │                                                                                                                    
+│            #11            │                                                                                                                    
+│            #12            │                                                                                                                    
+│            #13            │                                                                                                                    
+│            #14            │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│            111            │                                                                                                                    
+│          (0.00s)          │                                                                                                                    
+└─────────────┬─────────────┘                                                                                                                                                 
+┌─────────────┴─────────────┐                                                                                                                    
+│       HASH_GROUP_BY       │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│             #0            │                                                                                                                    
+│             #1            │                                                                                                                    
+│             #2            │                                                                                                                    
+│             #3            │                                                                                                                    
+│             #4            │                                                                                                                    
+│             #5            │                                                                                                                    
+│             #6            │                                                                                                                    
+│             #7            │                                                                                                                    
+│             #8            │                                                                                                                    
+│             #9            │                                                                                                                    
+│          sum(#10)         │                                                                                                                    
+│          sum(#11)         │                                                                                                                    
+│          sum(#12)         │                                                                                                                    
+│          sum(#13)         │                                                                                                                    
+│          sum(#14)         │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│            111            │                                                                                                                    
+│          (0.61s)          │                                                                                                                    
+└─────────────┬─────────────┘                                                                                                                                                 
+┌─────────────┴─────────────┐                                                                                                                    
+│         PROJECTION        │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│        s_store_name       │                                                                                                                    
+│        s_company_id       │                                                                                                                    
+│      s_street_number      │                                                                                                                    
+│       s_street_name       │                                                                                                                    
+│       s_street_type       │                                                                                                                    
+│       s_suite_number      │                                                                                                                    
+│           s_city          │                                                                                                                    
+│          s_county         │                                                                                                                    
+│          s_state          │                                                                                                                    
+│           s_zip           │                                                                                                                    
+│       CASE  WHEN ((       │                                                                                                                    
+│(sr_returned_date_sk -...  │                                                                                                                    
+│ = 30)) THEN (1) ELSE 0 END│                                                                                                                    
+│       CASE  WHEN (((      │                                                                                                                    
+│(sr_returned_date_sk -...  │                                                                                                                    
+│        > 30) AND (        │                                                                                                                    
+│(sr_returned_date_sk -...  │                                                                                                                    
+│  60))) THEN (1) ELSE 0 END│                                                                                                                    
+│       CASE  WHEN (((      │                                                                                                                    
+│(sr_returned_date_sk -...  │                                                                                                                    
+│        > 60) AND (        │                                                                                                                    
+│(sr_returned_date_sk -...  │                                                                                                                    
+│  90))) THEN (1) ELSE 0 END│                                                                                                                    
+│       CASE  WHEN (((      │                                                                                                                    
+│(sr_returned_date_sk -...  │                                                                                                                    
+│        > 90) AND (        │                                                                                                                    
+│(sr_returned_date_sk -...  │                                                                                                                    
+│ 120))) THEN (1) ELSE 0 END│                                                                                                                    
+│       CASE  WHEN ((       │                                                                                                                    
+└─────────────┬─────────────┘                                                                                                                                                 
+┌─────────────┴─────────────┐                                                                                                                    
+│         PROJECTION        │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│             #0            │                                                                                                                    
+│             #1            │                                                                                                                    
+│             #2            │                                                                                                                    
+│             #3            │                                                                                                                    
+│             #4            │                                                                                                                    
+│             #5            │                                                                                                                    
+│             #6            │                                                                                                                    
+│             #7            │                                                                                                                    
+│__internal_compress_integra│                                                                                                                    
+│  l_usmallint(#8, 2450819) │                                                                                                                    
+│__internal_compress_string_│                                                                                                                    
+│        ubigint(#9)        │                                                                                                                    
+│__internal_compress_integra│                                                                                                                    
+│     l_utinyint(#10, 1)    │                                                                                                                    
+│__internal_compress_string_│                                                                                                                    
+│       uinteger(#11)       │                                                                                                                    
+│            #12            │                                                                                                                    
+│__internal_compress_string_│                                                                                                                    
+│        hugeint(#13)       │                                                                                                                    
+│__internal_compress_string_│                                                                                                                    
+│        hugeint(#14)       │                                                                                                                    
+│__internal_compress_string_│                                                                                                                    
+│        hugeint(#15)       │                                                                                                                    
+│            #16            │                                                                                                                    
+│__internal_compress_string_│                                                                                                                    
+│       uinteger(#17)       │                                                                                                                    
+│__internal_compress_string_│                                                                                                                    
+│        hugeint(#18)       │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+└─────────────┬─────────────┘                                                                                                                                                 
+┌─────────────┴─────────────┐                                                                                                                    
+│         HASH_JOIN         │                                                                                                                    
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                                                    
+│           INNER           │                                                                                                                    
+│   sr_returned_date_sk =   │                                                                                                                    
+│          d_date_sk        │                                                                                                                    
+│      sr_customer_sk =     │                                                                                                                    
+│       ss_customer_sk      │                                                                                                                    
+│  sr_item_sk = ss_item_sk  ├──────────────┐                                                                                                     
+│     sr_ticket_number =    │              │                                                                                                     
+│      ss_ticket_number     │              │                                                                                                     
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │              │                                                                                                     
+│        EC: 85585604       │              │                                                                                                     
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │              │                                                                                                     
+│           535453          │              │                                                                                                     
+│         (2847.95s)        │              │                                                                                                     
+└─────────────┬─────────────┘              │                                                                                                                                  
+┌─────────────┴─────────────┐┌─────────────┴─────────────┐                                                                                       
+│         SEQ_SCAN          ││         HASH_JOIN         │                                                                                       
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                       
+│       store_returns       ││           INNER           │                                                                                       
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││  ss_store_sk = s_store_sk │                                                                                       
+│      sr_ticket_number     ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                       
+│         sr_item_sk        ││        EC: 5286541        │                                                                                       
+│    sr_returned_date_sk    ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ├────────────────────────────────────────────────────────────────────────┐              
+│       sr_customer_sk      ││         517598003         │                                                                        │              
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││          (33.16s)         │                                                                        │              
+│        EC: 71993780       ││                           │                                                                        │              
+│   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││                           │                                                                        │              
+│          71993780         ││                           │                                                                        │              
+│          (52.45s)         ││                           │                                                                        │              
+└───────────────────────────┘└─────────────┬─────────────┘                                                                        │                                           
+                             ┌─────────────┴─────────────┐                                                          ┌─────────────┴─────────────┐
+                             │         PROJECTION        │                                                          │         SEQ_SCAN          │
+                             │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                          │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+                             │             #0            │                                                          │           store           │
+                             │             #1            │                                                          │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+                             │             #2            │                                                          │         s_store_sk        │
+                             │             #3            │                                                          │        s_store_name       │
+                             │             #4            │                                                          │        s_company_id       │
+                             │             #6            │                                                          │      s_street_number      │
+                             │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                          │       s_street_name       │
+                             │         530076796         │                                                          │       s_street_type       │
+                             │          (0.19s)          │                                                          │       s_suite_number      │
+                             │                           │                                                          │           s_city          │
+                             │                           │                                                          │          s_county         │
+                             │                           │                                                          │          s_state          │
+                             │                           │                                                          │           s_zip           │
+                             │                           │                                                          │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+                             │                           │                                                          │          EC: 402          │
+                             │                           │                                                          │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │
+                             │                           │                                                          │            402            │
+                             │                           │                                                          │          (0.02s)          │
+                             └─────────────┬─────────────┘                                                          └───────────────────────────┘                             
+                             ┌─────────────┴─────────────┐                                                                                       
+                             │           FILTER          │                                                                                       
+                             │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                       
+                             │ (d_date_sk BETWEEN 2450819│                                                                                       
+                             │        AND 2453062)       │                                                                                       
+                             │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                       
+                             │        EC: 5286541        │                                                                                       
+                             │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                       
+                             │         530076796         │                                                                                       
+                             │          (3.91s)          │                                                                                       
+                             └─────────────┬─────────────┘                                                                                                                    
+                             ┌─────────────┴─────────────┐                                                                                       
+                             │         HASH_JOIN         │                                                                                       
+                             │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                       
+                             │           INNER           │                                                                                       
+                             │ss_sold_date_sk = d_date_sk│                                                                                       
+                             │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                                                       
+                             │     Build Min: 2450815    │                                                                                       
+                             │     Build Max: 2452882    ├──────────────┐                                                                        
+                             │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │              │                                                                        
+                             │        EC: 5286541        │              │                                                                        
+                             │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │              │                                                                        
+                             │         530076796         │              │                                                                        
+                             │          (12.02s)         │              │                                                                        
+                             └─────────────┬─────────────┘              │                                                                                                     
+                             ┌─────────────┴─────────────┐┌─────────────┴─────────────┐                                                          
+                             │         SEQ_SCAN          ││          IE_JOIN          │                                                          
+                             │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                                                          
+                             │        store_sales        ││           INNER           │                                                          
+                             │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││CAST(d_date AS TIMESTAMP) <│                                                          
+                             │      ss_ticket_number     ││= CAST(d_date AS TIMESTAMP)│                                                          
+                             │         ss_item_sk        ││CAST(d_date AS TIMESTAMP) >│                                                          
+                             │      ss_sold_date_sk      ││  = (d_date - '120 days':  │                                                          
+                             │       ss_customer_sk      ││         :INTERVAL)        ├──────────────┐                                           
+                             │        ss_store_sk        ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │              │                                           
+                             │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││         EC: 73049         │              │                                           
+                             │       EC: 287997024       ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │              │                                           
+                             │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││            3630           │              │                                           
+                             │         287997024         ││          (0.01s)          │              │                                           
+                             │         (153.33s)         ││                           │              │                                           
+                             └───────────────────────────┘└─────────────┬─────────────┘              │                                                                        
+                                                          ┌─────────────┴─────────────┐┌─────────────┴─────────────┐                             
+                                                          │         SEQ_SCAN          ││         SEQ_SCAN          │                             
+                                                          │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                             
+                                                          │          date_dim         ││          date_dim         │                             
+                                                          │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                             
+                                                          │         d_date_sk         ││         d_date_sk         │                             
+                                                          │           d_date          ││           d_date          │                             
+                                                          │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                             
+                                                          │Filters: d_date_sk>=2450815││ Filters: d_moy=4 AND d_moy│                             
+                                                          │ AND d_date_sk<=2452882 AND││         IS NOT NULL       │                             
+                                                          │    d_date_sk IS NOT NULL  ││ d_year=1999 AND d_year IS │                             
+                                                          │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││          NOT NULL         │                             
+                                                          │         EC: 73049         ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                             
+                                                          │   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   ││          EC: 1305         │                             
+                                                          │            2068           ││   ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─   │                             
+                                                          │          (0.01s)          ││             30            │                             
+                                                          │                           ││          (0.00s)          │                             
+                                                          └───────────────────────────┘└───────────────────────────┘

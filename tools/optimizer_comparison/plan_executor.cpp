@@ -365,12 +365,12 @@ int main(int argc, char **argv) {
 			auto logical_plan =
 			    ir_sql_converter::ConvertIRToDuckDBPlan(*binder, *conn.context, simplest_ir, &intermediate_results);
 
-			// fixme: necessary optimizer
+			// compensate necessary optimizer for missing info from IR
 			Optimizer optimizer(*binder, *conn.context);
 			if ("v1.3.2" == plan_meta.version) {
-				logical_plan = optimizer.TestOptimize(std::move(logical_plan), false);
+				logical_plan = optimizer.CompensateOptimize(std::move(logical_plan), false);
 			} else {
-				logical_plan = optimizer.TestOptimize(std::move(logical_plan), true);
+				logical_plan = optimizer.CompensateOptimize(std::move(logical_plan), true);
 			}
 #ifdef DEBUG
 			// print out
