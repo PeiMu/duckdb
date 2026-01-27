@@ -15,4 +15,6 @@ if(BUILD_PYTHON_PKG)
   add_subdirectory(pythonpkg)
 endif()
 
-add_subdirectory(optimizer_comparison)
+if (HAVE_IR_CONVERTER)
+  add_subdirectory(optimizer_comparison)
+endif()
