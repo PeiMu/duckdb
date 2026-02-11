@@ -394,5 +394,36 @@ unique_ptr<LogicalOperator> Optimizer::CompensateOptimize(unique_ptr<LogicalOper
 
 	return std::move(plan);
 }
+unique_ptr<LogicalOperator> Optimizer::FilterOptimize(unique_ptr<LogicalOperator> plan_p) {
+#ifdef DEBUG
+	Verify(*plan_p);
+#endif
+
+	switch (plan_p->type) {
+	case LogicalOperatorType::LOGICAL_TRANSACTION:
+		return plan_p; // skip optimizing simple & often-occurring plans unaffected by rewrites
+	default:
+		break;
+	}
+
+	this->plan = std::move(plan_p);
+	// first we perform expression rewrites using the ExpressionRewriter
+	// this does not change the logical plan structure, but only simplifies the expression trees
+	RunOptimizer(OptimizerType::EXPRESSION_REWRITER, [&]() { rewriter.VisitOperator(*plan); });
+
+	// perform filter pullup
+	RunOptimizer(OptimizerType::FILTER_PULLUP, [&]() {
+		FilterPullup filter_pullup;
+		plan = filter_pullup.Rewrite(std::move(plan));
+	});
+
+	// perform filter pushdown
+	RunOptimizer(OptimizerType::FILTER_PUSHDOWN, [&]() {
+		FilterPushdown filter_pushdown(*this);
+		plan = filter_pushdown.Rewrite(std::move(plan));
+	});
+
+	return std::move(plan);
+}
 
 } // namespace duckdb

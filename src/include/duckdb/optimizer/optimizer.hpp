@@ -35,6 +35,8 @@ public:
 	unique_ptr<LogicalOperator> PostOptimize(unique_ptr<LogicalOperator> plan);
 	//! Optimize for the tools/optimizer_comparison/plan_executor, compensate the missing info of IR
 	unique_ptr<LogicalOperator> CompensateOptimize(unique_ptr<LogicalOperator> plan);
+	//! Optimize a plan by running FILTER_PULLUP and FILTER_PUSHDOWN
+	unique_ptr<LogicalOperator> FilterOptimize(unique_ptr<LogicalOperator> plan_p);
 	//! Return a reference to the client context of this optimizer
 	ClientContext &GetContext();
 
