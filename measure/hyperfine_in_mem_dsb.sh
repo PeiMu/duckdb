@@ -4,6 +4,7 @@ log_name=duckdb_$1_$2.csv
 
 rm -rf ${log_name}
 rm -rf dsb_$3_result/${log_name}
+rm -rf temp.csv
 
 dir_1="$DSB_PATH/code/tools/1_instance_out_wo_multi_block/1/"
 dir_2="$DSB_PATH/code/tools/1_instance_out_wo_multi_block/2/"
@@ -16,4 +17,4 @@ for sql in $(find "$dir_1" "$dir_2" -type f -name "*.sql"); do
 done
 
 mv ${log_name} dsb_$3_result/.
-rm temp.csv
+rm -rf temp.csv
