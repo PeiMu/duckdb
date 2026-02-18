@@ -4,6 +4,7 @@ log_name=duckdb_$1_$2.csv
 
 rm -rf ${log_name}
 rm -rf tpcds_$3_result/${log_name}
+rm -rf temp.csv
 
 dir_1="$TPCDS_PATH/tools/1_instance_out_duckdb/1/"
 dir_2="$TPCDS_PATH/tools/1_instance_out_duckdb/2/"
@@ -16,4 +17,4 @@ for sql in $(find "$dir_1" "$dir_2" -type f -name "*.sql"); do
 done
 
 mv ${log_name} tpcds_$3_result/.
-rm temp.csv
+rm -rf temp.csv
