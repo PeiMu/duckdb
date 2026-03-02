@@ -338,6 +338,15 @@ void TopDownSplit::AddTargetTables(LogicalOperator &op) {
 		auto &get_op = op.Cast<LogicalGet>();
 		auto current_table_index = get_op.table_index;
 		target_tables.emplace(current_table_index);
+		// Populate scan_col_names_ so AddHeaderTableExprs can resolve the actual
+		// column name (get_op.names) instead of alias from BoundColumnRefExpression.
+		const auto &col_ids = get_op.GetColumnIds();
+		for (idx_t binding_idx = 0; binding_idx < col_ids.size(); binding_idx++) {
+			auto physical_col_id = col_ids[binding_idx].GetPrimaryIndex();
+			if (physical_col_id < get_op.names.size()) {
+				scan_col_names_[current_table_index][binding_idx] = get_op.names[physical_col_id];
+			}
+		}
 	} else if (LogicalOperatorType::LOGICAL_CHUNK_GET == op.type) {
 		auto &chunk_op = op.Cast<LogicalColumnDataGet>();
 		auto current_table_index = chunk_op.table_index;
@@ -431,8 +440,17 @@ void TopDownSplit::AddTableExprs(std::set<TableExpr> &table_exprs, const unique_
 	auto expr_info = GetConstTableExpr(expr);
 	table_expr.table_idx = expr_info.table_idx;
 	table_expr.column_idx = expr_info.column_idx;
-	table_expr.column_name = expr_info.column_name;
 	table_expr.return_type = expr_info.return_type;
+	// Use the actual column name from the scan node rather than the alias on
+	// BoundColumnRefExpression, which carries the query-level output alias and
+	// may differ from the physical column name (e.g. title.id aliased as movie_id).
+	auto scan_it = scan_col_names_.find(table_expr.table_idx);
+	if (scan_it != scan_col_names_.end()) {
+		auto col_it = scan_it->second.find(table_expr.column_idx);
+		table_expr.column_name = (col_it != scan_it->second.end()) ? col_it->second : expr_info.column_name;
+	} else {
+		table_expr.column_name = expr_info.column_name;
+	}
 	if (target_tables.count(table_expr.table_idx)) {
 		table_exprs.emplace(table_expr);
 	}
@@ -443,8 +461,17 @@ void TopDownSplit::AddHeaderTableExprs(const unique_ptr<Expression> &expr) {
 	auto expr_info = GetConstTableExpr(expr);
 	table_expr.table_idx = expr_info.table_idx;
 	table_expr.column_idx = expr_info.column_idx;
-	table_expr.column_name = expr_info.column_name;
 	table_expr.return_type = expr_info.return_type;
+	// Use the actual column name from the scan node rather than the alias on
+	// BoundColumnRefExpression, which carries the query-level output alias and
+	// may differ from the physical column name (e.g. title.id aliased as movie_id).
+	auto scan_it = scan_col_names_.find(table_expr.table_idx);
+	if (scan_it != scan_col_names_.end()) {
+		auto col_it = scan_it->second.find(table_expr.column_idx);
+		table_expr.column_name = (col_it != scan_it->second.end()) ? col_it->second : expr_info.column_name;
+	} else {
+		table_expr.column_name = expr_info.column_name;
+	}
 	if (target_tables.count(table_expr.table_idx)) {
 		header_expr.emplace_back(table_expr);
 	}

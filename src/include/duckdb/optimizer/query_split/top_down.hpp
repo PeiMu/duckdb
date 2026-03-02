@@ -48,6 +48,7 @@ public:
 		header_expr.clear();
 		query_split_index = 0;
 		used_table_ids.clear();
+		scan_col_names_.clear();
 	};
 
 public:
@@ -118,6 +119,12 @@ private:
 	std::unordered_set<idx_t> used_table_ids;
 
 	bool follow_pipeline_breaker_ = false;
+
+	// table_idx → (binding_col_idx → actual_column_name) for LOGICAL_GET nodes.
+	// Populated by AddTargetTables so that AddHeaderTableExprs can use the real
+	// column name instead of BoundColumnRefExpression::alias (which carries the
+	// query-level output alias and may differ from the physical column name).
+	std::unordered_map<idx_t, std::unordered_map<idx_t, std::string>> scan_col_names_;
 
 private:
 	struct TableExprCollector {
