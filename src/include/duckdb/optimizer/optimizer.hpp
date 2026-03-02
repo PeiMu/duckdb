@@ -39,6 +39,8 @@ public:
 	unique_ptr<LogicalOperator> CompensateOptimize(unique_ptr<LogicalOperator> plan, bool old_version);
 	//! Optimize the whole plan after merging back
 	unique_ptr<LogicalOperator> WholePlanOptimize(unique_ptr<LogicalOperator> plan);
+	//! Optimize a plan by running FILTER_PULLUP and FILTER_PUSHDOWN
+	unique_ptr<LogicalOperator> FilterOptimize(unique_ptr<LogicalOperator> plan);
 	//! Return a reference to the client context of this optimizer
 	ClientContext &GetContext();
 	//! Whether the specific optimizer is disabled
@@ -60,6 +62,8 @@ private:
 	void RunBuiltInCompensateOptimizers(bool old_version);
 	// for ENABLE_MERGE_BACK_PLAN, and we comment out the passes that change the join order
 	void RunBuiltInWholePlanOptimizers();
+	// Optimize a plan by running FILTER_PULLUP and FILTER_PUSHDOWN
+	void RunBuiltInFilterOptimizers();
 	void RunOptimizer(OptimizerType type, const std::function<void()> &callback);
 	void Verify(LogicalOperator &op);
 

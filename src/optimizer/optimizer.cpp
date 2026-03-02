@@ -956,6 +956,77 @@ void Optimizer::RunBuiltInWholePlanOptimizers() {
 	});
 }
 
+void Optimizer::RunBuiltInFilterOptimizers() {
+	switch (plan->type) {
+	case LogicalOperatorType::LOGICAL_TRANSACTION:
+	case LogicalOperatorType::LOGICAL_PRAGMA:
+	case LogicalOperatorType::LOGICAL_SET:
+	case LogicalOperatorType::LOGICAL_UPDATE_EXTENSIONS:
+	case LogicalOperatorType::LOGICAL_CREATE_SECRET:
+	case LogicalOperatorType::LOGICAL_EXTENSION_OPERATOR:
+		// skip optimizing simple & often-occurring plans unaffected by rewrites
+		if (plan->children.empty()) {
+			return;
+		}
+		break;
+	default:
+		break;
+	}
+
+	// first we perform expression rewrites using the ExpressionRewriter
+	// this does not change the logical plan structure, but only simplifies the expression trees
+	RunOptimizer(OptimizerType::EXPRESSION_REWRITER, [&]() { rewriter.VisitOperator(*plan); });
+
+	// Rewrites SUM(x + C) into SUM(x) + C * COUNT(x)
+	RunOptimizer(OptimizerType::SUM_REWRITER, [&]() {
+		SumRewriterOptimizer optimizer(*this);
+		optimizer.Optimize(plan);
+	});
+
+	// perform filter pullup
+	RunOptimizer(OptimizerType::FILTER_PULLUP, [&]() {
+		FilterPullup filter_pullup;
+		plan = filter_pullup.Rewrite(std::move(plan));
+	});
+
+	// perform filter pushdown
+	RunOptimizer(OptimizerType::FILTER_PUSHDOWN, [&]() {
+		FilterPushdown filter_pushdown(*this);
+		unordered_set<idx_t> top_bindings;
+		filter_pushdown.CheckMarkToSemi(*plan, top_bindings);
+		plan = filter_pushdown.Rewrite(std::move(plan));
+	});
+
+	// derive and push filters into materialized CTEs
+	RunOptimizer(OptimizerType::CTE_FILTER_PUSHER, [&]() {
+		CTEFilterPusher cte_filter_pusher(*this);
+		plan = cte_filter_pusher.Optimize(std::move(plan));
+	});
+
+	RunOptimizer(OptimizerType::REGEX_RANGE, [&]() {
+		RegexRangeFilter regex_opt;
+		plan = regex_opt.Rewrite(std::move(plan));
+	});
+
+	RunOptimizer(OptimizerType::IN_CLAUSE, [&]() {
+		InClauseRewriter ic_rewriter(context, *this);
+		plan = ic_rewriter.Rewrite(std::move(plan));
+	});
+
+	// removes any redundant DelimGets/DelimJoins
+	RunOptimizer(OptimizerType::DELIMINATOR, [&]() {
+		Deliminator deliminator;
+		plan = deliminator.Optimize(std::move(plan));
+	});
+
+	// new
+	// Pulls up empty results
+	RunOptimizer(OptimizerType::EMPTY_RESULT_PULLUP, [&]() {
+		EmptyResultPullup empty_result_pullup;
+		plan = empty_result_pullup.Optimize(std::move(plan));
+	});
+}
+
 unique_ptr<LogicalOperator> Optimizer::Optimize(unique_ptr<LogicalOperator> plan_p) {
 	Verify(*plan_p);
 
@@ -1104,6 +1175,14 @@ unique_ptr<LogicalOperator> Optimizer::WholePlanOptimize(unique_ptr<LogicalOpera
 	}
 
 	Planner::VerifyPlan(context, plan);
+
+	return std::move(plan);
+}
+
+unique_ptr<LogicalOperator> Optimizer::FilterOptimize(unique_ptr<LogicalOperator> plan_p) {
+	this->plan = std::move(plan_p);
+
+	RunBuiltInFilterOptimizers();
 
 	return std::move(plan);
 }
