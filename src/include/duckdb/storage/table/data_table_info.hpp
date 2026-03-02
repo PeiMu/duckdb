@@ -52,6 +52,10 @@ public:
 	string GetTableName();
 	void SetTableName(string name);
 
+	//! Optional cardinality override for injecting estimated stats (e.g. AQP testing).
+	//! INVALID_INDEX means "not set"; when set, GetTotalRows() returns this value.
+	atomic<idx_t> cardinality_override {DConstants::INVALID_INDEX};
+
 private:
 	//! The database instance of the table
 	AttachedDatabase &db;
