@@ -183,14 +183,12 @@ idx_t SubqueryPreparer::MergeDataChunk(subquery_queue &old_subqueries, unique_pt
 	unique_ptr<LogicalColumnDataGet> chunk_scan =
 	    make_uniq<LogicalColumnDataGet>(new_table_idx, previous_result->Types(), std::move(previous_result));
 
-#if ENABLE_SPECIFY_EST_STAT
-#ifdef DEBUG
-	D_ASSERT(0 != estimated_card);
-#endif
-	chunk_scan->estimated_cardinality = estimated_card;
-#else
-	chunk_scan->estimated_cardinality = chunk_size;
-#endif
+	if (0 != estimated_card) {
+		// which means ENABLE_SPECIFY_EST_STAT from client_context.cpp
+		chunk_scan->estimated_cardinality = estimated_card;
+	} else {
+		chunk_scan->estimated_cardinality = chunk_size;
+	}
 	chunk_scan->has_estimated_cardinality = true;
 	chunk_scan->split_index = data_chunk_split_index;
 	auto chunk_scan_op = unique_ptr_cast<LogicalColumnDataGet, LogicalOperator>(std::move(chunk_scan));
