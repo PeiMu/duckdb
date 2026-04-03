@@ -8,6 +8,7 @@ add_subdirectory(sample)
 add_library_unity(
   duckdb_execution
   OBJECT
+  aqp_jit.cpp
   adaptive_filter.cpp
   aggregate_hashtable.cpp
   base_aggregate_hashtable.cpp

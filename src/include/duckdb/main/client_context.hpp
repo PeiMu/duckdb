@@ -30,6 +30,7 @@
 #include "duckdb/planner/expression/bound_parameter_data.hpp"
 #include "duckdb/transaction/transaction_context.hpp"
 #include "duckdb/optimizer/query_split/query_split_util.h"
+#include "duckdb/execution/aqp_jit.hpp"
 
 namespace duckdb {
 class Appender;
@@ -81,6 +82,9 @@ public:
 	atomic<bool> interrupted;
 	//! Set of optional states (e.g. Caches) that can be held by the ClientContext
 	unique_ptr<RegisteredStateManager> registered_state;
+	//! AQP JIT context: holds LLVM-compiled expression function handles.
+	//! Set by the AQP middleware before executing a sub-plan; null otherwise.
+	unique_ptr<AQPJITContext> aqp_jit_context;
 	//! The logger to be used by this ClientContext
 	shared_ptr<Logger> logger;
 	//! The client configuration
