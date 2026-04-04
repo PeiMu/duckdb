@@ -120,6 +120,10 @@ struct AQPJITContext {
 	// Aggregate state size in bytes per eid
 	unordered_map<uint64_t, uint32_t>       agg_state_sizes;
 
+	// Scan+Filter fusion: filter applied at scan level, producing pre-filtered chunks.
+	// Key = TABLE_SCAN operator eid, Value = compiled filter function.
+	unordered_map<uint64_t, AQPExprFn> scan_filter_fns;
+
 	// Sub-plan coordinator: one per sub-plan execution
 	AQPSubPlanFn subplan_fn = nullptr;
 

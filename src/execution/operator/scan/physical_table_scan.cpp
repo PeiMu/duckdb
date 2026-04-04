@@ -4,6 +4,8 @@
 #include "duckdb/common/string_util.hpp"
 #include "duckdb/planner/expression/bound_conjunction_expression.hpp"
 #include "duckdb/transaction/transaction.hpp"
+#include "duckdb/execution/aqp_jit.hpp"
+#include "duckdb/main/client_context.hpp"
 
 #include <utility>
 
@@ -103,6 +105,30 @@ SourceResultType PhysicalTableScan::GetData(ExecutionContext &context, DataChunk
 
 	if (function.function) {
 		function.function(context.client, data, chunk);
+
+		// AQP JIT: Scan+Filter fusion — apply compiled filter at scan level.
+		// Produces a pre-filtered chunk, avoiding a separate PhysicalFilter operator call.
+		if (chunk.size() > 0) {
+			auto *jit = context.client.aqp_jit_context.get();
+			if (jit && !jit->scan_filter_fns.empty()) {
+				uint64_t scan_eid = ExpressionID(*this);
+				auto fit = jit->scan_filter_fns.find(scan_eid);
+				if (fit != jit->scan_filter_fns.end()) {
+					chunk.Flatten();
+					AQPChunkView cv = MakeChunkView(chunk);
+					SelectionVector sel(STANDARD_VECTOR_SIZE);
+					AQPSelView sv = MakeSelView(sel);
+					idx_t result_count = fit->second(&cv, &sv);
+					if (result_count == 0) {
+						chunk.SetCardinality(0);
+					} else if (result_count < chunk.size()) {
+						chunk.Slice(sel, result_count);
+					}
+					jit->dispatch_count++;
+				}
+			}
+		}
+
 		return chunk.size() == 0 ? SourceResultType::FINISHED : SourceResultType::HAVE_MORE_OUTPUT;
 	}
 
