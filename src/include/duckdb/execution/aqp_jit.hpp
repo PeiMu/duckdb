@@ -79,6 +79,9 @@ using AQPPipelineFn = int64_t (*)(AQPChunkView *source_chunk,
                                   AQPChunkView *sink_chunk,
                                   void *pipeline_state);
 
+// Sub-plan coordinator: orchestrates multiple compiled pipelines.
+using AQPSubPlanFn = int32_t (*)(void *subplan_ctx);
+
 // ---------------------------------------------------------------------------
 // JIT flags — indicate what was compiled and at what optimization level
 // ---------------------------------------------------------------------------
@@ -116,6 +119,9 @@ struct AQPJITContext {
 	unordered_map<uint64_t, AQPAggUpdateFn> agg_fns;
 	// Aggregate state size in bytes per eid
 	unordered_map<uint64_t, uint32_t>       agg_state_sizes;
+
+	// Sub-plan coordinator: one per sub-plan execution
+	AQPSubPlanFn subplan_fn = nullptr;
 
 	// Background compilation: futures that resolve to compiled fns.
 	// Polled at chunk boundaries; swapped into active maps when ready.
