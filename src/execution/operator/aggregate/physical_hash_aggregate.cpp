@@ -347,6 +347,13 @@ void PhysicalHashAggregate::SinkDistinct(ExecutionContext &context, DataChunk &c
 
 SinkResultType PhysicalHashAggregate::Sink(ExecutionContext &context, DataChunk &chunk,
                                            OperatorSinkInput &input) const {
+	// AQP JIT Level 2: Aggregate operators are compiled and stored for Level 3
+	// pipeline fusion, but at Level 2 we let DuckDB's native GroupedAggregateHashTable
+	// handle aggregation — it has radix partitioning, parallel combiners, and
+	// distinct tracking that would be expensive to replicate. The compiled
+	// aggregate function (ungrouped accumulator loop) is consumed by Level 3
+	// pipeline fusion where it's inlined into the fused pipeline function.
+
 	auto &local_state = input.local_state.Cast<HashAggregateLocalSinkState>();
 	auto &global_state = input.global_state.Cast<HashAggregateGlobalSinkState>();
 

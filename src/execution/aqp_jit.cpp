@@ -20,8 +20,14 @@ int32_t ToDtype(PhysicalType pt) {
 }
 
 AQPChunkView MakeChunkView(DataChunk &chunk) {
+	return MakeChunkViewAt(chunk, 0);
+}
+
+AQPChunkView MakeChunkViewAt(DataChunk &chunk, idx_t buf_offset) {
 	// col_views is a thread-local scratch buffer; we rebuild it per call.
-	// Cost: O(ncols) — negligible compared to processing 2048 rows.
+	// buf_offset allows multiple non-overlapping regions (e.g., input at 0,
+	// output at input.ColumnCount()) for operator-level JIT that needs
+	// separate input and output AQPChunkViews simultaneously.
 	static thread_local AQPColView col_buf[4096]; // max columns per chunk
 
 	// Flatten ensures all vectors are FLAT (no CONSTANT/DICTIONARY wrappers).
@@ -32,14 +38,14 @@ AQPChunkView MakeChunkView(DataChunk &chunk) {
 	for (idx_t i = 0; i < ncols; i++) {
 		Vector &vec = chunk.data[i];
 		auto &vmask = FlatVector::Validity(vec);
-		col_buf[i].data     = vec.GetData();
-		col_buf[i].validity = vmask.AllValid() ? nullptr : reinterpret_cast<uint64_t *>(vmask.GetData());
-		col_buf[i].vtype    = static_cast<int32_t>(vec.GetVectorType());
-		col_buf[i].dtype    = ToDtype(vec.GetType().InternalType());
+		col_buf[buf_offset + i].data     = vec.GetData();
+		col_buf[buf_offset + i].validity = vmask.AllValid() ? nullptr : reinterpret_cast<uint64_t *>(vmask.GetData());
+		col_buf[buf_offset + i].vtype    = static_cast<int32_t>(vec.GetVectorType());
+		col_buf[buf_offset + i].dtype    = ToDtype(vec.GetType().InternalType());
 	}
 
 	AQPChunkView cv;
-	cv.cols  = col_buf;
+	cv.cols  = &col_buf[buf_offset];
 	cv.nrows = static_cast<uint64_t>(chunk.size());
 	cv.ncols = static_cast<uint64_t>(ncols);
 	return cv;

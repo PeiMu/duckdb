@@ -50,8 +50,13 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 	idx_t result_count;
 	auto *jit = context.client.aqp_jit_context.get();
 	bool used_compiled = false;
+	uint64_t eid = ExpressionID(*this);
+	fprintf(stderr, "[AQP-JIT-TRACE] PhysicalFilter::Execute eid=0x%016lx"
+	                " jit=%p flags=%u expr_fns=%zu\n",
+	        (unsigned long)eid, (void*)jit,
+	        jit ? jit->flags : 0u,
+	        jit ? jit->expr_fns.size() : 0u);
 	if (jit && (jit->flags & AQPJIT_EXPR)) {
-		uint64_t eid = ExpressionID(*this);
 		// Poll any pending background compilation (zero-cost: wait_for(0s))
 		if (auto pit = jit->pending_exprs.find(eid); pit != jit->pending_exprs.end()) {
 			if (pit->second.wait_for(std::chrono::seconds(0)) == std::future_status::ready) {
@@ -60,19 +65,34 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 			}
 		}
 		if (auto fit = jit->expr_fns.find(eid); fit != jit->expr_fns.end()) {
+			fprintf(stderr, "[AQP-JIT] dispatch JIT fn=%p eid=0x%016lx nrows=%zu\n",
+			        (void*)fit->second, (unsigned long)eid, (size_t)input.size());
 			AQPChunkView cv = MakeChunkView(input);
 			AQPSelView   sv = MakeSelView(state.sel);
 			result_count     = fit->second(&cv, &sv);
 			used_compiled    = true;
-			if (jit->dispatch_count == 0)
-				fprintf(stderr, "[AQP-JIT] first dispatch eid=0x%016lx\n",
-				        (unsigned long)eid);
+			fprintf(stderr, "[AQP-JIT] dispatch #%lu eid=0x%016lx"
+			                " nrows=%zu → selected=%zu\n",
+			        (unsigned long)jit->dispatch_count,
+			        (unsigned long)eid,
+			        (size_t)input.size(),
+			        (size_t)result_count);
 			jit->dispatch_count++;
+		} else {
+			fprintf(stderr, "[AQP-JIT-TRACE] eid=0x%016lx not in expr_fns"
+			                " (skipped filter) → interpreter\n",
+			        (unsigned long)eid);
 		}
 	}
 	if (!used_compiled) {
+		// No compiled function for this filter — either JIT is disabled or
+		// this filter was intentionally skipped (e.g. VARCHAR).
+		// Fall back to the DuckDB interpreter.
+		fprintf(stderr, "[AQP-JIT-TRACE] interpreter fallback eid=0x%016lx\n",
+		        (unsigned long)eid);
 		result_count = state.executor.SelectExpression(input, state.sel);
-		if (jit) jit->fallback_count++;
+		fprintf(stderr, "[AQP-JIT-TRACE] interpreter done eid=0x%016lx result=%zu/%zu\n",
+		        (unsigned long)eid, (size_t)result_count, (size_t)input.size());
 	}
 
 	if (result_count == input.size()) {

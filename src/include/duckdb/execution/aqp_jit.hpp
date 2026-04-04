@@ -73,14 +73,23 @@ using AQPExprFn = idx_t (*)(AQPChunkView *, AQPSelView *);
 // Returns OperatorResultType cast to int32_t to avoid DuckDB enum dependency.
 using AQPOperatorFn = int32_t (*)(AQPChunkView *in, AQPChunkView *out);
 
+// Pipeline-level: processes one chunk from source through fused operators to sink.
+// Returns count of output rows, or negative on error.
+using AQPPipelineFn = int64_t (*)(AQPChunkView *source_chunk,
+                                  AQPChunkView *sink_chunk,
+                                  void *pipeline_state);
+
 // ---------------------------------------------------------------------------
 // JIT flags — indicate what was compiled and at what optimization level
 // ---------------------------------------------------------------------------
 enum AQPJITFlags : uint32_t {
 	AQPJIT_NONE     = 0,
-	AQPJIT_EXPR     = 1u << 0,  // expression-level JIT active
-	AQPJIT_OPERATOR = 1u << 1,  // operator-level JIT active
-	AQPJIT_OPT3     = 1u << 3,  // compiled with O3 (else O0)
+	AQPJIT_EXPR     = 1u << 0,  // Level 1: individual expression compilation
+	AQPJIT_OPERATOR = 1u << 1,  // Level 2: full operator compilation
+	AQPJIT_PIPELINE = 1u << 2,  // Level 3: fused pipeline compilation
+	AQPJIT_OPT3     = 1u << 3,  // Use LLVM O3 optimization
+	AQPJIT_SUBPLAN  = 1u << 4,  // Level 4: multi-pipeline sub-plan compilation
+	AQPJIT_SIMD     = 1u << 5,  // Enable explicit SIMD vectorization
 };
 
 // ---------------------------------------------------------------------------
@@ -92,11 +101,24 @@ struct AQPJITContext {
 	uint32_t flags = AQPJIT_NONE;
 
 	// expr_id → compiled function.  Key computed by ExpressionID() below.
-	unordered_map<uint64_t, AQPExprFn>     expr_fns;
-	unordered_map<uint64_t, AQPOperatorFn> op_fns;
+	unordered_map<uint64_t, AQPExprFn>     expr_fns;      // Level 1 + Level 2 filter
+	unordered_map<uint64_t, AQPOperatorFn> op_fns;        // Level 2 operators (+ Level 3)
+	unordered_map<uint64_t, AQPPipelineFn> pipeline_fns;  // Level 3 fused pipelines
 
-	// Background compilation (phase 2): futures that resolve to compiled fns.
-	// Polled at chunk boundaries; swapped into expr_fns when ready.
+	// Projection column mappings: eid → {out_col_i -> in_col_i}
+	// DuckDB dispatches these via zero-copy Vector::Reference() at Level 2.
+	// Other engines use the memcpy-based AQPOperatorFn in op_fns instead.
+	unordered_map<uint64_t, vector<int>>   proj_col_maps;
+
+	// Aggregate update functions: void fn(AQPChunkView*, void* agg_state)
+	// Dispatched at Level 2 for ungrouped aggregates (tight compiled loop).
+	using AQPAggUpdateFn = void (*)(AQPChunkView *, void *);
+	unordered_map<uint64_t, AQPAggUpdateFn> agg_fns;
+	// Aggregate state size in bytes per eid
+	unordered_map<uint64_t, uint32_t>       agg_state_sizes;
+
+	// Background compilation: futures that resolve to compiled fns.
+	// Polled at chunk boundaries; swapped into active maps when ready.
 	unordered_map<uint64_t, std::future<AQPExprFn>> pending_exprs;
 
 	// Diagnostic counters — incremented by PhysicalFilter on each dispatch.
@@ -111,6 +133,10 @@ struct AQPJITContext {
 // Convert a DuckDB DataChunk to an AQPChunkView.
 // Cost: O(ncols) pointer assignments — no data copy.
 AQPChunkView MakeChunkView(DataChunk &chunk);
+
+// Same as MakeChunkView but uses col_buf[buf_offset..] to avoid collisions
+// when building separate input and output views simultaneously.
+AQPChunkView MakeChunkViewAt(DataChunk &chunk, idx_t buf_offset);
 
 // Wrap an existing SelectionVector as an AQPSelView.
 AQPSelView MakeSelView(SelectionVector &sel);
