@@ -80,8 +80,10 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 #endif
 			jit->dispatch_count++;
 		} else {
+#ifndef NDEBUG
 			Printer::Print(StringUtil::Format(
 			    "[AQP-JIT-TRACE] eid=0x%016lx not in expr_fns, (skipped filter) → interpreter", (unsigned long)eid));
+#endif
 		}
 	}
 	if (!used_compiled) {
