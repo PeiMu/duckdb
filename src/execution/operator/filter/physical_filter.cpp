@@ -88,8 +88,6 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 		// No compiled function for this filter — either JIT is disabled or
 		// this filter was intentionally skipped (e.g. VARCHAR).
 		// Fall back to the DuckDB interpreter.
-		Printer::Print(StringUtil::Format(
-		    "[AQP-JIT-TRACE] interpreter fallback eid=0x%016lx", (unsigned long)eid));
 		result_count = state.executor.SelectExpression(input, state.sel);
 	}
 
