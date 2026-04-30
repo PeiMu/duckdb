@@ -91,7 +91,8 @@ enum AQPJITFlags : uint32_t {
 	AQPJIT_OPERATOR = 1u << 1,  // Level 2: full operator compilation
 	AQPJIT_PIPELINE = 1u << 2,  // Level 3: fused pipeline compilation
 	AQPJIT_OPT3     = 1u << 3,  // Use LLVM O3 optimization
-	AQPJIT_SUBPLAN  = 1u << 4,  // Level 4: multi-pipeline sub-plan compilation
+	AQPJIT_SQL      = 1u << 4,  // Level 4: SQL / sub-SQL compilation
+	AQPJIT_SUBPLAN  = AQPJIT_SQL,  // Legacy alias
 	AQPJIT_SIMD     = 1u << 5,  // Enable explicit SIMD vectorization
 };
 
@@ -123,6 +124,9 @@ struct AQPJITContext {
 	// Scan+Filter fusion: filter applied at scan level, producing pre-filtered chunks.
 	// Key = TABLE_SCAN operator eid, Value = compiled filter function.
 	unordered_map<uint64_t, AQPExprFn> scan_filter_fns;
+
+	// Per-pipeline opaque state (e.g., AQP hash table pointer for fused build/probe).
+	unordered_map<uint64_t, void*> pipeline_states;
 
 	// Sub-plan coordinator: one per sub-plan execution
 	AQPSubPlanFn subplan_fn = nullptr;
