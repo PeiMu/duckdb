@@ -6,6 +6,7 @@
 #include "duckdb/catalog/catalog_entry/table_catalog_entry.hpp"
 #include "duckdb/function/table/table_scan.hpp"
 #include "duckdb/planner/operator/logical_get.hpp"
+#include "duckdb/planner/operator/logical_column_data_get.hpp"
 #include "duckdb/storage/data_table.hpp"
 #include "duckdb/planner/filter/constant_filter.hpp"
 
@@ -173,6 +174,20 @@ RelationStats RelationStatisticsHelper::ExtractDelimGetStats(LogicalDelimGet &de
 		stats.column_distinct_count.push_back(DistinctCount({1, false}));
 		stats.column_names.push_back("column" + to_string(binding.column_index));
 	}
+	return stats;
+}
+
+RelationStats RelationStatisticsHelper::ExtractColumnDataGetStats(LogicalColumnDataGet &chunk_get, ClientContext &context) {
+	RelationStats stats;
+	stats.table_name = chunk_get.GetName();
+	idx_t estimated_card = chunk_get.EstimateCardinality(context);
+	stats.cardinality = estimated_card;
+	stats.stats_initialized = true;
+	for (auto &binding : chunk_get.GetColumnBindings()) {
+		stats.column_distinct_count.push_back(DistinctCount({estimated_card, false}));
+		stats.column_names.push_back("column" + to_string(binding.column_index));
+	}
+
 	return stats;
 }
 

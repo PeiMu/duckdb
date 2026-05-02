@@ -43,6 +43,14 @@ public:
 	idx_t estimated_cardinality;
 	bool has_estimated_cardinality;
 
+	//! The node where need to be merged by another subquery, used by query_split
+	int split_index = 0;
+	int merge_index = 0;
+
+	//! used for verification in top_down Split,
+	//! tracks if this JOIN was a split point but reverted
+	bool reverted = false;
+
 public:
 	virtual vector<ColumnBinding> GetColumnBindings();
 	virtual idx_t GetRootIndex();

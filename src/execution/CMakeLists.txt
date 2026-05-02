@@ -10,6 +10,7 @@ add_library_unity(
   OBJECT
   adaptive_filter.cpp
   aggregate_hashtable.cpp
+  aqp_jit.cpp
   base_aggregate_hashtable.cpp
   column_binding_resolver.cpp
   expression_executor.cpp

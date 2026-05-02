@@ -134,6 +134,69 @@ unique_ptr<PendingQueryResult> PreparedStatement::PendingQuery(case_insensitive_
 	return result;
 }
 
+unique_ptr<QueryResult> PreparedStatement::Execute(ClientContextLock &lock, vector<Value> &values,
+                                                   bool allow_stream_result) {
+	auto pending = PendingQuery(lock, values, allow_stream_result);
+	if (pending->HasError()) {
+		return make_uniq<MaterializedQueryResult>(pending->GetErrorObject());
+	}
+	return pending->Execute(lock);
+}
+
+unique_ptr<ColumnDataCollection> PreparedStatement::ExecuteRow(vector<Value> &values, bool allow_stream_result) {
+	auto pending = PendingQuery(values, allow_stream_result);
+	if (pending->HasError()) {
+		pending->GetErrorObject().Throw("has error with ");
+	}
+	return pending->ExecuteRow();
+}
+
+unique_ptr<ColumnDataCollection> PreparedStatement::ExecuteRow(ClientContextLock &lock, vector<Value> &values,
+                                                               bool allow_stream_result) {
+	auto pending = PendingQuery(lock, values, allow_stream_result);
+	if (pending->HasError()) {
+		pending->GetErrorObject().Throw("has error with ");
+	}
+	auto ret = pending->ExecuteRow(lock);
+	return ret;
+}
+
+unique_ptr<PendingQueryResult> PreparedStatement::PendingQuery(ClientContextLock &lock, vector<Value> &values,
+                                                               bool allow_stream_result) {
+	case_insensitive_map_t<BoundParameterData> named_values;
+	for (idx_t i = 0; i < values.size(); i++) {
+		auto &val = values[i];
+		named_values[std::to_string(i + 1)] = BoundParameterData(val);
+	}
+	return PendingQuery(lock, named_values, allow_stream_result);
+}
+
+unique_ptr<PendingQueryResult> PreparedStatement::PendingQuery(ClientContextLock &lock,
+                                                               case_insensitive_map_t<BoundParameterData> &named_values,
+                                                               bool allow_stream_result) {
+	if (!success) {
+		auto exception = InvalidInputException("Attempting to execute an unsuccessfully prepared statement!");
+		return make_uniq<PendingQueryResult>(ErrorData(exception));
+	}
+	PendingQueryParameters parameters;
+	parameters.parameters = &named_values;
+
+	try {
+		VerifyParameters(named_values, named_param_map);
+	} catch (const std::exception &ex) {
+		return make_uniq<PendingQueryResult>(ErrorData(ex));
+	}
+
+	D_ASSERT(data);
+	parameters.query_parameters.output_type =
+	    allow_stream_result && data->properties.output_type == QueryResultOutputType::ALLOW_STREAMING
+	        ? QueryResultOutputType::ALLOW_STREAMING
+	        : QueryResultOutputType::FORCE_MATERIALIZED;
+	auto result = context->PendingQuery(lock, query, data, parameters);
+	// The result should not contain any reference to the 'vector<Value> parameters.parameters'
+	return result;
+}
+
 bool PreparedStatement::CanCachePlan(const LogicalOperator &root) {
 	vector<const_reference<LogicalOperator>> operators;
 	operators.push_back(root);

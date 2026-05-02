@@ -29,6 +29,7 @@ class OperatorState;
 class QueryProfiler;
 class ThreadContext;
 class Task;
+class ColumnDataCollection;
 
 struct PipelineEventStack;
 struct ProducerToken;
@@ -106,6 +107,8 @@ public:
 	bool HasStreamingResultCollector();
 	//! Returns the query result - can only be used if `HasResultCollector` returns true
 	unique_ptr<QueryResult> GetResult();
+
+	unique_ptr<ColumnDataCollection> GetRowCollection();
 
 	//! Returns true if all pipelines have been completed
 	bool ExecutionIsFinished();

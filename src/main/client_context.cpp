@@ -53,6 +53,18 @@
 #include "duckdb/main/settings.hpp"
 #include "duckdb/main/result_set_manager.hpp"
 #include "duckdb/parser/statement/transaction_statement.hpp"
+#include "duckdb/common/local_file_system.hpp"
+#include "duckdb/optimizer/filter_pushdown.hpp"
+#include "duckdb/optimizer/query_split/query_split.hpp"
+#include "duckdb/optimizer/query_split/subquery_preparer.hpp"
+#include "duckdb/optimizer/reorder_get.h"
+#include "duckdb/parser/tableref/basetableref.hpp"
+#include "duckdb/parser/tableref/joinref.hpp"
+#include "duckdb/planner/operator/logical_explain.hpp"
+
+#if ENABLE_SERIALIZE_BINARY
+#include "duckdb/common/serializer/binary_serializer.hpp"
+#endif
 
 #ifdef __APPLE__
 #include <sys/sysctl.h>
@@ -114,7 +126,8 @@ struct DebugClientContextState : public ClientContextState {
 
 	void QueryBegin(ClientContext &context) override {
 		if (active_query) {
-			throw InternalException("DebugClientContextState::QueryBegin called when a query is already active");
+			// fixme: here might have bugs - Pei
+			// throw InternalException("DebugClientContextState::QueryBegin called when a query is already active");
 		}
 		active_query = true;
 	}
@@ -126,8 +139,9 @@ struct DebugClientContextState : public ClientContextState {
 	}
 	void TransactionBegin(MetaTransaction &transaction, ClientContext &context) override {
 		if (active_transaction) {
-			throw InternalException(
-			    "DebugClientContextState::TransactionBegin called when a transaction is already active");
+			// todo: Might have bugs here - Pei
+			// throw InternalException(
+			// "DebugClientContextState::TransactionBegin called when a transaction is already active");
 		}
 		active_transaction = true;
 	}
@@ -256,7 +270,7 @@ void ClientContext::BeginQueryInternal(ClientContextLock &lock, const string &qu
 }
 
 ErrorData ClientContext::EndQueryInternal(ClientContextLock &lock, bool success, bool invalidate_transaction,
-                                          optional_ptr<ErrorData> previous_error) {
+                                          optional_ptr<ErrorData> previous_error, bool continue_exec) {
 	if (active_query->executor) {
 		active_query->executor->CancelTasks();
 	}
@@ -265,6 +279,8 @@ ErrorData ClientContext::EndQueryInternal(ClientContextLock &lock, bool success,
 	active_query.reset();
 	query_progress.Initialize();
 	ErrorData error;
+	if (continue_exec)
+		return error;
 	try {
 		if (transaction.HasActiveTransaction()) {
 			transaction.ResetActiveQuery();
@@ -308,7 +324,8 @@ ErrorData ClientContext::EndQueryInternal(ClientContextLock &lock, bool success,
 	return error;
 }
 
-void ClientContext::CleanupInternal(ClientContextLock &lock, BaseQueryResult *result, bool invalidate_transaction) {
+void ClientContext::CleanupInternal(ClientContextLock &lock, BaseQueryResult *result, bool invalidate_transaction,
+                                    bool continue_exec) {
 	if (!active_query) {
 		// no query currently active
 		return;
@@ -326,11 +343,32 @@ void ClientContext::CleanupInternal(ClientContextLock &lock, BaseQueryResult *re
 	if (result && result->HasError()) {
 		passed_error = result->GetErrorObject();
 	}
-	auto error = EndQueryInternal(lock, result ? !result->HasError() : false, invalidate_transaction, passed_error);
+	auto error = EndQueryInternal(lock, result ? !result->HasError() : false, invalidate_transaction, passed_error,
+	                              continue_exec);
 	if (result && !result->HasError()) {
 		// if an error occurred while committing report it in the result
 		result->SetError(error);
 	}
+	D_ASSERT(!active_query);
+}
+
+void ClientContext::CleanupInternal(ClientContextLock &lock, bool invalidate_transaction, bool continue_exec) {
+	if (!active_query) {
+		// no query currently active
+		return;
+	}
+	if (active_query->executor) {
+		active_query->executor->CancelTasks();
+	}
+	active_query->progress_bar.reset();
+
+	// Relaunch the threads if a SET THREADS command was issued
+	auto &scheduler = TaskScheduler::GetScheduler(*this);
+	scheduler.RelaunchThreads();
+
+	optional_ptr<ErrorData> passed_error = nullptr;
+
+	auto error = EndQueryInternal(lock, true, invalidate_transaction, passed_error, continue_exec);
 	D_ASSERT(!active_query);
 }
 
@@ -353,7 +391,8 @@ connection_t ClientContext::GetConnectionId() const {
 	return connection_id;
 }
 
-unique_ptr<QueryResult> ClientContext::FetchResultInternal(ClientContextLock &lock, PendingQueryResult &pending) {
+unique_ptr<QueryResult> ClientContext::FetchResultInternal(ClientContextLock &lock, PendingQueryResult &pending,
+                                                           bool continue_exec) {
 	D_ASSERT(active_query);
 	D_ASSERT(active_query->IsOpenResult(pending));
 	D_ASSERT(active_query->prepared);
@@ -366,9 +405,32 @@ unique_ptr<QueryResult> ClientContext::FetchResultInternal(ClientContextLock &lo
 	// we have a result collector - fetch the result directly from the result collector
 	result = executor.GetResult();
 	if (!create_stream_result) {
-		CleanupInternal(lock, result.get(), false);
+		CleanupInternal(lock, result.get(), false, continue_exec);
 	} else {
 		active_query->SetOpenResult(*result);
+	}
+	return result;
+}
+
+unique_ptr<ColumnDataCollection>
+ClientContext::FetchCollectionInternal(ClientContextLock &lock, PendingQueryResult &pending, bool continue_exec) {
+	D_ASSERT(active_query);
+	D_ASSERT(active_query->IsOpenResult(pending));
+	D_ASSERT(active_query->prepared);
+	auto &executor = GetExecutor();
+	auto &prepared = *active_query->prepared;
+	bool create_stream_result =
+	    prepared.properties.output_type == QueryResultOutputType::ALLOW_STREAMING && pending.allow_stream_result;
+	unique_ptr<ColumnDataCollection> result;
+	D_ASSERT(executor.HasResultCollector());
+	// we have a result collector - fetch the result directly from the result collector
+	result = executor.GetRowCollection();
+	if (!create_stream_result) {
+		// todo: check if Collection has error
+		CleanupInternal(lock, false, continue_exec);
+	} else {
+		throw InternalException("Do not support stream result in FetchCollectionInternal");
+		// active_query->SetOpenResult(*result);
 	}
 	return result;
 }
@@ -377,6 +439,9 @@ static bool IsExplainAnalyze(SQLStatement *statement) {
 	if (!statement) {
 		return false;
 	}
+#if MANUAL_EXPLAIN_ANALYZE
+	return true;
+#endif
 	if (statement->type != StatementType::EXPLAIN_STATEMENT) {
 		return false;
 	}
@@ -402,6 +467,8 @@ shared_ptr<PreparedStatementData> ClientContext::CreatePreparedStatementInternal
 		}
 	}
 
+	auto tmp_statement = statement->Copy();
+
 	logical_planner.CreatePlan(std::move(statement));
 	D_ASSERT(logical_planner.plan || !logical_planner.properties.bound_all_parameters);
 	profiler.EndPhase();
@@ -412,6 +479,7 @@ shared_ptr<PreparedStatementData> ClientContext::CreatePreparedStatementInternal
 	result->names = logical_planner.names;
 	result->types = logical_planner.types;
 	result->value_map = std::move(logical_planner.value_map);
+	result->unbound_statement = std::move(tmp_statement);
 	if (!logical_planner.properties.bound_all_parameters) {
 		// not all parameters were bound - return
 		return result;
@@ -433,9 +501,374 @@ shared_ptr<PreparedStatementData> ClientContext::CreatePreparedStatementInternal
 	if (config.enable_optimizer && logical_plan->RequireOptimizer()) {
 		profiler.StartPhase(MetricType::ALL_OPTIMIZERS);
 		Optimizer optimizer(*logical_planner.binder, *this);
-		logical_plan = optimizer.Optimize(std::move(logical_plan));
-		D_ASSERT(logical_plan);
+
+#if ENABLE_QUERY_SPLIT
+		// Check if this is an executable plan (projection, order-by, limit)
+		bool execute_plan = logical_plan->type == LogicalOperatorType::LOGICAL_PROJECTION ||
+		                    logical_plan->type == LogicalOperatorType::LOGICAL_ORDER_BY ||
+		                    logical_plan->type == LogicalOperatorType::LOGICAL_LIMIT;
+
+#if TIME_BREAK_DOWN || ENABLE_MEASURE_EXE_TIME
+		std::chrono::high_resolution_clock::time_point timer;
+		if (execute_plan)
+			timer = chrono_tic();
+#endif
+
+		logical_plan = optimizer.PreOptimize(std::move(logical_plan));
+#if TIME_BREAK_DOWN
+		if (execute_plan)
+			chrono_toc(&timer, "PreOptimize time is\n");
+#endif
+#if ENABLE_MEASURE_EXE_TIME
+		if (execute_plan) {
+			auto execute_time = chrono_toc(&timer, "PreOptimize time is\n", false);
+			std::ofstream log_file;
+			log_file.open("time_log.csv", std::ios_base::app);
+			log_file << std::to_string(execute_time / 1000) + ", ";
+			log_file.close();
+		}
+#endif
+
+		SubqueryPreparer subquery_preparer(*logical_planner.binder, *this);
+
+		bool needToSplit = config.enable_dbshaker_query_split;
+		subquery_queue subqueries;
+		table_expr_info table_expr_queue;
+		std::vector<TableExpr> proj_expr;
+		bool merge_sibling_expr = false;
+		QuerySplit query_splitter(*this);
+		ReorderGet reorder_get(*this);
+		std::deque<std::pair<idx_t, idx_t>> table_card_order;
+		idx_t previous_result_card;
+
+#if ENABLE_SERIALIZE_BINARY
+		static size_t global_split_counter = 0;
+		std::unordered_map<unsigned int, std::string> intermediate_table_map;
+#endif
+
+#if ENABLE_MERGE_BACK_PLAN
+		unique_ptr<LogicalOperator> whole_plan;
+#endif
+
+		while (config.enable_dbshaker_query_split && execute_plan) {
+#if ALWAYS_SPLIT
+			needToSplit = true;
+#else
+			needToSplit = needToSplit || subquery_preparer.NeedRewrite(subqueries.front());
+			needToSplit = needToSplit ||
+			              subquery_preparer.NeedReorder(subqueries.front(), table_card_order, previous_result_card);
+#endif
+			if (needToSplit) {
+				if (!subqueries.empty()) {
+					subquery_preparer.MergeSubquery(logical_plan, std::move(subqueries));
+					logical_plan = subquery_preparer.UpdateProjHead(std::move(logical_plan), proj_expr);
+#if TIME_BREAK_DOWN
+					chrono_toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
+#endif
+					merge_sibling_expr = false;
+				}
+				if (config.enable_dbshaker_split_jop) {
+#if REORDER_DATACHUNK && ENABLE_REORDER_PLAN
+					logical_plan = reorder_get.Optimize(std::move(logical_plan));
+					table_card_order = reorder_get.GetTableCardOrder();
+					if (reorder_get.NeedFilterPushDown()) {
+						FilterPushdown filter_pushdown(optimizer);
+						logical_plan = filter_pushdown.Rewrite(std::move(logical_plan));
+						reorder_get.Clear();
+					}
+#endif
+					subquery_preparer.CanonicalizeCrossProduct(logical_plan);
+
+#if TIME_BREAK_DOWN
+					if (execute_plan)
+						chrono_toc(&timer, "CanonicalizeCrossProduct time is\n");
+#endif
+				} else {
+					logical_plan = optimizer.MiddleOptimize(std::move(logical_plan));
+				}
+
+				logical_plan = query_splitter.Clear(std::move(logical_plan));
+				logical_plan = query_splitter.Split(std::move(logical_plan), true);
+				subqueries = query_splitter.GetSubqueries();
+				table_expr_queue = query_splitter.GetTableExprQueue();
+				proj_expr = query_splitter.GetProjExpr();
+#if TIME_BREAK_DOWN
+				chrono_toc(&timer, "Split time is\n");
+#endif
+			}
+
+			// reorder the get and data chunk nodes (smaller first)
+			if (!config.enable_dbshaker_split_jop) {
+				bool reordered = reorder_get.ReorderTables(subqueries);
+#ifdef DEBUG
+				D_ASSERT(!subqueries.empty());
+#endif
+				subquery_preparer.MergeSubquery(logical_plan, std::move(subqueries));
+				logical_plan = subquery_preparer.UpdateProjHead(std::move(logical_plan), proj_expr);
+#if TIME_BREAK_DOWN
+				chrono_toc(&timer, "MergeSubquery & UpdateProjHead time is\n");
+#endif
+				merge_sibling_expr = false;
+
+				logical_plan = query_splitter.Clear(std::move(logical_plan));
+				logical_plan = query_splitter.Split(std::move(logical_plan), true);
+				subqueries = query_splitter.GetSubqueries();
+				table_expr_queue = query_splitter.GetTableExprQueue();
+				proj_expr = query_splitter.GetProjExpr();
+			}
+
+			if (subqueries.empty())
+				break;
+			if (1 == subqueries.size()) {
+				auto &child_node = subqueries.front()[0];
+#ifdef DEBUG
+				D_ASSERT(nullptr != child_node);
+#endif
+				bool merged = false;
+				subquery_preparer.MergeToSubquery(logical_plan, child_node, merged);
+#ifdef DEBUG
+				D_ASSERT(merged);
+#endif
+				break;
+			}
+
+			unique_ptr<LogicalOperator> last_sibling_node = nullptr;
+			if (subqueries.front().size() > 1) {
+				if (ENABLE_PARALLEL_EXECUTION) {
+					// todo: execute in parallel
+				} else {
+					last_sibling_node = std::move(subqueries.front()[1]);
+				}
+			}
+
+			subquery_preparer.ClearOldTableIndex();
+			subquery_preparer.AddOldTableIndex(subqueries.front()[0]);
+			auto sub_plan = subquery_preparer.GenerateProjHead(logical_plan, std::move(subqueries.front()[0]),
+			                                                   table_expr_queue, proj_expr, merge_sibling_expr);
+#if TIME_BREAK_DOWN
+			chrono_toc(&timer, "GenerateProjHead time is\n");
+#endif
+			subqueries.pop_front();
+			table_expr_queue.pop_front();
+
+#if MANUAL_EXPLAIN_ANALYZE
+			auto explain_sub_plan = sub_plan->Copy(*this);
+			explain_sub_plan = make_uniq<LogicalExplain>(std::move(explain_sub_plan), ExplainType::EXPLAIN_ANALYZE,
+			                                             ExplainFormat::DEFAULT);
+			explain_sub_plan = optimizer.PostOptimize(std::move(explain_sub_plan));
+			subquery_preparer.ExplainAnalyzeSubQuery(lock, result, std::move(explain_sub_plan),
+			                                         result->unbound_statement->query,
+			                                         result->unbound_statement->named_param_map);
+#endif
+
+#if TIME_BREAK_DOWN
+			timer = chrono_tic();
+#endif
+#if ENABLE_MEASURE_EXE_TIME
+			if (execute_plan) {
+				auto execute_time = chrono_toc(&timer, "AQP pre-process time is\n", false);
+				std::ofstream log_file;
+				log_file.open("time_log.csv", std::ios_base::app);
+				log_file << std::to_string(execute_time / 1000) + ", ";
+				log_file.close();
+			}
+#endif
+			sub_plan = optimizer.PostOptimize(std::move(sub_plan));
+#if TIME_BREAK_DOWN
+			chrono_toc(&timer, "PostOptimize time is\n");
+#endif
+#if ENABLE_MEASURE_EXE_TIME
+			if (execute_plan) {
+				auto execute_time = chrono_toc(&timer, "PostOptimize time is\n", false);
+				std::ofstream log_file;
+				log_file.open("time_log.csv", std::ios_base::app);
+				log_file << std::to_string(execute_time / 1000) + ", ";
+				log_file.close();
+			}
+#endif
+
+#if ENABLE_SERIALIZE_BINARY
+			// Serialize the logical plan to binary file
+			std::string filename = "logical_plan_v1.3.2_split_" + std::to_string(global_split_counter) + ".bin";
+			BufferedFileWriter writer(FileSystem::GetFileSystem(*this), filename);
+			BinarySerializer serializer(writer);
+			serializer.Begin();
+			sub_plan->Serialize(serializer);
+			serializer.End();
+			writer.Sync();
+			std::cout << "[Serialized] " << filename << std::endl;
+			global_split_counter++;
+#endif
+
+			// generate an unused table index by the binder
+			auto new_table_idx = logical_planner.binder->GenerateTableIndex();
+			subquery_preparer.SetNewTableIndex(new_table_idx);
+
+			idx_t estimated_card = 0;
+#if ENABLE_SPECIFY_EST_STAT
+			estimated_card = subquery_preparer.GetEstCard(sub_plan);
+#endif
+
+#if ENABLE_MERGE_BACK_PLAN
+			whole_plan = subquery_preparer.MergeBack(std::move(whole_plan), sub_plan);
+#endif
+
+			auto subquery_stmt = subquery_preparer.AdaptSelect(result, sub_plan);
+#if TIME_BREAK_DOWN
+			chrono_toc(&timer, "AdaptSelect time is\n");
+#endif
+#ifdef DEBUG
+			sub_plan->Verify(*this);
+#endif
+			// generate physical sub_plan of the subquery
+			PhysicalPlanGenerator physical_planner(*this);
+			auto physical_plan = physical_planner.Plan(std::move(sub_plan));
+#if TIME_BREAK_DOWN
+			chrono_toc(&timer, "Create Physical Plan time is\n");
+#endif
+#if ENABLE_MEASURE_EXE_TIME
+			if (execute_plan) {
+				auto execute_time = chrono_toc(&timer, "CreatePlan time is\n", false);
+				std::ofstream log_file;
+				log_file.open("time_log.csv", std::ios_base::app);
+				log_file << std::to_string(execute_time / 1000) + ", ";
+				log_file.close();
+			}
+#endif
+
+			subquery_stmt->physical_plan = std::move(physical_plan);
+
+			// Execute subquery
+			auto prepared_stmt = make_uniq<PreparedStatement>(shared_from_this(), std::move(subquery_stmt),
+			                                                  result->unbound_statement->query,
+			                                                  result->unbound_statement->named_param_map);
+			duckdb::vector<Value> bound_values;
+			unique_ptr<ColumnDataCollection> subquery_result = prepared_stmt->ExecuteRow(lock, bound_values, false);
+#if TIME_BREAK_DOWN
+			chrono_toc(&timer, "Execute time is\n");
+#endif
+
+			previous_result_card =
+			    subquery_preparer.MergeDataChunk(subqueries, std::move(subquery_result), estimated_card);
+			if (!ENABLE_PARALLEL_EXECUTION && nullptr != last_sibling_node) {
+				merge_sibling_expr = subquery_preparer.MergeSibling(subqueries, std::move(last_sibling_node));
+			} else {
+				merge_sibling_expr = false;
+			}
+#if TIME_BREAK_DOWN
+			chrono_toc(&timer, "MergeDataChunk time is\n");
+#endif
+
+			subquery_preparer.UpdateSubqueriesIndex(subqueries);
+			table_expr_queue = subquery_preparer.UpdateTableExpr(table_expr_queue, proj_expr);
+#if TIME_BREAK_DOWN
+			chrono_toc(&timer, "Update Index time is\n");
+#endif
+			if (1 == subqueries.size()) {
+				auto &child_node = subqueries.front()[0];
+#ifdef DEBUG
+				D_ASSERT(nullptr != child_node);
+#endif
+				bool merged = false;
+				subquery_preparer.MergeToSubquery(logical_plan, child_node, merged);
+#ifdef DEBUG
+				D_ASSERT(merged);
+#endif
+
+				logical_plan = subquery_preparer.UpdateProjHead(std::move(logical_plan), proj_expr);
+#if TIME_BREAK_DOWN
+				chrono_toc(&timer, "Prepare last subquery time is\n");
+#endif
+#if ENABLE_MEASURE_EXE_TIME
+				if (execute_plan) {
+					auto execute_time = chrono_toc(&timer, "AQP final post-process time is\n", false);
+					std::ofstream log_file;
+					log_file.open("time_log.csv", std::ios_base::app);
+					log_file << std::to_string(execute_time / 1000) + ", ";
+					log_file.close();
+				}
+#endif
+				break;
+			}
+			needToSplit = false;
+#if ENABLE_MEASURE_EXE_TIME
+			if (execute_plan) {
+				auto execute_time = chrono_toc(&timer, "AQP post-process time is\n", false);
+				std::ofstream log_file;
+				log_file.open("time_log.csv", std::ios_base::app);
+				log_file << std::to_string(execute_time / 1000) + ", ";
+				log_file.close();
+			}
+#endif
+		}
+
+#if MANUAL_EXPLAIN_ANALYZE
+		auto explain_sub_plan = logical_plan->Copy(*this);
+		explain_sub_plan = make_uniq<LogicalExplain>(std::move(explain_sub_plan), ExplainType::EXPLAIN_ANALYZE,
+		                                             ExplainFormat::DEFAULT);
+		explain_sub_plan = optimizer.PostOptimize(std::move(explain_sub_plan));
+		subquery_preparer.ExplainAnalyzeSubQuery(lock, result, std::move(explain_sub_plan),
+		                                         result->unbound_statement->query,
+		                                         result->unbound_statement->named_param_map);
+#endif
+
+#if TIME_BREAK_DOWN
+		if (execute_plan)
+			timer = chrono_tic();
+#endif
+		logical_plan = optimizer.PostOptimize(std::move(logical_plan));
 		profiler.EndPhase();
+#if TIME_BREAK_DOWN
+		if (execute_plan)
+			chrono_toc(&timer, "PostOptimize time is\n");
+#endif
+#if ENABLE_MEASURE_EXE_TIME
+		if (execute_plan) {
+			auto execute_time = chrono_toc(&timer, "final PostOptimize time is\n", false);
+			std::ofstream log_file;
+			log_file.open("time_log.csv", std::ios_base::app);
+			log_file << std::to_string(execute_time / 1000) + ", ";
+			log_file.close();
+		}
+#endif
+
+#if ENABLE_SERIALIZE_BINARY
+		if (execute_plan) {
+			std::string filename = "logical_plan_v1.3.2_split_" + std::to_string(global_split_counter) + ".bin";
+			BufferedFileWriter writer(FileSystem::GetFileSystem(*this), filename);
+			BinarySerializer serializer(writer);
+			serializer.Begin();
+			logical_plan->Serialize(serializer);
+			serializer.End();
+			writer.Sync();
+			std::cout << "[Serialized] " << filename << std::endl;
+			global_split_counter++;
+		}
+#endif
+
+#if ENABLE_MERGE_BACK_PLAN
+		whole_plan = subquery_preparer.MergeBack(std::move(whole_plan), logical_plan);
+		if (whole_plan) {
+			whole_plan = optimizer.WholePlanOptimize(std::move(whole_plan));
+
+#if WHOLE_PLAN_EXPLAIN_ANALYZE
+			auto explain_whole_plan =
+			    make_uniq<LogicalExplain>(std::move(whole_plan), ExplainType::EXPLAIN_ANALYZE, ExplainFormat::DEFAULT);
+			subquery_preparer.ExplainAnalyzeSubQuery(lock, result, std::move(explain_whole_plan),
+			                                         result->unbound_statement->query,
+			                                         result->unbound_statement->named_param_map);
+#else
+			logical_plan = std::move(whole_plan);
+#endif
+		}
+#endif
+
+#else  // !ENABLE_QUERY_SPLIT
+		logical_plan = optimizer.Optimize(std::move(logical_plan));
+		profiler.EndPhase();
+#endif // ENABLE_QUERY_SPLIT
+
+		D_ASSERT(logical_plan);
 
 #ifdef DEBUG
 		logical_plan->Verify(*this);
@@ -821,6 +1254,12 @@ unique_ptr<PendingQueryResult> ClientContext::PendingQuery(const string &query,
                                                            const PendingQueryParameters &parameters) {
 	auto lock = LockContext();
 	return PendingQueryPreparedInternal(*lock, query, prepared, parameters);
+}
+
+unique_ptr<PendingQueryResult> ClientContext::PendingQuery(ClientContextLock &lock, const string &query,
+                                                           shared_ptr<PreparedStatementData> &prepared,
+                                                           const PendingQueryParameters &parameters) {
+	return PendingStatementOrPreparedStatementInternal(lock, query, nullptr, prepared, parameters);
 }
 
 unique_ptr<QueryResult> ClientContext::Execute(const string &query, shared_ptr<PreparedStatementData> &prepared,

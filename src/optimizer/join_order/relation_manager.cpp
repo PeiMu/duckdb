@@ -100,6 +100,7 @@ static bool OperatorNeedsRelation(LogicalOperatorType op_type) {
 	case LogicalOperatorType::LOGICAL_GET:
 	case LogicalOperatorType::LOGICAL_UNNEST:
 	case LogicalOperatorType::LOGICAL_DELIM_GET:
+	case LogicalOperatorType::LOGICAL_CHUNK_GET:
 	case LogicalOperatorType::LOGICAL_AGGREGATE_AND_GROUP_BY:
 	case LogicalOperatorType::LOGICAL_WINDOW:
 	case LogicalOperatorType::LOGICAL_SAMPLE:
@@ -126,16 +127,16 @@ bool ExpressionContainsColumnRef(const Expression &root_expr) {
 	bool contains_column_ref = false;
 	ExpressionIterator::VisitExpression<BoundColumnRefExpression>(
 	    root_expr, [&](const BoundColumnRefExpression &colref) {
-	// Here you have a filter on a single column in a table. Return a binding for the column
-	// being filtered on so the filter estimator knows what HLL count to pull
+		// Here you have a filter on a single column in a table. Return a binding for the column
+		// being filtered on so the filter estimator knows what HLL count to pull
 #ifdef DEBUG
-		    (void)colref.depth;
-		    D_ASSERT(colref.depth == 0);
-		    D_ASSERT(colref.binding.table_index != DConstants::INVALID_INDEX);
+			    (void)colref.depth;
+			    D_ASSERT(colref.depth == 0);
+			    D_ASSERT(colref.binding.table_index != DConstants::INVALID_INDEX);
 #endif
-		    // map the base table index to the relation index used by the JoinOrderOptimizer
-		    contains_column_ref = true;
-	    });
+			    // map the base table index to the relation index used by the JoinOrderOptimizer
+			    contains_column_ref = true;
+		    });
 	return contains_column_ref;
 }
 
@@ -374,6 +375,12 @@ bool RelationManager::ExtractJoinRelations(JoinOrderOptimizer &optimizer, Logica
 			    (idx_t)MaxValue(double(stats.cardinality) * RelationStatisticsHelper::DEFAULT_SELECTIVITY, (double)1);
 		}
 		ModifyStatsIfLimit(limit_op.get(), stats);
+		AddRelation(input_op, parent, stats);
+		return true;
+	}
+	case LogicalOperatorType::LOGICAL_CHUNK_GET: {
+		auto &chunk_get = op->Cast<LogicalColumnDataGet>();
+		auto stats = RelationStatisticsHelper::ExtractColumnDataGetStats(chunk_get, context);
 		AddRelation(input_op, parent, stats);
 		return true;
 	}

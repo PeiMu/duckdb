@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "duckdb/common/constants.hpp"
 #include "duckdb/storage/table/table_index_list.hpp"
 #include "duckdb/storage/storage_lock.hpp"
 
@@ -51,6 +52,10 @@ public:
 	string GetSchemaName();
 	string GetTableName();
 	void SetTableName(string name);
+
+	//! Optional cardinality override for injecting estimated stats (e.g. AQP testing).
+	//! INVALID_INDEX means "not set"; when set, GetTotalRows() returns this value.
+	atomic<idx_t> cardinality_override {DConstants::INVALID_INDEX};
 
 private:
 	//! The database instance of the table

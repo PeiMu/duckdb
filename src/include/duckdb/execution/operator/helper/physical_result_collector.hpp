@@ -37,6 +37,9 @@ public:
 public:
 	//! The final method used to fetch the query result from this operator
 	virtual unique_ptr<QueryResult> GetResult(GlobalSinkState &state) const = 0;
+	virtual unique_ptr<ColumnDataCollection> GetRowCollection(GlobalSinkState &state) {
+		return make_uniq<ColumnDataCollection>(Allocator::DefaultAllocator(), types);
+	};
 
 	bool IsSink() const override {
 		return true;

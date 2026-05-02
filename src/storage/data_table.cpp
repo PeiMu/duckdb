@@ -1843,6 +1843,10 @@ idx_t DataTable::ColumnCount() const {
 }
 
 idx_t DataTable::GetTotalRows() const {
+	auto override_val = info->cardinality_override.load();
+	if (override_val != DConstants::INVALID_INDEX) {
+		return override_val;
+	}
 	return row_groups->GetTotalRows();
 }
 

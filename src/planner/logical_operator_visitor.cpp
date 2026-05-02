@@ -1,5 +1,6 @@
 #include "duckdb/planner/logical_operator_visitor.hpp"
 
+#include "duckdb/optimizer/query_split/query_split_util.h"
 #include "duckdb/planner/expression/list.hpp"
 #include "duckdb/planner/expression_iterator.hpp"
 #include "duckdb/planner/operator/list.hpp"
@@ -12,10 +13,12 @@ void LogicalOperatorVisitor::VisitOperator(LogicalOperator &op) {
 }
 
 void LogicalOperatorVisitor::VisitOperatorChildren(LogicalOperator &op) {
-	if (op.HasProjectionMap()) {
+	if (op.HasProjectionMap() && !HasNullptr(op)) {
 		VisitOperatorWithProjectionMapChildren(op);
 	} else {
 		for (auto &child : op.children) {
+			if (nullptr == child.get())
+				continue;
 			VisitOperator(*child);
 		}
 	}

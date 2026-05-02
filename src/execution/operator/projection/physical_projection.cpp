@@ -2,6 +2,8 @@
 #include "duckdb/parallel/thread_context.hpp"
 #include "duckdb/execution/expression_executor.hpp"
 #include "duckdb/planner/expression/bound_reference_expression.hpp"
+#include "duckdb/execution/aqp_jit.hpp"
+#include "duckdb/main/client_context.hpp"
 
 namespace duckdb {
 
@@ -27,6 +29,27 @@ PhysicalProjection::PhysicalProjection(PhysicalPlan &physical_plan, vector<Logic
 
 OperatorResultType PhysicalProjection::Execute(ExecutionContext &context, DataChunk &input, DataChunk &chunk,
                                                GlobalOperatorState &gstate, OperatorState &state_p) const {
+	// AQP JIT Level 2: Use pre-computed column mapping for zero-copy projection.
+	// Vector::Reference() aliases the input vector's data pointer — no memcpy.
+	// The compiled AQPOperatorFn (memcpy-based) is stored in op_fns for Level 3
+	// pipeline fusion and for engines without zero-copy aliasing.
+	auto *jit = context.client.aqp_jit_context.get();
+	if (jit && (jit->flags & AQPJIT_OPERATOR)) {
+		uint64_t eid = ExpressionID(*this);
+		auto mit = jit->proj_col_maps.find(eid);
+		if (mit != jit->proj_col_maps.end()) {
+			auto &mapping = mit->second;
+			chunk.SetCardinality(input.size());
+			for (idx_t i = 0; i < mapping.size() && i < chunk.ColumnCount(); i++) {
+				if (mapping[i] >= 0 && (idx_t)mapping[i] < input.ColumnCount()) {
+					chunk.data[i].Reference(input.data[mapping[i]]);
+				}
+			}
+			jit->dispatch_count++;
+			return OperatorResultType::NEED_MORE_INPUT;
+		}
+	}
+
 	auto &state = state_p.Cast<ProjectionState>();
 	state.executor.Execute(input, chunk);
 	return OperatorResultType::NEED_MORE_INPUT;
