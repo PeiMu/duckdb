@@ -743,7 +743,10 @@ shared_ptr<PreparedStatementData> ClientContext::CreatePreparedStatementInternal
 			                                                  result->unbound_statement->query,
 			                                                  result->unbound_statement->named_param_map);
 			duckdb::vector<Value> bound_values;
+			// Save outer active_query so sub-query can start its own
+			auto saved_active_query = std::move(active_query);
 			unique_ptr<ColumnDataCollection> subquery_result = prepared_stmt->ExecuteRow(lock, bound_values, false);
+			active_query = std::move(saved_active_query);
 #if TIME_BREAK_DOWN
 			chrono_toc(&timer, "Execute time is\n");
 #endif

@@ -52,10 +52,12 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 	auto *jit = context.client.aqp_jit_context.get();
 	bool used_compiled = false;
 	uint64_t eid = ExpressionID(*this);
-#ifndef NDEBUG
-	Printer::Print(
-	    StringUtil::Format("[AQP-JIT-TRACE] PhysicalFilter::Execute eid=0x%016lx, jit=%p, flags=%u, expr_fns=%zu",
-	                       (unsigned long)eid, (void *)jit, jit ? jit->flags : 0u, jit ? jit->expr_fns.size() : 0u));
+#ifdef DEBUG
+  	if (nullptr != jit && jit->flags) {
+		Printer::Print(
+		    StringUtil::Format("[AQP-JIT-TRACE] PhysicalFilter::Execute eid=0x%016lx, jit=%p, flags=%u, expr_fns=%zu",
+		                       (unsigned long)eid, (void *)jit, jit ? jit->flags : 0u, jit ? jit->expr_fns.size() : 0u));
+	}
 #endif
 	if (jit && (jit->flags & AQPJIT_EXPR)) {
 		// Poll any pending background compilation (zero-cost: wait_for(0s))
@@ -66,7 +68,7 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 			}
 		}
 		if (auto fit = jit->expr_fns.find(eid); fit != jit->expr_fns.end()) {
-#ifndef NDEBUG
+#ifdef DEBUG
 			Printer::Print(StringUtil::Format("[AQP-JIT] dispatch JIT fn=%p, eid=0x%016lx, nrows=%zu",
 			                                  (void *)fit->second, (unsigned long)eid, (size_t)input.size()));
 #endif
@@ -74,14 +76,14 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 			AQPSelView sv = MakeSelView(state.sel);
 			result_count = fit->second(&cv, &sv);
 			used_compiled = true;
-#ifndef NDEBUG
+#ifdef DEBUG
 			Printer::Print(StringUtil::Format("[AQP-JIT] dispatch #%lu eid=0x%016lx, nrows=%zu → selected=%zu",
 			                                  (unsigned long)jit->dispatch_count, (unsigned long)eid,
 			                                  (size_t)input.size(), (size_t)result_count));
 #endif
 			jit->dispatch_count++;
 		} else {
-#ifndef NDEBUG
+#ifdef DEBUG
 			Printer::Print(StringUtil::Format(
 			    "[AQP-JIT-TRACE] eid=0x%016lx not in expr_fns, (skipped filter) → interpreter", (unsigned long)eid));
 #endif
