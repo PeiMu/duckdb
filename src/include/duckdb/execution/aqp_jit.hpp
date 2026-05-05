@@ -14,6 +14,7 @@
 #include "duckdb/common/common.hpp"
 #include "duckdb/common/typedefs.hpp"
 #include "duckdb/common/unordered_map.hpp"
+#include "duckdb/common/unordered_set.hpp"
 #include "duckdb/common/types/data_chunk.hpp"
 #include "duckdb/common/types/selection_vector.hpp"
 
@@ -137,6 +138,10 @@ struct AQPJITContext {
 	// Scan+Filter fusion: filter applied at scan level, producing pre-filtered chunks.
 	// Key = TABLE_SCAN operator eid, Value = compiled filter function.
 	unordered_map<uint64_t, AQPExprFn> scan_filter_fns;
+
+	// PhysicalFilter eids whose work is already done by scan+filter fusion.
+	// PhysicalFilter checks this set and becomes a pass-through when present.
+	unordered_set<uint64_t> fused_scan_filter_eids;
 
 	// Per-pipeline opaque state (e.g., AQP hash table pointer for fused build/probe).
 	unordered_map<uint64_t, void*> pipeline_states;

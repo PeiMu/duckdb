@@ -176,10 +176,11 @@ SourceResultType PhysicalTableScan::GetDataInternal(ExecutionContext &context, D
 
 		// Actually call the function
 		function.function(context.client, data, chunk);
+		const idx_t original_chunk_size = chunk.size();
 
 		// AQP JIT: Scan+Filter fusion — apply compiled filter at scan level.
 		// Produces a pre-filtered chunk, avoiding a separate PhysicalFilter operator call.
-		if (chunk.size() > 0) {
+		if (original_chunk_size > 0) {
 			auto *jit = context.client.aqp_jit_context.get();
 			if (jit && !jit->scan_filter_fns.empty()) {
 				uint64_t scan_eid = ExpressionID(*this);
@@ -205,7 +206,7 @@ SourceResultType PhysicalTableScan::GetDataInternal(ExecutionContext &context, D
 		// Compare and check whether state before and after function.function call is compatible, will throw in case of
 		// inconsistencies
 		ValidateAsyncStrategyResult(execution_strategy, input_execution_mode, data.results_execution_mode,
-		                            initial_async_result, output_async_result, chunk.size());
+		                            initial_async_result, output_async_result, original_chunk_size);
 
 		// Handle results
 		switch (output_async_result) {
@@ -219,7 +220,7 @@ SourceResultType PhysicalTableScan::GetDataInternal(ExecutionContext &context, D
 			return SourceResultType::FINISHED;
 		}
 		case AsyncResultType::IMPLICIT:
-			if (chunk.size() > 0) {
+			if (original_chunk_size > 0) {
 				return SourceResultType::HAVE_MORE_OUTPUT;
 			}
 			return SourceResultType::FINISHED;

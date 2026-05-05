@@ -52,6 +52,13 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 	auto *jit = context.client.aqp_jit_context.get();
 	bool used_compiled = false;
 	uint64_t eid = ExpressionID(*this);
+
+	// Scan+Filter fusion: the TABLE_SCAN already applied this filter.
+	if (jit && jit->fused_scan_filter_eids.count(eid)) {
+		chunk.Reference(input);
+		return OperatorResultType::NEED_MORE_INPUT;
+	}
+
 #ifdef DEBUG
   	if (nullptr != jit && jit->flags) {
 		Printer::Print(
