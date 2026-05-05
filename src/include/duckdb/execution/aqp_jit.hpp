@@ -106,7 +106,10 @@ struct AQPJITContext {
 
 	// expr_id → compiled function.  Key computed by ExpressionID() below.
 	unordered_map<uint64_t, AQPExprFn>     expr_fns;      // Level 1 + Level 2 filter
-	unordered_map<uint64_t, AQPOperatorFn> op_fns;        // Level 2 operators (+ Level 3)
+	// Level 2 operators (+ Level 3). Hash build/probe are stored here but NOT
+	// dispatched at Level 2 — AQPHashTable is incompatible with DuckDB's
+	// JoinHashTable. They are consumed only by Level 3/4 pipeline fusion.
+	unordered_map<uint64_t, AQPOperatorFn> op_fns;
 	unordered_map<uint64_t, AQPPipelineFn> pipeline_fns;  // Level 3 fused pipelines
 
 	// Projection column mappings: eid → {out_col_i -> in_col_i}
@@ -120,6 +123,16 @@ struct AQPJITContext {
 	unordered_map<uint64_t, AQPAggUpdateFn> agg_fns;
 	// Aggregate state size in bytes per eid
 	unordered_map<uint64_t, uint32_t>       agg_state_sizes;
+
+	// Per-aggregate metadata for JIT state initialization and finalize conversion.
+	// agg_type: 1=Min, 2=Max, 3=Sum, 4=Avg, 5=Count, 6=CountStar
+	struct AQPAggMeta {
+		int32_t  agg_type;
+		int32_t  dtype;
+		uint32_t state_offset;
+		uint32_t state_bytes;
+	};
+	unordered_map<uint64_t, vector<AQPAggMeta>> agg_meta;
 
 	// Scan+Filter fusion: filter applied at scan level, producing pre-filtered chunks.
 	// Key = TABLE_SCAN operator eid, Value = compiled filter function.
