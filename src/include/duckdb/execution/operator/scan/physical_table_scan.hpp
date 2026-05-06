@@ -31,7 +31,8 @@ public:
 	                  unique_ptr<FunctionData> bind_data, vector<LogicalType> returned_types,
 	                  vector<ColumnIndex> column_ids, vector<idx_t> projection_ids, vector<string> names,
 	                  unique_ptr<TableFilterSet> table_filters, idx_t estimated_cardinality,
-	                  ExtraOperatorInfo extra_info, vector<Value> parameters, virtual_column_map_t virtual_columns);
+	                  ExtraOperatorInfo extra_info, vector<Value> parameters, virtual_column_map_t virtual_columns,
+	                  idx_t logical_table_index = DConstants::INVALID_INDEX);
 
 	//! The table function
 	TableFunction function;
@@ -56,6 +57,8 @@ public:
 	shared_ptr<DynamicTableFilterSet> dynamic_filters;
 	//! Virtual columns
 	virtual_column_map_t virtual_columns;
+	//! The logical table index from the planner (unique per table reference in the query)
+	idx_t logical_table_index;
 
 public:
 	string GetName() const override;
