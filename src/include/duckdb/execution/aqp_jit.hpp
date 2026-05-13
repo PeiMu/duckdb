@@ -138,8 +138,12 @@ struct AQPJITContext {
 	// dispatched at Level 2 — AQPHashTable is incompatible with DuckDB's
 	// JoinHashTable. They are consumed only by Level 3/4 pipeline fusion.
 	unordered_map<uint64_t, AQPOperatorFn> op_fns;
-	unordered_map<uint64_t, AQPPipelineFn> pipeline_fns;  // Level 3 fused pipelines (probe side)
-	unordered_map<uint64_t, AQPPipelineFn> build_pipeline_fns;  // Level 3 fused build-side pipelines
+	unordered_map<uint64_t, AQPPipelineFn> pipeline_fns;  // Level 3 fused pipelines (probe side + standalone filter/projection)
+	// Note: there is no build-side JIT map. The build path goes through
+	// DuckDB native (JoinHashTable::Build); only the build-side *filter*
+	// is JIT'd, via the regular filter pipeline dispatch in
+	// physical_filter.cpp. See AQP_middleware comment near RegisterJIT for
+	// the design rationale.
 
 	// Projection column mappings: eid → {out_col_i -> in_col_i}
 	// DuckDB dispatches these via zero-copy Vector::Reference() at Level 2.
