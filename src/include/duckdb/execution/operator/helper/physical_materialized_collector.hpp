@@ -22,6 +22,7 @@ public:
 
 public:
 	unique_ptr<QueryResult> GetResult(GlobalSinkState &state) const override;
+	unique_ptr<ColumnDataCollection> GetRowCollection(GlobalSinkState &state) const override;
 
 public:
 	// Sink interface

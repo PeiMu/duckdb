@@ -487,6 +487,56 @@ option(OVERRIDE_NEW_DELETE "Override C++ new/delete (only when jemalloc is enabl
 option(SET_DUCKDB_LIBRARY_VERSION "Whether or not to set the DuckDB Library version and emit versioned shared libraries" FALSE)
 option(PREBUILT_BINARY "Whether to use a prebuilt version of the DuckDB library, typically called libduckdb_static.a" "")
 
+OPTION(DEFINE_QUERY_SPLIT "ENABLE_QUERY_SPLIT" FALSE)
+OPTION(DEFINE_PARALLEL_EXECUTION "ENABLE_PARALLEL_EXECUTION" FALSE)
+OPTION(DEFINE_DEBUG_PRINT "ENABLE_DEBUG_PRINT" FALSE)
+OPTION(DEFINE_CROSS_PRODUCT_REWRITE "ENABLE_CROSS_PRODUCT_REWRITE" FALSE)
+OPTION(DEFINE_MERGE_BACK_PLAN "ENABLE_MERGE_BACK_PLAN" FALSE)
+OPTION(DEFINE_SPECIFY_EST_STAT "ENABLE_SPECIFY_EST_STAT" FALSE)
+OPTION(DEFINE_MEASURE_EXE_TIME "ENABLE_MEASURE_EXE_TIME" FALSE)
+
+if(${DEFINE_QUERY_SPLIT})
+  add_compile_definitions(ENABLE_QUERY_SPLIT=1)
+else ()
+  add_compile_definitions(ENABLE_QUERY_SPLIT=0)
+endif()
+
+if(${DEFINE_PARALLEL_EXECUTION})
+  add_compile_definitions(ENABLE_PARALLEL_EXECUTION=1)
+else ()
+  add_compile_definitions(ENABLE_PARALLEL_EXECUTION=0)
+endif()
+
+if(${DEFINE_DEBUG_PRINT})
+  add_compile_definitions(ENABLE_DEBUG_PRINT=1)
+else ()
+  add_compile_definitions(ENABLE_DEBUG_PRINT=0)
+endif()
+
+if(${DEFINE_CROSS_PRODUCT_REWRITE})
+  add_compile_definitions(ENABLE_CROSS_PRODUCT_REWRITE=1)
+else()
+  add_compile_definitions(ENABLE_CROSS_PRODUCT_REWRITE=0)
+endif()
+
+if(${DEFINE_MERGE_BACK_PLAN})
+  add_compile_definitions(ENABLE_MERGE_BACK_PLAN=1)
+else ()
+  add_compile_definitions(ENABLE_MERGE_BACK_PLAN=0)
+endif()
+
+if(${DEFINE_SPECIFY_EST_STAT})
+  add_compile_definitions(ENABLE_SPECIFY_EST_STAT=1)
+else ()
+  add_compile_definitions(ENABLE_SPECIFY_EST_STAT=0)
+endif()
+
+if(${DEFINE_MEASURE_EXE_TIME})
+  add_compile_definitions(ENABLE_MEASURE_EXE_TIME=1)
+else ()
+  add_compile_definitions(ENABLE_MEASURE_EXE_TIME=0)
+endif()
+
 if(${BUILD_RDTSC})
   add_compile_definitions(RDTSC)
 endif()
@@ -715,6 +765,38 @@ include_directories(third_party/jaro_winkler)
 include_directories(third_party/vergesort)
 include_directories(third_party/yyjson/include)
 include_directories(third_party/zstd/include)
+include_directories(third_party/libpg_query/include)
+
+# IR_SQL_Converter (for optimizer comparison)
+set(IR_CONVERTER_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/../IR_SQL_Converter" CACHE PATH "IR_SQL_Converter source path")
+if (EXISTS ${IR_CONVERTER_ROOT})
+    message(STATUS "Found IR_SQL_Converter at: ${IR_CONVERTER_ROOT}")
+
+    # Include IR_SQL_Converter headers
+    include_directories(
+            ${IR_CONVERTER_ROOT}/inc
+    )
+
+    # Find IR_SQL_Converter library (prefer shared library to avoid -fPIC issues)
+    find_library(IR_CONVERTER_LIB
+            NAMES IR_SQL_Converter libIR_SQL_Converter
+            PATHS
+            ${IR_CONVERTER_ROOT}/lib
+            ${IR_CONVERTER_ROOT}/build/lib
+            NO_DEFAULT_PATH
+    )
+
+    if (IR_CONVERTER_LIB)
+        message(STATUS "Found IR_SQL_Converter library at: ${IR_CONVERTER_LIB}")
+        set(HAVE_IR_CONVERTER TRUE)
+    else()
+        message(WARNING "IR_SQL_Converter library not found")
+        set(HAVE_IR_CONVERTER FALSE)
+    endif()
+else()
+    message(STATUS "IR_SQL_Converter not found at ${IR_CONVERTER_ROOT}")
+    set(HAVE_IR_CONVERTER FALSE)
+endif()
 
 # todo only regenerate ub file if one of the input files changed hack alert
 function(enable_unity_build UB_SUFFIX SOURCE_VARIABLE_NAME)

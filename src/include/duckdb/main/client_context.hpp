@@ -29,6 +29,7 @@
 #include "duckdb/planner/expression/bound_parameter_data.hpp"
 #include "duckdb/transaction/transaction_context.hpp"
 #include "duckdb/main/query_parameters.hpp"
+#include "duckdb/optimizer/query_split/query_split_util.h"
 
 namespace duckdb {
 
@@ -164,6 +165,9 @@ public:
 	DUCKDB_API unique_ptr<PendingQueryResult> PendingQuery(const string &query,
 	                                                       shared_ptr<PreparedStatementData> &prepared,
 	                                                       const PendingQueryParameters &parameters);
+	DUCKDB_API unique_ptr<PendingQueryResult> PendingQuery(ClientContextLock &lock, const string &query,
+														   shared_ptr<PreparedStatementData> &prepared,
+														   const PendingQueryParameters &parameters);
 
 	//! Execute a prepared statement with the given name and set of parameters
 	//! It is possible that the prepared statement will be re-bound. This will generally happen if the catalog is
@@ -251,7 +255,8 @@ private:
 	void InitialCleanup(ClientContextLock &lock);
 	//! Internal clean up, does not lock. Caller must hold the context_lock.
 	void CleanupInternal(ClientContextLock &lock, BaseQueryResult *result = nullptr,
-	                     bool invalidate_transaction = false);
+						 bool invalidate_transaction = false, bool continue_exec = false);
+	void CleanupInternal(ClientContextLock &lock, bool invalidate_transaction, bool continue_exec);
 	unique_ptr<PendingQueryResult> PendingStatementOrPreparedStatement(ClientContextLock &lock, const string &query,
 	                                                                   unique_ptr<SQLStatement> statement,
 	                                                                   shared_ptr<PreparedStatementData> &prepared,
@@ -277,14 +282,17 @@ private:
 	                                             const PendingQueryParameters &parameters, bool verify = true);
 	unique_ptr<PreparedStatement> PrepareInternal(ClientContextLock &lock, unique_ptr<SQLStatement> statement);
 	void LogQueryInternal(ClientContextLock &lock, const string &query);
+	unique_ptr<QueryResult> FetchResultInternal(ClientContextLock &lock, PendingQueryResult &pending,
+												bool continue_exec = false);
 
-	unique_ptr<QueryResult> FetchResultInternal(ClientContextLock &lock, PendingQueryResult &pending);
+	unique_ptr<ColumnDataCollection> FetchCollectionInternal(ClientContextLock &lock, PendingQueryResult &pending,
+												bool continue_exec = false);
 
 	unique_ptr<ClientContextLock> LockContext();
 
 	void BeginQueryInternal(ClientContextLock &lock, const string &query);
 	ErrorData EndQueryInternal(ClientContextLock &lock, bool success, bool invalidate_transaction,
-	                           optional_ptr<ErrorData> previous_error);
+	                           optional_ptr<ErrorData> previous_error, bool continue_exec = false);
 
 	//! Wait until a task is available to execute
 	void WaitForTask(ClientContextLock &lock, BaseQueryResult &result);
@@ -322,6 +330,8 @@ private:
 	QueryProgress query_progress;
 	//! The connection corresponding to this client context
 	connection_t connection_id;
+
+	friend class SelectStatement;
 };
 
 class ClientContextLock {

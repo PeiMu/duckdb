@@ -12,6 +12,9 @@
 #include "duckdb/planner/logical_operator.hpp"
 #include "duckdb/planner/logical_operator_visitor.hpp"
 #include "duckdb/common/enums/optimizer_type.hpp"
+#include "duckdb/optimizer/query_split/query_split.hpp"
+#include "duckdb/optimizer/reorder_get.h"
+#include "duckdb/execution/column_binding_resolver.hpp"
 
 #include <functional>
 
@@ -24,6 +27,20 @@ public:
 
 	//! Optimize a plan by running specialized optimizers
 	unique_ptr<LogicalOperator> Optimize(unique_ptr<LogicalOperator> plan);
+	//! Optimize a plan by running specialized optimizers before join order optimization
+	unique_ptr<LogicalOperator> PreOptimize(unique_ptr<LogicalOperator> plan_p);
+	//! Optimize the sub-plan before split
+	unique_ptr<LogicalOperator> MiddleOptimize(unique_ptr<LogicalOperator> plan_p);
+	//! Optimize a plan by running specialized optimizers when enable split_jop config
+	unique_ptr<LogicalOperator> ReorderGetOptimize(unique_ptr<LogicalOperator> plan_p);
+	//! Optimize a plan by running specialized optimizers after join order optimization
+	unique_ptr<LogicalOperator> PostOptimize(unique_ptr<LogicalOperator> plan);
+	//! Optimize for the tools/optimizer_comparison/plan_executor, compensate the missing info of IR
+	unique_ptr<LogicalOperator> CompensateOptimize(unique_ptr<LogicalOperator> plan, bool old_version);
+	//! Optimize the whole plan after merging back
+	unique_ptr<LogicalOperator> WholePlanOptimize(unique_ptr<LogicalOperator> plan);
+	//! Optimize a plan by running FILTER_PULLUP and FILTER_PUSHDOWN
+	unique_ptr<LogicalOperator> FilterOptimize(unique_ptr<LogicalOperator> plan);
 	//! Return a reference to the client context of this optimizer
 	ClientContext &GetContext();
 	//! Whether the specific optimizer is disabled
@@ -37,6 +54,16 @@ public:
 
 private:
 	void RunBuiltInOptimizers();
+	void RunBuiltInPreOptimizers();
+	void RunBuiltInMiddleOptimizers();
+	void RunBuiltInPostOptimizers();
+	// for the tools/optimizer_comparison/plan_executor.cpp, we need to call again some passes to add missing info,
+	//  especially JOIN_FILTER_PUSHDOWN
+	void RunBuiltInCompensateOptimizers(bool old_version);
+	// for ENABLE_MERGE_BACK_PLAN, and we comment out the passes that change the join order
+	void RunBuiltInWholePlanOptimizers();
+	// Optimize a plan by running FILTER_PULLUP and FILTER_PUSHDOWN
+	void RunBuiltInFilterOptimizers();
 	void RunOptimizer(OptimizerType type, const std::function<void()> &callback);
 	void Verify(LogicalOperator &op);
 
@@ -47,6 +74,7 @@ public:
 
 private:
 	unique_ptr<LogicalOperator> plan;
+	column_binding_map_t<unique_ptr<BaseStatistics>> statistics_map;
 
 private:
 	unique_ptr<Expression> BindScalarFunction(const string &name, vector<unique_ptr<Expression>> children);

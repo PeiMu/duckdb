@@ -85,6 +85,11 @@ set(DUCKDB_LINK_LIBS
     duckdb_yyjson
     duckdb_zstd)
 
+# Add IR_SQL_Converter library if available
+if (HAVE_IR_CONVERTER)
+    list(APPEND DUCKDB_LINK_LIBS ${IR_CONVERTER_LIB})
+endif()
+
 foreach(LINK_LIB ${DUCKDB_LINK_LIBS})
   list(APPEND LINK_OBJECTS $<TARGET_OBJECTS:${LINK_LIB}>)
 endforeach(LINK_LIB)
