@@ -4,6 +4,7 @@
 #include "duckdb/common/exception.hpp"
 #include "duckdb/common/radix_partitioning.hpp"
 #include "duckdb/common/vector_operations/vector_operations.hpp"
+#include "duckdb/execution/aqp_jit.hpp"
 #include "duckdb/execution/ht_entry.hpp"
 #include "duckdb/logging/log_manager.hpp"
 #include "duckdb/main/client_context.hpp"
@@ -1469,6 +1470,16 @@ idx_t JoinHashTable::FillWithHTOffsets(JoinHTScanState &state, Vector &addresses
 	} while (iterator.Next());
 
 	return key_count;
+}
+
+void JoinHashTable::PopulateAQPJITView(AQPJoinHTView &view) const {
+	view.entries = reinterpret_cast<void *>(entries);
+	view.bitmask = bitmask;
+	view.use_salt = capacity > USE_SALT_THRESHOLD ? 1ull : 0ull;
+	view.layout_ptr = const_cast<void *>(reinterpret_cast<const void *>(layout_ptr.get()));
+	view.tuple_size = static_cast<uint32_t>(tuple_size);
+	view.pointer_offset = static_cast<uint32_t>(pointer_offset);
+	view.data_offsets = layout_ptr->GetOffsets().data();
 }
 
 idx_t JoinHashTable::ScanKeyColumn(Vector &addresses, Vector &result, idx_t column_index) const {

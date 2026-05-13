@@ -59,6 +59,45 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 		return OperatorResultType::NEED_MORE_INPUT;
 	}
 
+	// Pipeline-level JIT: a compiled filter function that reads the input
+	// chunk and writes matching rows directly into the output chunk.
+	if (jit && (jit->flags & AQPJIT_PIPELINE)) {
+		auto pit = jit->pipeline_fns.find(eid);
+		if (pit != jit->pipeline_fns.end()) {
+			input.Flatten();
+			chunk.Reset();
+			chunk.Flatten();
+			AQPChunkView in_cv  = MakeChunkViewAt(input, 0);
+			AQPChunkView out_cv = MakeChunkViewAt(chunk, input.ColumnCount());
+			void *pipe_state = nullptr;
+			auto sit = jit->pipeline_states.find(eid);
+			if (sit != jit->pipeline_states.end() && sit->second) {
+				pipe_state = sit->second;
+			}
+			if (!pipe_state) {
+				// Standalone pipeline filter: build state with Vector
+				// pointers so the JIT can deep-copy VARCHAR strings.
+				thread_local std::vector<void *> col_vec_ptrs;
+				thread_local AQPPipelineFilterState pf_state;
+				col_vec_ptrs.resize(chunk.ColumnCount());
+				for (idx_t ci = 0; ci < chunk.ColumnCount(); ci++) {
+					col_vec_ptrs[ci] = &chunk.data[ci];
+				}
+				pf_state.col_vectors = col_vec_ptrs.data();
+				pf_state.num_cols = chunk.ColumnCount();
+				pf_state.copy_str = AQPCopyStringImpl;
+				pipe_state = &pf_state;
+			}
+			int64_t out_rows = pit->second(&in_cv, &out_cv, pipe_state);
+			if (out_rows >= 0) {
+				chunk.SetCardinality(static_cast<idx_t>(out_rows));
+				jit->dispatch_count++;
+				return OperatorResultType::NEED_MORE_INPUT;
+			}
+			// Negative = compilation error, fall through to interpreter
+		}
+	}
+
 #ifdef DEBUG
   	if (nullptr != jit && jit->flags) {
 		Printer::Print(

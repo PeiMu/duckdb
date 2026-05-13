@@ -410,43 +410,9 @@ OperatorResultType PipelineExecutor::Execute(DataChunk &input, DataChunk &result
 	} // LCOV_EXCL_STOP
 	D_ASSERT(!pipeline.operators.empty());
 
-	// AQP JIT Level 3: Check for a fused pipeline function that replaces the
-	// entire operator chain (Filter -> Projection -> ...) with a single compiled
-	// loop. No intermediate DataChunk materialization.
-	auto *jit = context.client.aqp_jit_context.get();
-	if (jit && (jit->flags & AQPJIT_PIPELINE) && !jit->pipeline_fns.empty()) {
-		// Look up by any operator in this pipeline (registered by first operator eid)
-		AQPPipelineFn pipe_fn = nullptr;
-		uint64_t matched_oid = 0;
-		for (auto &op_ref : pipeline.operators) {
-			uint64_t oid = ExpressionID(op_ref.get());
-			auto fit2 = jit->pipeline_fns.find(oid);
-			if (fit2 != jit->pipeline_fns.end()) {
-				pipe_fn = fit2->second;
-				matched_oid = oid;
-				break;
-			}
-		}
-		if (pipe_fn) {
-			input.Flatten();
-			result.SetCardinality(0);  // will be set by compiled fn
-			result.Flatten();
-			AQPChunkView in_cv  = MakeChunkViewAt(input, 0);
-			AQPChunkView out_cv = MakeChunkViewAt(result, input.ColumnCount());
-			void *pipe_state = nullptr;
-			auto sit = jit->pipeline_states.find(matched_oid);
-			if (sit != jit->pipeline_states.end()) {
-				pipe_state = sit->second;
-			}
-			int64_t out_rows = pipe_fn(&in_cv, &out_cv, pipe_state);
-			if (out_rows >= 0) {
-				result.SetCardinality(static_cast<idx_t>(out_rows));
-				jit->dispatch_count++;
-				return OperatorResultType::NEED_MORE_INPUT;
-			}
-			// Negative return = error, fall through to interpreter
-		}
-	}
+	// AQP JIT Level 3: Pipeline-level filter functions are now dispatched
+	// directly inside PhysicalFilter::Execute (physical_filter.cpp), so they
+	// integrate naturally with the operator chain.  No interception needed here.
 
 	idx_t current_idx;
 	GoToSource(current_idx, initial_idx);

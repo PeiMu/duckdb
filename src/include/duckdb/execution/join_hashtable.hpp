@@ -223,6 +223,10 @@ public:
 		return null_values_are_equal[col_idx];
 	}
 
+	//! AQP-JIT bridge: populate a view of this HT's internals for JIT'd probe code.
+	//! Only valid after Finalize() (entries[] must be allocated).
+	void PopulateAQPJITView(struct AQPJoinHTView &view) const;
+
 	ClientContext &context;
 	const PhysicalOperator &op;
 	//! BufferManager

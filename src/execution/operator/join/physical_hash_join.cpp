@@ -7,6 +7,7 @@
 #include "duckdb/function/aggregate/distributive_function_utils.hpp"
 #include "duckdb/function/aggregate/distributive_functions.hpp"
 #include "duckdb/function/function_binder.hpp"
+#include "duckdb/execution/aqp_jit.hpp"
 #include "duckdb/main/client_context.hpp"
 #include "duckdb/main/query_profiler.hpp"
 #include "duckdb/optimizer/filter_combiner.hpp"
@@ -1070,6 +1071,46 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 	auto &sink = sink_state->Cast<HashJoinGlobalSinkState>();
 	D_ASSERT(sink.finalized);
 	D_ASSERT(!sink.scanned_data);
+
+	// AQP JIT probe-side dispatch. Skip in three cases where the DuckDB HT we
+	// would read does not actually back the build data:
+	//   1. sink.external — spill path uses ProbeAndSpill, not Probe
+	//   2. Count() == 0  — ScheduleFinalize skips AllocatePointerTable, leaves
+	//      hash_table->entries == nullptr
+	//   3. sink.perfect_join_executor != nullptr — perfect hash builds its own
+	//      separate table inside the executor, never populating hash_table->
+	//      entries (see Finalize() above; ScheduleFinalize is skipped when
+	//      use_perfect_hash is true). The interpreter dispatches via the
+	//      perfect_join_executor branch a few lines below.
+	auto *jit = context.client.aqp_jit_context.get();
+	if (jit && (jit->flags & AQPJIT_PIPELINE) && !sink.external &&
+	    sink.hash_table->Count() > 0 && !sink.perfect_join_executor) {
+		uint64_t eid = ExpressionID(*this);
+		auto pit = jit->pipeline_fns.find(eid);
+		if (pit != jit->pipeline_fns.end()) {
+			auto vit = jit->join_ht_views.find(eid);
+			if (vit != jit->join_ht_views.end() && vit->second) {
+				// Populate view fields on first dispatch (hash_table is now
+				// finalized). Idempotent; populate fields are immutable across
+				// chunks of the same probe pipeline.
+				sink.hash_table->PopulateAQPJITView(*vit->second);
+				auto sit = jit->pipeline_states.find(eid);
+				if (sit != jit->pipeline_states.end() && sit->second) {
+					input.Flatten();
+					chunk.Reset();
+					chunk.Flatten();
+					AQPChunkView in_cv = MakeChunkView(input);
+					AQPChunkView out_cv = MakeChunkViewAt(chunk, input.ColumnCount());
+					int64_t out_rows = pit->second(&in_cv, &out_cv, sit->second);
+					if (out_rows >= 0) {
+						chunk.SetCardinality(static_cast<idx_t>(out_rows));
+						jit->dispatch_count++;
+						return OperatorResultType::NEED_MORE_INPUT;
+					}
+				}
+			}
+		}
+	}
 
 	if (sink.hash_table->Count() == 0) {
 		if (EmptyResultIfRHSIsEmpty()) {

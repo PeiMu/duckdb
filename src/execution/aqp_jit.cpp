@@ -65,4 +65,30 @@ uint64_t ExpressionID(const PhysicalOperator &op) {
 	return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(&op));
 }
 
+void AQPCopyStringImpl(const void *src_string, void *dst_string, void *dst_vector) {
+	auto &vec = *reinterpret_cast<Vector *>(dst_vector);
+	auto src = *reinterpret_cast<const string_t *>(src_string);
+	string_t result = StringVector::AddStringOrBlob(vec, src);
+	memcpy(dst_string, &result, sizeof(string_t));
+}
+
 } // namespace duckdb
+
+extern "C" {
+
+void aqp_copy_string(void *dst_data, void *src_data,
+                     uint64_t dst_row, uint64_t src_row,
+                     void *state_ptr, uint32_t col_idx) {
+	auto *state = reinterpret_cast<duckdb::AQPPipelineFilterState *>(state_ptr);
+	const uint8_t *src = reinterpret_cast<const uint8_t *>(src_data) + src_row * 16;
+	uint8_t *dst = reinterpret_cast<uint8_t *>(dst_data) + dst_row * 16;
+	uint32_t len;
+	memcpy(&len, src, sizeof(uint32_t));
+	if (len <= 12) {
+		memcpy(dst, src, 16);
+	} else {
+		state->copy_str(src, dst, state->col_vectors[col_idx]);
+	}
+}
+
+}

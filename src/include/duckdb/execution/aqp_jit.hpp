@@ -19,6 +19,7 @@
 #include "duckdb/common/types/selection_vector.hpp"
 
 #include <future>
+#include <mutex>
 
 namespace duckdb {
 
@@ -80,6 +81,32 @@ using AQPPipelineFn = int64_t (*)(AQPChunkView *source_chunk,
                                   AQPChunkView *sink_chunk,
                                   void *pipeline_state);
 
+// Callback for deep-copying a non-inline string_t into a Vector's string heap.
+using AQPCopyStringFn = void (*)(const void *src_string,
+                                 void *dst_string,
+                                 void *dst_vector);
+
+// Hash-join view: exposed to JIT'd probe code so it can touch DuckDB's
+// JoinHashTable directly (no vtable, no AQPHashTable shim).
+// Filled in PhysicalHashJoin::ExecuteInternal at probe time.
+// MUST stay byte-compatible with AQPJoinHTView in aqp_jit_abi.h.
+struct AQPJoinHTView {
+	void           *entries;        // ht_entry_t *
+	uint64_t        bitmask;        // capacity - 1
+	uint64_t        use_salt;       // 1 if capacity > USE_SALT_THRESHOLD (8192)
+	void           *layout_ptr;     // opaque shared_ptr<TupleDataLayout>* (set to layout_ptr.get())
+	uint32_t        tuple_size;     // total row width in bytes
+	uint32_t        pointer_offset; // offset of next_pointer inside row
+	const uint64_t *data_offsets;   // layout->GetOffsets().data() — per-col offsets within row
+};
+
+// State for pipeline filter functions (not fusions) — provides Vector pointers.
+struct AQPPipelineFilterState {
+	void **col_vectors;       // col_vectors[i] = &chunk.data[i]
+	uint64_t num_cols;
+	AQPCopyStringFn copy_str; // deep string copy callback
+};
+
 // Sub-plan coordinator: orchestrates multiple compiled pipelines.
 using AQPSubPlanFn = int32_t (*)(void *subplan_ctx);
 
@@ -111,7 +138,8 @@ struct AQPJITContext {
 	// dispatched at Level 2 — AQPHashTable is incompatible with DuckDB's
 	// JoinHashTable. They are consumed only by Level 3/4 pipeline fusion.
 	unordered_map<uint64_t, AQPOperatorFn> op_fns;
-	unordered_map<uint64_t, AQPPipelineFn> pipeline_fns;  // Level 3 fused pipelines
+	unordered_map<uint64_t, AQPPipelineFn> pipeline_fns;  // Level 3 fused pipelines (probe side)
+	unordered_map<uint64_t, AQPPipelineFn> build_pipeline_fns;  // Level 3 fused build-side pipelines
 
 	// Projection column mappings: eid → {out_col_i -> in_col_i}
 	// DuckDB dispatches these via zero-copy Vector::Reference() at Level 2.
@@ -146,12 +174,20 @@ struct AQPJITContext {
 	// Per-pipeline opaque state (e.g., AQP hash table pointer for fused build/probe).
 	unordered_map<uint64_t, void*> pipeline_states;
 
+	// Pipeline-JIT hash-join: view of DuckDB's JoinHashTable shared with JIT'd
+	// probe code. Owned by the context; populated at probe time from
+	// sink.hash_table fields. Keyed by HASH_JOIN operator eid.
+	unordered_map<uint64_t, unique_ptr<AQPJoinHTView>> join_ht_views;
+
 	// Sub-plan coordinator: one per sub-plan execution
 	AQPSubPlanFn subplan_fn = nullptr;
 
 	// Background compilation: futures that resolve to compiled fns.
 	// Polled at chunk boundaries; swapped into active maps when ready.
 	unordered_map<uint64_t, std::future<AQPExprFn>> pending_exprs;
+
+	// Mutex for thread-safe AQP hash table build (Sink is called from multiple threads).
+	std::mutex build_mutex;
 
 	// Diagnostic counters — incremented by PhysicalFilter on each dispatch.
 	uint64_t dispatch_count = 0;   // chunks routed through compiled path
@@ -180,5 +216,8 @@ int32_t ToDtype(PhysicalType pt);
 // Uses the operator's heap address XOR-hashed with a constant — stable within
 // a single query execution (the DuckDB plan does not move after creation).
 uint64_t ExpressionID(const PhysicalOperator &op);
+
+// Deep-copy a string_t into a Vector's string heap (safe for non-inline strings).
+void AQPCopyStringImpl(const void *src_string, void *dst_string, void *dst_vector);
 
 } // namespace duckdb
