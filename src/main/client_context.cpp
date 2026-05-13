@@ -285,31 +285,31 @@ ErrorData ClientContext::EndQueryInternal(ClientContextLock &lock, bool success,
 	active_query.reset();
 	query_progress.Initialize();
 	ErrorData error;
-	if (continue_exec)
-		return error;
-	try {
-		if (transaction.HasActiveTransaction()) {
-			transaction.ResetActiveQuery();
-			if (transaction.IsAutoCommit()) {
-				if (success) {
-					transaction.Commit();
-				} else {
-					transaction.Rollback(previous_error);
+	if (!continue_exec) {
+		try {
+			if (transaction.HasActiveTransaction()) {
+				transaction.ResetActiveQuery();
+				if (transaction.IsAutoCommit()) {
+					if (success) {
+						transaction.Commit();
+					} else {
+						transaction.Rollback(previous_error);
+					}
+				} else if (invalidate_transaction) {
+					D_ASSERT(!success);
+					ValidChecker::Invalidate(ActiveTransaction(), "Failed to commit");
 				}
-			} else if (invalidate_transaction) {
-				D_ASSERT(!success);
-				ValidChecker::Invalidate(ActiveTransaction(), "Failed to commit");
 			}
-		}
-	} catch (std::exception &ex) {
-		error = ErrorData(ex);
-		if (Exception::InvalidatesDatabase(error.Type()) || error.Type() == ExceptionType::INTERNAL) {
-			auto &db_inst = DatabaseInstance::GetDatabase(*this);
-			ValidChecker::Invalidate(db_inst, error.RawMessage());
-		}
-	} catch (...) { // LCOV_EXCL_START
-		error = ErrorData("Unhandled exception!");
-	} // LCOV_EXCL_STOP
+		} catch (std::exception &ex) {
+			error = ErrorData(ex);
+			if (Exception::InvalidatesDatabase(error.Type()) || error.Type() == ExceptionType::INTERNAL) {
+				auto &db_inst = DatabaseInstance::GetDatabase(*this);
+				ValidChecker::Invalidate(db_inst, error.RawMessage());
+			}
+		} catch (...) { // LCOV_EXCL_START
+			error = ErrorData("Unhandled exception!");
+		} // LCOV_EXCL_STOP
+	}
 
 	client_data->profiler->EndQuery();
 
