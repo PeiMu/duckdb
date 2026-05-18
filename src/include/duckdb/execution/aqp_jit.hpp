@@ -107,9 +107,6 @@ struct AQPPipelineFilterState {
 	AQPCopyStringFn copy_str; // deep string copy callback
 };
 
-// Sub-plan coordinator: orchestrates multiple compiled pipelines.
-using AQPSubPlanFn = int32_t (*)(void *subplan_ctx);
-
 // ---------------------------------------------------------------------------
 // JIT flags — indicate what was compiled and at what optimization level
 // ---------------------------------------------------------------------------
@@ -119,8 +116,6 @@ enum AQPJITFlags : uint32_t {
 	AQPJIT_OPERATOR = 1u << 1,  // Level 2: full operator compilation
 	AQPJIT_PIPELINE = 1u << 2,  // Level 3: fused pipeline compilation
 	AQPJIT_OPT3     = 1u << 3,  // Use LLVM O3 optimization
-	AQPJIT_SQL      = 1u << 4,  // Level 4: SQL / sub-SQL compilation
-	AQPJIT_SUBPLAN  = AQPJIT_SQL,  // Legacy alias
 	AQPJIT_SIMD     = 1u << 5,  // Enable explicit SIMD vectorization
 };
 
@@ -136,7 +131,7 @@ struct AQPJITContext {
 	unordered_map<uint64_t, AQPExprFn>     expr_fns;      // Level 1 + Level 2 filter
 	// Level 2 operators (+ Level 3). Hash build/probe are stored here but NOT
 	// dispatched at Level 2 — AQPHashTable is incompatible with DuckDB's
-	// JoinHashTable. They are consumed only by Level 3/4 pipeline fusion.
+	// JoinHashTable. They are consumed only by Level 3 pipeline fusion.
 	unordered_map<uint64_t, AQPOperatorFn> op_fns;
 	unordered_map<uint64_t, AQPPipelineFn> pipeline_fns;  // Level 3 fused pipelines (probe side + standalone filter/projection)
 	// Note: there is no build-side JIT map. The build path goes through
@@ -182,9 +177,6 @@ struct AQPJITContext {
 	// probe code. Owned by the context; populated at probe time from
 	// sink.hash_table fields. Keyed by HASH_JOIN operator eid.
 	unordered_map<uint64_t, unique_ptr<AQPJoinHTView>> join_ht_views;
-
-	// Sub-plan coordinator: one per sub-plan execution
-	AQPSubPlanFn subplan_fn = nullptr;
 
 	// Background compilation: futures that resolve to compiled fns.
 	// Polled at chunk boundaries; swapped into active maps when ready.
