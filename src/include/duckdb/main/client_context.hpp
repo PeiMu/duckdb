@@ -162,6 +162,9 @@ public:
 	DUCKDB_API unique_ptr<PreparedStatement> Prepare(const string &query);
 	//! Directly prepare a SQL statement
 	DUCKDB_API unique_ptr<PreparedStatement> Prepare(unique_ptr<SQLStatement> statement);
+	//! Prepare from a pre-built logical plan (skips parse/bind/optimize).
+	DUCKDB_API unique_ptr<PreparedStatement> PrepareFromPlan(unique_ptr<LogicalOperator> logical_plan,
+	                                                         vector<string> names, vector<LogicalType> types);
 
 	//! Create a pending query result from a prepared statement with the given name and set of parameters
 	//! It is possible that the prepared statement will be re-bound. This will generally happen if the catalog is

@@ -170,6 +170,11 @@ unique_ptr<PreparedStatement> Connection::Prepare(unique_ptr<SQLStatement> state
 	return context->Prepare(std::move(statement));
 }
 
+unique_ptr<PreparedStatement> Connection::PrepareFromPlan(unique_ptr<LogicalOperator> logical_plan,
+                                                           vector<string> names, vector<LogicalType> types) {
+	return context->PrepareFromPlan(std::move(logical_plan), std::move(names), std::move(types));
+}
+
 unique_ptr<QueryResult> Connection::QueryParamsRecursive(const string &query, vector<Value> &values) {
 	auto named_params = ConvertParamListToMap(values);
 	PendingQueryParameters parameters;
