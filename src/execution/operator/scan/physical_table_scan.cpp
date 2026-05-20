@@ -6,6 +6,7 @@
 #include "duckdb/planner/expression/bound_conjunction_expression.hpp"
 #include "duckdb/transaction/transaction.hpp"
 #include "duckdb/execution/aqp_jit.hpp"
+#include "duckdb/common/types/hash.hpp"
 #include "duckdb/main/client_context.hpp"
 #include "duckdb/main/database.hpp"
 #include "duckdb/execution/physical_table_scan_enum.hpp"
@@ -198,6 +199,56 @@ SourceResultType PhysicalTableScan::GetDataInternal(ExecutionContext &context, D
 						chunk.Slice(sel, result_count);
 					}
 					jit->dispatch_count++;
+				}
+			}
+		}
+
+		// AQP Bloom filter push-down: filter scanned rows against
+		// Bloom filters built from previous sub-plan temp tables.
+		if (chunk.size() > 0) {
+			auto *jit = context.client.aqp_jit_context.get();
+			if (jit && !jit->bloom_scan_filters.empty()) {
+				uint64_t scan_eid = ExpressionID(*this);
+				auto bit = jit->bloom_scan_filters.find(scan_eid);
+				if (bit != jit->bloom_scan_filters.end()) {
+					for (auto &bf_ptr : bit->second) {
+						if (chunk.size() == 0) break;
+						auto &bf = *bf_ptr;
+						chunk.Flatten();
+						auto &vec = chunk.data[bf.col_idx];
+						auto &validity = FlatVector::Validity(vec);
+						SelectionVector sel(STANDARD_VECTOR_SIZE);
+						idx_t result_count = 0;
+						idx_t n = chunk.size();
+
+						if (bf.dtype == AQP_DTYPE_INT32) {
+							auto *data_ptr = FlatVector::GetData<int32_t>(vec);
+							for (idx_t i = 0; i < n; i++) {
+								if (validity.RowIsValid(i)) {
+									uint64_t h = duckdb::Hash<int32_t>(data_ptr[i]);
+									if (bf.LookupOne(h)) {
+										sel.set_index(result_count++, i);
+									}
+								}
+							}
+						} else {
+							auto *data_ptr = FlatVector::GetData<int64_t>(vec);
+							for (idx_t i = 0; i < n; i++) {
+								if (validity.RowIsValid(i)) {
+									uint64_t h = duckdb::Hash<int64_t>(data_ptr[i]);
+									if (bf.LookupOne(h)) {
+										sel.set_index(result_count++, i);
+									}
+								}
+							}
+						}
+
+						if (result_count == 0) {
+							chunk.SetCardinality(0);
+						} else if (result_count < n) {
+							chunk.Slice(sel, result_count);
+						}
+					}
 				}
 			}
 		}

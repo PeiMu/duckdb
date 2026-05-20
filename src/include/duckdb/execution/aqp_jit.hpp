@@ -98,6 +98,7 @@ struct AQPJoinHTView {
 	uint32_t        tuple_size;     // total row width in bytes
 	uint32_t        pointer_offset; // offset of next_pointer inside row
 	const uint64_t *data_offsets;   // layout->GetOffsets().data() — per-col offsets within row
+	uint64_t        no_chains;      // 1 if chains_longer_than_one is false (skip chain walk)
 };
 
 // State for pipeline filter functions (not fusions) — provides Vector pointers.
@@ -166,6 +167,30 @@ struct AQPJITContext {
 	// Key = TABLE_SCAN operator eid, Value = compiled filter function.
 	unordered_map<uint64_t, AQPExprFn> scan_filter_fns;
 
+	// Bloom filter scan push-down: filters scanned rows against a Bloom filter
+	// built from a temp table's join key column (cross-sub-plan optimization).
+	static constexpr idx_t BF_N_BITS = 4;
+	static constexpr uint64_t BF_SHIFT_MASK = 0x3F3F3F3F3F3F3F3F;
+	struct AQPBloomScanFilter {
+		vector<uint64_t> bf_data;   // owned bit array
+		uint64_t bitmask;           // num_sectors - 1
+		uint32_t col_idx;           // column index in scanned chunk
+		int32_t dtype;              // AQP_DTYPE_INT32 or AQP_DTYPE_INT64
+
+		inline bool LookupOne(uint64_t hash) const {
+			uint64_t offset = hash & bitmask;
+			uint64_t shifts = hash & BF_SHIFT_MASK;
+			auto shifts_8 = reinterpret_cast<const uint8_t *>(&shifts);
+			uint64_t mask = 0;
+			for (idx_t i = 8 - BF_N_BITS; i < 8; i++) {
+				mask |= (1ULL << shifts_8[i]);
+			}
+			return (bf_data[offset] & mask) == mask;
+		}
+	};
+	// Key = TABLE_SCAN operator eid, Value = list of bloom filters on different columns
+	unordered_map<uint64_t, vector<unique_ptr<AQPBloomScanFilter>>> bloom_scan_filters;
+
 	// PhysicalFilter eids whose work is already done by scan+filter fusion.
 	// PhysicalFilter checks this set and becomes a pass-through when present.
 	unordered_set<uint64_t> fused_scan_filter_eids;
@@ -188,6 +213,7 @@ struct AQPJITContext {
 	// Diagnostic counters — incremented by PhysicalFilter on each dispatch.
 	uint64_t dispatch_count = 0;   // chunks routed through compiled path
 	uint64_t fallback_count = 0;   // chunks routed through interpreted path
+	uint64_t bail_count = 0;       // chunks where JIT bailed (output overflow)
 };
 
 // ---------------------------------------------------------------------------

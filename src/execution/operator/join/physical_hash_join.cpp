@@ -1107,6 +1107,7 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 						jit->dispatch_count++;
 						return OperatorResultType::NEED_MORE_INPUT;
 					}
+					jit->bail_count++;
 				}
 			}
 		}
