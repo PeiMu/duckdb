@@ -99,6 +99,8 @@ struct AQPJoinHTView {
 	uint32_t        pointer_offset; // offset of next_pointer inside row
 	const uint64_t *data_offsets;   // layout->GetOffsets().data() — per-col offsets within row
 	uint64_t        no_chains;      // 1 if chains_longer_than_one is false (skip chain walk)
+	const uint64_t *bf_data;        // bloom filter bit array (nullptr = no BF)
+	uint64_t        bf_bitmask;     // num_sectors - 1 for BF lookup
 };
 
 // State for pipeline filter functions (not fusions) — provides Vector pointers.
@@ -118,6 +120,7 @@ enum AQPJITFlags : uint32_t {
 	AQPJIT_PIPELINE = 1u << 2,  // Level 3: fused pipeline compilation
 	AQPJIT_OPT3     = 1u << 3,  // Use LLVM O3 optimization
 	AQPJIT_SIMD     = 1u << 5,  // Enable explicit SIMD vectorization
+	AQPJIT_PREFETCH = 1u << 6,  // Enable software prefetch for hash probes
 };
 
 // ---------------------------------------------------------------------------
@@ -197,6 +200,15 @@ struct AQPJITContext {
 
 	// Per-pipeline opaque state (e.g., AQP hash table pointer for fused build/probe).
 	unordered_map<uint64_t, void*> pipeline_states;
+
+	// Bloom filter data for hash join probe pre-filtering.
+	// Key = HASH_JOIN operator eid. Stored here to keep the data alive
+	// while the JIT probe code references it via AQPJoinHTView.bf_data.
+	struct AQPJoinBloomFilter {
+		vector<uint64_t> bf_data;
+		uint64_t bitmask; // num_sectors - 1
+	};
+	unordered_map<uint64_t, unique_ptr<AQPJoinBloomFilter>> join_bloom_filters;
 
 	// Pipeline-JIT hash-join: view of DuckDB's JoinHashTable shared with JIT'd
 	// probe code. Owned by the context; populated at probe time from

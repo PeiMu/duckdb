@@ -227,6 +227,9 @@ public:
 	//! Only valid after Finalize() (entries[] must be allocated).
 	void PopulateAQPJITView(struct AQPJoinHTView &view) const;
 
+	//! AQP-JIT: access hash table entries for prefetching
+	ht_entry_t *GetEntries() const { return entries; }
+
 	ClientContext &context;
 	const PhysicalOperator &op;
 	//! BufferManager

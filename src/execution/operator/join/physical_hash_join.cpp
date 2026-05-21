@@ -1083,7 +1083,7 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 	//      use_perfect_hash is true). The interpreter dispatches via the
 	//      perfect_join_executor branch a few lines below.
 	auto *jit = context.client.aqp_jit_context.get();
-	if (jit && (jit->flags & AQPJIT_PIPELINE) && !sink.external &&
+	if (false && jit && (jit->flags & AQPJIT_PIPELINE) && !sink.external &&
 	    sink.hash_table->Count() > 0 && !sink.perfect_join_executor) {
 		uint64_t eid = ExpressionID(*this);
 		auto pit = jit->pipeline_fns.find(eid);
@@ -1094,6 +1094,11 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 				// finalized). Idempotent; populate fields are immutable across
 				// chunks of the same probe pipeline.
 				sink.hash_table->PopulateAQPJITView(*vit->second);
+				auto bfit = jit->join_bloom_filters.find(eid);
+				if (bfit != jit->join_bloom_filters.end() && bfit->second) {
+					vit->second->bf_data = bfit->second->bf_data.data();
+					vit->second->bf_bitmask = bfit->second->bitmask;
+				}
 				auto sit = jit->pipeline_states.find(eid);
 				if (sit != jit->pipeline_states.end() && sit->second) {
 					input.Flatten();

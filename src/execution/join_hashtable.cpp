@@ -1481,6 +1481,8 @@ void JoinHashTable::PopulateAQPJITView(AQPJoinHTView &view) const {
 	view.pointer_offset = static_cast<uint32_t>(pointer_offset);
 	view.data_offsets = layout_ptr->GetOffsets().data();
 	view.no_chains = chains_longer_than_one ? 0ull : 1ull;
+	view.bf_data = nullptr;
+	view.bf_bitmask = 0;
 }
 
 idx_t JoinHashTable::ScanKeyColumn(Vector &addresses, Vector &result, idx_t column_index) const {
