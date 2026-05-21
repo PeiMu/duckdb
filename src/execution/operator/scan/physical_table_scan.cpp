@@ -214,8 +214,15 @@ SourceResultType PhysicalTableScan::GetDataInternal(ExecutionContext &context, D
 					for (auto &bf_ptr : bit->second) {
 						if (chunk.size() == 0) break;
 						auto &bf = *bf_ptr;
+						if (bf.col_idx >= chunk.ColumnCount()) {
+							continue;
+						}
 						chunk.Flatten();
 						auto &vec = chunk.data[bf.col_idx];
+						auto expected_pt = (bf.dtype == AQP_DTYPE_INT32) ? PhysicalType::INT32 : PhysicalType::INT64;
+						if (vec.GetType().InternalType() != expected_pt) {
+							continue;
+						}
 						auto &validity = FlatVector::Validity(vec);
 						SelectionVector sel(STANDARD_VECTOR_SIZE);
 						idx_t result_count = 0;
