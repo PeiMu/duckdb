@@ -28,22 +28,29 @@ void BloomFilter::Initialize(ClientContext &context_p, idx_t number_of_rows) {
 
 inline uint64_t GetMask(const hash_t hash) {
 	const uint64_t shifts = hash & SHIFT_MASK;
-	const auto shifts_8 = reinterpret_cast<const uint8_t *>(&shifts);
-
-	uint64_t mask = 0;
-
-	for (idx_t bit_idx = 8 - N_BITS; bit_idx < 8; bit_idx++) {
-		const uint8_t bit_pos = shifts_8[bit_idx];
-		mask |= (1ULL << bit_pos);
-	}
-
-	return mask;
+	const auto s = reinterpret_cast<const uint8_t *>(&shifts);
+	return (1ULL << s[4]) | (1ULL << s[5]) | (1ULL << s[6]) | (1ULL << s[7]);
 }
 
 void BloomFilter::InsertHashes(const Vector &hashes_v, idx_t count) const {
+	static constexpr idx_t BF_PREFETCH_DISTANCE = 16;
 	auto hashes = FlatVector::GetData<uint64_t>(hashes_v);
-	for (idx_t i = 0; i < count; i++) {
-		InsertOne(hashes[i]);
+
+	if (prefetch_enabled) {
+		const idx_t prefetch_end = std::min(count, BF_PREFETCH_DISTANCE);
+		for (idx_t p = 0; p < prefetch_end; p++) {
+			__builtin_prefetch(&bf[hashes[p] & bitmask], 1, 1);
+		}
+		for (idx_t i = 0; i < count; i++) {
+			if (i + BF_PREFETCH_DISTANCE < count) {
+				__builtin_prefetch(&bf[hashes[i + BF_PREFETCH_DISTANCE] & bitmask], 1, 1);
+			}
+			InsertOne(hashes[i]);
+		}
+	} else {
+		for (idx_t i = 0; i < count; i++) {
+			InsertOne(hashes[i]);
+		}
 	}
 }
 
@@ -51,11 +58,27 @@ idx_t BloomFilter::LookupHashes(const Vector &hashes_v, SelectionVector &result_
 	D_ASSERT(hashes_v.GetVectorType() == VectorType::FLAT_VECTOR);
 	D_ASSERT(hashes_v.GetType() == LogicalType::HASH);
 
+	static constexpr idx_t BF_PREFETCH_DISTANCE = 16;
 	const auto hashes = FlatVector::GetData<uint64_t>(hashes_v);
 	idx_t found_count = 0;
-	for (idx_t i = 0; i < count; i++) {
-		result_sel.set_index(found_count, i);
-		found_count += LookupOne(hashes[i]);
+
+	if (prefetch_enabled) {
+		const idx_t prefetch_end = std::min(count, BF_PREFETCH_DISTANCE);
+		for (idx_t p = 0; p < prefetch_end; p++) {
+			__builtin_prefetch(&bf[hashes[p] & bitmask], 0, 1);
+		}
+		for (idx_t i = 0; i < count; i++) {
+			if (i + BF_PREFETCH_DISTANCE < count) {
+				__builtin_prefetch(&bf[hashes[i + BF_PREFETCH_DISTANCE] & bitmask], 0, 1);
+			}
+			result_sel.set_index(found_count, i);
+			found_count += LookupOne(hashes[i]);
+		}
+	} else {
+		for (idx_t i = 0; i < count; i++) {
+			result_sel.set_index(found_count, i);
+			found_count += LookupOne(hashes[i]);
+		}
 	}
 	return found_count;
 }

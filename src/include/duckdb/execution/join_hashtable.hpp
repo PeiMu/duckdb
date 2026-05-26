@@ -158,6 +158,7 @@ public:
 		Vector ht_offsets_and_salts_v;
 		Vector hashes_dense_v;
 		SelectionVector non_empty_sel;
+		bool prefetch_enabled = false;
 	};
 
 	struct InsertState : SharedState {
@@ -351,6 +352,9 @@ private:
 	BloomFilter bloom_filter;
 	bool should_build_bloom_filter = false;
 
+	//! JIT-enabled software prefetching for probe and build
+	bool prefetch_enabled = false;
+
 	//! Copying not allowed
 	JoinHashTable(const JoinHashTable &) = delete;
 
@@ -436,6 +440,15 @@ public:
 
 	BloomFilter &GetBloomFilter() {
 		return bloom_filter;
+	}
+
+	void SetPrefetchEnabled(bool enabled) {
+		prefetch_enabled = enabled;
+		bloom_filter.prefetch_enabled = enabled;
+	}
+
+	bool IsPrefetchEnabled() const {
+		return prefetch_enabled;
 	}
 
 	//! Get total size of HT if all partitions would be built

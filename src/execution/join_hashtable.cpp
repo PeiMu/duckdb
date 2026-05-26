@@ -185,24 +185,35 @@ static void AddPointerToCompare(JoinHashTable::ProbeState &state, const ht_entry
 	keys_to_compare_count += 1;
 }
 
-template <bool USE_SALTS, bool HAS_SEL>
+static constexpr idx_t PROBE_PREFETCH_DISTANCE = 8;
+
+template <bool USE_SALTS, bool HAS_SEL, bool PREFETCH>
 static idx_t ProbeForPointersInternal(JoinHashTable::ProbeState &state, JoinHashTable &ht, ht_entry_t *entries,
                                       Vector &pointers_result_v, const SelectionVector *row_sel, idx_t &count) {
 	auto hashes_dense = FlatVector::GetData<hash_t>(state.hashes_dense_v);
 
 	idx_t keys_to_compare_count = 0;
 
+	if (PREFETCH) {
+		const idx_t prefetch_end = MinValue<idx_t>(count, PROBE_PREFETCH_DISTANCE);
+		for (idx_t p = 0; p < prefetch_end; p++) {
+			__builtin_prefetch(&entries[hashes_dense[p] & ht.bitmask], 0, 1);
+		}
+	}
+
 	for (idx_t i = 0; i < count; i++) {
-		auto row_hash = hashes_dense[i]; // hashes have been flattened before -> always access dense
+		if (PREFETCH && i + PROBE_PREFETCH_DISTANCE < count) {
+			__builtin_prefetch(&entries[hashes_dense[i + PROBE_PREFETCH_DISTANCE] & ht.bitmask], 0, 1);
+		}
+
+		auto row_hash = hashes_dense[i];
 		auto row_ht_offset = row_hash & ht.bitmask;
 
 		if (USE_SALTS) {
-			// increment the ht_offset of the entry as long as the next entry is occupied and salt does not match
 			while (true) {
 				const ht_entry_t entry = entries[row_ht_offset];
 				const bool occupied = entry.IsOccupied();
 
-				// the entry is empty -> no match possible
 				if (!occupied) {
 					break;
 				}
@@ -210,21 +221,18 @@ static idx_t ProbeForPointersInternal(JoinHashTable::ProbeState &state, JoinHash
 				const hash_t row_salt = ht_entry_t::ExtractSalt(row_hash);
 				const bool salt_match = entry.GetSalt() == row_salt;
 				if (salt_match) {
-					// we know that the enty is occupied and the salt matches -> compare the keys
 					auto row_index = GetOptionalIndex<HAS_SEL>(row_sel, i);
 					AddPointerToCompare(state, entry, pointers_result_v, row_ht_offset, keys_to_compare_count,
 					                    row_index);
 					break;
 				}
 
-				// full and salt do not match -> continue probing
 				IncrementAndWrap(row_ht_offset, ht.bitmask);
 			}
 		} else {
 			const ht_entry_t entry = entries[row_ht_offset];
 			const bool occupied = entry.IsOccupied();
 			if (occupied) {
-				// the entry is occupied -> compare the keys
 				auto row_index = GetOptionalIndex<HAS_SEL>(row_sel, i);
 				AddPointerToCompare(state, entry, pointers_result_v, row_ht_offset, keys_to_compare_count, row_index);
 			}
@@ -243,10 +251,18 @@ template <bool USE_SALTS>
 static idx_t ProbeForPointers(JoinHashTable::ProbeState &state, JoinHashTable &ht, ht_entry_t *entries,
                               Vector &pointers_result_v, const SelectionVector *row_sel, idx_t count,
                               const bool has_row_sel) {
-	if (has_row_sel) {
-		return ProbeForPointersInternal<USE_SALTS, true>(state, ht, entries, pointers_result_v, row_sel, count);
+	if (state.prefetch_enabled) {
+		if (has_row_sel) {
+			return ProbeForPointersInternal<USE_SALTS, true, true>(state, ht, entries, pointers_result_v, row_sel, count);
+		} else {
+			return ProbeForPointersInternal<USE_SALTS, false, true>(state, ht, entries, pointers_result_v, row_sel, count);
+		}
 	} else {
-		return ProbeForPointersInternal<USE_SALTS, false>(state, ht, entries, pointers_result_v, row_sel, count);
+		if (has_row_sel) {
+			return ProbeForPointersInternal<USE_SALTS, true, false>(state, ht, entries, pointers_result_v, row_sel, count);
+		} else {
+			return ProbeForPointersInternal<USE_SALTS, false, false>(state, ht, entries, pointers_result_v, row_sel, count);
+		}
 	}
 }
 
@@ -287,6 +303,16 @@ static void GetRowPointersInternal(DataChunk &keys, TupleDataChunkState &key_sta
 		// if there are no keys to compare, we are done
 		if (keys_to_compare_count == 0) {
 			break;
+		}
+
+		// Prefetch row data for upcoming key comparisons (JIT-gated)
+		if (state.prefetch_enabled && keys_to_compare_count > 0) {
+			auto row_ptrs = FlatVector::GetData<data_ptr_t>(pointers_result_v);
+			const idx_t prefetch_count = MinValue<idx_t>(keys_to_compare_count, 64);
+			for (idx_t p = 0; p < prefetch_count; p++) {
+				auto ridx = state.keys_to_compare_sel.get_index(p);
+				__builtin_prefetch(row_ptrs[ridx], 0, 1);
+			}
 		}
 
 		// Perform row comparisons, after Match function call salt_match_sel will point to the keys that match
@@ -644,11 +670,24 @@ static void InsertHashesLoop(atomic<ht_entry_t> entries[], Vector &row_locations
 
 	// use the ht bitmask to make the modulo operation faster but keep the salt bits intact
 	idx_t capacity_mask = ht.bitmask | ht_entry_t::SALT_MASK;
+	static constexpr idx_t BUILD_PREFETCH_DISTANCE = 8;
 	while (remaining_count > 0) {
 		idx_t salt_match_count = 0;
 
+		if (ht.IsPrefetchEnabled()) {
+			for (idx_t p = 0; p < std::min(remaining_count, BUILD_PREFETCH_DISTANCE); p++) {
+				const idx_t pidx = remaining_sel->get_index(p);
+				__builtin_prefetch(&entries[ht_offsets[pidx] & ht.bitmask], 1, 1);
+			}
+		}
+
 		// iterate over each entry to find out whether it belongs to an existing list or will start a new list
 		for (idx_t i = 0; i < remaining_count; i++) {
+			if (ht.IsPrefetchEnabled() && i + BUILD_PREFETCH_DISTANCE < remaining_count) {
+				const idx_t pidx = remaining_sel->get_index(i + BUILD_PREFETCH_DISTANCE);
+				__builtin_prefetch(&entries[ht_offsets[pidx] & ht.bitmask], 1, 1);
+			}
+
 			const idx_t row_index = remaining_sel->get_index(i);
 			auto &ht_offset = ht_offsets[row_index];
 			auto &salt = hash_salts[row_index];
@@ -891,39 +930,54 @@ bool ScanStructure::PointersExhausted() const {
 }
 
 idx_t ScanStructure::ResolvePredicates(DataChunk &keys, SelectionVector &match_sel, SelectionVector *no_match_sel) {
-	// Initialize the found_match array to the current sel_vector
-	for (idx_t i = 0; i < this->count; ++i) {
-		match_sel.set_index(i, this->sel_vector.get_index(i));
-	}
-
-	// If there is a matcher for the probing side because of non-equality predicates, use it
 	idx_t result_count;
 	if (ht.needs_chain_matcher) {
+		if (ht.IsPrefetchEnabled()) {
+			memcpy(match_sel.data(), this->sel_vector.data(), this->count * sizeof(sel_t));
+		} else {
+			for (idx_t i = 0; i < this->count; ++i) {
+				match_sel.set_index(i, this->sel_vector.get_index(i));
+			}
+		}
+
 		idx_t no_match_count = 0;
 		auto &matcher = no_match_sel ? ht.row_matcher_probe_no_match_sel : ht.row_matcher_probe;
 		D_ASSERT(matcher);
 
-		// we need to only use the vectors with the indices of the columns that are used in the probe phase, namely
-		// the non-equality columns
 		result_count =
 		    matcher->Match(keys, key_state.vector_data, match_sel, this->count, pointers, no_match_sel, no_match_count);
 	} else {
-		// no match sel is the opposite of match sel
+		if (ht.IsPrefetchEnabled()) {
+			memcpy(match_sel.data(), this->sel_vector.data(), this->count * sizeof(sel_t));
+		} else {
+			for (idx_t i = 0; i < this->count; ++i) {
+				match_sel.set_index(i, this->sel_vector.get_index(i));
+			}
+		}
 		result_count = this->count;
 	}
 
-	// Update total probe match count
 	ht.total_probe_matches.fetch_add(result_count, std::memory_order_relaxed);
 
 	return result_count;
 }
 
 idx_t ScanStructure::ScanInnerJoin(DataChunk &keys, SelectionVector &result_vector) {
+	if (ht.IsPrefetchEnabled() && !ht.needs_chain_matcher) {
+		// JIT-gated equality-only fast path: skip ResolvePredicates entirely
+		memcpy(result_vector.data(), this->sel_vector.data(), this->count * sizeof(sel_t));
+		idx_t result_count = this->count;
+		ht.total_probe_matches.fetch_add(result_count, std::memory_order_relaxed);
+		if (ht.join_type != JoinType::INNER && ht.join_type != JoinType::RIGHT && found_match) {
+			for (idx_t i = 0; i < result_count; i++) {
+				found_match[result_vector.get_index(i)] = true;
+			}
+		}
+		return result_count;
+	}
 	while (true) {
-		// resolve the equality_predicates for this set of keys
 		idx_t result_count = ResolvePredicates(keys, result_vector, nullptr);
 
-		// after doing all the comparisons set the found_match vector
 		if (found_match) {
 			for (idx_t i = 0; i < result_count; i++) {
 				auto idx = result_vector.get_index(i);
@@ -933,7 +987,6 @@ idx_t ScanStructure::ScanInnerJoin(DataChunk &keys, SelectionVector &result_vect
 		if (result_count > 0) {
 			return result_count;
 		}
-		// no matches found: check the next set of pointers
 		AdvancePointers();
 		if (this->count == 0) {
 			return 0;
@@ -947,14 +1000,35 @@ void ScanStructure::AdvancePointers(const SelectionVector &sel, const idx_t sel_
 		return;
 	}
 
-	// now for all the pointers, we move on to the next set of pointers
+	static constexpr idx_t CHAIN_PREFETCH_DISTANCE = 8;
+
 	idx_t new_count = 0;
 	auto ptrs = FlatVector::GetData<data_ptr_t>(this->pointers);
-	for (idx_t i = 0; i < sel_count; i++) {
-		auto idx = sel.get_index(i);
-		ptrs[idx] = LoadPointer(ptrs[idx] + ht.pointer_offset);
-		if (ptrs[idx]) {
-			this->sel_vector.set_index(new_count++, idx);
+
+	if (ht.IsPrefetchEnabled() && sel_count > CHAIN_PREFETCH_DISTANCE) {
+		for (idx_t p = 0; p < CHAIN_PREFETCH_DISTANCE; p++) {
+			auto pidx = sel.get_index(p);
+			__builtin_prefetch(ptrs[pidx] + ht.pointer_offset, 0, 1);
+		}
+		for (idx_t i = 0; i < sel_count; i++) {
+			if (i + CHAIN_PREFETCH_DISTANCE < sel_count) {
+				auto pidx = sel.get_index(i + CHAIN_PREFETCH_DISTANCE);
+				__builtin_prefetch(ptrs[pidx] + ht.pointer_offset, 0, 1);
+			}
+			auto idx = sel.get_index(i);
+			ptrs[idx] = LoadPointer(ptrs[idx] + ht.pointer_offset);
+			if (ptrs[idx]) {
+				__builtin_prefetch(ptrs[idx], 0, 1);
+				this->sel_vector.set_index(new_count++, idx);
+			}
+		}
+	} else {
+		for (idx_t i = 0; i < sel_count; i++) {
+			auto idx = sel.get_index(i);
+			ptrs[idx] = LoadPointer(ptrs[idx] + ht.pointer_offset);
+			if (ptrs[idx]) {
+				this->sel_vector.set_index(new_count++, idx);
+			}
 		}
 	}
 	this->count = new_count;
@@ -1071,23 +1145,23 @@ void ScanStructure::NextInnerJoin(DataChunk &keys, DataChunk &left, DataChunk &r
 }
 
 void ScanStructure::ScanKeyMatches(DataChunk &keys) {
-	// the semi-join, anti-join and mark-join we handle a differently from the inner join
-	// since there can be at most STANDARD_VECTOR_SIZE results
-	// we handle the entire chunk in one call to Next().
-	// for every pointer, we keep chasing pointers and doing comparisons.
-	// this results in a boolean array indicating whether or not the tuple has a match
-	// Start with the scan selection
+	if (ht.IsPrefetchEnabled() && !ht.needs_chain_matcher) {
+		// JIT-gated equality-only fast path: mark found and stop
+		for (idx_t i = 0; i < this->count; i++) {
+			found_match[this->sel_vector.get_index(i)] = true;
+		}
+		ht.total_probe_matches.fetch_add(this->count, std::memory_order_relaxed);
+		this->count = 0;
+		return;
+	}
 
 	while (this->count > 0) {
-		// resolve the equality_predicates for the current set of pointers
 		idx_t match_count = ResolvePredicates(keys, chain_match_sel_vector, &chain_no_match_sel_vector);
 		idx_t no_match_count = this->count - match_count;
 
-		// mark each of the matches as found
 		for (idx_t i = 0; i < match_count; i++) {
 			found_match[chain_match_sel_vector.get_index(i)] = true;
 		}
-		// continue searching for the ones where we did not find a match yet
 		AdvancePointers(chain_no_match_sel_vector, no_match_count);
 	}
 }

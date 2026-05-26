@@ -142,6 +142,12 @@ public:
 	      probe_side_requirement(0), scanned_data(false) {
 		hash_table = op.InitializeHashTable(context);
 
+		// Enable prefetching when JIT context is active
+		auto *jit = context_p.aqp_jit_context.get();
+		if (jit && jit->flags) {
+			hash_table->SetPrefetchEnabled(true);
+		}
+
 		// For perfect hash join
 		perfect_join_executor = make_uniq<PerfectHashJoinExecutor>(op, *hash_table);
 		bool use_perfect_hash = false;
@@ -1048,6 +1054,11 @@ unique_ptr<OperatorState> PhysicalHashJoin::GetOperatorState(ExecutionContext &c
 	state->lhs_join_keys.Initialize(allocator, condition_types);
 	if (!lhs_output_columns.col_types.empty()) {
 		state->lhs_output.Initialize(allocator, lhs_output_columns.col_types);
+	}
+	// Enable prefetching when JIT is active
+	auto *jit = context.client.aqp_jit_context.get();
+	if (jit && jit->flags) {
+		state->probe_state.prefetch_enabled = true;
 	}
 	if (sink.perfect_join_executor) {
 		state->perfect_hash_join_state = sink.perfect_join_executor->GetOperatorState(context);

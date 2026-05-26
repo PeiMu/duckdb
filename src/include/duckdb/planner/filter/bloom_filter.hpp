@@ -32,6 +32,8 @@ public:
 		return initialized;
 	}
 
+	bool prefetch_enabled = false;
+
 private:
 	idx_t num_sectors;
 	uint64_t bitmask; // num_sectors - 1 -> used to get the sector offset
