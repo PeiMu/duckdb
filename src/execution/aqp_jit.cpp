@@ -23,7 +23,7 @@ AQPChunkView MakeChunkView(DataChunk &chunk) {
 	return MakeChunkViewAt(chunk, 0);
 }
 
-AQPChunkView MakeChunkViewAt(DataChunk &chunk, idx_t buf_offset) {
+AQPChunkView MakeChunkViewAt(DataChunk &chunk, idx_t buf_offset, bool writable_validity) {
 	// col_views is a thread-local scratch buffer; we rebuild it per call.
 	// buf_offset allows multiple non-overlapping regions (e.g., input at 0,
 	// output at input.ColumnCount()) for operator-level JIT that needs
@@ -38,6 +38,12 @@ AQPChunkView MakeChunkViewAt(DataChunk &chunk, idx_t buf_offset) {
 	for (idx_t i = 0; i < ncols; i++) {
 		Vector &vec = chunk.data[i];
 		auto &vmask = FlatVector::Validity(vec);
+		if (writable_validity) {
+			// Fresh all-valid buffer: JIT'd emit code clears bits for NULL
+			// outputs via raw word stores, so the mask must be owned and
+			// not shared with another vector.
+			vmask.Initialize(STANDARD_VECTOR_SIZE);
+		}
 		col_buf[buf_offset + i].data     = vec.GetData();
 		col_buf[buf_offset + i].validity = vmask.AllValid() ? nullptr : reinterpret_cast<uint64_t *>(vmask.GetData());
 		col_buf[buf_offset + i].vtype    = static_cast<int32_t>(vec.GetVectorType());

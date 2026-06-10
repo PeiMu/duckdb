@@ -23,8 +23,9 @@
 
 namespace duckdb {
 
-// Forward declaration — full type included only in aqp_jit.cpp
+// Forward declarations — full types included only where needed
 class PhysicalOperator;
+class PhysicalHashJoin;
 
 // ---------------------------------------------------------------------------
 // ABI types — stable C-compatible layout shared with the AQP middleware.
@@ -101,6 +102,7 @@ struct AQPJoinHTView {
 	uint64_t        no_chains;      // 1 if chains_longer_than_one is false (skip chain walk)
 	const uint64_t *bf_data;        // bloom filter bit array (nullptr = no BF)
 	uint64_t        bf_bitmask;     // num_sectors - 1 for BF lookup
+	uint64_t        has_row_validity; // 1 if rows start with a per-column validity bit prefix
 };
 
 // State for pipeline filter functions (not fusions) — provides Vector pointers.
@@ -226,6 +228,48 @@ struct AQPJITContext {
 	uint64_t dispatch_count = 0;   // chunks routed through compiled path
 	uint64_t fallback_count = 0;   // chunks routed through interpreted path
 	uint64_t bail_count = 0;       // chunks where JIT bailed (output overflow)
+
+	// --- Multi-probe fusion (Phase 4-5) ---
+
+	// Fused multi-probe functions, keyed by innermost HJ eid.
+	// Separate from pipeline_fns so single-probe can serve as fallback
+	// (e.g., when an outer HJ uses perfect_join_executor at runtime).
+	unordered_map<uint64_t, AQPPipelineFn> multi_probe_fns;
+
+	// Outer HJ eids whose work is done by the innermost HJ's fused function.
+	// These become pass-through operators at dispatch time.
+	// Maps passthrough_eid → innermost_eid to verify the active chain matches.
+	unordered_map<uint64_t, uint64_t> multi_probe_passthrough_eids;
+
+	// Per-thread flag: set by inner HJ when multi-probe dispatch succeeds,
+	// checked by outer HJ to activate passthrough. Thread-local because
+	// multiple pipeline worker threads execute concurrently.
+	static thread_local uint64_t multi_probe_active_eid;
+
+	// innermost_eid → outermost HJ output LogicalTypes (for chunk reinit)
+	unordered_map<uint64_t, vector<LogicalType>> multi_probe_outer_types;
+
+	// All chain-member HJ eids (inner + outer). Used by Finalize to bypass
+	// the perfect (array) hash join when force_hash_join_for_chains is set,
+	// and by CachingPhysicalOperator to disable chunk caching (the fused
+	// output layout may differ from the member's own output layout).
+	unordered_set<uint64_t> multi_probe_chain_members;
+
+	// --single-column-int-join-mode: force the regular hash-table path for
+	// chain members even when a perfect hash join is possible, so the fused
+	// multi-probe function can run (it probes JoinHashTable directly).
+	bool force_hash_join_for_chains = false;
+
+	// Multi-probe state: array of AQPJoinHTView* for fused probe functions.
+	struct AQPMultiProbeState {
+		AQPJoinHTView *views[4] = {};
+		uint32_t num_stages = 0;
+	};
+	unordered_map<uint64_t, unique_ptr<AQPMultiProbeState>> multi_probe_states;
+
+	// innermost_eid → chain of PhysicalHashJoin* [inner, ..., outer]
+	// Used at dispatch to populate all views via each HJ's sink_state.
+	unordered_map<uint64_t, vector<PhysicalHashJoin*>> multi_probe_hj_chain;
 };
 
 // ---------------------------------------------------------------------------
@@ -238,7 +282,9 @@ AQPChunkView MakeChunkView(DataChunk &chunk);
 
 // Same as MakeChunkView but uses col_buf[buf_offset..] to avoid collisions
 // when building separate input and output views simultaneously.
-AQPChunkView MakeChunkViewAt(DataChunk &chunk, idx_t buf_offset);
+// writable_validity: allocate an all-valid mask per column so JIT'd code can
+// write NULL bits (output chunks of fused probe functions need this).
+AQPChunkView MakeChunkViewAt(DataChunk &chunk, idx_t buf_offset, bool writable_validity = false);
 
 // Wrap an existing SelectionVector as an AQPSelView.
 AQPSelView MakeSelView(SelectionVector &sel);

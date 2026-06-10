@@ -13,6 +13,7 @@ namespace duckdb {
 
 PipelineExecutor::PipelineExecutor(ClientContext &context_p, Pipeline &pipeline_p)
     : pipeline(pipeline_p), thread(context_p), context(context_p, thread, &pipeline_p) {
+	AQPJITContext::multi_probe_active_eid = 0;
 	D_ASSERT(pipeline.source_state);
 	if (pipeline.sink) {
 		local_sink_state = pipeline.sink->GetLocalSinkState(context);

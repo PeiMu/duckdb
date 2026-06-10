@@ -30,6 +30,14 @@
 
 namespace duckdb {
 
+thread_local uint64_t AQPJITContext::multi_probe_active_eid = 0;
+
+// Cached env check so the per-chunk dispatch path avoids repeated getenv().
+static bool AQPMPTrace() {
+	static const bool enabled = getenv("AQP_MP_TRACE") != nullptr;
+	return enabled;
+}
+
 PhysicalHashJoin::PhysicalHashJoin(PhysicalPlan &physical_plan, LogicalOperator &op, PhysicalOperator &left,
                                    PhysicalOperator &right, vector<JoinCondition> cond, JoinType join_type,
                                    const vector<idx_t> &left_projection_map, const vector<idx_t> &right_projection_map,
@@ -995,8 +1003,19 @@ SinkFinalizeType PhysicalHashJoin::Finalize(Pipeline &pipeline, Event &event, Cl
 		max = Value::MaximumValue(conditions[0].right->return_type);
 	}
 
+	// AQP multi-probe: force the regular hash-table path for chain members so
+	// the fused probe function (which reads JoinHashTable directly) can run.
+	bool aqp_force_hash = false;
+	{
+		auto *aqp_jit = context.aqp_jit_context.get();
+		if (aqp_jit && aqp_jit->force_hash_join_for_chains &&
+		    aqp_jit->multi_probe_chain_members.count(ExpressionID(*this))) {
+			aqp_force_hash = true;
+		}
+	}
+
 	// check for possible perfect hash table
-	auto use_perfect_hash = sink.perfect_join_executor->CanDoPerfectHashJoin(*this, min, max);
+	auto use_perfect_hash = !aqp_force_hash && sink.perfect_join_executor->CanDoPerfectHashJoin(*this, min, max);
 	if (use_perfect_hash) {
 		D_ASSERT(ht.equality_types.size() == 1);
 		auto key_type = ht.equality_types[0];
@@ -1094,16 +1113,252 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 	//      use_perfect_hash is true). The interpreter dispatches via the
 	//      perfect_join_executor branch a few lines below.
 	auto *jit = context.client.aqp_jit_context.get();
-	if (false && jit && (jit->flags & AQPJIT_PIPELINE) && !sink.external &&
-	    sink.hash_table->Count() > 0 && !sink.perfect_join_executor) {
+	// HAVE_MORE_OUTPUT continuation: the interpreter is mid-scan on this input
+	// chunk (e.g., after a JIT bail). Skip all JIT dispatch so the scan resumes.
+	if (jit && !state.scan_structure.is_null) {
+		jit = nullptr;
+	}
+
+	// Multi-probe passthrough: this HJ's probe was already done by the
+	// innermost HJ's fused function. Inner HJ changed its output chunk to
+	// outermost types and wrote the result directly. This HJ just forwards.
+	if (jit && (jit->flags & AQPJIT_PIPELINE) && jit->multi_probe_active_eid) {
 		uint64_t eid = ExpressionID(*this);
+		auto pt_it = jit->multi_probe_passthrough_eids.find(eid);
+		if (pt_it != jit->multi_probe_passthrough_eids.end() &&
+		    pt_it->second == jit->multi_probe_active_eid) {
+			// Verify input types match the CHAIN's final output types (the
+			// fused function writes the outermost HJ's layout). For middle
+			// HJs of N>=3 chains this differs from their own GetTypes().
+			// If mismatched, the fused code is on a different pipeline or has
+			// a column ordering bug — fall through to normal execution.
+			auto outer_it = jit->multi_probe_outer_types.find(pt_it->second);
+			bool input_ok = (outer_it != jit->multi_probe_outer_types.end()) &&
+			                (input.ColumnCount() == outer_it->second.size());
+			if (input_ok) {
+				for (idx_t ci = 0; ci < input.ColumnCount(); ci++) {
+					if (input.data[ci].GetType() != outer_it->second[ci]) {
+						input_ok = false;
+						break;
+					}
+				}
+			}
+			if (AQPMPTrace()) {
+				fprintf(stderr, "[MP-PASSTHROUGH] eid=%llx input_ok=%d in_cols=%llu my_cols=%llu\n",
+				        (unsigned long long)eid, (int)input_ok, (unsigned long long)input.ColumnCount(),
+				        (unsigned long long)GetTypes().size());
+			}
+			if (input_ok) {
+				bool needs_reinit = (chunk.ColumnCount() != input.ColumnCount());
+				if (!needs_reinit) {
+					for (idx_t ci = 0; ci < chunk.ColumnCount(); ci++) {
+						if (chunk.data[ci].GetType() != input.data[ci].GetType()) {
+							needs_reinit = true;
+							break;
+						}
+					}
+				}
+				if (needs_reinit) {
+					chunk.Destroy();
+					chunk.Initialize(BufferAllocator::Get(context.client), input.GetTypes());
+				}
+				chunk.Reference(input);
+				return OperatorResultType::NEED_MORE_INPUT;
+			}
+		}
+		jit->multi_probe_active_eid = 0;
+	}
+
+	// Falling back to normal execution for a chain member: if a previous
+	// passthrough left this HJ's output chunk with the chain's outer layout
+	// (middle HJs of N>=3 chains), restore this HJ's own layout first.
+	if (jit && (jit->flags & AQPJIT_PIPELINE) &&
+	    jit->multi_probe_passthrough_eids.count(ExpressionID(*this))) {
+		auto &my_types = GetTypes();
+		bool layout_ok = (chunk.ColumnCount() == my_types.size());
+		if (layout_ok) {
+			for (idx_t ci = 0; ci < chunk.ColumnCount(); ci++) {
+				if (chunk.data[ci].GetType() != my_types[ci]) {
+					layout_ok = false;
+					break;
+				}
+			}
+		}
+		if (!layout_ok) {
+			chunk.Destroy();
+			chunk.Initialize(BufferAllocator::Get(context.client), my_types);
+		}
+	}
+
+	if (jit && (jit->flags & AQPJIT_PIPELINE) && !sink.external &&
+	    sink.hash_table->Count() > 0) {
+		uint64_t eid = ExpressionID(*this);
+
+		// --- Multi-probe dispatch (try first) ---
+		// No perfect_join_executor gate here — the chain validation loop
+		// checks each member individually.
+		bool is_multi_probe = false;
+		auto mpit = jit->multi_probe_fns.find(eid);
+		if (AQPMPTrace()) {
+			fprintf(stderr, "[MP-GATE] eid=%llx in_fns=%d\n", (unsigned long long)eid,
+			        (int)(mpit != jit->multi_probe_fns.end()));
+		}
+		if (mpit != jit->multi_probe_fns.end()) {
+			is_multi_probe = true;
+			auto chain_it = jit->multi_probe_hj_chain.find(eid);
+			if (chain_it != jit->multi_probe_hj_chain.end()) {
+				bool chain_ok = true;
+				for (size_t ci = 0; ci < chain_it->second.size(); ci++) {
+					auto *chain_hj = chain_it->second[ci];
+					uint64_t chain_eid = ExpressionID(*chain_hj);
+					auto vit2 = jit->join_ht_views.find(chain_eid);
+					if (vit2 != jit->join_ht_views.end() && vit2->second) {
+						if (!chain_hj->sink_state) {
+							chain_ok = false;
+							if (AQPMPTrace())
+								fprintf(stderr, "[MP-CHAINFAIL] eid=%llx ci=%zu no-sink-state\n",
+								        (unsigned long long)eid, ci);
+							break;
+						}
+						auto &chain_sink = chain_hj->sink_state->Cast<HashJoinGlobalSinkState>();
+						if (chain_sink.hash_table->Count() == 0 || chain_sink.external ||
+						    chain_sink.perfect_join_executor) {
+							chain_ok = false;
+							if (AQPMPTrace())
+								fprintf(stderr, "[MP-CHAINFAIL] eid=%llx ci=%zu count=%llu ext=%d perfect=%d\n",
+								        (unsigned long long)eid, ci,
+								        (unsigned long long)chain_sink.hash_table->Count(),
+								        (int)chain_sink.external, (int)(bool)chain_sink.perfect_join_executor);
+							break;
+						}
+						chain_sink.hash_table->PopulateAQPJITView(*vit2->second);
+					} else {
+						chain_ok = false;
+						if (AQPMPTrace())
+							fprintf(stderr, "[MP-CHAINFAIL] eid=%llx ci=%zu no-view\n",
+							        (unsigned long long)eid, ci);
+						break;
+					}
+				}
+				if (chain_ok) {
+					auto msit = jit->multi_probe_states.find(eid);
+					if (msit != jit->multi_probe_states.end() && msit->second) {
+						auto *mps = msit->second.get();
+						for (size_t ci = 0; ci < chain_it->second.size(); ci++) {
+							auto *chain_hj = chain_it->second[ci];
+							uint64_t chain_eid = ExpressionID(*chain_hj);
+							mps->views[ci] = jit->join_ht_views[chain_eid].get();
+						}
+						auto types_it = jit->multi_probe_outer_types.find(eid);
+						if (types_it != jit->multi_probe_outer_types.end()) {
+							auto &outer_types = types_it->second;
+							// Check if chunk has already been committed to outer
+							// types (from a previous successful multi-probe call).
+							bool committed = (chunk.ColumnCount() == outer_types.size());
+							if (committed) {
+								for (idx_t ci = 0; ci < chunk.ColumnCount(); ci++) {
+									if (chunk.data[ci].GetType() != outer_types[ci]) {
+										committed = false;
+										break;
+									}
+								}
+							}
+							// Reinitialize chunk to outer types BEFORE calling JIT.
+							// Once committed, chunk stays at outer types permanently.
+							if (!committed) {
+								// First attempt: try multi-probe without committing.
+								// Use input columns as output buffer temporarily.
+								input.Flatten();
+								chunk.Reset();
+								// Create views with original chunk types
+								AQPChunkView in_cv = MakeChunkView(input);
+								// For first attempt, use a thread-local scratch chunk
+								static thread_local DataChunk mp_scratch;
+								bool scratch_ok = (mp_scratch.ColumnCount() == outer_types.size());
+								if (scratch_ok) {
+									for (idx_t ci = 0; ci < mp_scratch.ColumnCount(); ci++) {
+										if (mp_scratch.data[ci].GetType() != outer_types[ci]) {
+											scratch_ok = false;
+											break;
+										}
+									}
+								}
+								if (!scratch_ok) {
+									if (mp_scratch.ColumnCount() > 0) mp_scratch.Destroy();
+									mp_scratch.Initialize(BufferAllocator::Get(context.client), outer_types);
+								}
+								mp_scratch.Reset();
+								AQPChunkView out_cv = MakeChunkViewAt(mp_scratch, input.ColumnCount(), true);
+								int64_t out_rows = mpit->second(&in_cv, &out_cv, mps);
+								if (out_rows >= 0) {
+									// Commit: reinitialize chunk to outer types. Chunk
+									// caching is disabled for chain members (see
+									// CachingPhysicalOperator::Execute), so no
+									// cached_chunk can hold rows in the old layout.
+									chunk.Destroy();
+									chunk.Initialize(BufferAllocator::Get(context.client), outer_types);
+									chunk.Reference(mp_scratch);
+									chunk.SetCardinality(static_cast<idx_t>(out_rows));
+									jit->dispatch_count++;
+									jit->multi_probe_active_eid = eid;
+									if (AQPMPTrace()) {
+										fprintf(stderr, "[MP-DISPATCH] eid=%llx rows=%lld first-commit\n",
+										        (unsigned long long)eid, (long long)out_rows);
+									}
+									return OperatorResultType::NEED_MORE_INPUT;
+								}
+								jit->bail_count++;
+								if (AQPMPTrace()) {
+									fprintf(stderr, "[MP-BAIL] eid=%llx pre-commit\n", (unsigned long long)eid);
+								}
+								// Bail on first attempt: chunk untouched (original types).
+								// Fall through to single-probe or interpreter.
+							} else {
+								// Already committed: must use multi-probe.
+								input.Flatten();
+								chunk.Reset();
+								AQPChunkView in_cv = MakeChunkView(input);
+								AQPChunkView out_cv = MakeChunkViewAt(chunk, input.ColumnCount(), true);
+								int64_t out_rows = mpit->second(&in_cv, &out_cv, mps);
+								if (out_rows >= 0) {
+									chunk.SetCardinality(static_cast<idx_t>(out_rows));
+									jit->dispatch_count++;
+									jit->multi_probe_active_eid = eid;
+									if (AQPMPTrace()) {
+										fprintf(stderr, "[MP-DISPATCH] eid=%llx rows=%lld committed\n",
+										        (unsigned long long)eid, (long long)out_rows);
+									}
+									return OperatorResultType::NEED_MORE_INPUT;
+								}
+								// Bail after commit (>2048 output rows for this input
+								// chunk): restore this HJ's own output layout and fall
+								// through to the interpreter, which handles large
+								// outputs via HAVE_MORE_OUTPUT. multi_probe_active_eid
+								// stays 0, so outer chain HJs execute normally and
+								// restore their own layouts via the guard above.
+								jit->bail_count++;
+								if (AQPMPTrace()) {
+									fprintf(stderr, "[MP-BAIL] eid=%llx post-commit, falling back\n",
+									        (unsigned long long)eid);
+								}
+								chunk.Destroy();
+								chunk.Initialize(BufferAllocator::Get(context.client), GetTypes());
+							}
+						}
+					}
+				}
+			}
+		}
+		jit->multi_probe_active_eid = 0;
+
+		// --- Single-probe dispatch (skip if multi-probe registered or perfect join) ---
+		// When multi-probe is registered for this eid, skip single-probe entirely:
+		// multi-probe's output schema differs from single-probe's, and the chunk
+		// may have been reinitialized to outer types.
 		auto pit = jit->pipeline_fns.find(eid);
-		if (pit != jit->pipeline_fns.end()) {
+		if (pit != jit->pipeline_fns.end() && !sink.perfect_join_executor && !is_multi_probe) {
 			auto vit = jit->join_ht_views.find(eid);
 			if (vit != jit->join_ht_views.end() && vit->second) {
-				// Populate view fields on first dispatch (hash_table is now
-				// finalized). Idempotent; populate fields are immutable across
-				// chunks of the same probe pipeline.
 				sink.hash_table->PopulateAQPJITView(*vit->second);
 				auto bfit = jit->join_bloom_filters.find(eid);
 				if (bfit != jit->join_bloom_filters.end() && bfit->second) {
@@ -1116,7 +1371,7 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 					chunk.Reset();
 					chunk.Flatten();
 					AQPChunkView in_cv = MakeChunkView(input);
-					AQPChunkView out_cv = MakeChunkViewAt(chunk, input.ColumnCount());
+					AQPChunkView out_cv = MakeChunkViewAt(chunk, input.ColumnCount(), true);
 					int64_t out_rows = pit->second(&in_cv, &out_cv, sit->second);
 					if (out_rows >= 0) {
 						chunk.SetCardinality(static_cast<idx_t>(out_rows));
@@ -1124,6 +1379,11 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 						return OperatorResultType::NEED_MORE_INPUT;
 					}
 					jit->bail_count++;
+					// The bailed JIT run may have cleared validity bits in the
+					// pre-allocated output masks. The interpreter's gather only
+					// clears bits (never re-sets them), so reset the chunk to
+					// drop the stale masks before falling through.
+					chunk.Reset();
 				}
 			}
 		}

@@ -4,6 +4,7 @@
 #include "duckdb/common/render_tree.hpp"
 #include "duckdb/common/string_util.hpp"
 #include "duckdb/common/tree_renderer.hpp"
+#include "duckdb/execution/aqp_jit.hpp"
 #include "duckdb/execution/execution_context.hpp"
 #include "duckdb/execution/operator/set/physical_recursive_cte.hpp"
 #include "duckdb/execution/physical_plan_generator.hpp"
@@ -434,6 +435,18 @@ OperatorResultType CachingPhysicalOperator::Execute(ExecutionContext &context, D
 			state.can_cache_chunk = PhysicalOperator::SelectOperatorCachingMode(context);
 		} else {
 			state.can_cache_chunk = OperatorCachingMode::NONE;
+		}
+		// AQP multi-probe chain members emit the chain's outer layout on the
+		// fused path but their own layout on the interpreter fallback path.
+		// Caching would Append mismatched layouts into cached_chunk, so
+		// disable it for these operators.
+		auto *aqp_jit = context.client.aqp_jit_context.get();
+		if (aqp_jit && (aqp_jit->flags & AQPJIT_PIPELINE)) {
+			uint64_t aqp_eid = ExpressionID(*this);
+			if (aqp_jit->multi_probe_fns.count(aqp_eid) ||
+			    aqp_jit->multi_probe_passthrough_eids.count(aqp_eid)) {
+				state.can_cache_chunk = OperatorCachingMode::NONE;
+			}
 		}
 	}
 

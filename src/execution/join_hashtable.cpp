@@ -1557,6 +1557,7 @@ void JoinHashTable::PopulateAQPJITView(AQPJoinHTView &view) const {
 	view.no_chains = chains_longer_than_one ? 0ull : 1ull;
 	view.bf_data = nullptr;
 	view.bf_bitmask = 0;
+	view.has_row_validity = layout_ptr->AllValid() ? 0ull : 1ull;
 }
 
 idx_t JoinHashTable::ScanKeyColumn(Vector &addresses, Vector &result, idx_t column_index) const {
