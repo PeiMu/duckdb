@@ -19,6 +19,8 @@
 #include "duckdb/execution/aggregate_hashtable.hpp"
 #include "duckdb/execution/ht_entry.hpp"
 
+#include <atomic>
+
 namespace duckdb {
 
 class BufferManager;
@@ -152,6 +154,7 @@ public:
 		Vector ht_offsets_v;
 		Vector hashes_dense_v;
 		SelectionVector non_empty_sel;
+		bool prefetch_enabled = false;
 	};
 
 	struct InsertState : SharedState {
@@ -212,6 +215,13 @@ public:
 	bool NullValuesAreEqual(idx_t col_idx) const {
 		return null_values_are_equal[col_idx];
 	}
+
+	//! AQP-JIT bridge: populate a view of this HT's internals for JIT'd probe code.
+	//! Only valid after Finalize() (entries[] must be allocated).
+	void PopulateAQPJITView(struct AQPJoinHTView &view) const;
+
+	//! AQP-JIT: access hash table entries for prefetching
+	ht_entry_t *GetEntries() const { return entries; }
 
 	ClientContext &context;
 	const PhysicalOperator &op;
@@ -326,6 +336,12 @@ private:
 	//! An empty tuple that's a "dead end", can be used to stop chains early
 	unsafe_unique_array<data_t> dead_end;
 
+	//! JIT-enabled software prefetching for probe and build
+	bool prefetch_enabled = false;
+
+	//! Total number of probe matches (used by JIT fast paths)
+	std::atomic<idx_t> total_probe_matches {0};
+
 	//! Copying not allowed
 	JoinHashTable(const JoinHashTable &) = delete;
 
@@ -403,6 +419,14 @@ public:
 	//! Size of the pointer table (in bytes)
 	idx_t PointerTableSize(idx_t count) const {
 		return PointerTableCapacity(count) * sizeof(data_ptr_t);
+	}
+
+	void SetPrefetchEnabled(bool enabled) {
+		prefetch_enabled = enabled;
+	}
+
+	bool IsPrefetchEnabled() const {
+		return prefetch_enabled;
 	}
 
 	//! Get total size of HT if all partitions would be built

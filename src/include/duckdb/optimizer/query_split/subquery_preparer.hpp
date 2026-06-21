@@ -97,6 +97,20 @@ public:
 		new_table_idx = idx;
 	}
 
+	std::set<TableExpr> GetProjExprs() const {
+		return proj_exprs;
+	}
+	void SetProjExprs(std::set<TableExpr> exprs) {
+		proj_exprs = std::move(exprs);
+	}
+
+	int GetDataChunkSplitIndex() const {
+		return data_chunk_split_index;
+	}
+	void SetDataChunkSplitIndex(int idx) {
+		data_chunk_split_index = idx;
+	}
+
 private:
 	//! Because the `chunk_scan` will create a new table index and contains the result of all tables (SEQ SCAN) of the
 	//! current level, it is necessary to replace the index of the related expressions

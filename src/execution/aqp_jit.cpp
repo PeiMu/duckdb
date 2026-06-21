@@ -23,21 +23,18 @@ AQPChunkView MakeChunkView(DataChunk &chunk) {
 	return MakeChunkViewAt(chunk, 0);
 }
 
-AQPChunkView MakeChunkViewAt(DataChunk &chunk, idx_t buf_offset) {
-	// col_views is a thread-local scratch buffer; we rebuild it per call.
-	// buf_offset allows multiple non-overlapping regions (e.g., input at 0,
-	// output at input.ColumnCount()) for operator-level JIT that needs
-	// separate input and output AQPChunkViews simultaneously.
-	static thread_local AQPColView col_buf[4096]; // max columns per chunk
+AQPChunkView MakeChunkViewAt(DataChunk &chunk, idx_t buf_offset, bool writable_validity) {
+	static thread_local AQPColView col_buf[4096];
 
-	// Flatten ensures all vectors are FLAT (no CONSTANT/DICTIONARY wrappers).
-	// Required so FlatVector accessors and raw data pointers are valid.
 	chunk.Flatten();
 
 	idx_t ncols = chunk.ColumnCount();
 	for (idx_t i = 0; i < ncols; i++) {
 		Vector &vec = chunk.data[i];
 		auto &vmask = FlatVector::Validity(vec);
+		if (writable_validity) {
+			vmask.Initialize(STANDARD_VECTOR_SIZE);
+		}
 		col_buf[buf_offset + i].data     = vec.GetData();
 		col_buf[buf_offset + i].validity = vmask.AllValid() ? nullptr : reinterpret_cast<uint64_t *>(vmask.GetData());
 		col_buf[buf_offset + i].vtype    = static_cast<int32_t>(vec.GetVectorType());
@@ -59,10 +56,33 @@ AQPSelView MakeSelView(SelectionVector &sel) {
 }
 
 uint64_t ExpressionID(const PhysicalOperator &op) {
-	// Use the operator's heap address as a stable per-execution ID.
-	// The DuckDB physical plan is immutable after creation, so addresses
-	// are stable for the lifetime of a query execution.
 	return static_cast<uint64_t>(reinterpret_cast<uintptr_t>(&op));
 }
 
+void AQPCopyStringImpl(const void *src_string, void *dst_string, void *dst_vector) {
+	auto &vec = *reinterpret_cast<Vector *>(dst_vector);
+	auto src = *reinterpret_cast<const string_t *>(src_string);
+	string_t result = StringVector::AddStringOrBlob(vec, src);
+	memcpy(dst_string, &result, sizeof(string_t));
+}
+
 } // namespace duckdb
+
+extern "C" {
+
+void aqp_copy_string(void *dst_data, void *src_data,
+                     uint64_t dst_row, uint64_t src_row,
+                     void *state_ptr, uint32_t col_idx) {
+	auto *state = reinterpret_cast<duckdb::AQPPipelineFilterState *>(state_ptr);
+	const uint8_t *src = reinterpret_cast<const uint8_t *>(src_data) + src_row * 16;
+	uint8_t *dst = reinterpret_cast<uint8_t *>(dst_data) + dst_row * 16;
+	uint32_t len;
+	memcpy(&len, src, sizeof(uint32_t));
+	if (len <= 12) {
+		memcpy(dst, src, 16);
+	} else {
+		state->copy_str(src, dst, state->col_vectors[col_idx]);
+	}
+}
+
+}

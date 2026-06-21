@@ -14,15 +14,18 @@
 #include "duckdb/common/common.hpp"
 #include "duckdb/common/typedefs.hpp"
 #include "duckdb/common/unordered_map.hpp"
+#include "duckdb/common/unordered_set.hpp"
 #include "duckdb/common/types/data_chunk.hpp"
 #include "duckdb/common/types/selection_vector.hpp"
 
 #include <future>
+#include <mutex>
 
 namespace duckdb {
 
-// Forward declaration — full type included only in aqp_jit.cpp
+// Forward declarations — full types included only where needed
 class PhysicalOperator;
+class PhysicalHashJoin;
 
 // ---------------------------------------------------------------------------
 // ABI types — stable C-compatible layout shared with the AQP middleware.
@@ -79,8 +82,35 @@ using AQPPipelineFn = int64_t (*)(AQPChunkView *source_chunk,
                                   AQPChunkView *sink_chunk,
                                   void *pipeline_state);
 
-// Sub-plan coordinator: orchestrates multiple compiled pipelines.
-using AQPSubPlanFn = int32_t (*)(void *subplan_ctx);
+// Callback for deep-copying a non-inline string_t into a Vector's string heap.
+using AQPCopyStringFn = void (*)(const void *src_string,
+                                 void *dst_string,
+                                 void *dst_vector);
+
+// Hash-join view: exposed to JIT'd probe code so it can touch DuckDB's
+// JoinHashTable directly (no vtable, no AQPHashTable shim).
+// Filled in PhysicalHashJoin::ExecuteInternal at probe time.
+// MUST stay byte-compatible with AQPJoinHTView in aqp_jit_abi.h.
+struct AQPJoinHTView {
+	void           *entries;        // ht_entry_t *
+	uint64_t        bitmask;        // capacity - 1
+	uint64_t        use_salt;       // 1 if capacity > USE_SALT_THRESHOLD (8192)
+	void           *layout_ptr;     // opaque shared_ptr<TupleDataLayout>* (set to layout_ptr.get())
+	uint32_t        tuple_size;     // total row width in bytes
+	uint32_t        pointer_offset; // offset of next_pointer inside row
+	const uint64_t *data_offsets;   // layout->GetOffsets().data() — per-col offsets within row
+	uint64_t        no_chains;      // 1 if chains_longer_than_one is false (skip chain walk)
+	const uint64_t *bf_data;        // bloom filter bit array (nullptr = no BF)
+	uint64_t        bf_bitmask;     // num_sectors - 1 for BF lookup
+	uint64_t        has_row_validity; // 1 if rows start with a per-column validity bit prefix
+};
+
+// State for pipeline filter functions (not fusions) — provides Vector pointers.
+struct AQPPipelineFilterState {
+	void **col_vectors;       // col_vectors[i] = &chunk.data[i]
+	uint64_t num_cols;
+	AQPCopyStringFn copy_str; // deep string copy callback
+};
 
 // ---------------------------------------------------------------------------
 // JIT flags — indicate what was compiled and at what optimization level
@@ -91,9 +121,8 @@ enum AQPJITFlags : uint32_t {
 	AQPJIT_OPERATOR = 1u << 1,  // Level 2: full operator compilation
 	AQPJIT_PIPELINE = 1u << 2,  // Level 3: fused pipeline compilation
 	AQPJIT_OPT3     = 1u << 3,  // Use LLVM O3 optimization
-	AQPJIT_SQL      = 1u << 4,  // Level 4: SQL / sub-SQL compilation
-	AQPJIT_SUBPLAN  = AQPJIT_SQL,  // Legacy alias
 	AQPJIT_SIMD     = 1u << 5,  // Enable explicit SIMD vectorization
+	AQPJIT_PREFETCH = 1u << 6,  // Enable software prefetch for hash probes
 };
 
 // ---------------------------------------------------------------------------
@@ -106,8 +135,11 @@ struct AQPJITContext {
 
 	// expr_id → compiled function.  Key computed by ExpressionID() below.
 	unordered_map<uint64_t, AQPExprFn>     expr_fns;      // Level 1 + Level 2 filter
-	unordered_map<uint64_t, AQPOperatorFn> op_fns;        // Level 2 operators (+ Level 3)
-	unordered_map<uint64_t, AQPPipelineFn> pipeline_fns;  // Level 3 fused pipelines
+	// Level 2 operators (+ Level 3). Hash build/probe are stored here but NOT
+	// dispatched at Level 2 — AQPHashTable is incompatible with DuckDB's
+	// JoinHashTable. They are consumed only by Level 3 pipeline fusion.
+	unordered_map<uint64_t, AQPOperatorFn> op_fns;
+	unordered_map<uint64_t, AQPPipelineFn> pipeline_fns;  // Level 3 fused pipelines (probe side + standalone filter/projection)
 
 	// Projection column mappings: eid → {out_col_i -> in_col_i}
 	// DuckDB dispatches these via zero-copy Vector::Reference() at Level 2.
@@ -121,23 +153,118 @@ struct AQPJITContext {
 	// Aggregate state size in bytes per eid
 	unordered_map<uint64_t, uint32_t>       agg_state_sizes;
 
+	// Per-aggregate metadata for JIT state initialization and finalize conversion.
+	// agg_type: 1=Min, 2=Max, 3=Sum, 4=Avg, 5=Count, 6=CountStar
+	struct AQPAggMeta {
+		int32_t  agg_type;
+		int32_t  dtype;
+		uint32_t state_offset;
+		uint32_t state_bytes;
+	};
+	unordered_map<uint64_t, vector<AQPAggMeta>> agg_meta;
+
 	// Scan+Filter fusion: filter applied at scan level, producing pre-filtered chunks.
 	// Key = TABLE_SCAN operator eid, Value = compiled filter function.
 	unordered_map<uint64_t, AQPExprFn> scan_filter_fns;
 
+	// Bloom filter scan push-down: filters scanned rows against a Bloom filter
+	// built from a temp table's join key column (cross-sub-plan optimization).
+	static constexpr idx_t BF_N_BITS = 4;
+	static constexpr uint64_t BF_SHIFT_MASK = 0x3F3F3F3F3F3F3F3F;
+	struct AQPBloomScanFilter {
+		vector<uint64_t> bf_data;   // owned bit array
+		uint64_t bitmask;           // num_sectors - 1
+		uint32_t col_idx;           // column index in scanned chunk
+		int32_t dtype;              // AQP_DTYPE_INT32 or AQP_DTYPE_INT64
+
+		inline bool LookupOne(uint64_t hash) const {
+			uint64_t offset = hash & bitmask;
+			uint64_t shifts = hash & BF_SHIFT_MASK;
+			auto shifts_8 = reinterpret_cast<const uint8_t *>(&shifts);
+			uint64_t mask = 0;
+			for (idx_t i = 8 - BF_N_BITS; i < 8; i++) {
+				mask |= (1ULL << shifts_8[i]);
+			}
+			return (bf_data[offset] & mask) == mask;
+		}
+	};
+	// Key = TABLE_SCAN operator eid, Value = list of bloom filters on different columns
+	unordered_map<uint64_t, vector<unique_ptr<AQPBloomScanFilter>>> bloom_scan_filters;
+
+	// PhysicalFilter eids whose work is already done by scan+filter fusion.
+	// PhysicalFilter checks this set and becomes a pass-through when present.
+	unordered_set<uint64_t> fused_scan_filter_eids;
+
 	// Per-pipeline opaque state (e.g., AQP hash table pointer for fused build/probe).
 	unordered_map<uint64_t, void*> pipeline_states;
 
-	// Sub-plan coordinator: one per sub-plan execution
-	AQPSubPlanFn subplan_fn = nullptr;
+	// Bloom filter data for hash join probe pre-filtering.
+	// Key = HASH_JOIN operator eid. Stored here to keep the data alive
+	// while the JIT probe code references it via AQPJoinHTView.bf_data.
+	struct AQPJoinBloomFilter {
+		vector<uint64_t> bf_data;
+		uint64_t bitmask; // num_sectors - 1
+	};
+	unordered_map<uint64_t, unique_ptr<AQPJoinBloomFilter>> join_bloom_filters;
+
+	// Pipeline-JIT hash-join: view of DuckDB's JoinHashTable shared with JIT'd
+	// probe code. Owned by the context; populated at probe time from
+	// sink.hash_table fields. Keyed by HASH_JOIN operator eid.
+	unordered_map<uint64_t, unique_ptr<AQPJoinHTView>> join_ht_views;
 
 	// Background compilation: futures that resolve to compiled fns.
 	// Polled at chunk boundaries; swapped into active maps when ready.
 	unordered_map<uint64_t, std::future<AQPExprFn>> pending_exprs;
 
+	// Mutex for thread-safe AQP hash table build (Sink is called from multiple threads).
+	std::mutex build_mutex;
+
 	// Diagnostic counters — incremented by PhysicalFilter on each dispatch.
 	uint64_t dispatch_count = 0;   // chunks routed through compiled path
 	uint64_t fallback_count = 0;   // chunks routed through interpreted path
+	uint64_t bail_count = 0;       // chunks where JIT bailed (output overflow)
+
+	// --- Multi-probe fusion (Phase 4-5) ---
+
+	// Fused multi-probe functions, keyed by innermost HJ eid.
+	// Separate from pipeline_fns so single-probe can serve as fallback
+	// (e.g., when an outer HJ uses perfect_join_executor at runtime).
+	unordered_map<uint64_t, AQPPipelineFn> multi_probe_fns;
+
+	// Outer HJ eids whose work is done by the innermost HJ's fused function.
+	// These become pass-through operators at dispatch time.
+	// Maps passthrough_eid → innermost_eid to verify the active chain matches.
+	unordered_map<uint64_t, uint64_t> multi_probe_passthrough_eids;
+
+	// Per-thread flag: set by inner HJ when multi-probe dispatch succeeds,
+	// checked by outer HJ to activate passthrough. Thread-local because
+	// multiple pipeline worker threads execute concurrently.
+	static thread_local uint64_t multi_probe_active_eid;
+
+	// innermost_eid → outermost HJ output LogicalTypes (for chunk reinit)
+	unordered_map<uint64_t, vector<LogicalType>> multi_probe_outer_types;
+
+	// All chain-member HJ eids (inner + outer). Used by Finalize to bypass
+	// the perfect (array) hash join when force_hash_join_for_chains is set,
+	// and by CachingPhysicalOperator to disable chunk caching (the fused
+	// output layout may differ from the member's own output layout).
+	unordered_set<uint64_t> multi_probe_chain_members;
+
+	// --single-column-int-join-mode: force the regular hash-table path for
+	// chain members even when a perfect hash join is possible, so the fused
+	// multi-probe function can run (it probes JoinHashTable directly).
+	bool force_hash_join_for_chains = false;
+
+	// Multi-probe state: array of AQPJoinHTView* for fused probe functions.
+	struct AQPMultiProbeState {
+		AQPJoinHTView *views[4] = {};
+		uint32_t num_stages = 0;
+	};
+	unordered_map<uint64_t, unique_ptr<AQPMultiProbeState>> multi_probe_states;
+
+	// innermost_eid → chain of PhysicalHashJoin* [inner, ..., outer]
+	// Used at dispatch to populate all views via each HJ's sink_state.
+	unordered_map<uint64_t, vector<PhysicalHashJoin*>> multi_probe_hj_chain;
 };
 
 // ---------------------------------------------------------------------------
@@ -150,7 +277,9 @@ AQPChunkView MakeChunkView(DataChunk &chunk);
 
 // Same as MakeChunkView but uses col_buf[buf_offset..] to avoid collisions
 // when building separate input and output views simultaneously.
-AQPChunkView MakeChunkViewAt(DataChunk &chunk, idx_t buf_offset);
+// writable_validity: allocate an all-valid mask per column so JIT'd code can
+// write NULL bits (output chunks of fused probe functions need this).
+AQPChunkView MakeChunkViewAt(DataChunk &chunk, idx_t buf_offset, bool writable_validity = false);
 
 // Wrap an existing SelectionVector as an AQPSelView.
 AQPSelView MakeSelView(SelectionVector &sel);
@@ -162,5 +291,8 @@ int32_t ToDtype(PhysicalType pt);
 // Uses the operator's heap address XOR-hashed with a constant — stable within
 // a single query execution (the DuckDB plan does not move after creation).
 uint64_t ExpressionID(const PhysicalOperator &op);
+
+// Deep-copy a string_t into a Vector's string heap (safe for non-inline strings).
+void AQPCopyStringImpl(const void *src_string, void *dst_string, void *dst_vector);
 
 } // namespace duckdb

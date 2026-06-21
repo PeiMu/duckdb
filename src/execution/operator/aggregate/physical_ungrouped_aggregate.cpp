@@ -16,8 +16,11 @@
 #include "duckdb/planner/expression/bound_aggregate_expression.hpp"
 #include "duckdb/planner/expression/bound_reference_expression.hpp"
 #include "duckdb/execution/operator/aggregate/ungrouped_aggregate_state.hpp"
+#include "duckdb/execution/aqp_jit.hpp"
 
+#include <cstring>
 #include <functional>
+#include <limits>
 
 namespace duckdb {
 
@@ -225,6 +228,7 @@ public:
 	    : state(gstate_p.state), execute_state(context.client, op.aggregates, child_types) {
 		auto &gstate = gstate_p.Cast<UngroupedAggregateGlobalSinkState>();
 		InitializeDistinctAggregates(op, gstate, context);
+		InitializeJITAggregate(op, context);
 	}
 
 	//! The local aggregate state
@@ -233,6 +237,12 @@ public:
 	UngroupedAggregateExecuteState execute_state;
 	//! The local sink states of the distinct aggregates hash tables
 	vector<unique_ptr<LocalSinkState>> radix_states;
+
+	//! AQP JIT aggregate state
+	bool use_jit_agg = false;
+	AQPJITContext::AQPAggUpdateFn jit_agg_fn = nullptr;
+	vector<uint8_t> jit_agg_state;
+	vector<AQPJITContext::AQPAggMeta> jit_agg_meta;
 
 public:
 	void InitializeDistinctAggregates(const PhysicalUngroupedAggregate &op,
@@ -259,6 +269,87 @@ public:
 			auto &radix_table = *data.radix_tables[table_idx];
 			radix_states[table_idx] = radix_table.GetLocalSinkState(context);
 		}
+	}
+
+	void InitializeJITAggregate(const PhysicalUngroupedAggregate &op, ExecutionContext &context) {
+		auto *jit = context.client.aqp_jit_context.get();
+		if (!jit || !(jit->flags & AQPJIT_OPERATOR)) {
+			return;
+		}
+		if (op.distinct_data) {
+			return;
+		}
+		uint64_t eid = ExpressionID(op);
+		auto ait = jit->agg_fns.find(eid);
+		if (ait == jit->agg_fns.end()) {
+			return;
+		}
+		auto sit = jit->agg_state_sizes.find(eid);
+		uint32_t sz = (sit != jit->agg_state_sizes.end()) ? sit->second : 0;
+		if (sz == 0) {
+			return;
+		}
+		auto mit = jit->agg_meta.find(eid);
+		if (mit == jit->agg_meta.end() || mit->second.size() != op.aggregates.size()) {
+			return;
+		}
+
+		jit_agg_fn = ait->second;
+		jit_agg_meta = mit->second;
+		jit_agg_state.resize(sz);
+
+		// Initialize each accumulator to the identity value for its agg type
+		for (auto &m : jit_agg_meta) {
+			uint8_t *slot = jit_agg_state.data() + m.state_offset;
+			switch (m.agg_type) {
+			case 1: { // Min — init to max representable value
+				if (m.dtype == AQP_DTYPE_INT32 || m.dtype == AQP_DTYPE_DATE) {
+					int64_t v = std::numeric_limits<int32_t>::max();
+					memcpy(slot, &v, 8);
+				} else if (m.dtype == AQP_DTYPE_INT64) {
+					int64_t v = std::numeric_limits<int64_t>::max();
+					memcpy(slot, &v, 8);
+				} else if (m.dtype == AQP_DTYPE_INT16) {
+					int64_t v = std::numeric_limits<int16_t>::max();
+					memcpy(slot, &v, 8);
+				} else if (m.dtype == AQP_DTYPE_INT8) {
+					int64_t v = std::numeric_limits<int8_t>::max();
+					memcpy(slot, &v, 8);
+				} else if (m.dtype == AQP_DTYPE_DOUBLE || m.dtype == AQP_DTYPE_FLOAT) {
+					double v = std::numeric_limits<double>::max();
+					memcpy(slot, &v, 8);
+				} else {
+					memset(slot, 0, 8);
+				}
+				break;
+			}
+			case 2: { // Max — init to min representable value
+				if (m.dtype == AQP_DTYPE_INT32 || m.dtype == AQP_DTYPE_DATE) {
+					int64_t v = std::numeric_limits<int32_t>::lowest();
+					memcpy(slot, &v, 8);
+				} else if (m.dtype == AQP_DTYPE_INT64) {
+					int64_t v = std::numeric_limits<int64_t>::lowest();
+					memcpy(slot, &v, 8);
+				} else if (m.dtype == AQP_DTYPE_INT16) {
+					int64_t v = std::numeric_limits<int16_t>::lowest();
+					memcpy(slot, &v, 8);
+				} else if (m.dtype == AQP_DTYPE_INT8) {
+					int64_t v = std::numeric_limits<int8_t>::lowest();
+					memcpy(slot, &v, 8);
+				} else if (m.dtype == AQP_DTYPE_DOUBLE || m.dtype == AQP_DTYPE_FLOAT) {
+					double v = std::numeric_limits<double>::lowest();
+					memcpy(slot, &v, 8);
+				} else {
+					memset(slot, 0, 8);
+				}
+				break;
+			}
+			default: // Sum, Count, CountStar, Average — zero is correct identity
+				memset(slot, 0, m.state_bytes);
+				break;
+			}
+		}
+		use_jit_agg = true;
 	}
 };
 
@@ -339,6 +430,18 @@ SinkResultType PhysicalUngroupedAggregate::Sink(ExecutionContext &context, DataC
 		SinkDistinct(context, chunk, input);
 	}
 
+	// AQP JIT Level 2: compiled aggregate update
+	if (sink.use_jit_agg) {
+		chunk.Flatten();
+		AQPChunkView cv = MakeChunkView(chunk);
+		sink.jit_agg_fn(&cv, sink.jit_agg_state.data());
+		auto *jit = context.client.aqp_jit_context.get();
+		if (jit) {
+			jit->dispatch_count++;
+		}
+		return SinkResultType::NEED_MORE_INPUT;
+	}
+
 	sink.execute_state.Sink(sink.state, chunk);
 	return SinkResultType::NEED_MORE_INPUT;
 }
@@ -389,6 +492,103 @@ SinkCombineResultType PhysicalUngroupedAggregate::Combine(ExecutionContext &cont
 	// use the combine method to combine the partial aggregates
 	OperatorSinkCombineInput distinct_input {gstate, lstate, input.interrupt_state};
 	CombineDistinct(context, distinct_input);
+
+	// AQP JIT: convert the flat JIT state into DuckDB native aggregate states
+	// before the standard Combine path. We feed each JIT accumulator as a
+	// one-row vector through the native SimpleUpdate callback, which handles
+	// all type/state-layout specifics (works for MIN, MAX, SUM, COUNT, AVG).
+	if (lstate.use_jit_agg) {
+		for (idx_t aggr_idx = 0; aggr_idx < aggregates.size() && aggr_idx < lstate.jit_agg_meta.size(); aggr_idx++) {
+			auto &aggregate = aggregates[aggr_idx]->Cast<BoundAggregateExpression>();
+			auto &m = lstate.jit_agg_meta[aggr_idx];
+			uint8_t *slot = lstate.jit_agg_state.data() + m.state_offset;
+
+			DataChunk one_row;
+			one_row.Initialize(Allocator::DefaultAllocator(), {aggregate.return_type});
+			one_row.SetCardinality(1);
+			auto &vec = one_row.data[0];
+			auto pt = aggregate.return_type.InternalType();
+
+			if (m.agg_type == 6) {
+				// CountStar: result is int64 count → BIGINT
+				int64_t cnt;
+				memcpy(&cnt, slot, 8);
+				FlatVector::GetData<int64_t>(vec)[0] = cnt;
+			} else if (m.agg_type == 4) {
+				// Average: state is {sum:8, count:8}, emit sum/count as double
+				double sum_val;
+				int64_t cnt;
+				memcpy(&sum_val, slot, 8);
+				memcpy(&cnt, slot + 8, 8);
+				double avg = cnt > 0 ? sum_val / static_cast<double>(cnt) : 0.0;
+				if (pt == PhysicalType::DOUBLE) {
+					FlatVector::GetData<double>(vec)[0] = avg;
+				} else if (pt == PhysicalType::FLOAT) {
+					FlatVector::GetData<float>(vec)[0] = static_cast<float>(avg);
+				} else {
+					FlatVector::GetData<double>(vec)[0] = avg;
+				}
+			} else {
+				// Min, Max, Sum, Count — stored as int64 or double
+				bool is_float = (m.dtype == AQP_DTYPE_DOUBLE || m.dtype == AQP_DTYPE_FLOAT);
+				switch (pt) {
+				case PhysicalType::INT8: {
+					int64_t v; memcpy(&v, slot, 8);
+					FlatVector::GetData<int8_t>(vec)[0] = static_cast<int8_t>(v);
+					break;
+				}
+				case PhysicalType::INT16: {
+					int64_t v; memcpy(&v, slot, 8);
+					FlatVector::GetData<int16_t>(vec)[0] = static_cast<int16_t>(v);
+					break;
+				}
+				case PhysicalType::INT32: {
+					int64_t v; memcpy(&v, slot, 8);
+					FlatVector::GetData<int32_t>(vec)[0] = static_cast<int32_t>(v);
+					break;
+				}
+				case PhysicalType::INT64: {
+					int64_t v; memcpy(&v, slot, 8);
+					FlatVector::GetData<int64_t>(vec)[0] = v;
+					break;
+				}
+				case PhysicalType::FLOAT: {
+					if (is_float) {
+						double v; memcpy(&v, slot, 8);
+						FlatVector::GetData<float>(vec)[0] = static_cast<float>(v);
+					} else {
+						int64_t v; memcpy(&v, slot, 8);
+						FlatVector::GetData<float>(vec)[0] = static_cast<float>(v);
+					}
+					break;
+				}
+				case PhysicalType::DOUBLE: {
+					if (is_float) {
+						double v; memcpy(&v, slot, 8);
+						FlatVector::GetData<double>(vec)[0] = v;
+					} else {
+						int64_t v; memcpy(&v, slot, 8);
+						FlatVector::GetData<double>(vec)[0] = static_cast<double>(v);
+					}
+					break;
+				}
+				default: {
+					int64_t v; memcpy(&v, slot, 8);
+					FlatVector::GetData<int64_t>(vec)[0] = v;
+					break;
+				}
+				}
+			}
+
+			Vector *input_vec = &vec;
+			auto *native_state = lstate.state.state.aggregate_data[aggr_idx].get();
+			AggregateInputData aggr_input_data(lstate.state.state.bind_data[aggr_idx], lstate.state.allocator);
+			idx_t payload_cnt = (m.agg_type == 6) ? 0 : 1;
+			Vector *start_of_input = (payload_cnt == 0) ? nullptr : input_vec;
+			aggregate.function.simple_update(start_of_input, aggr_input_data, payload_cnt,
+			                                 native_state, 1);
+		}
+	}
 
 	gstate.state.Combine(lstate.state);
 

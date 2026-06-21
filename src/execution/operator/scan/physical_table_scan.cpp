@@ -2,6 +2,7 @@
 
 #include "duckdb/catalog/catalog_entry/table_catalog_entry.hpp"
 #include "duckdb/common/string_util.hpp"
+#include "duckdb/common/types/hash.hpp"
 #include "duckdb/planner/expression/bound_conjunction_expression.hpp"
 #include "duckdb/transaction/transaction.hpp"
 #include "duckdb/execution/aqp_jit.hpp"
@@ -16,12 +17,13 @@ PhysicalTableScan::PhysicalTableScan(vector<LogicalType> types, TableFunction fu
                                      vector<ColumnIndex> column_ids_p, vector<idx_t> projection_ids_p,
                                      vector<string> names_p, unique_ptr<TableFilterSet> table_filters_p,
                                      idx_t estimated_cardinality, ExtraOperatorInfo extra_info,
-                                     vector<Value> parameters_p, virtual_column_map_t virtual_columns_p)
+                                     vector<Value> parameters_p, virtual_column_map_t virtual_columns_p,
+                                     idx_t logical_table_index_p)
     : PhysicalOperator(PhysicalOperatorType::TABLE_SCAN, std::move(types), estimated_cardinality),
       function(std::move(function_p)), bind_data(std::move(bind_data_p)), returned_types(std::move(returned_types_p)),
       column_ids(std::move(column_ids_p)), projection_ids(std::move(projection_ids_p)), names(std::move(names_p)),
       table_filters(std::move(table_filters_p)), extra_info(std::move(extra_info)), parameters(std::move(parameters_p)),
-      virtual_columns(std::move(virtual_columns_p)) {
+      virtual_columns(std::move(virtual_columns_p)), logical_table_index(logical_table_index_p) {
 }
 
 class TableScanGlobalSourceState : public GlobalSourceState {
@@ -106,6 +108,12 @@ SourceResultType PhysicalTableScan::GetData(ExecutionContext &context, DataChunk
 	if (function.function) {
 		function.function(context.client, data, chunk);
 
+		// Remember whether the scan itself produced data before JIT filtering.
+		// A scan that returns 0 rows signals that the table is exhausted;
+		// JIT filtering can also reduce the chunk to 0 rows even though
+		// more data remains in the table.
+		bool scan_had_data = chunk.size() > 0;
+
 		// AQP JIT: Scan+Filter fusion — apply compiled filter at scan level.
 		// Produces a pre-filtered chunk, avoiding a separate PhysicalFilter operator call.
 		if (chunk.size() > 0) {
@@ -129,7 +137,59 @@ SourceResultType PhysicalTableScan::GetData(ExecutionContext &context, DataChunk
 			}
 		}
 
-		return chunk.size() == 0 ? SourceResultType::FINISHED : SourceResultType::HAVE_MORE_OUTPUT;
+		// AQP Bloom filter push-down
+		if (chunk.size() > 0) {
+			auto *jit = context.client.aqp_jit_context.get();
+			if (jit && !jit->bloom_scan_filters.empty()) {
+				uint64_t scan_eid = ExpressionID(*this);
+				auto bit = jit->bloom_scan_filters.find(scan_eid);
+				if (bit != jit->bloom_scan_filters.end()) {
+					for (auto &bf_ptr : bit->second) {
+						if (chunk.size() == 0) break;
+						auto &bf = *bf_ptr;
+						if (bf.col_idx >= chunk.ColumnCount()) continue;
+						chunk.Flatten();
+						auto &vec = chunk.data[bf.col_idx];
+						auto expected_pt = (bf.dtype == AQP_DTYPE_INT32) ? PhysicalType::INT32 : PhysicalType::INT64;
+						if (vec.GetType().InternalType() != expected_pt) continue;
+						auto &validity = FlatVector::Validity(vec);
+						SelectionVector sel(STANDARD_VECTOR_SIZE);
+						idx_t result_count = 0;
+						idx_t n = chunk.size();
+						if (bf.dtype == AQP_DTYPE_INT32) {
+							auto *data_ptr = FlatVector::GetData<int32_t>(vec);
+							for (idx_t i = 0; i < n; i++) {
+								if (validity.RowIsValid(i)) {
+									uint64_t h = duckdb::Hash<int32_t>(data_ptr[i]);
+									if (bf.LookupOne(h)) { sel.set_index(result_count++, i); }
+								}
+							}
+						} else {
+							auto *data_ptr = FlatVector::GetData<int64_t>(vec);
+							for (idx_t i = 0; i < n; i++) {
+								if (validity.RowIsValid(i)) {
+									uint64_t h = duckdb::Hash<int64_t>(data_ptr[i]);
+									if (bf.LookupOne(h)) { sel.set_index(result_count++, i); }
+								}
+							}
+						}
+						if (result_count == 0) {
+							chunk.SetCardinality(0);
+						} else if (result_count < n) {
+							chunk.Slice(sel, result_count);
+						}
+					}
+				}
+			}
+		}
+
+		// Use scan_had_data to determine the return value: if the scan
+		// produced rows but JIT filtering removed them all, there may
+		// still be more data in the table — return HAVE_MORE_OUTPUT.
+		if (!scan_had_data) {
+			return SourceResultType::FINISHED;
+		}
+		return SourceResultType::HAVE_MORE_OUTPUT;
 	}
 
 	if (g_state.in_out_final) {

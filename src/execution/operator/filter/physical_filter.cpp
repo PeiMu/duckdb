@@ -51,10 +51,55 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 	auto *jit = context.client.aqp_jit_context.get();
 	bool used_compiled = false;
 	uint64_t eid = ExpressionID(*this);
-#ifndef NDEBUG
-	Printer::Print(
-	    StringUtil::Format("[AQP-JIT-TRACE] PhysicalFilter::Execute eid=0x%016lx, jit=%p, flags=%u, expr_fns=%zu",
-	                       (unsigned long)eid, (void *)jit, jit ? jit->flags : 0u, jit ? jit->expr_fns.size() : 0u));
+
+	// Scan+Filter fusion: the TABLE_SCAN already applied this filter.
+	if (jit && jit->fused_scan_filter_eids.count(eid)) {
+		chunk.Reference(input);
+		return OperatorResultType::NEED_MORE_INPUT;
+	}
+
+	// Pipeline-level JIT: a compiled filter function that reads the input
+	// chunk and writes matching rows directly into the output chunk.
+	if (jit && (jit->flags & AQPJIT_PIPELINE)) {
+		auto pit = jit->pipeline_fns.find(eid);
+		if (pit != jit->pipeline_fns.end()) {
+			input.Flatten();
+			chunk.Reset();
+			chunk.Flatten();
+			AQPChunkView in_cv  = MakeChunkViewAt(input, 0);
+			AQPChunkView out_cv = MakeChunkViewAt(chunk, input.ColumnCount());
+			void *pipe_state = nullptr;
+			auto sit = jit->pipeline_states.find(eid);
+			if (sit != jit->pipeline_states.end() && sit->second) {
+				pipe_state = sit->second;
+			}
+			if (!pipe_state) {
+				thread_local std::vector<void *> col_vec_ptrs;
+				thread_local AQPPipelineFilterState pf_state;
+				col_vec_ptrs.resize(chunk.ColumnCount());
+				for (idx_t ci = 0; ci < chunk.ColumnCount(); ci++) {
+					col_vec_ptrs[ci] = &chunk.data[ci];
+				}
+				pf_state.col_vectors = col_vec_ptrs.data();
+				pf_state.num_cols = chunk.ColumnCount();
+				pf_state.copy_str = AQPCopyStringImpl;
+				pipe_state = &pf_state;
+			}
+			int64_t out_rows = pit->second(&in_cv, &out_cv, pipe_state);
+			if (out_rows >= 0) {
+				chunk.SetCardinality(static_cast<idx_t>(out_rows));
+				jit->dispatch_count++;
+				return OperatorResultType::NEED_MORE_INPUT;
+			}
+		}
+	}
+
+#ifdef DEBUG
+  	if (nullptr != jit && jit->flags) {
+		Printer::Print(
+		    StringUtil::Format("[AQP-JIT-TRACE] PhysicalFilter::Execute eid=0x%016lx, jit=%p, flags=%u, expr_fns=%zu",
+		                       (unsigned long)eid, (void *)jit, jit ? jit->flags : 0u, jit ? jit->expr_fns.size() : 0u));
+	}
 #endif
 	if (jit && (jit->flags & AQPJIT_EXPR)) {
 		// Poll any pending background compilation (zero-cost: wait_for(0s))
@@ -65,7 +110,7 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 			}
 		}
 		if (auto fit = jit->expr_fns.find(eid); fit != jit->expr_fns.end()) {
-#ifndef NDEBUG
+#ifdef DEBUG
 			Printer::Print(StringUtil::Format("[AQP-JIT] dispatch JIT fn=%p, eid=0x%016lx, nrows=%zu",
 			                                  (void *)fit->second, (unsigned long)eid, (size_t)input.size()));
 #endif
@@ -73,23 +118,20 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 			AQPSelView sv = MakeSelView(state.sel);
 			result_count = fit->second(&cv, &sv);
 			used_compiled = true;
-#ifndef NDEBUG
+#ifdef DEBUG
 			Printer::Print(StringUtil::Format("[AQP-JIT] dispatch #%lu eid=0x%016lx, nrows=%zu → selected=%zu",
 			                                  (unsigned long)jit->dispatch_count, (unsigned long)eid,
 			                                  (size_t)input.size(), (size_t)result_count));
 #endif
 			jit->dispatch_count++;
 		} else {
-#ifndef NDEBUG
+#ifdef DEBUG
 			Printer::Print(StringUtil::Format(
 			    "[AQP-JIT-TRACE] eid=0x%016lx not in expr_fns, (skipped filter) → interpreter", (unsigned long)eid));
 #endif
 		}
 	}
 	if (!used_compiled) {
-		// No compiled function for this filter — either JIT is disabled or
-		// this filter was intentionally skipped (e.g. VARCHAR).
-		// Fall back to the DuckDB interpreter.
 		result_count = state.executor.SelectExpression(input, state.sel);
 	}
 

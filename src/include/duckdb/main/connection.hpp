@@ -116,6 +116,10 @@ public:
 	//! Prepare the specified statement, returning a prepared statement object
 	DUCKDB_API unique_ptr<PreparedStatement> Prepare(unique_ptr<SQLStatement> statement);
 
+	//! Prepare a statement directly from a logical plan (used by AQP JIT)
+	DUCKDB_API unique_ptr<PreparedStatement> PrepareFromPlan(unique_ptr<LogicalOperator> logical_plan,
+	                                                         vector<string> names, vector<LogicalType> types);
+
 	//! Get the table info of a specific table, or nullptr if it cannot be found.
 	DUCKDB_API unique_ptr<TableDescription> TableInfo(const string &database_name, const string &schema_name,
 	                                                  const string &table_name);

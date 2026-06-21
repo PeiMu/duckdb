@@ -1438,6 +1438,29 @@ unique_ptr<PreparedStatement> ClientContext::Prepare(unique_ptr<SQLStatement> st
 	}
 }
 
+unique_ptr<PreparedStatement> ClientContext::PrepareFromPlan(unique_ptr<LogicalOperator> logical_plan,
+                                                              vector<string> names, vector<LogicalType> types) {
+	auto lock = LockContext();
+	try {
+		InitialCleanup(*lock);
+		auto result = make_shared_ptr<PreparedStatementData>(StatementType::SELECT_STATEMENT);
+		result->names = std::move(names);
+		result->types = std::move(types);
+		result->properties.allow_stream_result = false;
+		result->properties.bound_all_parameters = true;
+		result->unbound_statement = make_uniq<SelectStatement>();
+		RunFunctionInTransactionInternal(*lock, [&]() {
+			PhysicalPlanGenerator physical_planner(*this);
+			result->physical_plan = physical_planner.Plan(std::move(logical_plan));
+		}, false);
+		case_insensitive_map_t<idx_t> named_param_map;
+		return make_uniq<PreparedStatement>(shared_from_this(), std::move(result), string(""),
+		                                    std::move(named_param_map));
+	} catch (std::exception &ex) {
+		return ErrorResult<PreparedStatement>(ErrorData(ex));
+	}
+}
+
 unique_ptr<PreparedStatement> ClientContext::Prepare(const string &query) {
 	auto lock = LockContext();
 	// prepare the query
