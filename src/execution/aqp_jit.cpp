@@ -68,6 +68,15 @@ void AQPCopyStringImpl(const void *src_string, void *dst_string, void *dst_vecto
 
 } // namespace duckdb
 
+namespace aqp_jit {
+
+thread_local const uint8_t *g_jit_params = nullptr;
+
+const uint8_t *aqp_jit_get_params() { return g_jit_params; }
+void aqp_jit_set_params(const uint8_t *p) { g_jit_params = p; }
+
+} // namespace aqp_jit
+
 extern "C" {
 
 void aqp_copy_string(void *dst_data, void *src_data,

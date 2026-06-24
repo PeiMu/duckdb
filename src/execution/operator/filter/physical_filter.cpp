@@ -85,7 +85,10 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 				pf_state.copy_str = AQPCopyStringImpl;
 				pipe_state = &pf_state;
 			}
+			if (auto ppit = jit->pipeline_params.find(eid); ppit != jit->pipeline_params.end())
+				aqp_jit_set_params(ppit->second.data());
 			int64_t out_rows = pit->second(&in_cv, &out_cv, pipe_state);
+			aqp_jit_set_params(nullptr);
 			if (out_rows >= 0) {
 				chunk.SetCardinality(static_cast<idx_t>(out_rows));
 				jit->dispatch_count++;
@@ -114,9 +117,12 @@ OperatorResultType PhysicalFilter::ExecuteInternal(ExecutionContext &context, Da
 			Printer::Print(StringUtil::Format("[AQP-JIT] dispatch JIT fn=%p, eid=0x%016lx, nrows=%zu",
 			                                  (void *)fit->second, (unsigned long)eid, (size_t)input.size()));
 #endif
+			if (auto pit = jit->expr_params.find(eid); pit != jit->expr_params.end())
+				aqp_jit_set_params(pit->second.data());
 			AQPChunkView cv = MakeChunkView(input);
 			AQPSelView sv = MakeSelView(state.sel);
 			result_count = fit->second(&cv, &sv);
+			aqp_jit_set_params(nullptr);
 			used_compiled = true;
 #ifdef DEBUG
 			Printer::Print(StringUtil::Format("[AQP-JIT] dispatch #%lu eid=0x%016lx, nrows=%zu → selected=%zu",

@@ -122,11 +122,14 @@ SourceResultType PhysicalTableScan::GetData(ExecutionContext &context, DataChunk
 				uint64_t scan_eid = ExpressionID(*this);
 				auto fit = jit->scan_filter_fns.find(scan_eid);
 				if (fit != jit->scan_filter_fns.end()) {
+					if (auto pit = jit->expr_params.find(scan_eid); pit != jit->expr_params.end())
+						aqp_jit_set_params(pit->second.data());
 					chunk.Flatten();
 					AQPChunkView cv = MakeChunkView(chunk);
 					SelectionVector sel(STANDARD_VECTOR_SIZE);
 					AQPSelView sv = MakeSelView(sel);
 					idx_t result_count = fit->second(&cv, &sv);
+					aqp_jit_set_params(nullptr);
 					if (result_count == 0) {
 						chunk.SetCardinality(0);
 					} else if (result_count < chunk.size()) {
