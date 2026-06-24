@@ -168,6 +168,15 @@ struct AQPJITContext {
 	};
 	unordered_map<uint64_t, vector<AQPAggMeta>> agg_meta;
 
+	// §7.3 template cache: per-function params buffers for parameterized
+	// compilation (--jit-cache=single-run-template). On each dispatch the
+	// caller sets aqp_jit_set_params(buf.data()) before invoking the compiled
+	// function; compiled code loads constants from the buffer instead of
+	// immediates. Maps share the same key (eid) as the function maps.
+	unordered_map<uint64_t, vector<uint8_t>> expr_params;
+	unordered_map<uint64_t, vector<uint8_t>> pipeline_params;
+	unordered_map<uint64_t, vector<uint8_t>> multi_probe_params;
+
 	// Scan+Filter fusion: filter applied at scan level, producing pre-filtered chunks.
 	// Key = TABLE_SCAN operator eid, Value = compiled filter function.
 	unordered_map<uint64_t, AQPExprFn> scan_filter_fns;
@@ -301,3 +310,12 @@ uint64_t ExpressionID(const PhysicalOperator &op);
 void AQPCopyStringImpl(const void *src_string, void *dst_string, void *dst_vector);
 
 } // namespace duckdb
+
+// §7.3 template cache: thread-local params pointer for parameterized compilation.
+// Defined in aqp_jit.cpp (libduckdb.so). Both the middleware LLJIT symbol table
+// and DuckDB dispatch code resolve the same thread-local through these functions.
+namespace aqp_jit {
+void aqp_jit_set_params(const uint8_t *p);
+const uint8_t *aqp_jit_get_params();
+} // namespace aqp_jit
+using aqp_jit::aqp_jit_set_params;

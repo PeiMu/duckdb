@@ -80,6 +80,18 @@ void AQPCopyStringImpl(const void *src_string, void *dst_string, void *dst_vecto
 
 } // namespace duckdb
 
+// §7.3 template cache: thread-local params for parameterized compilation.
+// Defined here (in libduckdb.so) so both the middleware (linker) and the
+// LLJIT runtime symbol table can resolve the same address.
+namespace aqp_jit {
+
+thread_local const uint8_t *g_jit_params = nullptr;
+
+const uint8_t *aqp_jit_get_params() { return g_jit_params; }
+void aqp_jit_set_params(const uint8_t *p) { g_jit_params = p; }
+
+} // namespace aqp_jit
+
 extern "C" {
 
 void aqp_copy_string(void *dst_data, void *src_data,

@@ -1288,8 +1288,11 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 									mp_scratch.Initialize(BufferAllocator::Get(context.client), outer_types);
 								}
 								mp_scratch.Reset();
+								if (auto mppit = jit->multi_probe_params.find(eid); mppit != jit->multi_probe_params.end())
+									aqp_jit_set_params(mppit->second.data());
 								AQPChunkView out_cv = MakeChunkViewAt(mp_scratch, input.ColumnCount(), true);
 								int64_t out_rows = mpit->second(&in_cv, &out_cv, mps);
+								aqp_jit_set_params(nullptr);
 								if (out_rows >= 0) {
 									// Commit: reinitialize chunk to outer types. Chunk
 									// caching is disabled for chain members (see
@@ -1317,9 +1320,12 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 								// Already committed: must use multi-probe.
 								input.Flatten();
 								chunk.Reset();
+								if (auto mppit = jit->multi_probe_params.find(eid); mppit != jit->multi_probe_params.end())
+									aqp_jit_set_params(mppit->second.data());
 								AQPChunkView in_cv = MakeChunkView(input);
 								AQPChunkView out_cv = MakeChunkViewAt(chunk, input.ColumnCount(), true);
 								int64_t out_rows = mpit->second(&in_cv, &out_cv, mps);
+								aqp_jit_set_params(nullptr);
 								if (out_rows >= 0) {
 									chunk.SetCardinality(static_cast<idx_t>(out_rows));
 									jit->dispatch_count++;
@@ -1370,9 +1376,12 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 					input.Flatten();
 					chunk.Reset();
 					chunk.Flatten();
+					if (auto ppit = jit->pipeline_params.find(eid); ppit != jit->pipeline_params.end())
+						aqp_jit_set_params(ppit->second.data());
 					AQPChunkView in_cv = MakeChunkView(input);
 					AQPChunkView out_cv = MakeChunkViewAt(chunk, input.ColumnCount(), true);
 					int64_t out_rows = pit->second(&in_cv, &out_cv, sit->second);
+					aqp_jit_set_params(nullptr);
 					if (out_rows >= 0) {
 						chunk.SetCardinality(static_cast<idx_t>(out_rows));
 						jit->dispatch_count++;
