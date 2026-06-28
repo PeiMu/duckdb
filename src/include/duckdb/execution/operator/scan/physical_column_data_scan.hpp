@@ -31,6 +31,7 @@ public:
 
 	idx_t cte_index;
 	optional_idx delim_index;
+	idx_t logical_table_index = DConstants::INVALID_INDEX;
 
 public:
 	unique_ptr<GlobalSourceState> GetGlobalSourceState(ClientContext &context) const override;
