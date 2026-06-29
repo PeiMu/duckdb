@@ -18,6 +18,7 @@
 #include "duckdb/parser/statement/explain_statement.hpp"
 #include "duckdb/planner/binder.hpp"
 #include "duckdb/planner/operator/logical_projection.hpp"
+#include "duckdb/storage/statistics/base_statistics.hpp"
 #include "duckdb/planner/operator/logical_column_data_get.hpp"
 #include "duckdb/planner/operator/logical_get.hpp"
 #include "duckdb/planner/operator/logical_comparison_join.hpp"
@@ -38,7 +39,8 @@ public:
 
 	//! Merge the data chunk (temp table) to the current subquery
 	idx_t MergeDataChunk(subquery_queue &old_subqueries, unique_ptr<ColumnDataCollection> previous_result,
-	                     idx_t estimated_card);
+	                     idx_t estimated_card,
+	                     vector<unique_ptr<BaseStatistics>> column_stats = {});
 
 	//! Merge the previous sibling node. If merged to the main stream (left node), we add the sibling expr to proj.
 	bool MergeSibling(subquery_queue &old_subqueries, unique_ptr<LogicalOperator> last_sibling_node);
