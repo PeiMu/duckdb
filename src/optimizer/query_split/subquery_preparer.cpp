@@ -145,7 +145,8 @@ shared_ptr<PreparedStatementData> SubqueryPreparer::AdaptSelect(shared_ptr<Prepa
 }
 
 idx_t SubqueryPreparer::MergeDataChunk(subquery_queue &old_subqueries, unique_ptr<ColumnDataCollection> previous_result,
-                                       idx_t estimated_card) {
+                                       idx_t estimated_card,
+                                       vector<unique_ptr<BaseStatistics>> column_stats) {
 
 	//	unique_ptr<MaterializedQueryResult> result_materialized;
 	//	auto collection = make_uniq<ColumnDataCollection>(Allocator::DefaultAllocator(), types);
@@ -191,6 +192,7 @@ idx_t SubqueryPreparer::MergeDataChunk(subquery_queue &old_subqueries, unique_pt
 	}
 	chunk_scan->has_estimated_cardinality = true;
 	chunk_scan->split_index = data_chunk_split_index;
+	chunk_scan->column_stats = std::move(column_stats);
 	auto chunk_scan_op = unique_ptr_cast<LogicalColumnDataGet, LogicalOperator>(std::move(chunk_scan));
 	bool merged = false;
 	for (auto &current_level_subquery : old_subqueries) {
