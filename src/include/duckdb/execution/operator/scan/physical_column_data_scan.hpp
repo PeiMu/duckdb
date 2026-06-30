@@ -11,6 +11,7 @@
 #include "duckdb/common/optionally_owned_ptr.hpp"
 #include "duckdb/common/types/column/column_data_collection.hpp"
 #include "duckdb/execution/physical_operator.hpp"
+#include "duckdb/planner/table_filter.hpp"
 
 namespace duckdb {
 
@@ -32,6 +33,8 @@ public:
 	idx_t cte_index;
 	optional_idx delim_index;
 	idx_t logical_table_index = DConstants::INVALID_INDEX;
+	//! Dynamic filters pushed by JFP (join filter pushdown)
+	shared_ptr<DynamicTableFilterSet> dynamic_filters;
 
 public:
 	unique_ptr<GlobalSourceState> GetGlobalSourceState(ClientContext &context) const override;

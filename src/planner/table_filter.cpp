@@ -56,8 +56,7 @@ bool DynamicTableFilterSet::HasFilters() const {
 }
 
 unique_ptr<TableFilterSet>
-DynamicTableFilterSet::GetFinalTableFilters(const PhysicalTableScan &scan,
-                                            optional_ptr<TableFilterSet> existing_filters) const {
+DynamicTableFilterSet::GetFinalTableFilters(optional_ptr<TableFilterSet> existing_filters) const {
 	lock_guard<mutex> l(lock);
 	D_ASSERT(!filters.empty());
 	auto result = make_uniq<TableFilterSet>();

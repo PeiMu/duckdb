@@ -37,7 +37,7 @@ public:
 		physical_table_scan_execution_strategy = Settings::Get<DebugPhysicalTableScanExecutionStrategySetting>(context);
 
 		if (op.dynamic_filters && op.dynamic_filters->HasFilters()) {
-			table_filters = op.dynamic_filters->GetFinalTableFilters(op, op.table_filters.get());
+			table_filters = op.dynamic_filters->GetFinalTableFilters(op.table_filters.get());
 		}
 
 		if (op.function.init_global) {
@@ -452,7 +452,7 @@ InsertionOrderPreservingMap<string> PhysicalTableScan::ParamsToString() const {
 	}
 
 	if (function.filter_pushdown && dynamic_filters && dynamic_filters->HasFilters()) {
-		result["Dynamic Filters"] = GetFilterInfo(this, dynamic_filters->GetFinalTableFilters(*this, nullptr));
+		result["Dynamic Filters"] = GetFilterInfo(this, dynamic_filters->GetFinalTableFilters(nullptr));
 	}
 
 	if (extra_info.sample_options) {

@@ -5,6 +5,8 @@
 #include "duckdb/execution/operator/join/physical_delim_join.hpp"
 #include "duckdb/parallel/meta_pipeline.hpp"
 #include "duckdb/parallel/pipeline.hpp"
+#include "duckdb/planner/table_filter_state.hpp"
+#include "duckdb/storage/table/column_segment.hpp"
 
 namespace duckdb {
 
@@ -24,9 +26,12 @@ PhysicalColumnDataScan::PhysicalColumnDataScan(PhysicalPlan &physical_plan, vect
 
 class PhysicalColumnDataGlobalScanState : public GlobalSourceState {
 public:
-	explicit PhysicalColumnDataGlobalScanState(const ColumnDataCollection &collection)
-	    : max_threads(MaxValue<idx_t>(collection.ChunkCount(), 1)) {
-		collection.InitializeScan(global_scan_state);
+	explicit PhysicalColumnDataGlobalScanState(const PhysicalColumnDataScan &op)
+	    : max_threads(MaxValue<idx_t>(op.collection->ChunkCount(), 1)) {
+		op.collection->InitializeScan(global_scan_state);
+		if (op.dynamic_filters && op.dynamic_filters->HasFilters()) {
+			table_filters = op.dynamic_filters->GetFinalTableFilters(nullptr);
+		}
 	}
 
 	idx_t MaxThreads() override {
@@ -35,17 +40,19 @@ public:
 
 public:
 	ColumnDataParallelScanState global_scan_state;
-
 	const idx_t max_threads;
+	unique_ptr<TableFilterSet> table_filters;
 };
 
 class PhysicalColumnDataLocalScanState : public LocalSourceState {
 public:
 	ColumnDataLocalScanState local_scan_state;
+	bool filter_initialized = false;
+	unordered_map<idx_t, unique_ptr<TableFilterState>> filter_states;
 };
 
 unique_ptr<GlobalSourceState> PhysicalColumnDataScan::GetGlobalSourceState(ClientContext &context) const {
-	return make_uniq<PhysicalColumnDataGlobalScanState>(*collection);
+	return make_uniq<PhysicalColumnDataGlobalScanState>(*this);
 }
 
 unique_ptr<LocalSourceState> PhysicalColumnDataScan::GetLocalSourceState(ExecutionContext &,
@@ -57,8 +64,52 @@ SourceResultType PhysicalColumnDataScan::GetDataInternal(ExecutionContext &conte
                                                          OperatorSourceInput &input) const {
 	auto &gstate = input.global_state.Cast<PhysicalColumnDataGlobalScanState>();
 	auto &lstate = input.local_state.Cast<PhysicalColumnDataLocalScanState>();
-	collection->Scan(gstate.global_scan_state, lstate.local_scan_state, chunk);
-	return chunk.size() == 0 ? SourceResultType::FINISHED : SourceResultType::HAVE_MORE_OUTPUT;
+
+	while (true) {
+		collection->Scan(gstate.global_scan_state, lstate.local_scan_state, chunk);
+		if (chunk.size() == 0) {
+			return SourceResultType::FINISHED;
+		}
+
+		if (!gstate.table_filters) {
+			break;
+		}
+
+		if (!lstate.filter_initialized) {
+			for (auto &entry : gstate.table_filters->filters) {
+				lstate.filter_states[entry.first] =
+				    TableFilterState::Initialize(context.client, *entry.second);
+			}
+			lstate.filter_initialized = true;
+		}
+
+		idx_t approved_tuple_count = chunk.size();
+		SelectionVector sel(approved_tuple_count);
+		for (idx_t i = 0; i < approved_tuple_count; i++) {
+			sel.set_index(i, i);
+		}
+
+		for (auto &entry : gstate.table_filters->filters) {
+			auto col_idx = entry.first;
+			auto &filter = *entry.second;
+			auto &filter_state = *lstate.filter_states[col_idx];
+
+			auto &vec = chunk.data[col_idx];
+			UnifiedVectorFormat vdata;
+			vec.ToUnifiedFormat(chunk.size(), vdata);
+			ColumnSegment::FilterSelection(sel, vec, vdata, filter, filter_state,
+			                               chunk.size(), approved_tuple_count);
+		}
+
+		if (approved_tuple_count > 0) {
+			if (approved_tuple_count < chunk.size()) {
+				chunk.Slice(sel, approved_tuple_count);
+			}
+			break;
+		}
+		chunk.Reset();
+	}
+	return SourceResultType::HAVE_MORE_OUTPUT;
 }
 
 //===--------------------------------------------------------------------===//

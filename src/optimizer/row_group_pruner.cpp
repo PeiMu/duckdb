@@ -141,13 +141,17 @@ optional_ptr<LogicalGet> RowGroupPruner::FindLogicalGet(const LogicalOrder &logi
 	}
 
 	D_ASSERT(pushdown_targets.size() == 1);
-	auto &logical_get = pushdown_targets.front().get;
+	auto &target = pushdown_targets.front();
+	if (!target.get) {
+		return nullptr;
+	}
+	auto &logical_get = *target.get;
 
 	if (!logical_get.function.set_scan_order) {
 		return nullptr;
 	}
 
-	auto col_idx = pushdown_targets[0].columns[0].probe_column_index.column_index;
+	auto col_idx = target.columns[0].probe_column_index.column_index;
 	column_index = logical_get.GetColumnIds()[col_idx];
 
 	return logical_get;

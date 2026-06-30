@@ -50,12 +50,16 @@ struct JoinFilterPushdownFilter {
 };
 
 struct PushdownFilterTarget {
-	PushdownFilterTarget(LogicalGet &get, vector<JoinFilterPushdownColumn> columns_p)
-	    : get(get), columns(std::move(columns_p)) {
+	PushdownFilterTarget(shared_ptr<DynamicTableFilterSet> &dynamic_filters_p,
+	                     vector<JoinFilterPushdownColumn> columns_p,
+	                     optional_ptr<LogicalGet> get_p = nullptr)
+	    : dynamic_filters(dynamic_filters_p), columns(std::move(columns_p)), get(get_p) {
 	}
 
-	LogicalGet &get;
+	shared_ptr<DynamicTableFilterSet> &dynamic_filters;
 	vector<JoinFilterPushdownColumn> columns;
+	//! Optional LogicalGet pointer (used by TopN optimizer for static filter pushdown)
+	optional_ptr<LogicalGet> get;
 };
 
 struct JoinFilterPushdownInfo {
