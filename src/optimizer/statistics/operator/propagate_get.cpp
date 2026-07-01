@@ -201,16 +201,6 @@ unique_ptr<NodeStatistics> StatisticsPropagator::PropagateStatistics(LogicalGet 
 unique_ptr<NodeStatistics> StatisticsPropagator::PropagateStatistics(LogicalColumnDataGet &get,
                                                                      unique_ptr<LogicalOperator> &node_ptr) {
 	auto data_chunk_card = get.EstimateCardinality(context);
-	// Inject pre-computed column statistics (min/max) from AQP middleware.
-	if (!get.column_stats.empty()) {
-		auto bindings = get.GetColumnBindings();
-		for (idx_t i = 0; i < bindings.size() && i < get.column_stats.size(); i++) {
-			if (get.column_stats[i]) {
-				ColumnBinding binding(bindings[i].table_index, bindings[i].column_index);
-				statistics_map.insert(make_pair(binding, get.column_stats[i]->Copy().ToUnique()));
-			}
-		}
-	}
 	return make_uniq<NodeStatistics>(data_chunk_card);
 }
 

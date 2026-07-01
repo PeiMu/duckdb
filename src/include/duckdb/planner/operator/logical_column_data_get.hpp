@@ -35,8 +35,6 @@ public:
 	vector<LogicalType> chunk_types;
 	//! (optionally owned) column data collection
 	optionally_owned_ptr<ColumnDataCollection> collection;
-	//! Per-column min/max statistics (injected by AQP middleware after execution)
-	vector<unique_ptr<BaseStatistics>> column_stats;
 	//! Dynamic filters pushed by JFP (join filter pushdown)
 	shared_ptr<DynamicTableFilterSet> dynamic_filters;
 

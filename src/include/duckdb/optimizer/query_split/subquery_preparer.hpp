@@ -39,8 +39,7 @@ public:
 
 	//! Merge the data chunk (temp table) to the current subquery
 	idx_t MergeDataChunk(subquery_queue &old_subqueries, unique_ptr<ColumnDataCollection> previous_result,
-	                     idx_t estimated_card,
-	                     vector<unique_ptr<BaseStatistics>> column_stats = {});
+	                     idx_t estimated_card);
 
 	//! Merge the previous sibling node. If merged to the main stream (left node), we add the sibling expr to proj.
 	bool MergeSibling(subquery_queue &old_subqueries, unique_ptr<LogicalOperator> last_sibling_node);
