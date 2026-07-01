@@ -211,7 +211,19 @@ bool JoinFilterPushdownOptimizer::IsFiltering(const unique_ptr<LogicalOperator> 
 	switch (op->type) {
 	case LogicalOperatorType::LOGICAL_GET: {
 		auto &get = op->Cast<LogicalGet>();
-		return !get.table_filters.filters.empty();
+		if (!get.table_filters.filters.empty()) {
+			return true;
+		}
+		if (!get.function.filter_pushdown && get.has_estimated_cardinality &&
+		    get.estimated_cardinality > 0 && get.estimated_cardinality <= 500000) {
+			return true;
+		}
+		return false;
+	}
+	case LogicalOperatorType::LOGICAL_CHUNK_GET: {
+		auto &chunk_get = op->Cast<LogicalColumnDataGet>();
+		auto card = chunk_get.collection ? chunk_get.collection->Count() : 0;
+		return card > 0 && card <= 500000;
 	}
 	case LogicalOperatorType::LOGICAL_FILTER: {
 		return true;
