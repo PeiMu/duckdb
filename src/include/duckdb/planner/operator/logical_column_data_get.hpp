@@ -11,7 +11,7 @@
 #include "duckdb/common/types/column/column_data_collection.hpp"
 #include "duckdb/planner/logical_operator.hpp"
 #include "duckdb/common/optionally_owned_ptr.hpp"
-#include "duckdb/storage/statistics/base_statistics.hpp"
+#include "duckdb/planner/table_filter.hpp"
 
 namespace duckdb {
 
@@ -32,8 +32,7 @@ public:
 	vector<LogicalType> chunk_types;
 	//! (optionally owned) column data collection
 	optionally_owned_ptr<ColumnDataCollection> collection;
-	//! Per-column min/max statistics (injected by AQP middleware after execution)
-	vector<unique_ptr<BaseStatistics>> column_stats;
+	shared_ptr<DynamicTableFilterSet> dynamic_filters;
 
 public:
 	vector<ColumnBinding> GetColumnBindings() override;

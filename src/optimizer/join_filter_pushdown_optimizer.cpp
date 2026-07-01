@@ -9,6 +9,7 @@
 #include "duckdb/planner/expression/bound_columnref_expression.hpp"
 #include "duckdb/planner/operator/logical_aggregate.hpp"
 #include "duckdb/planner/operator/logical_comparison_join.hpp"
+#include "duckdb/planner/operator/logical_column_data_get.hpp"
 #include "duckdb/planner/operator/logical_get.hpp"
 #include "duckdb/planner/operator/logical_projection.hpp"
 #include "duckdb/planner/operator/logical_set_operation.hpp"
@@ -103,7 +104,23 @@ void JoinFilterPushdownOptimizer::GetPushdownFilterTargets(LogicalOperator &op,
 				return;
 			}
 		}
-		targets.emplace_back(get, std::move(columns));
+		if (!get.dynamic_filters) {
+			get.dynamic_filters = make_shared_ptr<DynamicTableFilterSet>();
+		}
+		targets.emplace_back(get.dynamic_filters, std::move(columns), &get);
+		break;
+	}
+	case LogicalOperatorType::LOGICAL_CHUNK_GET: {
+		auto &chunk_get = probe_child.Cast<LogicalColumnDataGet>();
+		for (auto &filter : columns) {
+			if (filter.probe_column_index.table_index != chunk_get.table_index) {
+				return;
+			}
+		}
+		if (!chunk_get.dynamic_filters) {
+			chunk_get.dynamic_filters = make_shared_ptr<DynamicTableFilterSet>();
+		}
+		targets.emplace_back(chunk_get.dynamic_filters, std::move(columns));
 		break;
 	}
 	case LogicalOperatorType::LOGICAL_PROJECTION: {
@@ -210,14 +227,8 @@ void JoinFilterPushdownOptimizer::GenerateJoinFilters(LogicalComparisonJoin &joi
 	vector<PushdownFilterTarget> pushdown_filter_targets;
 	GetPushdownFilterTargets(*join.children[0], pushdown_columns, pushdown_filter_targets);
 	for (auto &target : pushdown_filter_targets) {
-		auto &get = target.get;
-		// pushdown info can be applied to this LogicalGet - push the dynamic table filter set
-		if (!get.dynamic_filters) {
-			get.dynamic_filters = make_shared_ptr<DynamicTableFilterSet>();
-		}
-
 		JoinFilterPushdownFilter get_filter;
-		get_filter.dynamic_filters = get.dynamic_filters;
+		get_filter.dynamic_filters = target.dynamic_filters;
 		get_filter.columns = std::move(target.columns);
 		pushdown_info->probe_info.push_back(std::move(get_filter));
 	}

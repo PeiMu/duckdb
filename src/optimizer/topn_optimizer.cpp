@@ -111,7 +111,10 @@ void TopN::PushdownDynamicFilters(LogicalTopN &op) {
 	op.dynamic_filter = filter_data;
 
 	for (auto &target : pushdown_targets) {
-		auto &get = target.get;
+		if (!target.get) {
+			continue;
+		}
+		auto &get = *target.get;
 		D_ASSERT(target.columns.size() == 1);
 		auto col_idx = target.columns[0].probe_column_index.column_index;
 

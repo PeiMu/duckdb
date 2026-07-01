@@ -9,7 +9,11 @@ PhysicalOperator &PhysicalPlanGenerator::CreatePlan(LogicalColumnDataGet &op) {
 	D_ASSERT(op.collection);
 	auto &scan = Make<PhysicalColumnDataScan>(op.types, PhysicalOperatorType::COLUMN_DATA_SCAN,
 	                                          op.estimated_cardinality, std::move(op.collection));
-	scan.Cast<PhysicalColumnDataScan>().logical_table_index = op.table_index;
+	auto &cds = scan.Cast<PhysicalColumnDataScan>();
+	cds.logical_table_index = op.table_index;
+	if (op.dynamic_filters) {
+		cds.dynamic_filters = op.dynamic_filters;
+	}
 	return scan;
 }
 
