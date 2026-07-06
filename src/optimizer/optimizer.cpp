@@ -583,18 +583,6 @@ void Optimizer::RunBuiltInMiddleOptimizers() {
 		column_lifetime.VisitOperator(*plan);
 	});
 #endif
-
-	// apply simple expression heuristics to get an initial reordering
-	RunOptimizer(OptimizerType::REORDER_FILTER, [&]() {
-		ExpressionHeuristics expression_heuristics(*this);
-		plan = expression_heuristics.Rewrite(std::move(plan));
-	});
-
-	// perform join filter pushdown after the dust has settled
-	RunOptimizer(OptimizerType::JOIN_FILTER_PUSHDOWN, [&]() {
-		JoinFilterPushdownOptimizer join_filter_pushdown(*this);
-		join_filter_pushdown.VisitOperator(*plan);
-	});
 }
 
 unique_ptr<LogicalOperator> Optimizer::ReorderGetOptimize(unique_ptr<LogicalOperator> plan_p) {
