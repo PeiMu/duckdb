@@ -910,6 +910,47 @@ void JoinHashTable::Probe(ScanStructure &scan_structure, DataChunk &keys, TupleD
 		// hash all the keys
 		Hash(keys, *current_sel, scan_structure.count, hashes);
 
+		// AQP existence pre-check: using already-computed hashes, do a
+		// lightweight salt probe to exclude definite misses before the
+		// full GetRowPointers (which does salt probe + key comparison).
+		if (aqp_existence_threshold > 0 && Count() <= aqp_existence_threshold && Count() > 0 && finalized) {
+			UnifiedVectorFormat hashes_uvf;
+			hashes.ToUnifiedFormat(scan_structure.count, hashes_uvf);
+			auto hash_data = UnifiedVectorFormat::GetData<hash_t>(hashes_uvf);
+			bool use_salt = UseSalt();
+
+			idx_t new_count = 0;
+			for (idx_t i = 0; i < scan_structure.count; i++) {
+				auto row_idx = current_sel->get_index(i);
+				auto hash_idx = hashes_uvf.sel->get_index(row_idx);
+				hash_t h = hash_data[hash_idx];
+				auto salt = ht_entry_t::ExtractSalt(h);
+				idx_t offset = h & bitmask;
+				bool found = false;
+				for (idx_t step = 0; step <= bitmask; step++) {
+					auto &entry = entries[offset];
+					if (!entry.IsOccupied()) break;
+					if (!use_salt || entry.GetSalt() == salt) {
+						found = true;
+						break;
+					}
+					IncrementAndWrap(offset, bitmask);
+				}
+				if (found) {
+					scan_structure.sel_vector.set_index(new_count++, row_idx);
+				}
+			}
+			if (new_count == 0) {
+				scan_structure.count = 0;
+				scan_structure.is_null = true;
+				return;
+			}
+			if (new_count < scan_structure.count) {
+				scan_structure.count = new_count;
+				current_sel = &scan_structure.sel_vector;
+			}
+		}
+
 		// now initialize the pointers of the scan structure based on the hashes
 		GetRowPointers(keys, key_state, probe_state, hashes, current_sel, scan_structure.count, scan_structure.pointers,
 		               scan_structure.sel_vector, scan_structure.has_null_value_filter);

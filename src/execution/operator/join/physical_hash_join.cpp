@@ -1054,6 +1054,7 @@ SinkFinalizeType PhysicalHashJoin::Finalize(Pipeline &pipeline, Event &event, Cl
 				sink.aqp_key0_max = max.GetValue<int64_t>();
 				sink.aqp_probe_opt_enabled = true;
 				ht.SetRangeFilter(sink.aqp_key0_min, sink.aqp_key0_max);
+				ht.aqp_existence_threshold = 1u << 16;
 				static const bool trace = getenv("AQP_PROBE_OPT_TRACE") != nullptr;
 				if (trace) {
 					fprintf(stderr, "[AQP-PROBE-OPT] enabled: key0_min=%lld key0_max=%lld ht_count=%llu\n",

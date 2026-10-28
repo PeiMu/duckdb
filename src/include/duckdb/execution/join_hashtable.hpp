@@ -310,6 +310,10 @@ public:
 		aqp_key0_max = max_val;
 	}
 
+	//! AQP existence pre-check: skip rows whose hash has no salt match in HT.
+	//! Only for small HTs where the salt probe is cheap. Threshold configurable.
+	idx_t aqp_existence_threshold = 0;
+
 	struct {
 		mutex mj_lock;
 		//! The types of the duplicate eliminated columns, only used in correlated MARK JOIN for flattening
