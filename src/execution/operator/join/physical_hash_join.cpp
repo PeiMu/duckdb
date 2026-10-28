@@ -182,6 +182,17 @@ public:
 	~HashJoinGlobalSinkState() override {
 		DUCKDB_LOG(context, PhysicalOperatorLogType, op, "PhysicalHashJoin", "GetData",
 		           {{"total_probe_matches", to_string(hash_table->total_probe_matches)}});
+		static const bool debug_runtime_stat = getenv("AQP_DEBUG_RUNTIME_STAT_BEHAVIOR") != nullptr;
+		if (debug_runtime_stat && aqp_dbg_chunks_total.load() > 0) {
+			fprintf(stderr, "[AQP-DEBUG-RUNTIME-STAT] interpreter: rows_total=%llu chunks_total=%llu chunks_block_skipped=%llu rows_range_guard_filtered=%llu rows_existence_filtered=%llu rows_probed=%llu key0_min=%lld key0_max=%lld\n",
+			        (unsigned long long)aqp_dbg_rows_total.load(),
+			        (unsigned long long)aqp_dbg_chunks_total.load(),
+			        (unsigned long long)aqp_dbg_chunks_block_skipped.load(),
+			        (unsigned long long)aqp_dbg_rows_range_guard_filtered.load(),
+			        (unsigned long long)aqp_dbg_rows_existence_filtered.load(),
+			        (unsigned long long)aqp_dbg_rows_probed.load(),
+			        (long long)aqp_key0_min, (long long)aqp_key0_max);
+		}
 	}
 
 	void ScheduleFinalize(Pipeline &pipeline, Event &event);
@@ -229,6 +240,14 @@ public:
 	bool aqp_probe_opt_enabled = false;
 	int64_t aqp_key0_min = INT64_MAX;
 	int64_t aqp_key0_max = INT64_MIN;
+
+	// Debug counters (AQP_DEBUG_RUNTIME_STAT_BEHAVIOR). Atomic for concurrent probe threads.
+	atomic<uint64_t> aqp_dbg_rows_total{0};
+	atomic<uint64_t> aqp_dbg_chunks_total{0};
+	atomic<uint64_t> aqp_dbg_chunks_block_skipped{0};
+	atomic<uint64_t> aqp_dbg_rows_range_guard_filtered{0};
+	atomic<uint64_t> aqp_dbg_rows_existence_filtered{0};
+	atomic<uint64_t> aqp_dbg_rows_probed{0};
 };
 
 unique_ptr<JoinFilterLocalState> JoinFilterPushdownInfo::GetLocalState(JoinFilterGlobalState &gstate) const {
@@ -1471,41 +1490,24 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 
 		// AQP probe-side optimization: block skip + per-row guard + existence pre-check.
 		// Narrows the probe chunk before handing it to the full Probe.
+		static const bool debug_runtime_stat = getenv("AQP_DEBUG_RUNTIME_STAT_BEHAVIOR") != nullptr;
 		if (sink.aqp_probe_opt_enabled && !sink.external) {
 			auto &key_vec = state.lhs_join_keys.data[0];
 			auto key_count = state.lhs_join_keys.size();
 			auto key_type = key_vec.GetType().InternalType();
 
+			if (debug_runtime_stat) {
+				sink.aqp_dbg_chunks_total.fetch_add(1, std::memory_order_relaxed);
+				sink.aqp_dbg_rows_total.fetch_add(key_count, std::memory_order_relaxed);
+			}
+
 			key_vec.Flatten(key_count);
 			auto &validity = FlatVector::Validity(key_vec);
 
-			// Block skip: compute chunk-level min/max and skip entire chunk if disjoint.
+			// Fused block-skip + per-row range guard: single pass computes
+			// chunk min/max AND builds the SelectionVector of in-range rows.
 			int64_t chunk_min = NumericLimits<int64_t>::Maximum();
 			int64_t chunk_max = NumericLimits<int64_t>::Minimum();
-			if (key_type == PhysicalType::INT32) {
-				auto data = FlatVector::GetData<int32_t>(key_vec);
-				for (idx_t i = 0; i < key_count; i++) {
-					if (!validity.RowIsValid(i)) continue;
-					int64_t v = data[i];
-					chunk_min = MinValue(chunk_min, v);
-					chunk_max = MaxValue(chunk_max, v);
-				}
-			} else if (key_type == PhysicalType::INT64) {
-				auto data = FlatVector::GetData<int64_t>(key_vec);
-				for (idx_t i = 0; i < key_count; i++) {
-					if (!validity.RowIsValid(i)) continue;
-					chunk_min = MinValue(chunk_min, data[i]);
-					chunk_max = MaxValue(chunk_max, data[i]);
-				}
-			}
-
-			if (chunk_max < sink.aqp_key0_min || chunk_min > sink.aqp_key0_max) {
-				// Entire chunk is out of the build-side key range — skip probe.
-				state.scan_structure.is_null = true;
-				return OperatorResultType::NEED_MORE_INPUT;
-			}
-
-			// Per-row guard: build SelectionVector of rows within the build-side key range.
 			SelectionVector guard_sel(STANDARD_VECTOR_SIZE);
 			idx_t guard_count = 0;
 			if (key_type == PhysicalType::INT32) {
@@ -1513,6 +1515,8 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 				for (idx_t i = 0; i < key_count; i++) {
 					if (!validity.RowIsValid(i)) continue;
 					int64_t v = data[i];
+					chunk_min = MinValue(chunk_min, v);
+					chunk_max = MaxValue(chunk_max, v);
 					if (v >= sink.aqp_key0_min && v <= sink.aqp_key0_max) {
 						guard_sel.set_index(guard_count++, i);
 					}
@@ -1521,7 +1525,10 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 				auto data = FlatVector::GetData<int64_t>(key_vec);
 				for (idx_t i = 0; i < key_count; i++) {
 					if (!validity.RowIsValid(i)) continue;
-					if (data[i] >= sink.aqp_key0_min && data[i] <= sink.aqp_key0_max) {
+					auto v = data[i];
+					chunk_min = MinValue(chunk_min, v);
+					chunk_max = MaxValue(chunk_max, v);
+					if (v >= sink.aqp_key0_min && v <= sink.aqp_key0_max) {
 						guard_sel.set_index(guard_count++, i);
 					}
 				}
@@ -1532,8 +1539,18 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 			}
 
 			if (guard_count == 0) {
+				if (debug_runtime_stat) {
+					if (chunk_max < sink.aqp_key0_min || chunk_min > sink.aqp_key0_max) {
+						sink.aqp_dbg_chunks_block_skipped.fetch_add(1, std::memory_order_relaxed);
+					}
+					sink.aqp_dbg_rows_range_guard_filtered.fetch_add(key_count, std::memory_order_relaxed);
+				}
 				state.scan_structure.is_null = true;
 				return OperatorResultType::NEED_MORE_INPUT;
+			}
+
+			if (debug_runtime_stat && guard_count < key_count) {
+				sink.aqp_dbg_rows_range_guard_filtered.fetch_add(key_count - guard_count, std::memory_order_relaxed);
 			}
 
 			static const bool trace = getenv("AQP_PROBE_OPT_TRACE") != nullptr;
@@ -1579,6 +1596,10 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 					}
 				}
 
+				if (debug_runtime_stat && exists_count < guard_count) {
+					sink.aqp_dbg_rows_existence_filtered.fetch_add(guard_count - exists_count, std::memory_order_relaxed);
+				}
+
 				if (exists_count == 0) {
 					state.scan_structure.is_null = true;
 					return OperatorResultType::NEED_MORE_INPUT;
@@ -1591,6 +1612,9 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 			} else if (guard_count < key_count) {
 				state.lhs_join_keys.Slice(guard_sel, guard_count);
 				input.Slice(guard_sel, guard_count);
+			}
+			if (debug_runtime_stat) {
+				sink.aqp_dbg_rows_probed.fetch_add(state.lhs_join_keys.size(), std::memory_order_relaxed);
 			}
 		}
 
