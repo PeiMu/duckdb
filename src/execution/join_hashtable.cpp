@@ -865,6 +865,43 @@ void JoinHashTable::Probe(ScanStructure &scan_structure, DataChunk &keys, TupleD
 	if (scan_structure.count == 0) {
 		return;
 	}
+	if (aqp_range_filter_enabled && scan_structure.count > 0) {
+		auto &key0_format = key_state.vector_data[0].unified;
+		auto key0_type = keys.data[0].GetType().InternalType();
+		idx_t new_count = 0;
+		if (key0_type == PhysicalType::INT32) {
+			auto data = UnifiedVectorFormat::GetData<int32_t>(key0_format);
+			for (idx_t i = 0; i < scan_structure.count; i++) {
+				auto row_idx = current_sel->get_index(i);
+				auto key_idx = key0_format.sel->get_index(row_idx);
+				int64_t v = data[key_idx];
+				if (v >= aqp_key0_min && v <= aqp_key0_max) {
+					scan_structure.sel_vector.set_index(new_count++, row_idx);
+				}
+			}
+		} else if (key0_type == PhysicalType::INT64) {
+			auto data = UnifiedVectorFormat::GetData<int64_t>(key0_format);
+			for (idx_t i = 0; i < scan_structure.count; i++) {
+				auto row_idx = current_sel->get_index(i);
+				auto key_idx = key0_format.sel->get_index(row_idx);
+				int64_t v = data[key_idx];
+				if (v >= aqp_key0_min && v <= aqp_key0_max) {
+					scan_structure.sel_vector.set_index(new_count++, row_idx);
+				}
+			}
+		} else {
+			new_count = scan_structure.count;
+		}
+		if (new_count == 0) {
+			scan_structure.count = 0;
+			scan_structure.is_null = true;
+			return;
+		}
+		if (new_count < scan_structure.count) {
+			scan_structure.count = new_count;
+			current_sel = &scan_structure.sel_vector;
+		}
+	}
 	if (precomputed_hashes) {
 		GetRowPointers(keys, key_state, probe_state, *precomputed_hashes, current_sel, scan_structure.count,
 		               scan_structure.pointers, scan_structure.sel_vector, scan_structure.has_null_value_filter);

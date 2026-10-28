@@ -300,6 +300,16 @@ public:
 	//! Number of probe matches
 	atomic<idx_t> total_probe_matches {0};
 
+	//! AQP range filter: skip probe rows whose key0 is outside [min, max].
+	bool aqp_range_filter_enabled = false;
+	int64_t aqp_key0_min = NumericLimits<int64_t>::Maximum();
+	int64_t aqp_key0_max = NumericLimits<int64_t>::Minimum();
+	void SetRangeFilter(int64_t min_val, int64_t max_val) {
+		aqp_range_filter_enabled = true;
+		aqp_key0_min = min_val;
+		aqp_key0_max = max_val;
+	}
+
 	struct {
 		mutex mj_lock;
 		//! The types of the duplicate eliminated columns, only used in correlated MARK JOIN for flattening

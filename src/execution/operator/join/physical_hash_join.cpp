@@ -1053,6 +1053,7 @@ SinkFinalizeType PhysicalHashJoin::Finalize(Pipeline &pipeline, Event &event, Cl
 				sink.aqp_key0_min = min.GetValue<int64_t>();
 				sink.aqp_key0_max = max.GetValue<int64_t>();
 				sink.aqp_probe_opt_enabled = true;
+				ht.SetRangeFilter(sink.aqp_key0_min, sink.aqp_key0_max);
 				static const bool trace = getenv("AQP_PROBE_OPT_TRACE") != nullptr;
 				if (trace) {
 					fprintf(stderr, "[AQP-PROBE-OPT] enabled: key0_min=%lld key0_max=%lld ht_count=%llu\n",
@@ -1488,135 +1489,12 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 		state.lhs_join_keys.Reset();
 		state.probe_executor.Execute(input, state.lhs_join_keys);
 
-		// AQP probe-side optimization: block skip + per-row guard + existence pre-check.
-		// Narrows the probe chunk before handing it to the full Probe.
-		static const bool debug_runtime_stat = getenv("AQP_DEBUG_RUNTIME_STAT_BEHAVIOR") != nullptr;
-		if (sink.aqp_probe_opt_enabled && !sink.external) {
-			auto &key_vec = state.lhs_join_keys.data[0];
-			auto key_count = state.lhs_join_keys.size();
-			auto key_type = key_vec.GetType().InternalType();
-
-			if (debug_runtime_stat) {
-				sink.aqp_dbg_chunks_total.fetch_add(1, std::memory_order_relaxed);
-				sink.aqp_dbg_rows_total.fetch_add(key_count, std::memory_order_relaxed);
-			}
-
-			key_vec.Flatten(key_count);
-			auto &validity = FlatVector::Validity(key_vec);
-
-			// Fused block-skip + per-row range guard: single pass computes
-			// chunk min/max AND builds the SelectionVector of in-range rows.
-			int64_t chunk_min = NumericLimits<int64_t>::Maximum();
-			int64_t chunk_max = NumericLimits<int64_t>::Minimum();
-			SelectionVector guard_sel(STANDARD_VECTOR_SIZE);
-			idx_t guard_count = 0;
-			if (key_type == PhysicalType::INT32) {
-				auto data = FlatVector::GetData<int32_t>(key_vec);
-				for (idx_t i = 0; i < key_count; i++) {
-					if (!validity.RowIsValid(i)) continue;
-					int64_t v = data[i];
-					chunk_min = MinValue(chunk_min, v);
-					chunk_max = MaxValue(chunk_max, v);
-					if (v >= sink.aqp_key0_min && v <= sink.aqp_key0_max) {
-						guard_sel.set_index(guard_count++, i);
-					}
-				}
-			} else if (key_type == PhysicalType::INT64) {
-				auto data = FlatVector::GetData<int64_t>(key_vec);
-				for (idx_t i = 0; i < key_count; i++) {
-					if (!validity.RowIsValid(i)) continue;
-					auto v = data[i];
-					chunk_min = MinValue(chunk_min, v);
-					chunk_max = MaxValue(chunk_max, v);
-					if (v >= sink.aqp_key0_min && v <= sink.aqp_key0_max) {
-						guard_sel.set_index(guard_count++, i);
-					}
-				}
-			} else {
-				for (idx_t i = 0; i < key_count; i++) {
-					guard_sel.set_index(guard_count++, i);
-				}
-			}
-
-			if (guard_count == 0) {
-				if (debug_runtime_stat) {
-					if (chunk_max < sink.aqp_key0_min || chunk_min > sink.aqp_key0_max) {
-						sink.aqp_dbg_chunks_block_skipped.fetch_add(1, std::memory_order_relaxed);
-					}
-					sink.aqp_dbg_rows_range_guard_filtered.fetch_add(key_count, std::memory_order_relaxed);
-				}
-				state.scan_structure.is_null = true;
-				return OperatorResultType::NEED_MORE_INPUT;
-			}
-
-			if (debug_runtime_stat && guard_count < key_count) {
-				sink.aqp_dbg_rows_range_guard_filtered.fetch_add(key_count - guard_count, std::memory_order_relaxed);
-			}
-
-			static const bool trace = getenv("AQP_PROBE_OPT_TRACE") != nullptr;
-			if (trace && guard_count < key_count) {
-				fprintf(stderr, "[AQP-PROBE-OPT] guard filtered: %llu -> %llu rows (min=%lld max=%lld chunk=[%lld,%lld])\n",
-				        (unsigned long long)key_count, (unsigned long long)guard_count,
-				        (long long)sink.aqp_key0_min, (long long)sink.aqp_key0_max,
-				        (long long)chunk_min, (long long)chunk_max);
-			}
-
-			// Existence pre-check: for surviving rows, check if any HT entry
-			// could match using the salt (16-bit hash summary in ht_entry_t).
-			// Only for small builds where the cost of the pre-check is worth it.
-			auto &ht = *sink.hash_table;
-			constexpr idx_t kExistenceMaxEntries = 1u << 16;
-			if (ht.Count() <= kExistenceMaxEntries && ht.Count() > 0) {
-				auto *entries = ht.GetEntries();
-				auto bitmask = ht.bitmask;
-				bool use_salt = ht.capacity > JoinHashTable::USE_SALT_THRESHOLD;
-
-				Vector hashes(LogicalType::HASH);
-				ht.HashKeys(state.lhs_join_keys, guard_sel, guard_count, hashes);
-				auto hash_data = FlatVector::GetData<hash_t>(hashes);
-
-				SelectionVector exists_sel(STANDARD_VECTOR_SIZE);
-				idx_t exists_count = 0;
-				for (idx_t i = 0; i < guard_count; i++) {
-					hash_t h = hash_data[guard_sel.get_index(i)];
-					auto salt = ht_entry_t::ExtractSalt(h);
-					idx_t offset = h & bitmask;
-					bool found = false;
-					for (idx_t probe_step = 0; probe_step <= bitmask; probe_step++) {
-						auto &entry = entries[offset];
-						if (!entry.IsOccupied()) break;
-						if (!use_salt || entry.GetSalt() == salt) {
-							found = true;
-							break;
-						}
-						IncrementAndWrap(offset, bitmask);
-					}
-					if (found) {
-						exists_sel.set_index(exists_count++, guard_sel.get_index(i));
-					}
-				}
-
-				if (debug_runtime_stat && exists_count < guard_count) {
-					sink.aqp_dbg_rows_existence_filtered.fetch_add(guard_count - exists_count, std::memory_order_relaxed);
-				}
-
-				if (exists_count == 0) {
-					state.scan_structure.is_null = true;
-					return OperatorResultType::NEED_MORE_INPUT;
-				}
-
-				if (exists_count < key_count) {
-					state.lhs_join_keys.Slice(exists_sel, exists_count);
-					input.Slice(exists_sel, exists_count);
-				}
-			} else if (guard_count < key_count) {
-				state.lhs_join_keys.Slice(guard_sel, guard_count);
-				input.Slice(guard_sel, guard_count);
-			}
-			if (debug_runtime_stat) {
-				sink.aqp_dbg_rows_probed.fetch_add(state.lhs_join_keys.size(), std::memory_order_relaxed);
-			}
-		}
+		// AQP probe-side optimization: per-row range guard is now integrated
+		// inside JoinHashTable::Probe (between PrepareKeys and Hash), avoiding
+		// the Flatten + Slice overhead of a separate pre-pass. The range filter
+		// is set on the hash table during Finalize via SetRangeFilter().
+		// Block-skip and existence pre-check are removed (redundant with
+		// DuckDB's native JoinFilterPushdown and ProbeForPointersInternal).
 
 		// perform the actual probe
 		if (sink.external) {
