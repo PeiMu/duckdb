@@ -865,7 +865,9 @@ void JoinHashTable::Probe(ScanStructure &scan_structure, DataChunk &keys, TupleD
 	if (scan_structure.count == 0) {
 		return;
 	}
+	static const bool aqp_dbg = getenv("AQP_DEBUG_RUNTIME_STAT_BEHAVIOR") != nullptr;
 	if (aqp_range_filter_enabled && scan_structure.count > 0) {
+		idx_t pre_range_count = scan_structure.count;
 		auto &key0_format = key_state.vector_data[0].unified;
 		auto key0_type = keys.data[0].GetType().InternalType();
 		idx_t new_count = 0;
@@ -892,6 +894,11 @@ void JoinHashTable::Probe(ScanStructure &scan_structure, DataChunk &keys, TupleD
 		} else {
 			new_count = scan_structure.count;
 		}
+		if (aqp_dbg) {
+			aqp_dbg_rows_total.fetch_add(pre_range_count, std::memory_order_relaxed);
+			if (new_count < pre_range_count)
+				aqp_dbg_rows_range_filtered.fetch_add(pre_range_count - new_count, std::memory_order_relaxed);
+		}
 		if (new_count == 0) {
 			scan_structure.count = 0;
 			scan_structure.is_null = true;
@@ -913,6 +920,7 @@ void JoinHashTable::Probe(ScanStructure &scan_structure, DataChunk &keys, TupleD
 		// AQP existence pre-check: using already-computed hashes, do a
 		// lightweight salt probe to exclude definite misses before the
 		// full GetRowPointers (which does salt probe + key comparison).
+		idx_t pre_exist_count = scan_structure.count;
 		if (aqp_existence_threshold > 0 && Count() <= aqp_existence_threshold && Count() > 0 && finalized) {
 			UnifiedVectorFormat hashes_uvf;
 			hashes.ToUnifiedFormat(scan_structure.count, hashes_uvf);
@@ -949,6 +957,12 @@ void JoinHashTable::Probe(ScanStructure &scan_structure, DataChunk &keys, TupleD
 				scan_structure.count = new_count;
 				current_sel = &scan_structure.sel_vector;
 			}
+		}
+
+		if (aqp_dbg && aqp_range_filter_enabled) {
+			if (scan_structure.count < pre_exist_count)
+				aqp_dbg_rows_existence_filtered.fetch_add(pre_exist_count - scan_structure.count, std::memory_order_relaxed);
+			aqp_dbg_rows_probed.fetch_add(scan_structure.count, std::memory_order_relaxed);
 		}
 
 		// now initialize the pointers of the scan structure based on the hashes

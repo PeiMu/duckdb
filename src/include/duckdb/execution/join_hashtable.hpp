@@ -314,6 +314,12 @@ public:
 	//! Only for small HTs where the salt probe is cheap. Threshold configurable.
 	idx_t aqp_existence_threshold = 0;
 
+	//! Debug counters (AQP_DEBUG_RUNTIME_STAT_BEHAVIOR).
+	atomic<uint64_t> aqp_dbg_rows_total{0};
+	atomic<uint64_t> aqp_dbg_rows_range_filtered{0};
+	atomic<uint64_t> aqp_dbg_rows_existence_filtered{0};
+	atomic<uint64_t> aqp_dbg_rows_probed{0};
+
 	struct {
 		mutex mj_lock;
 		//! The types of the duplicate eliminated columns, only used in correlated MARK JOIN for flattening

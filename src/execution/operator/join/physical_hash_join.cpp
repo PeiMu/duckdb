@@ -183,14 +183,13 @@ public:
 		DUCKDB_LOG(context, PhysicalOperatorLogType, op, "PhysicalHashJoin", "GetData",
 		           {{"total_probe_matches", to_string(hash_table->total_probe_matches)}});
 		static const bool debug_runtime_stat = getenv("AQP_DEBUG_RUNTIME_STAT_BEHAVIOR") != nullptr;
-		if (debug_runtime_stat && aqp_dbg_chunks_total.load() > 0) {
-			fprintf(stderr, "[AQP-DEBUG-RUNTIME-STAT] interpreter: rows_total=%llu chunks_total=%llu chunks_block_skipped=%llu rows_range_guard_filtered=%llu rows_existence_filtered=%llu rows_probed=%llu key0_min=%lld key0_max=%lld\n",
-			        (unsigned long long)aqp_dbg_rows_total.load(),
-			        (unsigned long long)aqp_dbg_chunks_total.load(),
-			        (unsigned long long)aqp_dbg_chunks_block_skipped.load(),
-			        (unsigned long long)aqp_dbg_rows_range_guard_filtered.load(),
-			        (unsigned long long)aqp_dbg_rows_existence_filtered.load(),
-			        (unsigned long long)aqp_dbg_rows_probed.load(),
+		if (debug_runtime_stat && hash_table && hash_table->aqp_dbg_rows_total.load() > 0) {
+			auto &ht = *hash_table;
+			fprintf(stderr, "[AQP-DEBUG-RUNTIME-STAT] interpreter: rows_total=%llu rows_range_guard_filtered=%llu rows_existence_filtered=%llu rows_probed=%llu key0_min=%lld key0_max=%lld\n",
+			        (unsigned long long)ht.aqp_dbg_rows_total.load(),
+			        (unsigned long long)ht.aqp_dbg_rows_range_filtered.load(),
+			        (unsigned long long)ht.aqp_dbg_rows_existence_filtered.load(),
+			        (unsigned long long)ht.aqp_dbg_rows_probed.load(),
 			        (long long)aqp_key0_min, (long long)aqp_key0_max);
 		}
 	}
@@ -241,13 +240,6 @@ public:
 	int64_t aqp_key0_min = INT64_MAX;
 	int64_t aqp_key0_max = INT64_MIN;
 
-	// Debug counters (AQP_DEBUG_RUNTIME_STAT_BEHAVIOR). Atomic for concurrent probe threads.
-	atomic<uint64_t> aqp_dbg_rows_total{0};
-	atomic<uint64_t> aqp_dbg_chunks_total{0};
-	atomic<uint64_t> aqp_dbg_chunks_block_skipped{0};
-	atomic<uint64_t> aqp_dbg_rows_range_guard_filtered{0};
-	atomic<uint64_t> aqp_dbg_rows_existence_filtered{0};
-	atomic<uint64_t> aqp_dbg_rows_probed{0};
 };
 
 unique_ptr<JoinFilterLocalState> JoinFilterPushdownInfo::GetLocalState(JoinFilterGlobalState &gstate) const {
@@ -1489,13 +1481,6 @@ OperatorResultType PhysicalHashJoin::ExecuteInternal(ExecutionContext &context, 
 		// probe the HT, start by resolving the join keys for the left chunk
 		state.lhs_join_keys.Reset();
 		state.probe_executor.Execute(input, state.lhs_join_keys);
-
-		// AQP probe-side optimization: per-row range guard is now integrated
-		// inside JoinHashTable::Probe (between PrepareKeys and Hash), avoiding
-		// the Flatten + Slice overhead of a separate pre-pass. The range filter
-		// is set on the hash table during Finalize via SetRangeFilter().
-		// Block-skip and existence pre-check are removed (redundant with
-		// DuckDB's native JoinFilterPushdown and ProbeForPointersInternal).
 
 		// perform the actual probe
 		if (sink.external) {
