@@ -231,6 +231,11 @@ public:
 	//! AQP-JIT: access hash table entries for prefetching
 	ht_entry_t *GetEntries() const { return entries; }
 
+	//! AQP probe-opt: hash join keys with a selection vector (public wrapper).
+	void HashKeys(DataChunk &keys, const SelectionVector &sel, idx_t count, Vector &hashes) {
+		Hash(keys, sel, count, hashes);
+	}
+
 	ClientContext &context;
 	const PhysicalOperator &op;
 	//! BufferManager
